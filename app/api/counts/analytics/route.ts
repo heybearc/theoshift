@@ -5,11 +5,11 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    const totalSessions = await prisma.count_sessions.count({ where: { isActive: true } });
-    const activeSessions = await prisma.count_sessions.count({ 
+    const totalSessions = await prisma.users.count({ where: { isActive: true } });
+    const activeSessions = await prisma.users.count({ 
       where: { 
         isActive: true,
-        countTime: {
+        lastLogin: {
           gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Last 30 days
         }
       } 

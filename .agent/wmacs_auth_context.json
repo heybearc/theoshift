@@ -1,0 +1,19 @@
+{
+  "changed_files": [
+    ".next/server/app/api/auth/[...nextauth]/route.js",
+    ".next/server/app/api/auth/[...nextauth]/route.js.nft.json",
+    ".next/server/middleware-build-manifest.js",
+    ".next/server/middleware-manifest.json",
+    ".next/server/middleware.js",
+    ".next/server/middleware.js.map",
+    ".next/types/app/api/auth/[...nextauth]/route.ts",
+    "app/api/auth/login/route.ts",
+    "app/api/auth/logout/route.ts",
+    "app/api/auth/me/route.ts",
+    "middleware.ts"
+  ],
+  "file_count": 11,
+  "analysis_scope": "diff-only",
+  "timestamp": "2025-09-15T21:26:07Z",
+  "analysis_focus": "authentication_imports"
+}

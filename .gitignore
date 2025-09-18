@@ -55,6 +55,4 @@ data/exports/
 # Test coverage
 .coverage
 htmlcov/
-node_modules/
-*.log
-.env.local
+node_modules

@@ -4,7 +4,7 @@ const prisma = new PrismaClient()
 
 async function main() {
   // Create sample attendants
-  const attendant1 = await prisma.attendants.create({
+  const attendant1 = await prisma.attendant.create({
     data: {
       firstName: 'John',
       lastName: 'Smith',
@@ -14,7 +14,7 @@ async function main() {
     },
   })
 
-  const attendant2 = await prisma.attendants.create({
+  const attendant2 = await prisma.attendant.create({
     data: {
       firstName: 'Jane',
       lastName: 'Doe',
@@ -25,21 +25,21 @@ async function main() {
   })
 
   // Create sample events
-  const event1 = await prisma.events.create({
+  const event1 = await prisma.event.create({
     data: {
       name: 'Midweek Meeting',
       description: 'Weekly congregation meeting',
-      startDate: new Date('2024-01-15T19:00:00Z'),
+      eventDate: new Date('2024-01-15T19:00:00Z'),
       location: 'Kingdom Hall',
       isActive: true,
     },
   })
 
-  const event2 = await prisma.events.create({
+  const event2 = await prisma.event.create({
     data: {
       name: 'Weekend Meeting',
       description: 'Weekend public meeting',
-      startDate: new Date('2024-01-20T10:00:00Z'),
+      eventDate: new Date('2024-01-20T10:00:00Z'),
       location: 'Kingdom Hall',
       isActive: true,
     },
@@ -65,7 +65,7 @@ async function main() {
   })
 
   // Create sample count sessions
-  await prisma.count_sessions.create({
+  await prisma.countSession.create({
     data: {
       sessionName: 'Midweek Meeting Count - Jan 15',
       eventId: event1.id,
@@ -75,7 +75,7 @@ async function main() {
     },
   })
 
-  await prisma.count_sessions.create({
+  await prisma.countSession.create({
     data: {
       sessionName: 'Weekend Meeting Count - Jan 20',
       eventId: event2.id,

@@ -27,19 +27,19 @@ export async function GET(request: NextRequest) {
     }
     
     const baseSessionName = `${event.name} Count - ${new Date().toLocaleDateString()}`;
-    let sessionName = baseSessionName;
+    let userName = baseSessionName;
     let counter = 1;
     
-    // Check for existing sessions and increment counter if needed
-    while (await prisma.count_sessions.findFirst({ where: { sessionName } })) {
-      sessionName = `${baseSessionName} (${counter})`;
+    // Check for existing users and increment counter if needed
+    while (await prisma.users.findFirst({ where: { email: userName } })) {
+      userName = `${baseSessionName} (${counter})`;
       counter++;
     }
-    return NextResponse.json({ sessionName });
+    return NextResponse.json({ userName });
   } catch (error) {
-    console.error('Failed to generate session name:', error);
+    console.error('Failed to generate user name:', error);
     return NextResponse.json(
-      { error: 'Failed to generate session name' },
+      { error: 'Failed to generate user name' },
       { status: 500 }
     );
   }

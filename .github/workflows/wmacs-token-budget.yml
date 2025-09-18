@@ -1,0 +1,99 @@
+name: WMACS Token Budget Enforcement
+
+on:
+  workflow_call:
+    inputs:
+      phase:
+        description: 'Deployment phase (build, deploy, test, rollback)'
+        required: true
+        type: string
+      operation:
+        description: 'Specific operation within phase'
+        required: false
+        type: string
+        default: ''
+    secrets:
+      WMACS_BUILD_BUDGET:
+        description: 'Token budget for build phase'
+        required: false
+      WMACS_DEPLOY_BUDGET:
+        description: 'Token budget for deploy phase'
+        required: false
+      WMACS_TEST_BUDGET:
+        description: 'Token budget for test phase'
+        required: false
+      WMACS_ROLLBACK_BUDGET:
+        description: 'Token budget for rollback phase'
+        required: false
+
+jobs:
+  token-budget-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Check token budget
+      env:
+        PHASE: ${{ inputs.phase }}
+        OPERATION: ${{ inputs.operation }}
+        BUILD_BUDGET: ${{ secrets.WMACS_BUILD_BUDGET || '500' }}
+        DEPLOY_BUDGET: ${{ secrets.WMACS_DEPLOY_BUDGET || '300' }}
+        TEST_BUDGET: ${{ secrets.WMACS_TEST_BUDGET || '200' }}
+        ROLLBACK_BUDGET: ${{ secrets.WMACS_ROLLBACK_BUDGET || '100' }}
+      run: |
+        # Set budget based on phase
+        case "$PHASE" in
+          "build")
+            BUDGET=$BUILD_BUDGET
+            ;;
+          "deploy")
+            BUDGET=$DEPLOY_BUDGET
+            ;;
+          "test")
+            BUDGET=$TEST_BUDGET
+            ;;
+          "rollback")
+            BUDGET=$ROLLBACK_BUDGET
+            ;;
+          *)
+            echo "Unknown phase: $PHASE"
+            exit 1
+            ;;
+        esac
+        
+        echo "🎯 WMACS Token Budget Check"
+        echo "Phase: $PHASE"
+        echo "Budget: $BUDGET tokens"
+        echo "Operation: $OPERATION"
+        
+        # Check current usage
+        if [ -f "scripts/token_ledger.py" ]; then
+          python scripts/token_ledger.py check "$PHASE" "$BUDGET"
+        else
+          echo "⚠️  Token ledger not found, skipping budget check"
+        fi
+        
+    - name: Generate diff context
+      if: inputs.phase == 'deploy'
+      run: |
+        if [ -f "scripts/wmacs-diff-analyzer.py" ]; then
+          echo "📊 Generating diff-scoped context for token efficiency"
+          python scripts/wmacs-diff-analyzer.py analyze main
+        fi
+        
+    - name: Upload token artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: wmacs-token-data-${{ github.sha }}
+        path: |
+          .agent/wmacs_token_ledger.json
+          .agent/wmacs_diff_context.json
+        retention-days: 30
+        if-no-files-found: ignore

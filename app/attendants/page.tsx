@@ -1,251 +1,222 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'
+import { useAuth } from '../providers'
+import Link from 'next/link'
 
 interface Attendant {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  isAvailable: boolean
+  totalAssignments: number
+  totalHours: number
+  servingAs: string[]
+  skills: string[]
+  preferredDepartments: string[]
+  createdAt: string
 }
 
-export default function AttendantsPage() {
-  const [attendants, setAttendants] = useState<Attendant[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [newAttendant, setNewAttendant] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: ''
-  });
+export default function Attendants() {
+  const { user } = useAuth()
+  const [attendants, setAttendants] = useState<Attendant[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
-    loadAttendants();
-  }, []);
+    if (user) {
+      fetchAttendants()
+    }
+  }, [user])
 
-  const loadAttendants = async () => {
+  const fetchAttendants = async () => {
     try {
-      const response = await fetch('/api/attendants');
-      const data = await response.json();
-      setAttendants(data);
+      const response = await fetch('/api/attendants')
+      if (response.ok) {
+        const data = await response.json()
+        setAttendants(data)
+      }
     } catch (error) {
-      console.error('Failed to load attendants:', error);
+      console.error('Failed to fetch attendants:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
-      loadAttendants();
-      return;
-    }
-
+  const toggleAvailability = async (attendantId: string, currentStatus: boolean) => {
     try {
-      const response = await fetch(`/api/attendants/search?q=${encodeURIComponent(searchQuery)}`);
-      const data = await response.json();
-      setAttendants(data);
-    } catch (error) {
-      console.error('Search failed:', error);
-    }
-  };
-
-  const handleCreateAttendant = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      const response = await fetch('/api/attendants', {
-        method: 'POST',
+      const response = await fetch(`/api/attendants/${attendantId}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newAttendant),
-      });
+        body: JSON.stringify({ isAvailable: !currentStatus }),
+      })
 
       if (response.ok) {
-        setNewAttendant({ firstName: '', lastName: '', email: '', phone: '' });
-        setShowCreateForm(false);
-        loadAttendants();
+        fetchAttendants()
       }
     } catch (error) {
-      console.error('Failed to create attendant:', error);
+      console.error('Failed to update attendant:', error)
     }
-  };
+  }
+
+  const filteredAttendants = attendants.filter(attendant =>
+    `${attendant.firstName} ${attendant.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    attendant.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    attendant.servingAs?.some(role => role.toLowerCase().includes(searchTerm.toLowerCase()))
+  )
+
+  if (!user) {
+    return <div className="p-8">Please sign in to access this page.</div>
+  }
 
   if (loading) {
-    return (
-      <div className="container mx-auto p-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-300 rounded w-1/4 mb-6"></div>
-          <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-20 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <div className="p-8">Loading attendants...</div>
   }
 
   return (
-    <div className="container mx-auto p-8">
-      <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6">
-        <p className="text-yellow-700">
-          <strong>Next.js Staging Environment</strong> - Attendant management with SDD architecture
-        </p>
-      </div>
-
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Attendant Management</h1>
-        <button
-          onClick={() => setShowCreateForm(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Add New Attendant
-        </button>
-      </div>
-
-      {/* Search Bar */}
-      <div className="mb-6 flex gap-4">
-        <input
-          type="text"
-          placeholder="Search attendants..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1 px-4 py-2 border rounded-lg"
-          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-        />
-        <button
-          onClick={handleSearch}
-          className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700"
-        >
-          Search
-        </button>
-        <button
-          onClick={() => {
-            setSearchQuery('');
-            loadAttendants();
-          }}
-          className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
-        >
-          Clear
-        </button>
-      </div>
-
-      {/* Create Form Modal */}
-      {showCreateForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96">
-            <h2 className="text-xl font-bold mb-4">Add New Attendant</h2>
-            <form onSubmit={handleCreateAttendant}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">First Name</label>
-                <input
-                  type="text"
-                  required
-                  value={newAttendant.firstName}
-                  onChange={(e) => setNewAttendant({...newAttendant, firstName: e.target.value})}
-                  className="w-full px-3 py-2 border rounded"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Last Name</label>
-                <input
-                  type="text"
-                  required
-                  value={newAttendant.lastName}
-                  onChange={(e) => setNewAttendant({...newAttendant, lastName: e.target.value})}
-                  className="w-full px-3 py-2 border rounded"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Email</label>
-                <input
-                  type="email"
-                  value={newAttendant.email}
-                  onChange={(e) => setNewAttendant({...newAttendant, email: e.target.value})}
-                  className="w-full px-3 py-2 border rounded"
-                />
-              </div>
-              <div className="mb-6">
-                <label className="block text-sm font-medium mb-2">Phone</label>
-                <input
-                  type="tel"
-                  value={newAttendant.phone}
-                  onChange={(e) => setNewAttendant({...newAttendant, phone: e.target.value})}
-                  className="w-full px-3 py-2 border rounded"
-                />
-              </div>
-              <div className="flex gap-4">
-                <button
-                  type="submit"
-                  className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-                >
-                  Create Attendant
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowCreateForm(false)}
-                  className="flex-1 bg-gray-400 text-white py-2 rounded hover:bg-gray-500"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Attendants List */}
-      <div className="grid gap-4">
-        {attendants.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <p className="text-xl mb-2">No attendants found</p>
-            <p>Add your first attendant to get started</p>
-          </div>
-        ) : (
-          attendants.map((attendant) => (
-            <div key={attendant.id} className="bg-white p-6 rounded-lg shadow border">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-lg font-semibold">
-                    {attendant.firstName} {attendant.lastName}
-                  </h3>
-                  {attendant.email && (
-                    <p className="text-gray-600">{attendant.email}</p>
-                  )}
-                  {attendant.phone && (
-                    <p className="text-gray-600">{attendant.phone}</p>
-                  )}
-                  <p className="text-sm text-gray-500 mt-2">
-                    Added: {new Date(attendant.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <span className={`px-2 py-1 rounded text-sm ${
-                    attendant.isActive 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {attendant.isActive ? 'Active' : 'Inactive'}
-                  </span>
-                </div>
-              </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4 max-w-7xl">
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-3xl font-bold">Attendant Management</h1>
+              <p className="text-gray-600 mt-2">Manage attendant profiles and availability</p>
             </div>
-          ))
-        )}
-      </div>
+            <div className="space-x-4">
+              <Link
+                href="/dashboard"
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+              >
+                Back to Dashboard
+              </Link>
+              <Link
+                href="/attendants/create"
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Add Attendant
+              </Link>
+            </div>
+          </div>
+          
+          <div className="mb-6">
+            <input
+              type="text"
+              placeholder="Search attendants by name, email, or role..."
+              className="px-4 py-2 border border-gray-300 rounded-lg w-full max-w-md"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
 
-      <div className="mt-8 text-center text-gray-500">
-        <p>Total Attendants: {attendants.length}</p>
-        <p className="text-sm">Using SDD Attendant Management Library</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-blue-900">Total Attendants</h3>
+              <p className="text-2xl font-bold text-blue-700">{attendants.length}</p>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-green-900">Available</h3>
+              <p className="text-2xl font-bold text-green-700">
+                {attendants.filter(a => a.isAvailable).length}
+              </p>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-purple-900">Total Assignments</h3>
+              <p className="text-2xl font-bold text-purple-700">
+                {attendants.reduce((sum, a) => sum + (a.totalAssignments || 0), 0)}
+              </p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full table-auto">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="px-4 py-2 text-left">Name</th>
+                  <th className="px-4 py-2 text-left">Contact</th>
+                  <th className="px-4 py-2 text-left">Serving As</th>
+                  <th className="px-4 py-2 text-left">Status</th>
+                  <th className="px-4 py-2 text-left">Assignments</th>
+                  <th className="px-4 py-2 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredAttendants.map((attendant) => (
+                  <tr key={attendant.id} className="border-t">
+                    <td className="px-4 py-2">
+                      <div className="font-medium text-gray-900">
+                        {attendant.firstName} {attendant.lastName}
+                      </div>
+                    </td>
+                    <td className="px-4 py-2">
+                      <div className="text-sm text-gray-900">{attendant.email}</div>
+                      <div className="text-sm text-gray-500">{attendant.phone}</div>
+                    </td>
+                    <td className="px-4 py-2">
+                      <div className="flex flex-wrap gap-1">
+                        {attendant.servingAs?.slice(0, 2).map((role, index) => (
+                          <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                            {role}
+                          </span>
+                        ))}
+                        {attendant.servingAs?.length > 2 && (
+                          <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                            +{attendant.servingAs.length - 2} more
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-2">
+                      <span className={`px-2 py-1 rounded text-xs ${
+                        attendant.isAvailable 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {attendant.isAvailable ? 'Available' : 'Unavailable'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2">
+                      <div className="text-sm">
+                        <div>{attendant.totalAssignments || 0} assignments</div>
+                        <div className="text-gray-500">{attendant.totalHours || 0} hours</div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-2">
+                      <div className="space-x-2">
+                        <Link
+                          href={`/attendants/${attendant.id}`}
+                          className="text-blue-600 hover:text-blue-900 text-sm"
+                        >
+                          View
+                        </Link>
+                        <button
+                          onClick={() => toggleAvailability(attendant.id, attendant.isAvailable)}
+                          className={`text-sm ${
+                            attendant.isAvailable 
+                              ? 'text-red-600 hover:text-red-900' 
+                              : 'text-green-600 hover:text-green-900'
+                          }`}
+                        >
+                          {attendant.isAvailable ? 'Mark Unavailable' : 'Mark Available'}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {filteredAttendants.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No attendants found matching your search.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
-  );
+  )
 }

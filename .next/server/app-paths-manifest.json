@@ -1,18 +1,1 @@
-{
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/attendants/route": "app/api/attendants/route.js",
-  "/api/attendants/search/route": "app/api/attendants/search/route.js",
-  "/api/counts/analytics/route": "app/api/counts/analytics/route.js",
-  "/api/counts/generate-name/route": "app/api/counts/generate-name/route.js",
-  "/api/counts/route": "app/api/counts/route.js",
-  "/api/counts/search/route": "app/api/counts/search/route.js",
-  "/api/events/route": "app/api/events/route.js",
-  "/api/events/upcoming/route": "app/api/events/upcoming/route.js",
-  "/api/events/search/route": "app/api/events/search/route.js",
-  "/api/events/past/route": "app/api/events/past/route.js",
-  "/api/test/route": "app/api/test/route.js",
-  "/attendants/page": "app/attendants/page.js",
-  "/counts/page": "app/counts/page.js",
-  "/events/page": "app/events/page.js",
-  "/page": "app/page.js"
-}
+{}

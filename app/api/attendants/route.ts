@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
         lastName,
         email,
         phone,
+        isAvailable: true,
         updatedAt: new Date()
       }
     });

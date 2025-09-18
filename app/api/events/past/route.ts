@@ -7,12 +7,12 @@ export async function GET() {
   try {
     const events = await prisma.events.findMany({
       where: {
-        endDate: {
+        startDate: {
           lt: new Date()
         },
         isActive: true
       },
-      orderBy: { endDate: 'desc' }
+      orderBy: { startDate: 'desc' }
     });
     return NextResponse.json(events);
   } catch (error) {

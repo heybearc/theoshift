@@ -15,24 +15,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const countSessions = await prisma.count_sessions.findMany({
+    const countSessions = await prisma.users.findMany({
       where: {
         OR: [
-          { sessionName: { contains: query } },
-          { notes: { contains: query } }
+          { firstName: { contains: query } },
+          { lastName: { contains: query } },
+          { email: { contains: query } }
         ],
         isActive: true
       },
-      include: {
-        events: true
-      },
-      orderBy: { countTime: 'desc' }
+      orderBy: { createdAt: 'desc' }
     });
     return NextResponse.json(countSessions);
   } catch (error) {
-    console.error('Failed to search count sessions:', error);
+    console.error('Failed to search count users:', error);
     return NextResponse.json(
-      { error: 'Failed to search count sessions' },
+      { error: 'Failed to search count users' },
       { status: 500 }
     );
   }
