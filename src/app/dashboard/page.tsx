@@ -63,10 +63,20 @@ export default function Dashboard() {
       setLoading(true)
       setError(null)
 
-      // Fetch users and events in parallel
+      // Fetch users and events in parallel with credentials
       const [usersResponse, eventsResponse] = await Promise.all([
-        fetch('/api/users?limit=5'),
-        fetch('/api/events?limit=5')
+        fetch('/api/users?limit=5', {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }),
+        fetch('/api/events?limit=5', {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
       ])
 
       if (!usersResponse.ok || !eventsResponse.ok) {
