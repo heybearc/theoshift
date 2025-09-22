@@ -1,6 +1,6 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { withAuth, withAdminAuth } from '@/lib/auth-middleware'
+import { getAuthenticatedSession } from '@/lib/auth-helpers'
 import { successResponse, errorResponse, handleAPIError, parsePagination, createPagination } from '@/lib/api-utils'
 import { CreateUserSchema, UserQuerySchema } from '@/lib/validations'
 import bcrypt from 'bcryptjs'
@@ -8,8 +8,14 @@ import bcrypt from 'bcryptjs'
 /**
  * GET /api/users - List users with pagination and filtering
  */
-export const GET = withAuth(async (req: NextRequest) => {
+export async function GET(req: NextRequest) {
   try {
+    // Check authentication
+    const session = await getAuthenticatedSession()
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(req.url)
     const query = UserQuerySchema.parse(Object.fromEntries(searchParams))
     const { page, limit, skip } = parsePagination(searchParams)
@@ -62,13 +68,23 @@ export const GET = withAuth(async (req: NextRequest) => {
   } catch (error) {
     return handleAPIError(error)
   }
-})
+}
 
 /**
  * POST /api/users - Create new user (Admin only)
  */
-export const POST = withAdminAuth(async (req: NextRequest) => {
+export async function POST(req: NextRequest) {
   try {
+    // Check authentication and admin role
+    const session = await getAuthenticatedSession()
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 })
+    }
+
+    if (session.user.role !== 'ADMIN') {
+      return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 })
+    }
+
     const body = await req.json()
     const data = CreateUserSchema.parse(body)
 
@@ -113,4 +129,4 @@ export const POST = withAdminAuth(async (req: NextRequest) => {
   } catch (error) {
     return handleAPIError(error)
   }
-})
+}
