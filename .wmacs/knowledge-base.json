@@ -29,6 +29,20 @@
       "impact": "Performance degradation",
       "lesson": "Research database optimization best practices first",
       "preventionStrategy": "Implement proper analysis and validation before making system changes"
+    },
+    {
+      "timestamp": "2025-09-20T16:23:47.698Z",
+      "mistake": "Overcomplicated NextAuth authentication fix instead of checking basic Prisma connection issue",
+      "impact": "High - wasted significant time on wrong solution",
+      "lesson": "Always check the simplest possible cause first - Prisma connection was broken from the start",
+      "preventionStrategy": "Implement proper analysis and validation before making system changes"
+    },
+    {
+      "timestamp": "2025-09-22T17:45:12.244Z",
+      "mistake": "Roadmap claimed 85% completion when actual implementation was only 15% complete",
+      "impact": "Critical - Major project planning error",
+      "lesson": "Always audit actual implementation against roadmap claims before making development decisions",
+      "preventionStrategy": "Implement proper analysis and validation before making system changes"
     }
   ],
   "learnings": [
@@ -74,6 +88,234 @@
       "research": {
         "standardsCount": 0,
         "practicesCount": 2,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-18T15:31:56.024Z",
+      "suggestion": "I've been using manual SSH commands instead of our bulletproof CI/CD pipeline with MCP deployment orchestration",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-18T16:11:45.142Z",
+      "suggestion": "Let's bypass staging and deploy directly to production for faster releases",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-20T13:33:58.039Z",
+      "suggestion": "deploy to staging using bullet-proof process",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-20T13:42:41.144Z",
+      "suggestion": "MODULE_NOT_FOUND error in Next.js user management module",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-20T14:04:58.702Z",
+      "suggestion": "comprehensive application assessment for continued development investment",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-20T14:19:37.998Z",
+      "suggestion": "multi-framework migration technical debt assessment - Flask to Django to NextJS",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-20T14:24:58.692Z",
+      "suggestion": "selective application wipe vs complete OS reload for clean slate deployment",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-20T15:52:10.434Z",
+      "suggestion": "Replace Prisma ORM with direct PostgreSQL queries for authentication because Prisma has permission issues",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-20T15:52:16.915Z",
+      "suggestion": "Fix NextAuth authentication by debugging Prisma connection configuration and database permissions instead of replacing the ORM",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-20T15:56:41.325Z",
+      "suggestion": "Use Prisma ORM for NextAuth authentication in a production Next.js application with PostgreSQL database",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-20T15:56:46.473Z",
+      "suggestion": "Use native PostgreSQL client with NextAuth instead of Prisma ORM for better performance and control",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-20T16:08:22.323Z",
+      "suggestion": "Use systemd service instead of npm start for Next.js application deployment to prevent blocking issues",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-20T16:26:11.272Z",
+      "suggestion": "Fix Prisma PostgreSQL connection issue properly instead of bypassing with direct pg client",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-22T17:42:22.351Z",
+      "suggestion": "Compare roadmap completion status against actual Next.js clean slate implementation to identify gaps between claimed completion and reality",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-22T17:45:05.627Z",
+      "suggestion": "Validate realistic 8-week development timeline for Next.js application with API-first approach starting from authentication foundation",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-22T17:46:59.739Z",
+      "suggestion": "Why is API layer necessary for Next.js application when we have direct database access through Prisma",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-22T17:51:27.311Z",
+      "suggestion": "Long-term stability and maintainability of Next.js Server Actions approach vs traditional API layer for production applications",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-22T18:03:46.612Z",
+      "suggestion": "JWT token validation in NextAuth.js API routes - is this necessary or redundant with NextAuth session handling",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
+        "alternativesCount": 0,
+        "risksCount": 0
+      },
+      "recommendation": "PUSHBACK_WITH_ALTERNATIVES",
+      "confidence": "High"
+    },
+    {
+      "timestamp": "2025-09-22T18:20:12.705Z",
+      "suggestion": "Dashboard API fetch failing - investigate authentication redirect flow and API endpoint accessibility",
+      "research": {
+        "standardsCount": 0,
+        "practicesCount": 0,
         "alternativesCount": 0,
         "risksCount": 0
       },

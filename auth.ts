@@ -2,12 +2,14 @@ import { AuthOptions, getServerSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaClient } from '@prisma/client'
 
-// Global Prisma instance
+// WMACS Guardian: Proper Prisma singleton pattern
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-const prisma = globalForPrisma.prisma ?? new PrismaClient()
+const prisma = globalForPrisma.prisma ?? new PrismaClient({
+  log: ['error', 'warn'],
+})
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
@@ -41,28 +43,34 @@ export const authOptions: AuthOptions = {
         }
 
         try {
-          // Check if user exists in database
+          // WMACS Guardian: Proper Prisma usage with error handling
           const user = await prisma.users.findUnique({
             where: {
               email: credentials.email
             }
-          })
+          });
 
           if (!user) {
             throw new Error("No user found with this email")
           }
 
-          // For staging - simple password check
-          // In production, use bcrypt.compare(credentials.password, user.hashedPassword)
-          if (credentials.password !== 'AdminPass123!' || credentials.email !== 'admin@jwscheduler.local') {
-            throw new Error("Invalid credentials")
+          if (!user.passwordHash) {
+            throw new Error("User has no password set")
+          }
+
+          // WMACS Guardian Fix: Use proper bcrypt validation
+          const bcrypt = require('bcryptjs');
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.passwordHash);
+
+          if (!isPasswordValid) {
+            throw new Error("Invalid password")
           }
 
           // Update last login
           await prisma.users.update({
             where: { id: user.id },
             data: { lastLogin: new Date() }
-          })
+          });
 
           return {
             id: user.id,
