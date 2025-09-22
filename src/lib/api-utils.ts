@@ -64,7 +64,7 @@ export function handleAPIError(error: unknown): NextResponse {
     return errorResponse(
       'Validation failed',
       400,
-      error.errors.map(e => ({
+      error.issues.map(e => ({
         field: e.path.join('.'),
         message: e.message
       }))
