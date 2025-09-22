@@ -5,7 +5,7 @@ import { successResponse, errorResponse, handleAPIError } from '@/lib/api-utils'
 import { UpdateUserSchema, IdParamSchema } from '@/lib/validations'
 
 interface RouteParams {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 /**
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 })
     }
 
-    const { id } = IdParamSchema.parse(params)
+    const { id } = IdParamSchema.parse(await params)
 
     // Users can only view their own profile unless they're admin/overseer
     const canViewAll = ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER'].includes(session.user.role)
@@ -64,7 +64,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 })
     }
 
-    const { id } = IdParamSchema.parse(params)
+    const { id } = IdParamSchema.parse(await params)
     const body = await req.json()
     const data = UpdateUserSchema.parse(body)
 
@@ -115,7 +115,7 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 })
     }
 
-    const { id } = IdParamSchema.parse(params)
+    const { id } = IdParamSchema.parse(await params)
 
     // Prevent self-deletion
     if (session.user.id === id) {

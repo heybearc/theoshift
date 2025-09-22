@@ -5,7 +5,7 @@ import { successResponse, errorResponse, handleAPIError } from '@/lib/api-utils'
 import { UpdateEventSchema, IdParamSchema } from '@/lib/validations'
 
 interface RouteParams {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 /**
@@ -19,43 +19,42 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 })
     }
 
-    const { id } = IdParamSchema.parse(params)
+    const { id } = IdParamSchema.parse(await params)
 
     const event = await prisma.events.findUnique({
       where: { id },
       include: {
-        eventAttendantAssociations: {
+        event_attendant_associations: {
           include: {
-            attendant: {
+            users: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true
+              }
+            }
+          }
+        },
+        event_positions: {
+          include: {
+            position_shifts: true,
+            assignments: {
               include: {
-                user: {
+                users: {
                   select: {
                     firstName: true,
-                    lastName: true,
-                    email: true
+                    lastName: true
                   }
                 }
               }
             }
           }
         },
-        eventPositions: {
-          include: {
-            positionShifts: true,
-            assignments: {
-              include: {
-                attendant: {
-                  include: {
-                    user: {
-                      select: {
-                        firstName: true,
-                        lastName: true
-                      }
-                    }
-                  }
-                }
-              }
-            }
+        _count: {
+          select: {
+            event_attendant_associations: true,
+            event_positions: true,
+            assignments: true
           }
         }
       }
@@ -87,7 +86,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Insufficient permissions to update events' }, { status: 403 })
     }
 
-    const { id } = IdParamSchema.parse(params)
+    const { id } = IdParamSchema.parse(await params)
     const body = await req.json()
     const data = UpdateEventSchema.parse(body)
 
@@ -142,7 +141,7 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 })
     }
 
-    const { id } = IdParamSchema.parse(params)
+    const { id } = IdParamSchema.parse(await params)
 
     // Check if event has associated data
     const eventWithAssociations = await prisma.events.findUnique({
@@ -150,8 +149,8 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
       include: {
         _count: {
           select: {
-            eventAttendantAssociations: true,
-            eventPositions: true,
+            event_attendant_associations: true,
+            event_positions: true,
             assignments: true
           }
         }
@@ -164,8 +163,8 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
 
     // Warn if event has associations
     const hasAssociations = 
-      eventWithAssociations._count.eventAttendantAssociations > 0 ||
-      eventWithAssociations._count.eventPositions > 0 ||
+      eventWithAssociations._count.event_attendant_associations > 0 ||
+      eventWithAssociations._count.event_positions > 0 ||
       eventWithAssociations._count.assignments > 0
 
     if (hasAssociations) {
