@@ -39,6 +39,9 @@
 - `wmacs-bad-gateway-diagnosis.js` - Gateway issue diagnosis
 - `wmacs-rendering-guardian.js` - Rendering mode analysis
 - `wmacs-emergency-auth-fix.js` - Authentication emergency fixes
+- **`wmacs-clean-deploy.sh` - Clean CI/CD deployment script**
+- **`WMACS_DEPLOYMENT_ARCHITECTURE.md` - Deployment best practices**
+- **`WMACS_CICD_NGINX_PROXY_ARCHITECTURE.md` - Proxy setup guidelines**
 
 ### 🏗️ MANDATORY DEVELOPMENT WORKFLOW
 
@@ -47,6 +50,9 @@
 - Editing files directly on production/staging servers
 - Building directly on servers without version control
 - Making changes without proper artifact deployment
+- **Hardcoding environment-specific IPs/URLs in code**
+- **Deploying development/testing scripts to production**
+- **Cross-environment configuration contamination**
 
 **✅ REQUIRED WORKFLOW:**
 1. **Local Development First**
@@ -54,16 +60,28 @@
    - Test locally with `npm run dev`
    - Fix all build errors locally
    - Commit to version control
+   - **NO hardcoded server IPs in application code**
 
 2. **Staging Deployment**
    - Deploy to staging from repository artifact
+   - **Deploy ONLY application code (src/, package.json, configs)**
+   - **Inject staging-specific environment variables**
    - Test in staging environment
    - Validate all functionality
 
 3. **Production Deployment**
    - Deploy to production from SAME commit as staging
+   - **Deploy ONLY application code (exclude dev scripts)**
+   - **Inject production-specific environment variables**
    - Use artifact-based deployment only
    - Maintain rollback capability via git
+
+### 🧹 **CLEAN DEPLOYMENT REQUIREMENTS:**
+- **✅ Application Code Only:** Deploy src/, package.json, configs
+- **❌ Exclude Development Files:** No wmacs-*, test-*, scripts/, .github/
+- **✅ Environment Injection:** Server-specific .env at deployment time
+- **✅ Cross-Environment Verification:** Check for staging references in production
+- **✅ Clean Slate Deployment:** Fresh directory for each deployment
 
 **🔍 TROUBLESHOOTING WITHOUT SERVER ACCESS:**
 - Use remote logging (`journalctl`, application logs)
@@ -102,6 +120,9 @@ When user says "guardian save me" or reports critical issues:
 - ✅ **100% artifact-based deployments**
 - ✅ **Zero direct server modifications**
 - ✅ **Complete version control compliance**
+- ✅ **Zero cross-environment contamination**
+- ✅ **Clean deployment verification (no staging refs in production)**
+- ✅ **Environment-specific configuration injection**
 
 ---
 
