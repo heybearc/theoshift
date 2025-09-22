@@ -104,8 +104,10 @@ export async function POST(req: NextRequest) {
     // Create user
     const user = await prisma.users.create({
       data: {
+        id: crypto.randomUUID(),
         ...data,
-        passwordHash
+        passwordHash,
+        updatedAt: new Date()
       },
       select: {
         id: true,
