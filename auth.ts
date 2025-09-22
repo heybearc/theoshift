@@ -14,10 +14,7 @@ const prisma = globalForPrisma.prisma ?? new PrismaClient({
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 export const authOptions: AuthOptions = {
-  pages: {
-    signIn: '/auth/signin',
-    error: '/auth/error'
-  },
+  // Remove custom pages to use default NextAuth server-side pages
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
