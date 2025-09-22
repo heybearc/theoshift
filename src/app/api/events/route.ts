@@ -61,8 +61,9 @@ export async function GET(req: NextRequest) {
           updatedAt: true,
           _count: {
             select: {
-              eventAttendantAssociations: true,
-              eventPositions: true
+              event_attendant_associations: true,
+              event_positions: true,
+              assignments: true
             }
           }
         }
@@ -108,9 +109,11 @@ export async function POST(req: NextRequest) {
     // Create event
     const event = await prisma.events.create({
       data: {
+        id: crypto.randomUUID(),
         ...data,
         startDate,
         endDate,
+        updatedAt: new Date(),
         createdBy: session.user.id
       },
       select: {

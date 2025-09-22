@@ -50,11 +50,13 @@ export default function Dashboard() {
   useEffect(() => {
     if (status === 'loading') return
     
-    if (!session) {
+    if (!session || !session.user) {
+      console.log('Dashboard: No valid session, redirecting to signin')
       router.push('/auth/signin')
       return
     }
 
+    console.log('Dashboard: Valid session found, fetching data')
     fetchDashboardData()
   }, [session, status, router])
 

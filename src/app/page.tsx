@@ -11,8 +11,8 @@ export default function Home() {
   useEffect(() => {
     if (status === 'loading') return // Still loading
 
-    if (session) {
-      // User is authenticated, redirect to dashboard
+    if (session && session.user) {
+      // User is authenticated with valid session, redirect to dashboard
       router.push('/dashboard')
     } else {
       // User is not authenticated, redirect to signin
