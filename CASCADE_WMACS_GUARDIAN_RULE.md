@@ -40,6 +40,38 @@
 - `wmacs-rendering-guardian.js` - Rendering mode analysis
 - `wmacs-emergency-auth-fix.js` - Authentication emergency fixes
 
+### 🏗️ MANDATORY DEVELOPMENT WORKFLOW
+
+**🚫 FORBIDDEN PRACTICES:**
+- Direct server modifications via SSH
+- Editing files directly on production/staging servers
+- Building directly on servers without version control
+- Making changes without proper artifact deployment
+
+**✅ REQUIRED WORKFLOW:**
+1. **Local Development First**
+   - Make ALL changes in local repository
+   - Test locally with `npm run dev`
+   - Fix all build errors locally
+   - Commit to version control
+
+2. **Staging Deployment**
+   - Deploy to staging from repository artifact
+   - Test in staging environment
+   - Validate all functionality
+
+3. **Production Deployment**
+   - Deploy to production from SAME commit as staging
+   - Use artifact-based deployment only
+   - Maintain rollback capability via git
+
+**🔍 TROUBLESHOOTING WITHOUT SERVER ACCESS:**
+- Use remote logging (`journalctl`, application logs)
+- Reproduce issues in local development
+- Use staging as production mirror
+- Implement health check endpoints
+- Monitor via external tools
+
 ### ⚡ GUARDIAN ACTIVATION TRIGGERS
 
 - Any port configuration changes
@@ -48,6 +80,8 @@
 - Service restart/rebuild operations
 - Error states (500, 502, infinite redirects)
 - User reports of system issues
+- **Attempts to modify servers directly (FORBIDDEN)**
+- **Requests to bypass proper workflow (BLOCKED)**
 
 ### 🚨 EMERGENCY GUARDIAN PROTOCOLS
 
@@ -65,6 +99,9 @@ When user says "guardian save me" or reports critical issues:
 - ✅ 100% environment consistency
 - ✅ Rapid emergency response (<5 minutes)
 - ✅ Proactive issue prevention
+- ✅ **100% artifact-based deployments**
+- ✅ **Zero direct server modifications**
+- ✅ **Complete version control compliance**
 
 ---
 
