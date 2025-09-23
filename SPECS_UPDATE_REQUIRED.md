@@ -27,25 +27,32 @@ Following the updated CASCADE RULES, I have examined all project specifications 
 - ✅ User roles and permissions
 - ✅ Email configuration requirements
 
-### ❌ **MISSING FROM SPECS:**
+### ✅ **FOUND IN SSH CONFIG SPECS:**
 
-**Deployment Access Details:**
-1. **SSH Access Method** - How to connect to staging/production servers
-2. **Server User Account** - What username to use for SSH
-3. **Authentication Method** - SSH keys, passwords, etc.
-4. **Service Names** - Systemd service names for the application
+**From .github/workflows/staging-to-production.yml:**
+- ✅ **SSH User:** `root@10.92.3.24` (staging), `root@10.92.3.22` (production)
+- ✅ **SSH Key:** `${{ secrets.JW_ATTENDANT_SSH_KEY }}`
+- ✅ **Application Directory:** `/opt/jw-attendant-staging`, `/opt/jw-attendant-production`
+- ✅ **Service Names:** `jw-attendant-production` (systemd service)
+- ✅ **Database Connection:** `postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler`
 
-**Database Connection Details:**
-1. **Database Username** - Actual staging database user
-2. **Database Password** - Staging database password
-3. **Database Name** - Actual staging database name
-4. **Connection Method** - Direct connection or through tunnel
+**From .windsurf/workflows/staging-development.md:**
+- ✅ **SSH Alias:** `ssh jw-staging` (configured SSH alias)
+- ✅ **Application Directory:** `/opt/jw-attendant-staging`
+- ✅ **Service Management:** `systemctl restart jw-attendant-staging`
+- ✅ **Database Connection:** `psql -h 10.92.3.21 -U jw_user -d jw_attendant_scheduler`
 
-**Application Service Details:**
-1. **Service Name** - Systemd service name (e.g., jw-attendant-staging.service)
-2. **Application Directory** - Exact path where app is deployed
-3. **Process Management** - PM2, systemd, or other process manager
-4. **Log Locations** - Where to find application logs
+**From .github/workflows/mcp-ci-cd.yml:**
+- ✅ **Release Directory Pattern:** `/opt/jw-attendant-scheduler/releases/{commit-sha}`
+- ✅ **Current Symlink:** `/opt/jw-attendant-scheduler/current`
+- ✅ **Log Location:** `/var/log/jw-attendant-scheduler.log`
+- ✅ **Process Management:** Direct npm start with nohup
+
+### ❌ **STILL MISSING:**
+
+**SSH Key Access:**
+1. **Local SSH Key Location** - Where is the JW_ATTENDANT_SSH_KEY stored locally?
+2. **SSH Config Alias Setup** - How is `jw-staging` alias configured?
 
 ### 🔄 **SPECS UPDATE REQUEST:**
 

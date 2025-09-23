@@ -27,11 +27,12 @@
 
 ### Step 1: Connect to Staging Environment
 ```bash
-# SSH to staging server (per WMACS specs)
-ssh user@10.92.3.24
+# SSH to staging server (per SSH config specs)
+ssh jw-staging
+# OR directly: ssh root@10.92.3.24
 
-# Navigate to application directory (WMACS standard)
-cd /opt/jw-attendant-scheduler-staging
+# Navigate to application directory (per workflow specs)
+cd /opt/jw-attendant-staging
 ```
 
 ### Step 2: Pull Latest Staging Code
@@ -62,12 +63,12 @@ cp .env.example .env.local
 
 # Configure essential variables
 cat >> .env.local << EOF
-# Database (per WMACS specs)
-DATABASE_URL="postgresql://jw_scheduler_staging:password@10.92.3.21:5432/jw_scheduler_staging"
+# Database (per SSH config specs)
+DATABASE_URL="postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler"
 
 # NextAuth Configuration (per WMACS specs)
 NEXTAUTH_URL="http://10.92.3.24:3001"
-NEXTAUTH_SECRET="your-staging-secret-key"
+NEXTAUTH_SECRET="staging-secret-2024-secure"
 
 # Optional: Email Configuration (for testing invitations)
 SMTP_HOST="smtp.gmail.com"
@@ -97,12 +98,11 @@ npx prisma db pull
 # Build the Next.js application
 npm run build
 
-# Start the application
+# Start the application (per workflow specs)
 npm run start
 
-# Or use PM2 for process management
-pm2 start npm --name "jw-attendant-staging" -- start
-pm2 save
+# Or restart the systemd service (per SSH config specs)
+sudo systemctl restart jw-attendant-staging
 ```
 
 ### Step 7: Verify Deployment
@@ -212,28 +212,28 @@ curl http://localhost:3001/api/health
 ### Health Checks
 ```bash
 # Application health
-curl http://10.92.3.25:3001/api/health
+curl http://10.92.3.24:3001/api/health
 
 # Admin endpoints
-curl http://10.92.3.25:3001/admin
+curl http://10.92.3.24:3001/admin
 
 # Database connectivity
-curl http://10.92.3.25:3001/api/users
+curl http://10.92.3.24:3001/api/users
 
 # Email configuration (if configured)
-curl http://10.92.3.25:3001/api/admin/email-config
+curl http://10.92.3.24:3001/api/admin/email-config
 ```
 
 ### Log Monitoring
 ```bash
-# Check application logs
-pm2 logs jw-attendant-staging
+# Check application logs (per SSH config specs)
+tail -f /var/log/jw-attendant-scheduler.log
 
-# Check for errors
-pm2 logs jw-attendant-staging --err
+# Check systemd service logs
+journalctl -u jw-attendant-staging -f
 
-# Monitor real-time logs
-pm2 logs jw-attendant-staging --lines 50 -f
+# Check service status
+systemctl status jw-attendant-staging
 ```
 
 ## 🎯 USER ACCEPTANCE TESTING PLAN
