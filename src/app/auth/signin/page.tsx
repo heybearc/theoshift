@@ -1,6 +1,6 @@
 'use client'
 
-import { signIn, getSession } from 'next-auth/react'
+import { signIn, useSession } from '@/lib/auth-stub'
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -12,15 +12,14 @@ export default function SignIn() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
+  const { data: session, status } = useSession()
 
   useEffect(() => {
     // Check if user is already signed in
-    getSession().then((session) => {
-      if (session) {
-        router.push(callbackUrl)
-      }
-    })
-  }, [router, callbackUrl])
+    if (status === 'authenticated' && session) {
+      router.push(callbackUrl)
+    }
+  }, [status, session, router, callbackUrl])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,16 +27,16 @@ export default function SignIn() {
     setError('')
 
     try {
+      // With auth stub, signin always succeeds
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false,
       })
 
-      if (result?.error) {
-        setError('Invalid credentials. Please try again.')
-      } else if (result?.ok) {
+      if (result?.ok) {
         router.push(callbackUrl)
+      } else {
+        setError('Authentication failed. Please try again.')
       }
     } catch (error) {
       setError('An error occurred. Please try again.')
