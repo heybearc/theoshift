@@ -5,8 +5,8 @@ description: WMACS Guardian CI/CD Pipeline for Next.js JW Attendant Scheduler
 # WMACS Guardian CI/CD Pipeline - Next.js Implementation
 
 **Environment Mapping (CORRECTED):**
-- **Staging:** Container 135 (10.92.3.24:3001) - Development and testing
-- **Production:** Container 133 (10.92.3.22:3001) - Live application  
+- **Staging:** Container 134 (10.92.3.24:3001) - Development and testing
+- **Production:** Container 132 (10.92.3.22:3001) - Live application  
 - **Database:** Container 131 (10.92.3.21:5432) - Shared PostgreSQL
 
 ## 🛡️ WMACS Cascade Rules (MANDATORY)
@@ -27,7 +27,7 @@ description: WMACS Guardian CI/CD Pipeline for Next.js JW Attendant Scheduler
 
 ### 1. Connect to Staging Environment
 ```bash
-ssh jws  # 10.92.3.24 (Container 135)
+ssh jws  # 10.92.3.24 (Container 134)
 ```
 
 ### 2. Navigate to Project Directory
@@ -79,4 +79,4 @@ curl http://10.92.3.24:3001/api/users
 
 **🛡️ WMACS Guardian Enforcement:** This workflow is MANDATORY and enforced by WMACS Research Advisor.
 
-**Container Mapping:** 10.92.3.24 (staging) → 10.92.3.22 (production) → 10.92.3.21 (database)
+**Container Mapping:** 134 (staging: 10.92.3.24) → 132 (production: 10.92.3.22) → 131 (database: 10.92.3.21)
