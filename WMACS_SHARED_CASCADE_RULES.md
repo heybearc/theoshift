@@ -14,19 +14,26 @@
 
 ### 📋 **IMPLEMENTATION PROTOCOL**
 
-1. **Pre-Action Analysis**
+1. **Specs-First Analysis (MANDATORY)**
+   - **ALWAYS check project specs and documentation FIRST**
+   - Identify missing information in specs and request updates
+   - Use current project context over historical memories
+   - Verify all environment details with user directly
+   - **NEVER assume environment details from memories**
+
+2. **Pre-Action Analysis**
    - Analyze user request through WMACS Guardian lens
    - Identify potential system impacts
    - Assess deployment/infrastructure implications
    - Check for port 3001 compliance (immutable)
 
-2. **Guardian Advisory Consultation**
+3. **Guardian Advisory Consultation**
    - Use WMACS Guardian scripts for complex operations
    - Validate against established patterns
    - Ensure consistency across environments
    - Prevent infinite loops and configuration conflicts
 
-3. **Action Execution**
+4. **Action Execution**
    - Execute with Guardian oversight
    - Monitor for Guardian-flagged issues
    - Apply Guardian fixes when needed
@@ -72,6 +79,8 @@
 - **Deploying development/testing scripts to production**
 - **Cross-environment configuration contamination**
 - **Deviating from port 3001 for any reason**
+- **Using memories for environment details without user verification**
+- **Assuming infrastructure details from historical conversations**
 
 #### **✅ REQUIRED WORKFLOW:**
 
@@ -98,6 +107,38 @@
 - Use artifact-based deployment only
 - Maintain rollback capability via git
 - **Verify no staging references in production**
+
+### 📋 **SPECS-FIRST MANDATE**
+
+#### **🎯 PRIMARY INFORMATION SOURCES (IN ORDER):**
+1. **Current Project Specifications** - Always check specs first
+2. **User Direct Input** - Ask user for missing details
+3. **Project Documentation** - README, config files, etc.
+4. **Current Environment Verification** - Test/validate current state
+5. **Memories (RESTRICTED USE)** - Only for general patterns, NEVER for environment details
+
+#### **✅ APPROVED MEMORY USAGE:**
+- **General coding patterns and best practices**
+- **Framework-specific knowledge (Next.js, React, etc.)**
+- **Universal development principles**
+- **Common troubleshooting approaches**
+- **Technology-specific syntax and methods**
+
+#### **❌ FORBIDDEN MEMORY USAGE:**
+- **Environment-specific details (IPs, ports, server names)**
+- **Infrastructure configuration from other projects**
+- **Deployment-specific information**
+- **Database connection details**
+- **Authentication configurations**
+- **Any project-specific implementation details**
+
+#### **🔄 SPECS UPDATE PROTOCOL:**
+When information is missing from specs:
+1. **Identify the gap** in current specifications
+2. **Request user to provide** the missing information
+3. **Update project specs** with the new information
+4. **Document the addition** for future reference
+5. **Proceed with verified information only**
 
 ### 🧹 **CLEAN DEPLOYMENT REQUIREMENTS**
 
@@ -157,6 +198,8 @@ curl -s http://{server}:3001/health
 - **Requests to bypass proper workflow (BLOCKED)**
 - **Cross-environment contamination detected**
 - **Hardcoded environment references found**
+- **Use of memories for infrastructure details without verification**
+- **Missing or incomplete project specifications detected**
 
 ### 🚨 **EMERGENCY GUARDIAN PROTOCOLS**
 
