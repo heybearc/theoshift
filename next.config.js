@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client']
-  },
-  // Configure for reverse proxy setup
+  // Fix the deprecated experimental option
+  serverExternalPackages: ['@prisma/client'],
+  
+  // Configure for reverse proxy setup with FQDN
   async headers() {
     return [
       {
@@ -17,16 +17,37 @@ const nextConfig = {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
           },
+          {
+            key: 'X-Forwarded-Proto',
+            value: 'https',
+          },
         ],
       },
     ]
   },
+  
+  // Configure for proper FQDN handling
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: '/api/:path*',
+      },
+    ]
+  },
+  
   // Ensure proper URL handling behind reverse proxy
   trailingSlash: false,
+  
   // Configure public runtime config for URL consistency
   publicRuntimeConfig: {
     // This will be available on both server and client
-    publicUrl: process.env.NEXT_PUBLIC_URL || 'https://jw-staging.cloudigan.net'
+    publicUrl: process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://jw-staging.cloudigan.net'
+  },
+  
+  // Environment variables for client-side
+  env: {
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL,
   }
 }
 
