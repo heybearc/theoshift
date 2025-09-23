@@ -127,7 +127,7 @@ QOS Agent (Oversight)
 - **Recovery**: Django/Gunicorn process management
 
 ### LDC Construction Tools
-- **Containers**: 133 (production), 135 (staging)
+- **Containers**: 134 (production), 135 (staging)
 - **Database**: PostgreSQL Container 131
 - **Ports**: 3001 (Next.js), 8000 (FastAPI)
 - **Recovery**: Next.js/FastAPI process management
