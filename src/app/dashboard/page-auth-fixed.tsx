@@ -9,73 +9,14 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-<<<<<<< HEAD
-    if (status === 'loading') return
-    
-    if (!session || !session.user) {
-      console.log('Dashboard: No valid session, redirecting to signin')
-      router.push('/auth/signin')
-      return
-=======
     // Redirect to sign-in if not authenticated
     if (status === 'unauthenticated') {
       router.push('/auth/signin');
->>>>>>> feature/api-foundation
     }
   }, [status, router]);
 
-<<<<<<< HEAD
-    console.log('Dashboard: Valid session found, fetching data')
-    fetchDashboardData()
-  }, [session, status, router])
-
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      // Fetch users and events in parallel with credentials
-      const [usersResponse, eventsResponse] = await Promise.all([
-        fetch('/api/users?limit=5', {
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        }),
-        fetch('/api/events?limit=5', {
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        })
-      ])
-
-      if (!usersResponse.ok || !eventsResponse.ok) {
-        throw new Error('Failed to fetch dashboard data')
-      }
-
-      const usersData: APIResponse<User[]> = await usersResponse.json()
-      const eventsData: APIResponse<Event[]> = await eventsResponse.json()
-
-      if (usersData.success && usersData.data) {
-        setUsers(usersData.data)
-      }
-
-      if (eventsData.success && eventsData.data) {
-        setEvents(eventsData.data)
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (status === 'loading' || loading) {
-=======
   // Show loading while checking authentication
   if (status === 'loading') {
->>>>>>> feature/api-foundation
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-lg text-gray-600">Loading...</div>
