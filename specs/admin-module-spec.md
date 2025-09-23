@@ -88,10 +88,10 @@ enum UserRole {
 
 ### Technical Implementation
 
-#### Database Models Used
-- `users` - Core user information and roles
-- `email_configurations` - SMTP settings and templates
-- `attendants` - Extended attendant profiles (linked to users)
+#### Database Models Used (Prisma Schema)
+- `User` - Core user information and roles
+- `EmailConfiguration` - SMTP settings and templates  
+- `Attendant` - Extended attendant profiles (linked to users)
 
 #### API Endpoints
 ```
