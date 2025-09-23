@@ -15,7 +15,7 @@ const https = require('https');
 const http = require('http');
 
 class AdminModuleTester {
-  constructor(baseUrl = 'http://10.92.3.25:3001') {
+  constructor(baseUrl = 'http://10.92.3.24:3001') {
     this.baseUrl = baseUrl;
     this.testResults = [];
     this.adminSession = null;
@@ -397,7 +397,7 @@ class AdminModuleTester {
   // Run all tests
   async runAllTests() {
     console.log('🛡️  STARTING COMPREHENSIVE ADMIN MODULE TESTING');
-    console.log(`Target: ${this.baseUrl}`);
+    console.log(`Target: ${this.baseUrl} (per WMACS specs)`);
     console.log('='.repeat(60));
 
     await this.testAdminAuthentication();

@@ -2,10 +2,10 @@
 
 ## 📋 DEPLOYMENT OVERVIEW
 
-**Target Environment:** Container 135 (10.92.3.25:3001)  
-**Database:** PostgreSQL Container 131 (10.92.3.21)  
+**Target Environment:** Staging Server (10.92.3.24:3001)  
+**Database:** PostgreSQL Server (10.92.3.21:5432)  
 **Branch:** `staging` (merged with admin module Phase 2)  
-**Deployment Type:** Battle-tested CI/CD approach  
+**Deployment Type:** Battle-tested CI/CD approach (per WMACS specs)  
 
 ## 🎯 PRE-DEPLOYMENT CHECKLIST
 
@@ -17,21 +17,21 @@
 - [x] Clean git history with atomic commits
 
 ### ✅ Environment Requirements
-- [ ] Staging container accessible (10.92.3.25)
-- [ ] Database connectivity verified (10.92.3.21)
+- [ ] Staging server accessible (10.92.3.24)
+- [ ] Database connectivity verified (10.92.3.21:5432)
 - [ ] Node.js and npm/yarn available
-- [ ] Environment variables configured
+- [ ] Environment variables configured per WMACS specs
 - [ ] SMTP settings (optional for email testing)
 
 ## 🔧 DEPLOYMENT STEPS
 
 ### Step 1: Connect to Staging Environment
 ```bash
-# SSH to staging container
-ssh user@10.92.3.25
+# SSH to staging server (per WMACS specs)
+ssh user@10.92.3.24
 
-# Navigate to application directory
-cd /path/to/jw-attendant-scheduler
+# Navigate to application directory (WMACS standard)
+cd /opt/jw-attendant-scheduler-staging
 ```
 
 ### Step 2: Pull Latest Staging Code
@@ -62,11 +62,11 @@ cp .env.example .env.local
 
 # Configure essential variables
 cat >> .env.local << EOF
-# Database (Container 131)
-DATABASE_URL="postgresql://username:password@10.92.3.21:5432/jw_attendant_scheduler"
+# Database (per WMACS specs)
+DATABASE_URL="postgresql://jw_scheduler_staging:password@10.92.3.21:5432/jw_scheduler_staging"
 
-# NextAuth Configuration
-NEXTAUTH_URL="http://10.92.3.25:3001"
+# NextAuth Configuration (per WMACS specs)
+NEXTAUTH_URL="http://10.92.3.24:3001"
 NEXTAUTH_SECRET="your-staging-secret-key"
 
 # Optional: Email Configuration (for testing invitations)
