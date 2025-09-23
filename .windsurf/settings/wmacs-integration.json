@@ -1,0 +1,42 @@
+{
+  "editor.rulers": [80, 120],
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+  "files.associations": {
+    "wmacs-config.js": "javascript",
+    "*.wmacs": "yaml",
+    "cascade-rules.json": "jsonc"
+  },
+  "emmet.includeLanguages": {
+    "wmacs": "yaml"
+  },
+  "yaml.schemas": {
+    "./wmacs/schemas/wmacs-config.schema.json": "wmacs-config.js"
+  },
+  "editor.quickSuggestions": {
+    "comments": true,
+    "strings": true,
+    "other": true
+  },
+  "editor.suggest.showWords": true,
+  "editor.wordBasedSuggestions": "allDocuments",
+  "workbench.colorCustomizations": {
+    "editorRuler.foreground": "#ff0000",
+    "statusBar.background": "#1e3a8a",
+    "statusBar.foreground": "#ffffff",
+    "activityBar.background": "#0f172a",
+    "sideBar.background": "#1e293b"
+  },
+  "terminal.integrated.env.osx": {
+    "WMACS_ENABLED": "true",
+    "WMACS_STRICT_MODE": "true",
+    "WMACS_CONTAINER_STAGING": "134",
+    "WMACS_CONTAINER_PRODUCTION": "132",
+    "WMACS_CONTAINER_DATABASE": "131"
+  },
+  "git.decorations.enabled": true,
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "extensions.ignoreRecommendations": false
+}

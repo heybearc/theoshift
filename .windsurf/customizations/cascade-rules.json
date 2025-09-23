@@ -1,0 +1,99 @@
+{
+  "wmacs": {
+    "enabled": true,
+    "strictMode": true,
+    "rules": {
+      "hardStops": [
+        {
+          "pattern": "ssh.*production.*rm -rf",
+          "message": "🚫 HARD STOP: Direct production file deletion blocked",
+          "action": "block"
+        },
+        {
+          "pattern": "bypass.*ci.*cd",
+          "message": "🚫 HARD STOP: CI/CD pipeline bypass not allowed",
+          "action": "block"
+        },
+        {
+          "pattern": "skip.*staging",
+          "message": "🚫 HARD STOP: Staging validation required",
+          "action": "block"
+        },
+        {
+          "pattern": "direct.*production.*deploy",
+          "message": "🚫 HARD STOP: Direct production deployment blocked - Use staging-first workflow",
+          "action": "block"
+        },
+        {
+          "pattern": "copy.*files.*production",
+          "message": "🚫 HARD STOP: Manual file copying to production blocked",
+          "action": "block"
+        }
+      ],
+      "softStops": [
+        {
+          "pattern": "architecture.*change",
+          "message": "⚠️ SOFT STOP: Architecture change requires WMACS Research Advisor analysis",
+          "action": "warn"
+        },
+        {
+          "pattern": "remove.*multi-agent",
+          "message": "⚠️ SOFT STOP: Multi-agent removal requires justification",
+          "action": "warn"
+        },
+        {
+          "pattern": "database.*migration.*without.*backup",
+          "message": "⚠️ SOFT STOP: Database migration without backup requires approval",
+          "action": "warn"
+        },
+        {
+          "pattern": "container.*134.*132.*direct",
+          "message": "⚠️ SOFT STOP: Direct container access - Use proper CI/CD workflow",
+          "action": "warn"
+        }
+      ],
+      "approvedPatterns": [
+        {
+          "pattern": "staging.*first",
+          "message": "✅ APPROVED: Staging-first deployment",
+          "action": "approve"
+        },
+        {
+          "pattern": "wmacs.*sync",
+          "message": "✅ APPROVED: WMACS synchronization",
+          "action": "approve"
+        },
+        {
+          "pattern": "container.*134.*staging",
+          "message": "✅ APPROVED: Staging container access",
+          "action": "approve"
+        },
+        {
+          "pattern": "exact.*code.*parity",
+          "message": "✅ APPROVED: Exact code parity deployment",
+          "action": "approve"
+        }
+      ]
+    },
+    "environments": {
+      "staging": {
+        "container": "134",
+        "host": "10.92.3.24",
+        "port": "3001",
+        "allowed_operations": ["development", "testing", "build", "deploy_to_production"]
+      },
+      "production": {
+        "container": "132", 
+        "host": "10.92.3.22",
+        "port": "3001",
+        "allowed_operations": ["deploy_from_staging", "rollback", "monitoring"]
+      },
+      "database": {
+        "container": "131",
+        "host": "10.92.3.21", 
+        "port": "5432",
+        "allowed_operations": ["read", "migration_with_approval"]
+      }
+    }
+  }
+}
