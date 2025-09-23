@@ -1,0 +1,380 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model assignments {
+  id              String           @id
+  eventId         String
+  userId          String
+  positionId      String
+  shiftId         String?
+  shiftStart      DateTime
+  shiftEnd        DateTime
+  status          AssignmentStatus @default(ASSIGNED)
+  notes           String?
+  assignedBy      String?
+  assignedAt      DateTime         @default(now())
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime
+  events          events           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event_positions event_positions  @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  position_shifts position_shifts? @relation(fields: [shiftId], references: [id])
+  users           users            @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model attendants {
+  id                   String          @id
+  userId               String?         @unique
+  firstName            String?
+  lastName             String?
+  email                String?
+  phone                String?
+  availabilityStatus   String?         @default("AVAILABLE")
+  isAvailable          Boolean         @default(true)
+  notes                String?
+  
+  servingAs             Json?           @default("[]")
+  skills               Json?
+  preferredDepartments Json?
+  unavailableDates     Json?
+  totalAssignments     Int             @default(0)
+  totalHours           Float           @default(0)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime
+  users                users?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model count_sessions {
+  id              String             @id
+  eventId         String
+  sessionName     String
+  countTime       DateTime
+  notes           String?
+  isActive        Boolean            @default(true)
+  status          CountSessionStatus @default(ACTIVE)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime
+  createdBy       String?
+  events          events             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  position_counts position_counts[]
+
+  @@unique([eventId, sessionName])
+}
+
+model departments {
+  id                    String                  @id
+  eventId               String
+  name                  String
+  description           String?
+  color                 String?
+  isActive              Boolean                 @default(true)
+  sortOrder             Int                     @default(0)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime
+  events                events                  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  oversight_assignments oversight_assignments[]
+  station_ranges        station_ranges[]
+
+  @@unique([eventId, name])
+}
+
+model documents {
+  id                 String              @id
+  eventId            String?
+  title              String
+  description        String?
+  fileName           String
+  filePath           String
+  fileSize           Int
+  mimeType           String
+  category           DocumentCategory
+  tags               Json?
+  accessLevel        DocumentAccessLevel @default(PUBLIC)
+  allowedRoles       Json?
+  allowedDepartments Json?
+  isActive           Boolean             @default(true)
+  uploadedBy         String?
+  uploadedAt         DateTime            @default(now())
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime
+  events             events?             @relation(fields: [eventId], references: [id])
+}
+
+model email_configurations {
+  id                 String   @id
+  smtpServer         String
+  smtpPort           Int
+  smtpUser           String
+  smtpPassword       String
+  fromEmail          String
+  fromName           String
+  replyToEmail       String?
+  inviteTemplate     String?
+  assignmentTemplate String?
+  reminderTemplate   String?
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime
+}
+
+model event_attendant_associations {
+  id                    String   @id
+  eventId               String
+  userId                String
+  role                  UserRole @default(ATTENDANT)
+  isActive              Boolean  @default(true)
+  assignedDepartments   Json?
+  assignedStationRanges Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime
+  events                events   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  users                 users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+}
+
+model event_positions {
+  id                   String            @id
+  eventId              String
+  positionNumber       Int
+  positionName         String
+  description          String?
+  department           String?
+  isActive             Boolean           @default(true)
+  isAllDay             Boolean           @default(false)
+  isLeadershipPosition Boolean           @default(false)
+  requiresExperience   Boolean           @default(false)
+  maxAttendants        Int               @default(1)
+  minAttendants        Int               @default(1)
+  tags                 Json?
+  instructions         String?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime
+  assignments          assignments[]
+  events               events            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  position_counts      position_counts[]
+  position_shifts      position_shifts[]
+
+  @@unique([eventId, positionNumber])
+}
+
+model events {
+  id                           String                         @id
+  name                         String
+  description                  String?
+  eventType                    EventType                      @default(ASSEMBLY)
+  status                       EventStatus                    @default(UPCOMING)
+  startDate                    DateTime
+  endDate                      DateTime
+  location                     String?
+  venue                        String?
+  isActive                     Boolean                        @default(true)
+  settings                     Json?
+  createdAt                    DateTime                       @default(now())
+  updatedAt                    DateTime
+  createdBy                    String?
+  assignments                  assignments[]
+  count_sessions               count_sessions[]
+  departments                  departments[]
+  documents                    documents[]
+  event_attendant_associations event_attendant_associations[]
+  event_positions              event_positions[]
+  lanyard_settings             lanyard_settings?
+  oversight_assignments        oversight_assignments[]
+}
+
+model lanyard_settings {
+  id                String     @id
+  eventId           String     @unique
+  totalLanyards     Int
+  availableLanyards Int
+  isActive          Boolean    @default(true)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime
+  events            events     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  lanyards          lanyards[]
+}
+
+model lanyards {
+  id               String           @id
+  lanyardSettingId String
+  badgeNumber      String
+  isCheckedOut     Boolean          @default(false)
+  checkedOutTo     String?
+  checkedOutAt     DateTime?
+  checkedInAt      DateTime?
+  status           LanyardStatus    @default(AVAILABLE)
+  notes            String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime
+  lanyard_settings lanyard_settings @relation(fields: [lanyardSettingId], references: [id], onDelete: Cascade)
+
+  @@unique([lanyardSettingId, badgeNumber])
+}
+
+model oversight_assignments {
+  id             String          @id
+  eventId        String
+  userId         String
+  departmentId   String?
+  stationRangeId String?
+  oversightLevel OversightLevel
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime
+  departments    departments?    @relation(fields: [departmentId], references: [id])
+  events         events          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  station_ranges station_ranges? @relation(fields: [stationRangeId], references: [id])
+  users          users           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model position_counts {
+  id              String          @id
+  countSessionId  String
+  positionId      String
+  attendeeCount   Int
+  notes           String?
+  countedBy       String?
+  countedAt       DateTime        @default(now())
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime
+  count_sessions  count_sessions  @relation(fields: [countSessionId], references: [id], onDelete: Cascade)
+  event_positions event_positions @relation(fields: [positionId], references: [id], onDelete: Cascade)
+
+  @@unique([countSessionId, positionId])
+}
+
+model position_shifts {
+  id              String          @id
+  positionId      String
+  shiftName       String
+  shiftStart      DateTime
+  shiftEnd        DateTime
+  isAllDay        Boolean         @default(false)
+  maxAttendants   Int             @default(1)
+  notes           String?
+  isActive        Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime
+  assignments     assignments[]
+  event_positions event_positions @relation(fields: [positionId], references: [id], onDelete: Cascade)
+}
+
+model station_ranges {
+  id                    String                  @id
+  departmentId          String
+  name                  String
+  startStation          Int
+  endStation            Int
+  description           String?
+  isActive              Boolean                 @default(true)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime
+  oversight_assignments oversight_assignments[]
+  departments           departments             @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+}
+
+model users {
+  id                           String                         @id
+  email                        String                         @unique
+  firstName                    String
+  lastName                     String
+  phone                        String?
+  isActive                     Boolean                        @default(true)
+  role                         UserRole                       @default(ATTENDANT)
+  passwordHash                 String?
+  inviteToken                  String?                        @unique
+  inviteExpiry                 DateTime?
+  lastLogin                    DateTime?
+  createdAt                    DateTime                       @default(now())
+  updatedAt                    DateTime
+  createdBy                    String?
+  assignments                  assignments[]
+  attendants                   attendants?
+  event_attendant_associations event_attendant_associations[]
+  oversight_assignments        oversight_assignments[]
+}
+
+enum AssignmentStatus {
+  ASSIGNED
+  CONFIRMED
+  DECLINED
+  COMPLETED
+  NO_SHOW
+}
+
+enum CountSessionStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum DocumentAccessLevel {
+  PUBLIC
+  ATTENDANTS_ONLY
+  LEADERSHIP_ONLY
+  DEPARTMENT_SPECIFIC
+  POSITION_SPECIFIC
+  ADMIN_ONLY
+}
+
+enum DocumentCategory {
+  EMERGENCY_INFO
+  POSITION_INSTRUCTIONS
+  EVENT_DOCUMENTATION
+  TRAINING_MATERIALS
+  ANNOUNCEMENTS
+  FORMS
+  REPORTS
+  OTHER
+}
+
+enum EventStatus {
+  UPCOMING
+  CURRENT
+  COMPLETED
+  CANCELLED
+  ARCHIVED
+}
+
+enum EventType {
+  ASSEMBLY
+  CONVENTION
+  SPECIAL_EVENT
+  MEETING
+}
+
+enum ExperienceLevel {
+  BEGINNER
+  INTERMEDIATE
+  EXPERIENCED
+  EXPERT
+}
+
+enum LanyardStatus {
+  AVAILABLE
+  CHECKED_OUT
+  LOST
+  DAMAGED
+  RETIRED
+}
+
+enum OversightLevel {
+  OVERSEER
+  ASSISTANT_OVERSEER
+  DEPARTMENT_HEAD
+  STATION_OVERSEER
+}
+
+enum UserRole {
+  ADMIN
+  OVERSEER
+  ASSISTANT_OVERSEER
+  KEYMAN
+  ATTENDANT
+}
