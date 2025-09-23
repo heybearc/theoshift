@@ -80,12 +80,7 @@ export async function GET(request: NextRequest) {
           role: true,
           isActive: true,
           createdAt: true,
-          updatedAt: true,
-          _count: {
-            select: {
-              attendants: true
-            }
-          }
+          updatedAt: true
         }
       }),
       prisma.users.count({ where })
