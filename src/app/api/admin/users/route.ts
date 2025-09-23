@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
 
     // Get users with pagination
     const [users, total] = await Promise.all([
-      prisma.user.findMany({
+      prisma.users.findMany({
         where,
         skip,
         take: limit,
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
           }
         }
       }),
-      prisma.user.count({ where })
+      prisma.users.count({ where })
     ]);
 
     return NextResponse.json({
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
     const validatedData = createUserSchema.parse(body);
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.users.findUnique({
       where: { email: validatedData.email }
     });
 
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(tempPassword, 12);
 
     // Create user
-    const user = await prisma.user.create({
+    const user = await prisma.users.create({
       data: {
         firstName: validatedData.firstName,
         lastName: validatedData.lastName,

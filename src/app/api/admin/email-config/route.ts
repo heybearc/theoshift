@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import nodemailer from 'nodemailer';
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     // Test the email configuration before saving
     try {
-      const transporter = nodemailer.createTransporter({
+      const transporter = nodemailer.createTransport({
         host: validatedData.smtpHost,
         port: validatedData.smtpPort,
         secure: validatedData.smtpSecure,
@@ -167,7 +167,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Create transporter and send test email
-    const transporter = nodemailer.createTransporter(smtpConfig);
+    const transporter = nodemailer.createTransport(smtpConfig);
 
     const mailOptions = {
       from: `${process.env.EMAIL_FROM_NAME || 'JW Attendant Scheduler'} <${process.env.EMAIL_FROM || smtpConfig.auth.user}>`,

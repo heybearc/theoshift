@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
@@ -46,7 +46,7 @@ export async function GET(
   try {
     const { id } = await params;
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id },
       select: {
         id: true,
@@ -117,7 +117,7 @@ export async function PUT(
     const validatedData = updateUserSchema.parse(body);
 
     // Check if user exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.users.findUnique({
       where: { id }
     });
 
@@ -130,7 +130,7 @@ export async function PUT(
 
     // Check if email is being changed and if it's already taken
     if (validatedData.email && validatedData.email !== existingUser.email) {
-      const emailExists = await prisma.user.findUnique({
+      const emailExists = await prisma.users.findUnique({
         where: { email: validatedData.email }
       });
 
@@ -143,7 +143,7 @@ export async function PUT(
     }
 
     // Update user
-    const updatedUser = await prisma.user.update({
+    const updatedUser = await prisma.users.update({
       where: { id },
       data: validatedData,
       select: {
@@ -192,7 +192,7 @@ export async function DELETE(
     const { id } = await params;
 
     // Check if user exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.users.findUnique({
       where: { id },
       include: {
         _count: {
@@ -222,7 +222,7 @@ export async function DELETE(
     }
 
     // Soft delete by deactivating the user
-    const deactivatedUser = await prisma.user.update({
+    const deactivatedUser = await prisma.users.update({
       where: { id },
       data: { isActive: false },
       select: {
