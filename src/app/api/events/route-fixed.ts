@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return errorResponse(
-        'Validation failed: ' + error.issues.map(e => e.message).join(', '),
+        'Validation failed: ' + error.errors.map(e => e.message).join(', '),
         400
       )
     }
