@@ -4,6 +4,7 @@ import { authOptions } from '../../../auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { sendInvitationEmail, isEmailConfigured } from '@/lib/email';
 
 // Validation schemas
 const createUserSchema = z.object({
@@ -159,10 +160,27 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // TODO: Send invitation email if requested
-    if (validatedData.sendInvitation) {
-      // This will be implemented in Phase 2
-      console.log(`TODO: Send invitation email to ${user.email} with temp password: ${tempPassword}`);
+    // Send invitation email if requested and email is configured
+    if (validatedData.sendInvitation && isEmailConfigured()) {
+      try {
+        const loginUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/auth/signin`;
+        
+        await sendInvitationEmail({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role,
+          tempPassword,
+          loginUrl
+        });
+        
+        console.log(`Invitation email sent to ${user.email}`);
+      } catch (emailError) {
+        console.error('Failed to send invitation email:', emailError);
+        // Don't fail user creation if email fails, just log the error
+      }
+    } else if (validatedData.sendInvitation && !isEmailConfigured()) {
+      console.log(`Email not configured. Temp password for ${user.email}: ${tempPassword}`);
     }
 
     return NextResponse.json({
