@@ -1,0 +1,361 @@
+#!/usr/bin/env node
+
+/**
+ * WMACS Smart Synchronization System
+ * 
+ * Syncs shared WMACS components while preserving repository-specific configurations
+ */
+
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+class WMACSSmartSync {
+  constructor() {
+    this.sharedSystemPath = path.join(process.env.HOME, 'Documents/Cloudy-Work/shared/wmacs-guardian-system');
+    this.localWmacsPath = path.join(process.cwd(), 'wmacs');
+    
+    // Files that are always synced from shared system
+    this.syncableFiles = [
+      'WINDSURF_OPERATIONAL_GUIDELINES.md',
+      'ENFORCEMENT_MECHANISMS.md',
+      'OPERATIONAL_PROCEDURES.md',
+      'USAGE_GUIDE.md',
+      'wmacs-research-advisor.js',
+      'wmacs-auto-advisor.js',
+      'wmacs-architectural-guardian.js',
+      'wmacs-admin-comprehensive-tester.js',
+      'cascade-rules.json',
+      'health-check.sh'
+    ];
+    
+    // Files that are NEVER overwritten (protected)
+    this.protectedFiles = [
+      'config/project.json',
+      'config/environments.json',
+      'config/ssh-config.json',
+      'config/overrides.json',
+      'local/custom-rules.js',
+      'local/local-procedures.md',
+      'local/integrations/*'
+    ];
+    
+    // Files that require intelligent merging
+    this.hybridFiles = [
+      'wmacs-guardian.js'
+    ];
+  }
+
+  async sync() {
+    console.log('🛡️ WMACS Smart Sync: Starting intelligent synchronization...');
+    
+    try {
+      // 1. Validate shared system exists
+      await this.validateSharedSystem();
+      
+      // 2. Create modular structure if needed
+      await this.ensureModularStructure();
+      
+      // 3. Backup protected files
+      await this.backupProtectedFiles();
+      
+      // 4. Sync shared components
+      await this.syncSharedComponents();
+      
+      // 5. Handle hybrid files
+      await this.handleHybridFiles();
+      
+      // 6. Restore protected files
+      await this.restoreProtectedFiles();
+      
+      // 7. Validate configuration
+      await this.validateConfiguration();
+      
+      console.log('✅ WMACS Smart Sync: Synchronization completed successfully');
+      
+    } catch (error) {
+      console.error('❌ WMACS Smart Sync failed:', error.message);
+      process.exit(1);
+    }
+  }
+
+  async validateSharedSystem() {
+    if (!fs.existsSync(this.sharedSystemPath)) {
+      throw new Error(`Shared WMACS system not found at: ${this.sharedSystemPath}`);
+    }
+    
+    console.log('✅ Shared WMACS system validated');
+  }
+
+  async ensureModularStructure() {
+    const dirs = ['core', 'config', 'local', 'local/integrations'];
+    
+    for (const dir of dirs) {
+      const dirPath = path.join(this.localWmacsPath, dir);
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+        console.log(`📁 Created directory: ${dir}`);
+      }
+    }
+  }
+
+  async backupProtectedFiles() {
+    console.log('💾 Backing up protected files...');
+    
+    const backupDir = path.join(this.localWmacsPath, '.backup');
+    if (fs.existsSync(backupDir)) {
+      fs.rmSync(backupDir, { recursive: true });
+    }
+    fs.mkdirSync(backupDir, { recursive: true });
+    
+    for (const protectedPattern of this.protectedFiles) {
+      const fullPath = path.join(this.localWmacsPath, protectedPattern);
+      
+      if (fs.existsSync(fullPath)) {
+        const backupPath = path.join(backupDir, protectedPattern);
+        const backupDirPath = path.dirname(backupPath);
+        
+        if (!fs.existsSync(backupDirPath)) {
+          fs.mkdirSync(backupDirPath, { recursive: true });
+        }
+        
+        fs.copyFileSync(fullPath, backupPath);
+        console.log(`   Backed up: ${protectedPattern}`);
+      }
+    }
+  }
+
+  async syncSharedComponents() {
+    console.log('🔄 Syncing shared components...');
+    
+    for (const file of this.syncableFiles) {
+      const sourcePath = path.join(this.sharedSystemPath, file);
+      const targetPath = path.join(this.localWmacsPath, 'core', file);
+      
+      if (fs.existsSync(sourcePath)) {
+        // Ensure target directory exists
+        const targetDir = path.dirname(targetPath);
+        if (!fs.existsSync(targetDir)) {
+          fs.mkdirSync(targetDir, { recursive: true });
+        }
+        
+        fs.copyFileSync(sourcePath, targetPath);
+        console.log(`   Synced: ${file}`);
+      }
+    }
+  }
+
+  async handleHybridFiles() {
+    console.log('🔀 Handling hybrid files...');
+    
+    // For wmacs-guardian.js, we'll create a wrapper that loads the core and applies config
+    const wrapperContent = this.generateGuardianWrapper();
+    fs.writeFileSync(path.join(this.localWmacsPath, 'wmacs-guardian.js'), wrapperContent);
+    
+    console.log('   Generated intelligent wrapper for wmacs-guardian.js');
+  }
+
+  generateGuardianWrapper() {
+    return `#!/usr/bin/env node
+
+/**
+ * WMACS Guardian - Intelligent Wrapper
+ * 
+ * This file is auto-generated by wmacs-smart-sync.js
+ * It loads the core WMACS system and applies repository-specific configuration
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+class WMACSGuardian {
+  constructor() {
+    // Load project configuration
+    this.projectConfig = this.loadConfig('config/project.json');
+    this.environmentConfig = this.loadConfig('config/environments.json');
+    this.overrides = this.loadConfig('config/overrides.json') || {};
+    
+    // Apply configuration hierarchy
+    this.config = this.mergeConfigs();
+  }
+
+  loadConfig(configPath) {
+    const fullPath = path.join(__dirname, configPath);
+    if (fs.existsSync(fullPath)) {
+      return JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+    }
+    return null;
+  }
+
+  mergeConfigs() {
+    // Merge configuration with hierarchy: core defaults < project < environment < overrides
+    return {
+      ...this.projectConfig,
+      environments: this.environmentConfig,
+      ...this.overrides
+    };
+  }
+
+  async executeCommand(command, reason = '') {
+    console.log(\`🔧 WMACS: \${reason || 'Executing command'}\`);
+    console.log(\`   Command: \${command}\`);
+    
+    try {
+      const { promisify } = require('util');
+      const exec = promisify(require('child_process').exec);
+      const result = await exec(command);
+      console.log(\`✅ Command successful\`);
+      if (result.stdout.trim()) {
+        console.log(\`   Output: \${result.stdout.trim()}\`);
+      }
+      return result.stdout;
+    } catch (error) {
+      console.error(\`❌ Command failed: \${error.message}\`);
+      throw error;
+    }
+  }
+
+  async test(container) {
+    console.log(\`🛡️ WMACS Guardian: Executing login-test on \${container}\`);
+    
+    try {
+      const env = this.getEnvironmentByContainer(container);
+      if (!env) {
+        throw new Error(\`Environment not found for container: \${container}\`);
+      }
+
+      const testUrl = \`http://\${env.ip}:\${env.ports.frontend}\${this.config.authentication.endpoints.signin}\`;
+      const credentials = this.config.authentication.credentials;
+      
+      const curlCommand = \`curl -X POST -F "email=\${credentials.testUser}" -F "password=\${credentials.testPassword}" \${testUrl} -s\`;
+      
+      const result = await this.executeCommand(curlCommand, 'Testing authentication');
+      
+      if (result.includes('error') || result.includes('Error')) {
+        throw new Error(\`Authentication test failed: \${result}\`);
+      }
+      
+      console.log('✅ Login test completed successfully');
+      return { login: 'success', dashboard: 'redirect' };
+      
+    } catch (error) {
+      console.error(\`❌ login-test failed: \${error.message}\`);
+      throw error;
+    }
+  }
+
+  getEnvironmentByContainer(container) {
+    for (const [envName, envConfig] of Object.entries(this.config.environments)) {
+      if (envConfig.container === container) {
+        return envConfig;
+      }
+    }
+    return null;
+  }
+
+  async start(container) {
+    console.log(\`🛡️ WMACS Guardian: Starting guarded application on container \${container}\`);
+    
+    const env = this.getEnvironmentByContainer(container);
+    if (!env) {
+      throw new Error(\`Environment not found for container: \${container}\`);
+    }
+
+    const sshCommand = \`ssh \${env.sshHost} "pct exec \${container} -- bash -c 'cd /opt/\${this.config.projectName}/frontend && pkill -f \\"next dev\\" && sleep 2 && npm run dev > /dev/null 2>&1 &'"\`;
+    
+    try {
+      await this.executeCommand(sshCommand, 'Starting application');
+      console.log('✅ Application started successfully');
+    } catch (error) {
+      console.error(\`❌ Failed to start application: \${error.message}\`);
+      throw error;
+    }
+  }
+}
+
+// CLI Interface
+if (require.main === module) {
+  const guardian = new WMACSGuardian();
+  const [,, action, container] = process.argv;
+
+  if (!action || !container) {
+    console.log('Usage: node wmacs-guardian.js [start|test] [container]');
+    process.exit(1);
+  }
+
+  guardian[action](container)
+    .then(result => {
+      if (result) {
+        console.log(\`✅ Guardian \${action} completed:\`, result);
+      }
+    })
+    .catch(error => {
+      console.error(\`❌ Guardian \${action} failed:\`, error.message);
+      process.exit(1);
+    });
+}
+
+module.exports = WMACSGuardian;
+`;
+  }
+
+  async restoreProtectedFiles() {
+    console.log('🔄 Restoring protected files...');
+    
+    const backupDir = path.join(this.localWmacsPath, '.backup');
+    
+    if (fs.existsSync(backupDir)) {
+      // Copy all backed up files back to their original locations
+      this.copyRecursive(backupDir, this.localWmacsPath);
+      
+      // Clean up backup
+      fs.rmSync(backupDir, { recursive: true });
+      console.log('   Protected files restored');
+    }
+  }
+
+  copyRecursive(src, dest) {
+    const stats = fs.statSync(src);
+    
+    if (stats.isDirectory()) {
+      if (!fs.existsSync(dest)) {
+        fs.mkdirSync(dest, { recursive: true });
+      }
+      
+      const files = fs.readdirSync(src);
+      for (const file of files) {
+        this.copyRecursive(path.join(src, file), path.join(dest, file));
+      }
+    } else {
+      const destDir = path.dirname(dest);
+      if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+      }
+      fs.copyFileSync(src, dest);
+    }
+  }
+
+  async validateConfiguration() {
+    console.log('✅ Validating configuration...');
+    
+    // Check that all required config files exist
+    const requiredConfigs = ['config/project.json', 'config/environments.json'];
+    
+    for (const configFile of requiredConfigs) {
+      const configPath = path.join(this.localWmacsPath, configFile);
+      if (!fs.existsSync(configPath)) {
+        throw new Error(`Required configuration file missing: ${configFile}`);
+      }
+    }
+    
+    console.log('   Configuration validation passed');
+  }
+}
+
+// CLI Interface
+if (require.main === module) {
+  const sync = new WMACSSmartSync();
+  sync.sync();
+}
+
+module.exports = WMACSSmartSync;
