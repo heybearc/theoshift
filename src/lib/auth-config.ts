@@ -62,7 +62,8 @@ export const authOptions: NextAuthOptions = {
     }
   },
   pages: {
-    signIn: '/auth/signin'
+    signIn: '/auth/signin',
+    error: '/auth/signin', // Redirect errors to our custom signin page
   },
   // Use environment-specific URL configuration
   useSecureCookies: process.env.NODE_ENV === 'production',

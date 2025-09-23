@@ -8,6 +8,6 @@ export default async function HomePage() {
   if (session) {
     redirect('/dashboard')
   } else {
-    redirect('/api/auth/signin')
+    redirect('/auth/signin') // Use our custom signin page
   }
 }
