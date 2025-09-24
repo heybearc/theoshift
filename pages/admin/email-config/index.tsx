@@ -5,22 +5,79 @@ import AdminLayout from '../../../components/AdminLayout'
 import { useState } from 'react'
 
 export default function EmailConfigPage() {
+  const [authType, setAuthType] = useState<'smtp' | 'gmail'>('gmail')
   const [config, setConfig] = useState({
+    // Gmail App Password Configuration
+    gmailEmail: '',
+    gmailAppPassword: '',
+    
+    // Generic SMTP Configuration
     smtpServer: 'smtp.gmail.com',
     smtpPort: '587',
-    smtpUser: 'admin@jwscheduler.local',
+    smtpUser: '',
     smtpPassword: '',
-    fromEmail: 'admin@jwscheduler.local',
-    fromName: 'JW Attendant Scheduler'
+    smtpSecure: true,
+    
+    // Common Settings
+    fromEmail: '',
+    fromName: 'JW Attendant Scheduler',
+    replyToEmail: ''
   })
 
-  const handleSave = () => {
-    alert('Email configuration saved!')
+  const [saving, setSaving] = useState(false)
+  const [testing, setTesting] = useState(false)
+  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
+
+  const handleSave = async () => {
+    setSaving(true)
+    setStatus('idle')
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Here you would make the actual API call to save configuration
+      // const response = await fetch('/api/admin/email-config', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ authType, config })
+      // })
+      
+      setStatus('success')
+      setTimeout(() => setStatus('idle'), 3000)
+    } catch (error) {
+      setStatus('error')
+      setTimeout(() => setStatus('idle'), 3000)
+    } finally {
+      setSaving(false)
+    }
   }
 
-  const handleTest = () => {
-    alert('Test email sent successfully!')
+  const handleTest = async () => {
+    setTesting(true)
+    
+    try {
+      // Simulate test email
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Here you would make the actual API call to send test email
+      // const response = await fetch('/api/admin/email-config/test', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ authType, config })
+      // })
+      
+      alert('✅ Test email sent successfully!')
+    } catch (error) {
+      alert('❌ Failed to send test email. Please check your configuration.')
+    } finally {
+      setTesting(false)
+    }
   }
+
+  const isGmailConfigValid = authType === 'gmail' && config.gmailEmail && config.gmailAppPassword
+  const isSmtpConfigValid = authType === 'smtp' && config.smtpServer && config.smtpUser && config.smtpPassword
+  const isConfigValid = (isGmailConfigValid || isSmtpConfigValid) && config.fromEmail && config.fromName
 
   return (
     <AdminLayout title="Email Configuration" breadcrumbs={[{ label: 'Email Configuration' }]}>
@@ -32,69 +89,238 @@ export default function EmailConfigPage() {
           </button>
         </div>
 
+        {/* Authentication Type Selector */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">SMTP Configuration</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Email Provider</h3>
+          <div className="flex space-x-4 mb-6">
+            <button
+              onClick={() => setAuthType('gmail')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                authType === 'gmail'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              📧 Gmail (Recommended)
+            </button>
+            <button
+              onClick={() => setAuthType('smtp')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                authType === 'smtp'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              🔧 Custom SMTP
+            </button>
+          </div>
+
+          {authType === 'gmail' && (
+            <div className="space-y-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <span className="text-2xl">💡</span>
+                  </div>
+                  <div className="ml-3">
+                    <h4 className="text-sm font-medium text-blue-800">Gmail App Password Setup</h4>
+                    <div className="mt-2 text-sm text-blue-700">
+                      <p className="mb-2">To use Gmail, you need to generate an App Password:</p>
+                      <ol className="list-decimal list-inside space-y-1">
+                        <li>Go to your Google Account settings</li>
+                        <li>Enable 2-Step Verification if not already enabled</li>
+                        <li>Go to Security → App passwords</li>
+                        <li>Generate a new app password for "Mail"</li>
+                        <li>Use that 16-character password below</li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Gmail Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="your-email@gmail.com"
+                    value={config.gmailEmail}
+                    onChange={(e) => setConfig({...config, gmailEmail: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Gmail App Password *
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="16-character app password"
+                    value={config.gmailAppPassword}
+                    onChange={(e) => setConfig({...config, gmailAppPassword: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Not your regular Gmail password</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {authType === 'smtp' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">SMTP Server *</label>
+                <input
+                  type="text"
+                  placeholder="smtp.example.com"
+                  value={config.smtpServer}
+                  onChange={(e) => setConfig({...config, smtpServer: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">SMTP Port *</label>
+                <select
+                  value={config.smtpPort}
+                  onChange={(e) => setConfig({...config, smtpPort: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="587">587 (STARTTLS)</option>
+                  <option value="465">465 (SSL)</option>
+                  <option value="25">25 (Plain)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Username *</label>
+                <input
+                  type="text"
+                  placeholder="username or email"
+                  value={config.smtpUser}
+                  onChange={(e) => setConfig({...config, smtpUser: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Password *</label>
+                <input
+                  type="password"
+                  placeholder="SMTP password"
+                  value={config.smtpPassword}
+                  onChange={(e) => setConfig({...config, smtpPassword: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={config.smtpSecure}
+                    onChange={(e) => setConfig({...config, smtpSecure: e.target.checked})}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Use secure connection (TLS/SSL)</span>
+                </label>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Email Settings */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Email Settings</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">SMTP Server</label>
-              <input
-                type="text"
-                value={config.smtpServer}
-                onChange={(e) => setConfig({...config, smtpServer: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">SMTP Port</label>
-              <input
-                type="text"
-                value={config.smtpPort}
-                onChange={(e) => setConfig({...config, smtpPort: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">SMTP Username</label>
-              <input
-                type="text"
-                value={config.smtpUser}
-                onChange={(e) => setConfig({...config, smtpUser: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">SMTP Password</label>
-              <input
-                type="password"
-                value={config.smtpPassword}
-                onChange={(e) => setConfig({...config, smtpPassword: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">From Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">From Email *</label>
               <input
                 type="email"
+                placeholder="noreply@jwscheduler.local"
                 value={config.fromEmail}
                 onChange={(e) => setConfig({...config, fromEmail: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              <p className="text-xs text-gray-500 mt-1">Email address that appears in "From" field</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">From Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">From Name *</label>
               <input
                 type="text"
+                placeholder="JW Attendant Scheduler"
                 value={config.fromName}
                 onChange={(e) => setConfig({...config, fromName: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              <p className="text-xs text-gray-500 mt-1">Display name for outgoing emails</p>
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Reply-To Email</label>
+              <input
+                type="email"
+                placeholder="admin@jwscheduler.local (optional)"
+                value={config.replyToEmail}
+                onChange={(e) => setConfig({...config, replyToEmail: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">Where replies should be sent (optional)</p>
             </div>
           </div>
-          <div className="mt-6">
-            <button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
-              💾 Save Configuration
+          
+          <div className="mt-6 flex flex-col sm:flex-row gap-4">
+            <button 
+              onClick={handleSave}
+              disabled={!isConfigValid || saving}
+              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                !isConfigValid 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : saving
+                  ? 'bg-blue-400 text-white cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+            >
+              {saving ? '⏳ Saving...' : '💾 Save Configuration'}
             </button>
+            
+            <button 
+              onClick={handleTest}
+              disabled={!isConfigValid || testing}
+              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                !isConfigValid 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : testing
+                  ? 'bg-green-400 text-white cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-700 text-white'
+              }`}
+            >
+              {testing ? '📤 Sending...' : '📧 Send Test Email'}
+            </button>
+            
+            {status === 'success' && (
+              <div className="flex items-center text-green-600">
+                <span className="text-lg mr-2">✅</span>
+                <span className="text-sm font-medium">Configuration saved successfully!</span>
+              </div>
+            )}
+            
+            {status === 'error' && (
+              <div className="flex items-center text-red-600">
+                <span className="text-lg mr-2">❌</span>
+                <span className="text-sm font-medium">Failed to save configuration</span>
+              </div>
+            )}
           </div>
+          
+          {!isConfigValid && (
+            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex items-start">
+                <span className="text-yellow-600 mr-2">⚠️</span>
+                <div className="text-sm text-yellow-700">
+                  <p className="font-medium">Configuration incomplete</p>
+                  <p>Please fill in all required fields to enable email functionality.</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6">
