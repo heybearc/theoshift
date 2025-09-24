@@ -1,10 +1,8 @@
 'use client'
 
-import { useSession, signOut } from '@/lib/auth-stub'
 import { useEffect, useState } from 'react'
 
 export default function AdminPage() {
-  const { data: session } = useSession()
   const [stats, setStats] = useState({
     users: 0,
     events: 0,
@@ -23,17 +21,6 @@ export default function AdminPage() {
       .catch(console.error)
   }, [])
 
-  if (!session) {
-    return (
-      <div className="main-container">
-        <div className="page-header">
-          <h1 className="page-title">Access Denied</h1>
-          <p className="page-subtitle">Please sign in to access the admin panel</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <>
       {/* Navigation Header */}
@@ -45,14 +32,13 @@ export default function AdminPage() {
           </div>
           <div className="nav-user">
             <div className="user-avatar">
-              {session.user?.firstName?.charAt(0) || 'A'}
+              A
             </div>
             <div className="user-info">
-              <h4>{session.user?.firstName} {session.user?.lastName}</h4>
-              <p>{session.user?.role} • {session.user?.email}</p>
+              <h4>Admin User</h4>
+              <p>ADMIN • admin@jwscheduler.local</p>
             </div>
             <button 
-              onClick={() => signOut()} 
               className="btn"
               style={{ padding: '8px 16px', fontSize: '12px' }}
             >
