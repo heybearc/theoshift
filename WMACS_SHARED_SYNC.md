@@ -1,17 +1,17 @@
-# WMACS SHARED SYSTEM SYNCHRONIZATION
+# APEX SHARED SYSTEM SYNCHRONIZATION
 ## Cross-Project Rule Enforcement & Knowledge Sharing
 
 **📅 Sync Date:** September 23, 2025  
 **🛡️ Status:** MANDATORY CROSS-PROJECT ENFORCEMENT  
-**🔄 Sync Target:** All WMACS-enabled repositories
+**🔄 Sync Target:** All APEX-enabled repositories
 
 ---
 
-## 🌐 SHARED WMACS RULES FOR ALL PROJECTS
+## 🌐 SHARED APEX RULES FOR ALL PROJECTS
 
 ### **UNIVERSAL RULE SET - APPLIES TO ALL REPOSITORIES**
 
-#### **WMACS-UNIVERSAL-001: RABBIT HOLE PREVENTION**
+#### **APEX-UNIVERSAL-001: RABBIT HOLE PREVENTION**
 ```
 APPLIES TO: All development projects
 TRIGGER: >90 minutes on single technical issue
@@ -19,7 +19,7 @@ ACTION: Mandatory pivot to alternative approach
 ENFORCEMENT: Automatic detection and intervention
 ```
 
-#### **WMACS-UNIVERSAL-002: ARCHITECTURAL RESPECT**
+#### **APEX-UNIVERSAL-002: ARCHITECTURAL RESPECT**
 ```
 APPLIES TO: All development projects  
 TRIGGER: Recommendation contradicts user-established architecture
@@ -27,7 +27,7 @@ ACTION: Block recommendation, reinforce user decisions
 ENFORCEMENT: Pre-recommendation validation required
 ```
 
-#### **WMACS-UNIVERSAL-003: COMPLEXITY PROPORTIONALITY**
+#### **APEX-UNIVERSAL-003: COMPLEXITY PROPORTIONALITY**
 ```
 APPLIES TO: All development projects
 TRIGGER: Solution complexity > 1.5x problem complexity
@@ -35,7 +35,7 @@ ACTION: Require simpler alternatives first
 ENFORCEMENT: Complexity validation before implementation
 ```
 
-#### **WMACS-UNIVERSAL-004: BUSINESS VALUE PRIORITY**
+#### **APEX-UNIVERSAL-004: BUSINESS VALUE PRIORITY**
 ```
 APPLIES TO: All development projects
 TRIGGER: >50% time on infrastructure vs features
@@ -43,7 +43,7 @@ ACTION: Redirect focus to user-facing functionality
 ENFORCEMENT: Progress monitoring and intervention
 ```
 
-#### **WMACS-UNIVERSAL-005: FOUNDATION STABILITY**
+#### **APEX-UNIVERSAL-005: FOUNDATION STABILITY**
 ```
 APPLIES TO: All development projects
 TRIGGER: Suggestion to bypass foundation components
@@ -97,21 +97,21 @@ SHARE WITH: JW-Attendant-Scheduler, future projects
 
 ### **STEP 1: RULE PROPAGATION**
 ```bash
-# Copy WMACS rules to all repositories
-cp WMACS_ENHANCED_ENFORCEMENT.md ../ldc-construction-tools/
-cp WMACS_LESSONS_LEARNED.md ../ldc-construction-tools/
-cp WMACS_SHARED_SYNC.md ../ldc-construction-tools/
+# Copy APEX rules to all repositories
+cp APEX_ENHANCED_ENFORCEMENT.md ../ldc-construction-tools/
+cp APEX_LESSONS_LEARNED.md ../ldc-construction-tools/
+cp APEX_SHARED_SYNC.md ../ldc-construction-tools/
 
 # Update shared rule files in each project
-git add WMACS_*.md
-git commit -m "sync: WMACS shared rule enforcement"
+git add APEX_*.md
+git commit -m "sync: APEX shared rule enforcement"
 git push origin staging
 ```
 
 ### **STEP 2: CROSS-PROJECT VALIDATION**
 ```javascript
-// Shared WMACS validation across projects
-const sharedWMACSRules = {
+// Shared APEX validation across projects
+const sharedAPEXRules = {
   rabbitHoleDetection: (timeSpent) => timeSpent > 90,
   complexityValidation: (solution, problem) => solution.complexity <= problem.complexity * 1.5,
   architecturalConsistency: (recommendation, userDecisions) => !contradicts(recommendation, userDecisions),
@@ -121,7 +121,7 @@ const sharedWMACSRules = {
 
 ### **STEP 3: SHARED KNOWLEDGE BASE**
 ```
-WMACS SHARED KNOWLEDGE:
+APEX SHARED KNOWLEDGE:
 - Failed patterns to avoid
 - Successful architectural decisions
 - Complexity management strategies
@@ -164,7 +164,7 @@ AUTOMATIC SHARING:
 ## 📊 SHARED SUCCESS METRICS
 
 ### **METRIC 1: CROSS-PROJECT CONSISTENCY**
-- **Target:** 100% rule consistency across all WMACS projects
+- **Target:** 100% rule consistency across all APEX projects
 - **Measurement:** Automated rule compliance checking
 - **Enforcement:** Synchronized rule updates
 
@@ -183,7 +183,7 @@ AUTOMATIC SHARING:
 ## 🔧 IMPLEMENTATION CHECKLIST
 
 ### **IMMEDIATE ACTIONS:**
-- [ ] Copy WMACS files to LDC-Construction-Tools
+- [ ] Copy APEX files to LDC-Construction-Tools
 - [ ] Update shared rule enforcement in both projects
 - [ ] Implement cross-project validation
 - [ ] Establish shared knowledge base
@@ -197,17 +197,17 @@ AUTOMATIC SHARING:
 
 ---
 
-## 🏆 WMACS SHARED COMMITMENT
+## 🏆 APEX SHARED COMMITMENT
 
-**UNIVERSAL COMMITMENT:** All WMACS-enabled projects will:
+**UNIVERSAL COMMITMENT:** All APEX-enabled projects will:
 1. Follow the same core enforcement rules
 2. Share lessons learned across projects
 3. Prevent repeated failures through knowledge sharing
 4. Maintain consistent architectural standards
 5. Prioritize business value over technical complexity
 
-**SYNCHRONIZATION GUARANTEE:** Rule updates in one project automatically propagate to all WMACS projects, ensuring consistent enforcement and shared learning across the entire development ecosystem.
+**SYNCHRONIZATION GUARANTEE:** Rule updates in one project automatically propagate to all APEX projects, ensuring consistent enforcement and shared learning across the entire development ecosystem.
 
 ---
 
-**🛡️ WMACS CASCADE RULES: This shared synchronization system ensures that lessons learned and rule enforcement improvements benefit all projects in the WMACS ecosystem.**
+**🛡️ APEX CASCADE RULES: This shared synchronization system ensures that lessons learned and rule enforcement improvements benefit all projects in the APEX ecosystem.**

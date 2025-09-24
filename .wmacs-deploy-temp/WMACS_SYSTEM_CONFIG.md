@@ -1,8 +1,8 @@
-# WMACS System Configuration - Shared Standards
+# APEX System Configuration - Shared Standards
 
-## 🛡️ Universal WMACS Guardian Standards
+## 🛡️ Universal APEX Guardian Standards
 
-This document defines the **immutable standards** that ALL WMACS-managed systems must follow.
+This document defines the **immutable standards** that ALL APEX-managed systems must follow.
 
 ### 🎯 **Core Principles**
 
@@ -86,7 +86,7 @@ rm -rf /opt/{app-name}-{environment}
 mkdir -p /opt/{app-name}-{environment}
 
 # Deploy application code only
-rsync -av --exclude='wmacs-*' --exclude='test-*' \
+rsync -av --exclude='apex-*' --exclude='test-*' \
   --exclude='.github/' --exclude='scripts/' \
   src/ package.json package-lock.json configs/ \
   root@{server}:/opt/{app-name}-{environment}/
@@ -153,11 +153,11 @@ journalctl -u {service-name} -f
 
 ### 🛠️ **Required Tools**
 
-Every WMACS system must include:
-- `wmacs-clean-deploy.sh` - Clean deployment script
-- `wmacs-health-check.sh` - Health monitoring script
-- `wmacs-backup.sh` - Automated backup script
-- `CASCADE_WMACS_GUARDIAN_RULE.md` - Guardian rules
+Every APEX system must include:
+- `apex-clean-deploy.sh` - Clean deployment script
+- `apex-health-check.sh` - Health monitoring script
+- `apex-backup.sh` - Automated backup script
+- `CASCADE_APEX_GUARDIAN_RULE.md` - Guardian rules
 
 ### 🔐 **Security Standards**
 
@@ -170,12 +170,12 @@ Every WMACS system must include:
 
 ## 🎯 **Implementation Checklist**
 
-For any new WMACS system:
+For any new APEX system:
 - [ ] Implement standard directory structure
 - [ ] Create environment-specific configurations
-- [ ] Deploy WMACS Guardian tools
+- [ ] Deploy APEX Guardian tools
 - [ ] Set up standard monitoring
 - [ ] Test emergency procedures
 - [ ] Validate success metrics
 
-**This configuration is IMMUTABLE and applies to ALL WMACS-managed systems.**
+**This configuration is IMMUTABLE and applies to ALL APEX-managed systems.**

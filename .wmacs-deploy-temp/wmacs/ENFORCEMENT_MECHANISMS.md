@@ -1,4 +1,4 @@
-# WMACS Guardian Enforcement Mechanisms
+# APEX Guardian Enforcement Mechanisms
 
 **Automated Guardrails for Windsurf AI Development**
 
@@ -9,7 +9,7 @@ This document outlines the enforcement mechanisms that ensure compliance with op
 ## Automatic Enforcement Layers
 
 ### Layer 1: Real-Time Analysis
-**WMACS Research Advisor Integration**
+**APEX Research Advisor Integration**
 - **Trigger**: All suggestions containing risk keywords
 - **Response Time**: < 2 seconds
 - **Action**: Automatic analysis with industry research backing
@@ -17,8 +17,8 @@ This document outlines the enforcement mechanisms that ensure compliance with op
 
 ```javascript
 // Example integration in Windsurf workflows
-const WMACSResearchAdvisor = require('./wmacs/wmacs-research-advisor.js');
-const advisor = new WMACSResearchAdvisor();
+const APEXResearchAdvisor = require('./apex/apex-research-advisor.js');
+const advisor = new APEXResearchAdvisor();
 
 // Automatic analysis of user suggestions
 const analysis = await advisor.analyzeSuggestion(userInput);
@@ -29,7 +29,7 @@ if (analysis.decision === 'PUSHBACK_WITH_ALTERNATIVES') {
 ```
 
 ### Layer 2: Pattern Detection
-**WMACS Auto-Advisor Monitoring**
+**APEX Auto-Advisor Monitoring**
 - **Trigger**: Conversation patterns matching anti-patterns
 - **Response Time**: Real-time during conversation
 - **Action**: Automatic intervention with research-backed alternatives
@@ -47,7 +47,7 @@ const antiPatterns = [
 ```
 
 ### Layer 3: Command Execution Guards
-**WMACS Guardian Process Protection**
+**APEX Guardian Process Protection**
 - **Trigger**: High-risk command execution
 - **Response Time**: Before command execution
 - **Action**: Require explicit confirmation with risk assessment
@@ -87,7 +87,7 @@ const antiPatterns = [
    - Multi-agent system modifications
    - Database schema changes
    - Authentication system updates
-   **Enforcement**: WMACS Research Advisor analysis required
+   **Enforcement**: APEX Research Advisor analysis required
 
 2. **Performance Optimizations**
    - Token usage optimizations
@@ -109,7 +109,7 @@ const antiPatterns = [
    ```javascript
    // Hook into Windsurf command execution
    async function executeWithGuardian(command, context) {
-     const analysis = await wmacs.analyzeCommand(command, context);
+     const analysis = await apex.analyzeCommand(command, context);
      
      if (analysis.blocked) {
        throw new Error(`Command blocked: ${analysis.reason}`);
@@ -128,7 +128,7 @@ const antiPatterns = [
    ```javascript
    // Monitor all user inputs for anti-patterns
    async function monitorUserInput(input) {
-     const result = await WMACSAutoAdvisor.analyzeUserInput(input);
+     const result = await APEXAutoAdvisor.analyzeUserInput(input);
      
      if (result.analyzed && result.highPriorityCount > 0) {
        displayPushbackRecommendations(result.analyses);
@@ -189,7 +189,7 @@ const antiPatterns = [
 
 ### Project-Specific Rules
 ```javascript
-// wmacs-config.js enforcement section
+// apex-config.js enforcement section
 module.exports = {
   enforcement: {
     strictMode: true, // Enable all enforcement mechanisms

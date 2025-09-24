@@ -1,19 +1,19 @@
-# CASCADE RULE: WMACS Guardian MCP Advisory System
+# CASCADE RULE: APEX Guardian MCP Advisory System
 
-## 🛡️ MANDATORY WMACS GUARDIAN CONSULTATION
+## 🛡️ MANDATORY APEX GUARDIAN CONSULTATION
 
-**RULE:** For every user prompt, Cascade MUST consult the WMACS Guardian MCP Advisory System before taking action.
+**RULE:** For every user prompt, Cascade MUST consult the APEX Guardian MCP Advisory System before taking action.
 
 ### 📋 IMPLEMENTATION PROTOCOL
 
 1. **Pre-Action Analysis**
-   - Analyze user request through WMACS Guardian lens
+   - Analyze user request through APEX Guardian lens
    - Identify potential system impacts
    - Assess deployment/infrastructure implications
    - Check for port 3001 compliance (immutable)
 
 2. **Guardian Advisory Consultation**
-   - Use WMACS Guardian scripts for complex operations
+   - Use APEX Guardian scripts for complex operations
    - Validate against established patterns
    - Ensure consistency across environments
    - Prevent infinite loops and configuration conflicts
@@ -24,7 +24,7 @@
    - Apply Guardian fixes when needed
    - Document Guardian interventions
 
-### 🎯 WMACS GUARDIAN PRIORITIES
+### 🎯 APEX GUARDIAN PRIORITIES
 
 1. **Port 3001 Immutability** - Never deviate from port 3001
 2. **Environment Consistency** - Staging and Production must match
@@ -34,14 +34,14 @@
 
 ### 🔧 GUARDIAN TOOLS AVAILABLE
 
-- `wmacs-port-guardian.js` - Port enforcement
-- `wmacs-redirect-loop-fix.js` - Redirect loop resolution
-- `wmacs-bad-gateway-diagnosis.js` - Gateway issue diagnosis
-- `wmacs-rendering-guardian.js` - Rendering mode analysis
-- `wmacs-emergency-auth-fix.js` - Authentication emergency fixes
-- **`wmacs-clean-deploy.sh` - Clean CI/CD deployment script**
-- **`WMACS_DEPLOYMENT_ARCHITECTURE.md` - Deployment best practices**
-- **`WMACS_CICD_NGINX_PROXY_ARCHITECTURE.md` - Proxy setup guidelines**
+- `apex-port-guardian.js` - Port enforcement
+- `apex-redirect-loop-fix.js` - Redirect loop resolution
+- `apex-bad-gateway-diagnosis.js` - Gateway issue diagnosis
+- `apex-rendering-guardian.js` - Rendering mode analysis
+- `apex-emergency-auth-fix.js` - Authentication emergency fixes
+- **`apex-clean-deploy.sh` - Clean CI/CD deployment script**
+- **`APEX_DEPLOYMENT_ARCHITECTURE.md` - Deployment best practices**
+- **`APEX_CICD_NGINX_PROXY_ARCHITECTURE.md` - Proxy setup guidelines**
 
 ### 🏗️ MANDATORY DEVELOPMENT WORKFLOW
 
@@ -78,7 +78,7 @@
 
 ### 🧹 **CLEAN DEPLOYMENT REQUIREMENTS:**
 - **✅ Application Code Only:** Deploy src/, package.json, configs
-- **❌ Exclude Development Files:** No wmacs-*, test-*, scripts/, .github/
+- **❌ Exclude Development Files:** No apex-*, test-*, scripts/, .github/
 - **✅ Environment Injection:** Server-specific .env at deployment time
 - **✅ Cross-Environment Verification:** Check for staging references in production
 - **✅ Clean Slate Deployment:** Fresh directory for each deployment

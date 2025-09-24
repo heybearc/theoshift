@@ -1,7 +1,7 @@
 # JW Attendant Scheduler - ACTUAL Clean Slate Roadmap
 ## Next.js 15 Implementation Status & Development Plan
 
-**🚨 WMACS Guardian Audit Results: 15% Implementation Accuracy**  
+**🚨 APEX Guardian Audit Results: 15% Implementation Accuracy**  
 *The previous roadmap reflected Django implementation, not Next.js clean slate reality*
 
 ---
@@ -13,7 +13,7 @@
 - ✅ **Custom Signin Page** - `/auth/signin` with proper form handling
 - ✅ **Database Connection** - Prisma + PostgreSQL with proper bcrypt hashing
 - ✅ **Session Management** - JWT-based sessions with role support
-- ✅ **WMACS Guardian Protection** - Comprehensive testing and monitoring
+- ✅ **APEX Guardian Protection** - Comprehensive testing and monitoring
 
 ### 🗄️ Database Schema (Prisma)
 - ✅ **16 Database Models** - Complete schema from Django migration
@@ -23,7 +23,7 @@
 - ✅ **Advanced Features** - Count sessions, oversight, lanyards, documents
 
 ### 🛠️ Development Infrastructure
-- ✅ **WMACS Guardian System** - Automated deployment and monitoring
+- ✅ **APEX Guardian System** - Automated deployment and monitoring
 - ✅ **Staging Environment** - http://10.92.3.24:3001 (fully operational)
 - ✅ **Regression Testing** - Automated authentication flow testing
 - ✅ **Database Verification** - Automated integrity checking
@@ -134,20 +134,20 @@
 1. **API-First Development** - Build all APIs before UI
 2. **Component-Driven UI** - Reusable React components
 3. **TypeScript Strict Mode** - Type safety throughout
-4. **WMACS Guardian Protection** - All changes tested and monitored
+4. **APEX Guardian Protection** - All changes tested and monitored
 
 ### Technology Stack (Confirmed Working)
 - **Frontend**: Next.js 15 + React 19 + TypeScript
 - **Authentication**: NextAuth.js with credentials provider
 - **Database**: PostgreSQL + Prisma ORM
 - **Styling**: Tailwind CSS
-- **Testing**: WMACS regression testing suite
-- **Deployment**: Staging-first with WMACS Guardian
+- **Testing**: APEX regression testing suite
+- **Deployment**: Staging-first with APEX Guardian
 
 ### Quality Assurance
-- **Regression Testing**: Run `wmacs-regression-test.js` after each change
-- **Database Verification**: Run `wmacs-db-verify.js` for data integrity
-- **WMACS Guardian**: Automated deployment protection and monitoring
+- **Regression Testing**: Run `apex-regression-test.js` after each change
+- **Database Verification**: Run `apex-db-verify.js` for data integrity
+- **APEX Guardian**: Automated deployment protection and monitoring
 
 ---
 
@@ -157,7 +157,7 @@
 - [ ] All core APIs functional and tested
 - [ ] Authentication working across all endpoints
 - [ ] Database operations performing correctly
-- [ ] WMACS Guardian tests passing
+- [ ] APEX Guardian tests passing
 
 ### Phase 2 Success Criteria
 - [ ] Users can create and manage events
@@ -179,12 +179,12 @@
 
 ---
 
-## 🚨 WMACS Guardian Recommendations
+## 🚨 APEX Guardian Recommendations
 
 1. **Abandon Inaccurate Roadmap** - Previous roadmap is 85% incorrect
 2. **Focus on API Layer First** - No UI can work without proper APIs
 3. **Incremental Development** - Build and test each component thoroughly
-4. **Maintain WMACS Protection** - Continue using Guardian system for all changes
+4. **Maintain APEX Protection** - Continue using Guardian system for all changes
 5. **Realistic Timeline** - 8 weeks minimum for basic functionality
 
 ---

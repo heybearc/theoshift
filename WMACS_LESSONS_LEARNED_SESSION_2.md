@@ -1,4 +1,4 @@
-# WMACS LESSONS LEARNED - SESSION 2: CI/CD & AUTH CONFLICTS
+# APEX LESSONS LEARNED - SESSION 2: CI/CD & AUTH CONFLICTS
 ## Critical Infrastructure & Deployment Insights
 
 **📅 Date:** September 23, 2025  
@@ -20,11 +20,11 @@
 - Created `INFRASTRUCTURE_CONFIG.md` as single source of truth
 - Updated memory with correct container mappings
 - Established immutable infrastructure documentation
-- All WMACS tools now reference authoritative source
+- All APEX tools now reference authoritative source
 
-**🛡️ NEW WMACS RULE:**
+**🛡️ NEW APEX RULE:**
 ```
-WMACS-INFRA-001: Infrastructure configuration must be immutable
+APEX-INFRA-001: Infrastructure configuration must be immutable
 - Single authoritative source for all container/network information
 - All deployment scripts reference immutable config
 - Changes require explicit approval and documentation update
@@ -44,9 +44,9 @@ WMACS-INFRA-001: Infrastructure configuration must be immutable
 - Followed "battle-tested approach" from user requirements
 - Maintained code parity between environments
 
-**🛡️ NEW WMACS RULE:**
+**🛡️ NEW APEX RULE:**
 ```
-WMACS-CICD-001: Deployment method compliance mandatory
+APEX-CICD-001: Deployment method compliance mandatory
 - Never use direct file copying for deployments
 - Always follow user-specified CI/CD requirements
 - Git-based deployment ensures exact code consistency
@@ -66,9 +66,9 @@ WMACS-CICD-001: Deployment method compliance mandatory
 - Verified no merge conflicts remain in codebase
 - Established clean foundation before proceeding
 
-**🛡️ NEW WMACS RULE:**
+**🛡️ NEW APEX RULE:**
 ```
-WMACS-MERGE-001: Zero tolerance for merge conflict corruption
+APEX-MERGE-001: Zero tolerance for merge conflict corruption
 - All merge conflicts must be resolved before deployment
 - Use git reset --hard to clean corrupted repositories
 - Verify clean state with grep -r '>>>>>' before proceeding
@@ -88,9 +88,9 @@ WMACS-MERGE-001: Zero tolerance for merge conflict corruption
 - Simplified signin logic for auth stub compatibility
 - Eliminated authentication system conflicts
 
-**🛡️ NEW WMACS RULE:**
+**🛡️ NEW APEX RULE:**
 ```
-WMACS-AUTH-001: Authentication system consistency mandatory
+APEX-AUTH-001: Authentication system consistency mandatory
 - Only one authentication system active at a time
 - Complete removal of conflicting auth implementations
 - All imports must reference same auth system
@@ -118,11 +118,11 @@ WMACS-AUTH-001: Authentication system consistency mandatory
 
 ---
 
-## 🛡️ WMACS ENFORCEMENT IMPROVEMENTS
+## 🛡️ APEX ENFORCEMENT IMPROVEMENTS
 
 ### **ENFORCEMENT LEVEL 1: INFRASTRUCTURE VALIDATION**
 ```
-WMACS-INFRA-VALIDATE: Before any deployment
+APEX-INFRA-VALIDATE: Before any deployment
 - Verify container IPs and mappings
 - Confirm infrastructure documentation accuracy
 - Validate SSH access and connectivity
@@ -131,7 +131,7 @@ WMACS-INFRA-VALIDATE: Before any deployment
 
 ### **ENFORCEMENT LEVEL 2: DEPLOYMENT METHOD VALIDATION**
 ```
-WMACS-DEPLOY-VALIDATE: Before any code deployment
+APEX-DEPLOY-VALIDATE: Before any code deployment
 - Confirm git-based deployment method
 - Reject direct file copying approaches
 - Verify CI/CD compliance with user requirements
@@ -140,7 +140,7 @@ WMACS-DEPLOY-VALIDATE: Before any code deployment
 
 ### **ENFORCEMENT LEVEL 3: FOUNDATION CORRUPTION PREVENTION**
 ```
-WMACS-FOUNDATION-VALIDATE: Before proceeding with development
+APEX-FOUNDATION-VALIDATE: Before proceeding with development
 - Check for merge conflict markers in all files
 - Verify clean git repository state
 - Confirm single authentication system active
@@ -192,7 +192,7 @@ WMACS-FOUNDATION-VALIDATE: Before proceeding with development
 
 ---
 
-## 🏆 WMACS GUARDIAN COMMITMENT UPDATE
+## 🏆 APEX GUARDIAN COMMITMENT UPDATE
 
 **COMMITMENT 1:** Always verify infrastructure accuracy before deployment
 **COMMITMENT 2:** Follow user-specified CI/CD requirements without exception
@@ -202,4 +202,4 @@ WMACS-FOUNDATION-VALIDATE: Before proceeding with development
 
 ---
 
-**🛡️ WMACS CASCADE RULES: These lessons learned become permanent enforcement protocols. Foundation corruption prevention is now a mandatory validation step before any development work.**
+**🛡️ APEX CASCADE RULES: These lessons learned become permanent enforcement protocols. Foundation corruption prevention is now a mandatory validation step before any development work.**

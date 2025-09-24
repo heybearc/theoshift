@@ -1,8 +1,8 @@
-# WMACS LESSONS LEARNED - JW ATTENDANT SCHEDULER
+# APEX LESSONS LEARNED - JW ATTENDANT SCHEDULER
 ## Critical Development Insights & Rule Violations
 
 **📅 Date:** September 23, 2025  
-**🛡️ WMACS Guardian Assessment:** MAJOR RULE VIOLATIONS DETECTED  
+**🛡️ APEX Guardian Assessment:** MAJOR RULE VIOLATIONS DETECTED  
 **⚠️ Enforcement Status:** INSUFFICIENT - Rules ignored multiple times
 
 ---
@@ -21,9 +21,9 @@
 - Built core features first, added security later
 - Used proven patterns instead of complex enterprise solutions
 
-**🛡️ NEW WMACS RULE:**
+**🛡️ NEW APEX RULE:**
 ```
-WMACS-AUTH-001: Authentication complexity must be justified by business value
+APEX-AUTH-001: Authentication complexity must be justified by business value
 - Simple apps get simple auth (environment variables, basic passwords)
 - Complex auth only for multi-tenant or high-security requirements
 - Auth stubs are preferred during development phase
@@ -32,7 +32,7 @@ WMACS-AUTH-001: Authentication complexity must be justified by business value
 ### **LESSON 2: IGNORING PROJECT HISTORY IS DANGEROUS**
 **❌ What Happened:**
 - User explicitly stated: "we tried building from the event focus first in the past and it failed"
-- WMACS Guardian recommended the exact same failed approach
+- APEX Guardian recommended the exact same failed approach
 - Violated established architectural decisions and roadmap
 
 **✅ What We Should Have Done:**
@@ -40,9 +40,9 @@ WMACS-AUTH-001: Authentication complexity must be justified by business value
 - Followed the established Users → Attendants → Events flow
 - Built on lessons learned from past failures
 
-**🛡️ NEW WMACS RULE:**
+**🛡️ NEW APEX RULE:**
 ```
-WMACS-HISTORY-001: Project history and previous failures must be respected
+APEX-HISTORY-001: Project history and previous failures must be respected
 - Never recommend approaches that have already failed
 - Always ask about previous attempts before suggesting architecture
 - Document failed approaches to prevent repetition
@@ -59,9 +59,9 @@ WMACS-HISTORY-001: Project history and previous failures must be respected
 - Supported the admin-first architecture
 - Built proper data relationships from the start
 
-**🛡️ NEW WMACS RULE:**
+**🛡️ NEW APEX RULE:**
 ```
-WMACS-STABILITY-001: Foundation stability takes priority over feature velocity
+APEX-STABILITY-001: Foundation stability takes priority over feature velocity
 - Admin/management modules are foundation, not optional
 - Data relationship layers must be built before dependent features
 - Technical debt shortcuts are forbidden in foundation layers
@@ -88,16 +88,16 @@ WMACS-STABILITY-001: Foundation stability takes priority over feature velocity
 
 ---
 
-## 🛡️ WMACS RULE ENFORCEMENT FAILURES
+## 🛡️ APEX RULE ENFORCEMENT FAILURES
 
 ### **ENFORCEMENT FAILURE 1: ADVISORY SYSTEM IGNORED USER FEEDBACK**
 **Issue:** User said "we are just spinning our wheels" - clear signal to pivot
-**Failure:** WMACS Guardian continued with complex auth approach
+**Failure:** APEX Guardian continued with complex auth approach
 **Fix:** Implement immediate pivot protocols when user expresses frustration
 
 ### **ENFORCEMENT FAILURE 2: ARCHITECTURAL DECISIONS OVERRIDDEN**
 **Issue:** User had established admin-first architecture
-**Failure:** WMACS Guardian recommended contradictory approach
+**Failure:** APEX Guardian recommended contradictory approach
 **Fix:** Architecture decisions are immutable without explicit user approval
 
 ### **ENFORCEMENT FAILURE 3: RABBIT HOLE DETECTION DELAYED**
@@ -107,11 +107,11 @@ WMACS-STABILITY-001: Foundation stability takes priority over feature velocity
 
 ---
 
-## 📋 NEW WMACS ENFORCEMENT MECHANISMS
+## 📋 NEW APEX ENFORCEMENT MECHANISMS
 
 ### **ENFORCEMENT LEVEL 1: IMMEDIATE ALERTS**
 ```
-WMACS-ALERT-001: Time-based rabbit hole detection
+APEX-ALERT-001: Time-based rabbit hole detection
 - If same issue discussed for >2 hours, trigger pivot alert
 - If user expresses frustration, immediate strategy reassessment
 - If multiple failed attempts, suggest alternative approach
@@ -119,7 +119,7 @@ WMACS-ALERT-001: Time-based rabbit hole detection
 
 ### **ENFORCEMENT LEVEL 2: ARCHITECTURAL PROTECTION**
 ```
-WMACS-ARCH-001: Architectural decision protection
+APEX-ARCH-001: Architectural decision protection
 - User-established architecture cannot be contradicted without explicit approval
 - Previous failed approaches are forbidden
 - Foundation-first approaches take priority over feature-first
@@ -127,7 +127,7 @@ WMACS-ARCH-001: Architectural decision protection
 
 ### **ENFORCEMENT LEVEL 3: COMPLEXITY VALIDATION**
 ```
-WMACS-COMPLEX-001: Complexity justification requirement
+APEX-COMPLEX-001: Complexity justification requirement
 - Any complex solution must be justified against business value
 - Simple alternatives must be presented first
 - Enterprise solutions require explicit complexity approval
@@ -147,7 +147,7 @@ WMACS-COMPLEX-001: Complexity justification requirement
 - Build proper foundation before dependent features
 - Respect user's architectural decisions
 
-### **ACTION 3: WMACS RULE ENFORCEMENT UPGRADE**
+### **ACTION 3: APEX RULE ENFORCEMENT UPGRADE**
 - Implement automated rabbit hole detection
 - Add architectural decision protection
 - Create complexity validation checkpoints
@@ -173,7 +173,7 @@ WMACS-COMPLEX-001: Complexity justification requirement
 
 ---
 
-## 🏆 WMACS GUARDIAN COMMITMENT
+## 🏆 APEX GUARDIAN COMMITMENT
 
 **COMMITMENT 1:** Never again recommend approaches that have already failed
 **COMMITMENT 2:** Always respect user-established architectural decisions  
@@ -183,4 +183,4 @@ WMACS-COMPLEX-001: Complexity justification requirement
 
 ---
 
-**🛡️ WMACS CASCADE RULES: These lessons learned become permanent enforcement rules for all future development decisions. Rule violations will trigger immediate corrective actions.**
+**🛡️ APEX CASCADE RULES: These lessons learned become permanent enforcement rules for all future development decisions. Rule violations will trigger immediate corrective actions.**

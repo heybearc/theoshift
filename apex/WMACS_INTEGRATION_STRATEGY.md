@@ -1,31 +1,31 @@
-# WMACS INTEGRATION STRATEGY
+# APEX INTEGRATION STRATEGY
 **Deployment Standards vs Smart Sync Integration**
 
 ## 🎯 **INTEGRATION ANALYSIS**
 
-### **TWO DISTINCT WMACS SYSTEMS:**
+### **TWO DISTINCT APEX SYSTEMS:**
 
-#### **1. WMACS Smart Sync (Existing)**
-- **Purpose:** Ongoing synchronization of shared WMACS components
+#### **1. APEX Smart Sync (Existing)**
+- **Purpose:** Ongoing synchronization of shared APEX components
 - **Scope:** Rules, guidelines, advisors, enforcement mechanisms
 - **Frequency:** Regular updates from shared guardian system
-- **Target:** `wmacs/core/` shared components
+- **Target:** `apex/core/` shared components
 
-#### **2. WMACS Deployment Standards (New)**
+#### **2. APEX Deployment Standards (New)**
 - **Purpose:** Repository-specific deployment infrastructure
 - **Scope:** Deployment tools, environment configs, MCP operations
 - **Frequency:** One-time setup + project-specific updates
-- **Target:** `wmacs/core/` deployment tools + `wmacs/config/` environments
+- **Target:** `apex/core/` deployment tools + `apex/config/` environments
 
 ## 🔧 **PROPER INTEGRATION APPROACH**
 
-### **WMACS Smart Sync Enhancement (Recommended)**
+### **APEX Smart Sync Enhancement (Recommended)**
 
-The deployment standards should be **integrated into the existing WMACS Smart Sync** system rather than being separate:
+The deployment standards should be **integrated into the existing APEX Smart Sync** system rather than being separate:
 
 #### **Enhanced Sync Categories:**
 ```javascript
-// wmacs-smart-sync.js enhancement
+// apex-smart-sync.js enhancement
 this.syncableFiles = [
   // Existing shared components
   'WINDSURF_OPERATIONAL_GUIDELINES.md',
@@ -34,8 +34,8 @@ this.syncableFiles = [
   
   // NEW: Deployment standards (shared)
   'DEPLOYMENT_STANDARDS.md',
-  'wmacs-deployment-rules.json',
-  'wmacs-enhanced-deployment.js',
+  'apex-deployment-rules.json',
+  'apex-enhanced-deployment.js',
   
   // NEW: Base MCP components (shared)
   'base-server.js',
@@ -58,11 +58,11 @@ this.repositorySpecificFiles = [
 
 ## 📋 **RECOMMENDED IMPLEMENTATION**
 
-### **Phase 1: Enhance WMACS Smart Sync**
+### **Phase 1: Enhance APEX Smart Sync**
 
 ```javascript
-// Enhanced wmacs-smart-sync.js
-class WMACSSmartSync {
+// Enhanced apex-smart-sync.js
+class APEXSmartSync {
   constructor() {
     this.syncCategories = {
       // Existing categories
@@ -72,8 +72,8 @@ class WMACSSmartSync {
       // NEW: Deployment standards
       deployment: [
         'DEPLOYMENT_STANDARDS.md',
-        'wmacs-deployment-rules.json',
-        'wmacs-enhanced-deployment.js'
+        'apex-deployment-rules.json',
+        'apex-enhanced-deployment.js'
       ],
       
       // NEW: MCP integration
@@ -96,14 +96,14 @@ class WMACSSmartSync {
 
 The setup script becomes a **one-time initialization** that:
 1. Creates repository-specific configuration
-2. Triggers initial WMACS sync
+2. Triggers initial APEX sync
 3. Sets up deployment wrapper scripts
 
 ```bash
 # Enhanced setup flow
-./wmacs/setup-wmacs-deployment-standards.sh
+./apex/setup-apex-deployment-standards.sh
 # ↓ Calls
-node wmacs/wmacs-smart-sync.js --include-deployment-standards
+node apex/apex-smart-sync.js --include-deployment-standards
 # ↓ Results in
 # - Shared deployment tools synced
 # - Repository configs created
@@ -114,10 +114,10 @@ node wmacs/wmacs-smart-sync.js --include-deployment-standards
 
 ### **Existing Workflows Enhanced:**
 
-#### **WMACS Sync Workflow (Enhanced)**
+#### **APEX Sync Workflow (Enhanced)**
 ```markdown
-## /wmacs-sync Workflow
-1. Sync shared WMACS components
+## /apex-sync Workflow
+1. Sync shared APEX components
 2. **NEW:** Sync deployment standards
 3. **NEW:** Update MCP integration
 4. Preserve repository-specific configs
@@ -126,10 +126,10 @@ node wmacs/wmacs-smart-sync.js --include-deployment-standards
 
 #### **Repository Setup Workflow (New)**
 ```markdown
-## /wmacs-setup Workflow  
-1. Initialize WMACS directory structure
+## /apex-setup Workflow  
+1. Initialize APEX directory structure
 2. Create repository-specific configurations
-3. Trigger enhanced WMACS sync
+3. Trigger enhanced APEX sync
 4. Validate deployment readiness
 5. Create deployment wrapper scripts
 ```
@@ -151,16 +151,16 @@ node wmacs/wmacs-smart-sync.js --include-deployment-standards
 
 ## 📊 **IMPLEMENTATION PLAN**
 
-### **Step 1: Enhance WMACS Smart Sync**
+### **Step 1: Enhance APEX Smart Sync**
 ```bash
-# Update wmacs-smart-sync.js to include deployment standards
+# Update apex-smart-sync.js to include deployment standards
 # Add deployment category to sync operations
 # Preserve repository-specific configurations
 ```
 
 ### **Step 2: Create Setup Workflow**
 ```bash
-# Create .windsurf/workflows/wmacs-setup.md
+# Create .windsurf/workflows/apex-setup.md
 # Integrate with existing workflow system
 # One-time repository initialization
 ```
@@ -172,19 +172,19 @@ node wmacs/wmacs-smart-sync.js --include-deployment-standards
 # Validate deployment capabilities across projects
 ```
 
-## 🛡️ **WMACS CASCADE RULES COMPLIANCE**
+## 🛡️ **APEX CASCADE RULES COMPLIANCE**
 
-### **WMACS-SYNC-001: Bidirectional Synchronization**
+### **APEX-SYNC-001: Bidirectional Synchronization**
 - ✅ Shared components sync from guardian system
 - ✅ Repository improvements sync back to shared system
 - ✅ Deployment standards maintained consistently
 
-### **WMACS-CONFIG-001: Repository Autonomy**
+### **APEX-CONFIG-001: Repository Autonomy**
 - ✅ Environment configs remain repository-specific
 - ✅ Project settings preserved during sync
 - ✅ Local customizations protected
 
-### **WMACS-DEPLOY-001: Standardized Deployment**
+### **APEX-DEPLOY-001: Standardized Deployment**
 - ✅ Deployment tools consistent across repositories
 - ✅ Standards automatically updated via sync
 - ✅ Repository-specific environments preserved
@@ -193,10 +193,10 @@ node wmacs/wmacs-smart-sync.js --include-deployment-standards
 
 ## 🎯 **RECOMMENDATION**
 
-**Integrate deployment standards into WMACS Smart Sync** rather than creating separate systems:
+**Integrate deployment standards into APEX Smart Sync** rather than creating separate systems:
 
-1. **Enhance `wmacs-smart-sync.js`** to include deployment standards
-2. **Create `/wmacs-setup` workflow** for one-time repository initialization  
+1. **Enhance `apex-smart-sync.js`** to include deployment standards
+2. **Create `/apex-setup` workflow** for one-time repository initialization  
 3. **Move deployment standards** to shared guardian system
 4. **Use existing sync infrastructure** for consistent updates
 

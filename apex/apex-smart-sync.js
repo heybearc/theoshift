@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 
 /**
- * WMACS Smart Synchronization System
+ * APEX Smart Synchronization System
  * 
- * Syncs shared WMACS components while preserving repository-specific configurations
+ * Syncs shared APEX components while preserving repository-specific configurations
  */
 
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-class WMACSSmartSync {
+class APEXSmartSync {
   constructor() {
-    this.sharedSystemPath = path.join(process.env.HOME, 'Documents/Cloudy-Work/shared/wmacs-guardian-system');
-    this.localWmacsPath = path.join(process.cwd(), 'wmacs');
+    this.sharedSystemPath = path.join(process.env.HOME, 'Documents/Cloudy-Work/shared/apex-guardian-system');
+    this.localApexPath = path.join(process.cwd(), 'apex');
     
     // Files that are always synced from shared system
     this.syncableFiles = [

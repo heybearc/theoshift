@@ -1,4 +1,4 @@
-# 🛡️ WMACS RULE ENFORCEMENT MECHANISM
+# 🛡️ APEX RULE ENFORCEMENT MECHANISM
 
 ## 🚨 **MANDATORY PRE-ACTION CHECKLIST**
 
@@ -45,4 +45,4 @@ This enforcement mechanism must be **AUTOMATICALLY TRIGGERED** before any:
 - Branch operations
 - Server commands
 
-**STATUS:** WMACS Guardian Rule Enforcement - ACTIVE ✅
+**STATUS:** APEX Guardian Rule Enforcement - ACTIVE ✅

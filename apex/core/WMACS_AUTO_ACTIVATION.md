@@ -1,40 +1,40 @@
-# WMACS AUTO-ACTIVATION SYSTEM
-**Ensuring Consistent WMACS Usage Without Manual Prompting**
+# APEX AUTO-ACTIVATION SYSTEM
+**Ensuring Consistent APEX Usage Without Manual Prompting**
 
 ## 🚨 **PROBLEM STATEMENT**
 
 **Current Issues:**
-- WMACS system not automatically applied to every prompt
-- Manual typing "wmacs guardian mcp" required for consistency
+- APEX system not automatically applied to every prompt
+- Manual typing "apex guardian mcp" required for consistency
 - Uncertainty about MCP server usage optimization
 - Credit waste from inconsistent system application
 
-## 🛡️ **WMACS AUTO-ACTIVATION SOLUTIONS**
+## 🛡️ **APEX AUTO-ACTIVATION SOLUTIONS**
 
 ### **Solution 1: Repository-Based Auto-Detection**
 
-**Concept:** WMACS automatically activates when working in WMACS-enabled repositories
+**Concept:** APEX automatically activates when working in APEX-enabled repositories
 
 **Implementation:**
 ```markdown
 # In system prompt or memory
-WMACS_AUTO_DETECTION_RULES:
-- IF repository contains `wmacs/` directory → ACTIVATE WMACS GUARDIAN
-- IF repository contains `wmacs/config/project.json` → ENFORCE WMACS RULES
+APEX_AUTO_DETECTION_RULES:
+- IF repository contains `apex/` directory → ACTIVATE APEX GUARDIAN
+- IF repository contains `apex/config/project.json` → ENFORCE APEX RULES
 - IF repository contains MCP server configs → USE MCP OPERATIONS ONLY
 - IF working on deployment tasks → MANDATORY MCP DEPLOYMENT TOOLS
 ```
 
 ### **Solution 2: Workspace Context Integration**
 
-**Concept:** WMACS rules embedded in workspace context automatically
+**Concept:** APEX rules embedded in workspace context automatically
 
 **Implementation:**
 ```json
 // .windsurf/settings.json or workspace config
 {
-  "wmacs_enabled": true,
-  "wmacs_enforcement": "strict",
+  "apex_enabled": true,
+  "apex_enforcement": "strict",
   "mcp_operations_mandatory": true,
   "auto_apply_cascade_rules": true,
   "deployment_standards_enforced": true
@@ -43,13 +43,13 @@ WMACS_AUTO_DETECTION_RULES:
 
 ### **Solution 3: Memory-Based Auto-Activation**
 
-**Concept:** Create persistent memory that auto-applies WMACS to all interactions
+**Concept:** Create persistent memory that auto-applies APEX to all interactions
 
 **Memory Content:**
 ```
-WMACS_AUTO_ACTIVATION_MEMORY:
-- Repository: jw-attendant-scheduler (WMACS-enabled)
-- Auto-apply WMACS Guardian rules to ALL interactions
+APEX_AUTO_ACTIVATION_MEMORY:
+- Repository: jw-attendant-scheduler (APEX-enabled)
+- Auto-apply APEX Guardian rules to ALL interactions
 - Mandatory MCP operations for server tasks
 - Enforce deployment standards automatically
 - Apply cascade rules without manual prompting
@@ -58,19 +58,19 @@ WMACS_AUTO_ACTIVATION_MEMORY:
 
 ### **Solution 4: Shortened Activation Commands**
 
-**Instead of:** "wmacs guardian mcp"
+**Instead of:** "apex guardian mcp"
 **Use:** Short, memorable triggers:
 
-- `w` - Activate WMACS Guardian
-- `wg` - WMACS Guardian mode
-- `wmacs` - Full WMACS activation
+- `w` - Activate APEX Guardian
+- `wg` - APEX Guardian mode
+- `apex` - Full APEX activation
 - `guardian` - Guardian mode only
 - `mcp` - MCP operations focus
 
 ## 🎯 **NAMING OPTIMIZATION**
 
 ### **Current Name Analysis:**
-- ❌ "WMACS Guardian MCP" - Too long (17 characters)
+- ❌ "APEX Guardian MCP" - Too long (17 characters)
 - ❌ Requires typing full phrase for activation
 - ❌ Not memorable or catchy
 - ❌ Doesn't reflect the power/sophistication
@@ -137,7 +137,7 @@ WMACS_AUTO_ACTIVATION_MEMORY:
 
 ### **Best Auto-Activation Method:**
 **Memory-Based + Repository Detection**
-- Create persistent memory for WMACS auto-activation
+- Create persistent memory for APEX auto-activation
 - Repository detection as backup/validation
 - Shortened command for manual override
 
@@ -152,7 +152,7 @@ WMACS_AUTO_ACTIVATION_MEMORY:
 ### **Implementation:**
 ```
 APEX_AUTO_ACTIVATION_MEMORY:
-- Auto-apply APEX Guardian to ALL interactions in WMACS repositories
+- Auto-apply APEX Guardian to ALL interactions in APEX repositories
 - Mandatory MCP operations for server/deployment tasks
 - Enforce deployment standards automatically
 - Apply cascade rules without manual prompting
@@ -168,4 +168,4 @@ APEX_AUTO_ACTIVATION_MEMORY:
 4. **Validate MCP operation usage**
 5. **Document new activation patterns**
 
-This approach ensures APEX Guardian is applied consistently while dramatically reducing the typing burden from "wmacs guardian mcp" (17 chars) to "apex" (4 chars) - a 76% reduction!
+This approach ensures APEX Guardian is applied consistently while dramatically reducing the typing burden from "apex guardian mcp" (17 chars) to "apex" (4 chars) - a 76% reduction!

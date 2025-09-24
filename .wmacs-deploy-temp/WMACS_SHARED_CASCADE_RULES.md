@@ -1,16 +1,16 @@
-# WMACS Shared CASCADE Rules - Universal Implementation
+# APEX Shared CASCADE Rules - Universal Implementation
 
-## 🛡️ **WMACS Guardian: Universal CASCADE RULE System**
+## 🛡️ **APEX Guardian: Universal CASCADE RULE System**
 
 **Version:** 2.0.0  
 **Last Updated:** 2025-09-22  
-**Applies To:** ALL WMACS-managed workspaces and projects
+**Applies To:** ALL APEX-managed workspaces and projects
 
 ---
 
-## 📋 **CASCADE RULE: WMACS Guardian MCP Advisory System**
+## 📋 **CASCADE RULE: APEX Guardian MCP Advisory System**
 
-**RULE:** For every user prompt, Cascade MUST consult the WMACS Guardian MCP Advisory System before taking action.
+**RULE:** For every user prompt, Cascade MUST consult the APEX Guardian MCP Advisory System before taking action.
 
 ### 📋 **IMPLEMENTATION PROTOCOL**
 
@@ -22,13 +22,13 @@
    - **NEVER assume environment details from memories**
 
 2. **Pre-Action Analysis**
-   - Analyze user request through WMACS Guardian lens
+   - Analyze user request through APEX Guardian lens
    - Identify potential system impacts
    - Assess deployment/infrastructure implications
    - Check for port 3001 compliance (immutable)
 
 3. **Guardian Advisory Consultation**
-   - Use WMACS Guardian scripts for complex operations
+   - Use APEX Guardian scripts for complex operations
    - Validate against established patterns
    - Ensure consistency across environments
    - Prevent infinite loops and configuration conflicts
@@ -39,7 +39,7 @@
    - Apply Guardian fixes when needed
    - Document Guardian interventions
 
-### 🎯 **WMACS GUARDIAN PRIORITIES**
+### 🎯 **APEX GUARDIAN PRIORITIES**
 
 1. **Port 3001 Immutability** - Never deviate from port 3001
 2. **Environment Consistency** - Staging and Production must match
@@ -51,22 +51,22 @@
 ### 🔧 **GUARDIAN TOOLS AVAILABLE**
 
 #### **Core Guardian Tools:**
-- `wmacs-port-guardian.js` - Port enforcement and validation
-- `wmacs-redirect-loop-fix.js` - Redirect loop resolution
-- `wmacs-bad-gateway-diagnosis.js` - Gateway issue diagnosis
-- `wmacs-rendering-guardian.js` - Rendering mode analysis
-- `wmacs-emergency-auth-fix.js` - Authentication emergency fixes
+- `apex-port-guardian.js` - Port enforcement and validation
+- `apex-redirect-loop-fix.js` - Redirect loop resolution
+- `apex-bad-gateway-diagnosis.js` - Gateway issue diagnosis
+- `apex-rendering-guardian.js` - Rendering mode analysis
+- `apex-emergency-auth-fix.js` - Authentication emergency fixes
 
 #### **CI/CD Guardian Tools:**
-- `wmacs-clean-deploy.sh` - Clean CI/CD deployment script
-- `wmacs-environment-validator.js` - Cross-environment contamination checker
-- `wmacs-backup-guardian.js` - Automated backup and rollback
-- `wmacs-health-monitor.js` - Continuous health monitoring
+- `apex-clean-deploy.sh` - Clean CI/CD deployment script
+- `apex-environment-validator.js` - Cross-environment contamination checker
+- `apex-backup-guardian.js` - Automated backup and rollback
+- `apex-health-monitor.js` - Continuous health monitoring
 
 #### **Documentation:**
-- `WMACS_DEPLOYMENT_ARCHITECTURE.md` - Deployment best practices
-- `WMACS_SYSTEM_CONFIG.md` - Universal system standards
-- `WMACS_EMERGENCY_PROCEDURES.md` - Crisis response protocols
+- `APEX_DEPLOYMENT_ARCHITECTURE.md` - Deployment best practices
+- `APEX_SYSTEM_CONFIG.md` - Universal system standards
+- `APEX_EMERGENCY_PROCEDURES.md` - Crisis response protocols
 
 ### 🏗️ **MANDATORY DEVELOPMENT WORKFLOW**
 
@@ -150,7 +150,7 @@ When information is missing from specs:
 - Database migration scripts (if applicable)
 
 #### **❌ EXCLUDE from Deployments:**
-- Development scripts (`wmacs-*`, `test-*`, `debug-*`)
+- Development scripts (`apex-*`, `test-*`, `debug-*`)
 - Testing directories (`tests/`, `__tests__/`, `spec/`)
 - CI/CD workflows (`.github/`, `.gitlab-ci.yml`)
 - Development utilities (`scripts/`, `tools/`)
@@ -178,7 +178,7 @@ curl -s http://{server}:3001/health
 - Use staging as production mirror
 - Implement health check endpoints
 - Monitor via external tools
-- Use WMACS Guardian diagnostic scripts
+- Use APEX Guardian diagnostic scripts
 
 #### **Emergency Remote Access:**
 - Only for critical production issues
@@ -256,27 +256,27 @@ curl -s http://{server}:3001/health
 
 ### **Step 1: Download and Setup**
 ```bash
-# Download WMACS Guardian system
-curl -O https://raw.githubusercontent.com/your-org/wmacs-config/main/WMACS_SHARED_CASCADE_RULES.md
-curl -O https://raw.githubusercontent.com/your-org/wmacs-config/main/wmacs-clean-deploy.sh
-curl -O https://raw.githubusercontent.com/your-org/wmacs-config/main/WMACS_SYSTEM_CONFIG.md
+# Download APEX Guardian system
+curl -O https://raw.githubusercontent.com/your-org/apex-config/main/APEX_SHARED_CASCADE_RULES.md
+curl -O https://raw.githubusercontent.com/your-org/apex-config/main/apex-clean-deploy.sh
+curl -O https://raw.githubusercontent.com/your-org/apex-config/main/APEX_SYSTEM_CONFIG.md
 
 # Make scripts executable
-chmod +x wmacs-clean-deploy.sh
+chmod +x apex-clean-deploy.sh
 ```
 
 ### **Step 2: Workspace Integration**
 ```bash
-# Create WMACS directory
-mkdir -p .wmacs/
+# Create APEX directory
+mkdir -p .apex/
 
 # Move Guardian files
-mv WMACS_SHARED_CASCADE_RULES.md .wmacs/
-mv wmacs-clean-deploy.sh .wmacs/
-mv WMACS_SYSTEM_CONFIG.md .wmacs/
+mv APEX_SHARED_CASCADE_RULES.md .apex/
+mv apex-clean-deploy.sh .apex/
+mv APEX_SYSTEM_CONFIG.md .apex/
 
 # Create workspace-specific Guardian config
-cat > .wmacs/workspace-config.json << EOF
+cat > .apex/workspace-config.json << EOF
 {
   "workspace_name": "your-project-name",
   "staging_server": "10.92.3.24",
@@ -291,10 +291,10 @@ EOF
 ### **Step 3: Environment Setup**
 ```bash
 # Create environment templates
-mkdir -p .wmacs/env-templates/
+mkdir -p .apex/env-templates/
 
 # Staging template
-cat > .wmacs/env-templates/.env.staging << EOF
+cat > .apex/env-templates/.env.staging << EOF
 NODE_ENV=production
 PORT=3001
 NEXTAUTH_URL=http://10.92.3.24:3001
@@ -304,7 +304,7 @@ NEXTAUTH_DEBUG=true
 EOF
 
 # Production template
-cat > .wmacs/env-templates/.env.production << EOF
+cat > .apex/env-templates/.env.production << EOF
 NODE_ENV=production
 PORT=3001
 NEXTAUTH_URL=http://10.92.3.22:3001
@@ -319,10 +319,10 @@ EOF
 # Add to package.json scripts
 {
   "scripts": {
-    "deploy:staging": ".wmacs/wmacs-clean-deploy.sh staging",
-    "deploy:production": ".wmacs/wmacs-clean-deploy.sh production",
-    "guardian:health": ".wmacs/wmacs-health-monitor.js",
-    "guardian:validate": ".wmacs/wmacs-environment-validator.js"
+    "deploy:staging": ".apex/apex-clean-deploy.sh staging",
+    "deploy:production": ".apex/apex-clean-deploy.sh production",
+    "guardian:health": ".apex/apex-health-monitor.js",
+    "guardian:validate": ".apex/apex-environment-validator.js"
   }
 }
 ```
@@ -330,14 +330,14 @@ EOF
 ### **Step 5: Git Integration**
 ```bash
 # Add to .gitignore
-echo ".wmacs/secrets/" >> .gitignore
-echo ".wmacs/logs/" >> .gitignore
+echo ".apex/secrets/" >> .gitignore
+echo ".apex/logs/" >> .gitignore
 
 # Commit Guardian system
-git add .wmacs/
-git commit -m "feat: Add WMACS Guardian system
+git add .apex/
+git commit -m "feat: Add APEX Guardian system
 
-🛡️ WMACS Guardian Integration
+🛡️ APEX Guardian Integration
 - Added shared CASCADE rules
 - Implemented clean deployment system
 - Added environment validation
@@ -382,9 +382,9 @@ git commit -m "feat: Add WMACS Guardian system
 
 ## 📞 **SUPPORT AND UPDATES**
 
-- **Guardian Issues:** Create issue with `[WMACS-GUARDIAN]` prefix
-- **Rule Updates:** Must be approved by WMACS Guardian Council
+- **Guardian Issues:** Create issue with `[APEX-GUARDIAN]` prefix
+- **Rule Updates:** Must be approved by APEX Guardian Council
 - **Emergency Contact:** Use `guardian save me` command for immediate assistance
 - **Documentation:** Always refer to latest version in shared repository
 
-**Version Control:** This document is version-controlled and automatically distributed to all WMACS workspaces.
+**Version Control:** This document is version-controlled and automatically distributed to all APEX workspaces.

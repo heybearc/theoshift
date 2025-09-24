@@ -1,33 +1,33 @@
 ---
-description: Initial WMACS setup for new repositories with deployment standards
+description: Initial APEX setup for new repositories with deployment standards
 ---
 
-# WMACS Repository Setup Workflow
+# APEX Repository Setup Workflow
 
-This workflow sets up WMACS deployment standards and synchronization for a new repository.
+This workflow sets up APEX deployment standards and synchronization for a new repository.
 
 ## Prerequisites
 - Repository must be git-initialized
-- Access to shared WMACS guardian system
+- Access to shared APEX guardian system
 - Container infrastructure configured
 
 ## Setup Steps
 
-### 1. Initialize WMACS Directory Structure
+### 1. Initialize APEX Directory Structure
 ```bash
-mkdir -p wmacs/{config,core,logs}
-echo "✅ Created WMACS directory structure"
+mkdir -p apex/{config,core,logs}
+echo "✅ Created APEX directory structure"
 ```
 
 ### 2. Create Repository Configuration
-Create `wmacs/config/project.json`:
+Create `apex/config/project.json`:
 ```json
 {
   "name": "$(basename $(pwd))",
   "version": "1.0.0",
   "type": "web_application",
   "framework": "nextjs",
-  "wmacs_version": "1.0",
+  "apex_version": "1.0",
   "deployment_standards": "1.0",
   "mcp_integration": true,
   "repository": {
@@ -44,7 +44,7 @@ Create `wmacs/config/project.json`:
 ```
 
 ### 3. Create Environment Configuration Template
-Create `wmacs/config/environments.json`:
+Create `apex/config/environments.json`:
 ```json
 {
   "staging": {
@@ -70,62 +70,62 @@ Create `wmacs/config/environments.json`:
 }
 ```
 
-### 4. Sync WMACS Components
+### 4. Sync APEX Components
 // turbo
 ```bash
-node wmacs/wmacs-smart-sync.js --include-deployment-standards
+node apex/apex-smart-sync.js --include-deployment-standards
 ```
 
 ### 5. Create Deployment Wrapper
 Create `deploy.sh`:
 ```bash
 #!/bin/bash
-# WMACS Deployment Wrapper Script
+# APEX Deployment Wrapper Script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WMACS_DEPLOY="$SCRIPT_DIR/wmacs/core/wmacs-enhanced-deployment.js"
+APEX_DEPLOY="$SCRIPT_DIR/apex/core/apex-enhanced-deployment.js"
 
-if [ ! -f "$WMACS_DEPLOY" ]; then
-    echo "❌ WMACS deployment tool not found. Run WMACS sync first."
+if [ ! -f "$APEX_DEPLOY" ]; then
+    echo "❌ APEX deployment tool not found. Run APEX sync first."
     exit 1
 fi
 
-node "$WMACS_DEPLOY" "$@"
+node "$APEX_DEPLOY" "$@"
 ```
 
 ### 6. Make Scripts Executable
 // turbo
 ```bash
 chmod +x deploy.sh
-chmod +x wmacs/core/*.js
+chmod +x apex/core/*.js
 ```
 
 ### 7. Update .gitignore
 ```bash
 echo "" >> .gitignore
-echo "# WMACS logs" >> .gitignore
-echo "wmacs/logs/" >> .gitignore
+echo "# APEX logs" >> .gitignore
+echo "apex/logs/" >> .gitignore
 ```
 
 ### 8. Test Deployment Setup
 ```bash
-./deploy.sh staging --reason "Initial WMACS setup test"
+./deploy.sh staging --reason "Initial APEX setup test"
 ```
 
 ## Configuration Required
 
 After running this workflow, you must:
 
-1. **Update `wmacs/config/environments.json`** with your actual server details
+1. **Update `apex/config/environments.json`** with your actual server details
 2. **Configure SSH access** to your containers
 3. **Test deployment** to staging environment
 4. **Validate all endpoints** are working correctly
 
 ## Validation Checklist
 
-- [ ] WMACS directory structure created
+- [ ] APEX directory structure created
 - [ ] Project configuration customized
 - [ ] Environment configuration updated with real server details
-- [ ] WMACS components synced successfully
+- [ ] APEX components synced successfully
 - [ ] Deployment wrapper script working
 - [ ] SSH access to containers configured
 - [ ] Test deployment successful
@@ -135,7 +135,7 @@ After running this workflow, you must:
 
 1. Configure your specific environment details in `environments.json`
 2. Test deployment: `./deploy.sh staging --reason "Initial deployment"`
-3. Set up regular WMACS sync: `/wmacs-sync` workflow
+3. Set up regular APEX sync: `/apex-sync` workflow
 4. Configure production environment when ready
 
 ## Troubleshooting
@@ -144,11 +144,11 @@ After running this workflow, you must:
 1. Check SSH access to containers
 2. Verify environment configuration
 3. Ensure repository is cloned on target containers
-4. Run WMACS sync to update deployment tools
+4. Run APEX sync to update deployment tools
 
 **If sync fails:**
-1. Verify shared WMACS guardian system path
+1. Verify shared APEX guardian system path
 2. Check file permissions
 3. Ensure git repository is clean
 
-This workflow establishes the foundation for standardized WMACS deployment across all repositories.
+This workflow establishes the foundation for standardized APEX deployment across all repositories.

@@ -1,15 +1,15 @@
 ---
-description: WMACS Guardian CI/CD Pipeline for Next.js JW Attendant Scheduler
+description: APEX Guardian CI/CD Pipeline for Next.js JW Attendant Scheduler
 ---
 
-# WMACS Guardian CI/CD Pipeline - Next.js Implementation
+# APEX Guardian CI/CD Pipeline - Next.js Implementation
 
 **Environment Mapping (CORRECTED):**
 - **Staging:** Container 134 (10.92.3.24:3001) - Development and testing
 - **Production:** Container 132 (10.92.3.22:3001) - Live application  
 - **Database:** Container 131 (10.92.3.21:5432) - Shared PostgreSQL
 
-## 🛡️ WMACS Cascade Rules (MANDATORY)
+## 🛡️ APEX Cascade Rules (MANDATORY)
 
 ### Core Principles
 1. **Battle-tested deployment pipeline** - No shortcuts allowed
@@ -35,13 +35,13 @@ ssh jws  # 10.92.3.24 (Container 134)
 cd /opt/jw-attendant-scheduler
 ```
 
-### 3. Verify WMACS Guardian Status
+### 3. Verify APEX Guardian Status
 ```bash
-# Check WMACS system
-node wmacs/wmacs-guardian.js status
+# Check APEX system
+node apex/apex-guardian.js status
 
 # Verify environment configuration
-cat wmacs-config.js
+cat apex-config.js
 ```
 
 ### 4. Feature Branch Development
@@ -77,6 +77,6 @@ curl http://10.92.3.24:3001/api/users
 
 ---
 
-**🛡️ WMACS Guardian Enforcement:** This workflow is MANDATORY and enforced by WMACS Research Advisor.
+**🛡️ APEX Guardian Enforcement:** This workflow is MANDATORY and enforced by APEX Research Advisor.
 
 **Container Mapping:** 134 (staging: 10.92.3.24) → 132 (production: 10.92.3.22) → 131 (database: 10.92.3.21)

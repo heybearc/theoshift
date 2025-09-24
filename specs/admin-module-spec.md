@@ -151,15 +151,15 @@ interface EmailConfig {
 - Audit trail for all user management actions
 - Rate limiting on invitation sending
 
-### WMACS Guardian Integration
-- All admin operations protected by WMACS Guardian
+### APEX Guardian Integration
+- All admin operations protected by APEX Guardian
 - Automatic recovery from email configuration failures
 - Database transaction rollback on user creation errors
 - Deployment protection during admin module updates
 
 ### Development Approach
 1. **Feature Branch**: `feature/admin-module`
-2. **Incremental Development**: Build and test each component with WMACS Guardian
+2. **Incremental Development**: Build and test each component with APEX Guardian
 3. **Staging Testing**: Use container 134 for all testing
 4. **API-First**: Complete backend APIs before UI development
 5. **Email Testing**: Test with actual Gmail configuration
@@ -210,7 +210,7 @@ interface EmailConfig {
 - [x] Gmail integration with app passwords
 - [x] Bulk user operations
 - [x] Admin UI with modular navigation
-- [x] WMACS Guardian protection on all operations
+- [x] APEX Guardian protection on all operations
 - [x] Comprehensive error handling and validation
 - [ ] Role management with proper permissions
 - [ ] System settings management

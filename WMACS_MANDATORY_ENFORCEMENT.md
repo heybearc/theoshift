@@ -1,12 +1,12 @@
-# 🛡️ WMACS MANDATORY ENFORCEMENT PROTOCOL
+# 🛡️ APEX MANDATORY ENFORCEMENT PROTOCOL
 
 ## 🚨 **CREDIT-AWARE DEVELOPMENT ENFORCEMENT**
 
 ### **MANDATORY PRE-ACTION VERIFICATION (MUST EXECUTE BEFORE ANY CHANGE):**
 
 ```bash
-# WMACS GUARDIAN PRE-ACTION CHECKLIST
-echo "🛡️ WMACS GUARDIAN: PRE-ACTION VERIFICATION"
+# APEX GUARDIAN PRE-ACTION CHECKLIST
+echo "🛡️ APEX GUARDIAN: PRE-ACTION VERIFICATION"
 echo "=========================================="
 
 # 1. FEATURE BRANCH AUDIT
@@ -61,8 +61,8 @@ echo "PROCEED ONLY IF ALL CHECKS PASS"
 
 ```bash
 # These commands MUST be run before ANY action:
-wmacs_pre_action_check() {
-    echo "🛡️ WMACS MANDATORY ENFORCEMENT ACTIVE"
+apex_pre_action_check() {
+    echo "🛡️ APEX MANDATORY ENFORCEMENT ACTIVE"
     
     # Check 1: Feature branch work
     if ! git branch -a | grep -q "feature/"; then
@@ -80,7 +80,7 @@ wmacs_pre_action_check() {
     echo "📋 Current admin module status:"
     ls -la src/app/admin/ 2>/dev/null || echo "⚠️ Admin module not found"
     
-    echo "✅ WMACS ENFORCEMENT CHECKS PASSED"
+    echo "✅ APEX ENFORCEMENT CHECKS PASSED"
     return 0
 }
 ```
@@ -99,4 +99,4 @@ wmacs_pre_action_check() {
 - 🔄 **Recovery protocol ready for execution**
 - ⏳ **Awaiting user approval to proceed**
 
-**WMACS GUARDIAN STATUS: MANDATORY ENFORCEMENT ACTIVE** 🛡️
+**APEX GUARDIAN STATUS: MANDATORY ENFORCEMENT ACTIVE** 🛡️

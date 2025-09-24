@@ -1,8 +1,23 @@
 {
   "name": "jw-attendant-scheduler",
-  "type": "nextjs",
-  "description": "JW Attendant Scheduler - Kingdom Hall Event Management System",
-  "version": "2.0.0",
+  "version": "1.0.0",
+  "type": "web_application",
+  "framework": "nextjs",
+  "apex_version": "1.0",
+  "apex_enabled": true,
+  "deployment_standards": "1.0",
+  "mcp_integration": true,
+  "auto_activation": true,
+  "repository": {
+    "url": "https://github.com/heybearc/jw-attendant-scheduler.git",
+    "main_branch": "main",
+    "staging_branch": "staging"
+  },
+  "application": {
+    "start_command": "npm run dev",
+    "health_endpoint": "/admin",
+    "process_pattern": "next"
+  },
   "mcp": {
     "enabled": true,
     "serverType": "repository-focused",

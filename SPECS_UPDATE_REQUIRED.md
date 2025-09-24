@@ -1,12 +1,12 @@
 # 📋 SPECS UPDATE REQUIRED - Missing Environment Details
 
-## 🛡️ WMACS GUARDIAN: SPECS-FIRST ANALYSIS RESULTS
+## 🛡️ APEX GUARDIAN: SPECS-FIRST ANALYSIS RESULTS
 
 Following the updated CASCADE RULES, I have examined all project specifications and identified missing information required for deployment.
 
 ### ✅ **FOUND IN SPECS:**
 
-**From WMACS_DEPLOYMENT_ARCHITECTURE.md:**
+**From APEX_DEPLOYMENT_ARCHITECTURE.md:**
 - ✅ Staging IP: 10.92.3.24:3001
 - ✅ Production IP: 10.92.3.22:3001  
 - ✅ Database IP: 10.92.3.21:5432
@@ -15,7 +15,7 @@ Following the updated CASCADE RULES, I have examined all project specifications 
 - ✅ Database naming conventions
 - ✅ Directory structure standards
 
-**From WMACS_SYSTEM_CONFIG.md:**
+**From APEX_SYSTEM_CONFIG.md:**
 - ✅ Standard deployment process
 - ✅ Systemd service template
 - ✅ Environment variable requirements
@@ -91,7 +91,7 @@ cd /opt/[application-directory]
 - Deployment guide updated with verified IP addresses from specs
 - Testing script updated with correct staging URL
 - All hardcoded container numbers removed
-- WMACS specs compliance verified
+- APEX specs compliance verified
 
 **🔄 PENDING USER INPUT:**
 - SSH access method and credentials
@@ -109,4 +109,4 @@ cd /opt/[application-directory]
 
 ---
 
-**Following WMACS CASCADE RULES: Specs checked first, gaps identified, user input requested for missing details. No assumptions made from memories about environment specifics.**
+**Following APEX CASCADE RULES: Specs checked first, gaps identified, user input requested for missing details. No assumptions made from memories about environment specifics.**

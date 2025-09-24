@@ -1,5 +1,5 @@
 # APEX GUARDIAN SYSTEM MIGRATION
-**From WMACS to APEX - Enhanced Naming & Auto-Activation**
+**From APEX to APEX - Enhanced Naming & Auto-Activation**
 
 ## 🚀 **APEX GUARDIAN SYSTEM**
 
@@ -21,12 +21,12 @@
 ### **Phase 1: Core System Rename**
 ```bash
 # Rename core files
-mv wmacs/wmacs-guardian.js wmacs/apex-guardian.js
-mv wmacs/wmacs-smart-sync.js wmacs/apex-smart-sync.js
-mv wmacs/wmacs-enhanced-deployment.js wmacs/core/apex-enhanced-deployment.js
+mv apex/apex-guardian.js apex/apex-guardian.js
+mv apex/apex-smart-sync.js apex/apex-smart-sync.js
+mv apex/apex-enhanced-deployment.js apex/core/apex-enhanced-deployment.js
 
 # Update directory structure
-mv wmacs/ apex/
+mv apex/ apex/
 ```
 
 ### **Phase 2: Configuration Updates**
@@ -48,8 +48,8 @@ mv wmacs/ apex/
 mv deploy.sh apex-deploy.sh
 
 # Update content to use APEX
-sed -i 's/WMACS/APEX/g' apex-deploy.sh
-sed -i 's/wmacs/apex/g' apex-deploy.sh
+sed -i 's/APEX/APEX/g' apex-deploy.sh
+sed -i 's/apex/apex/g' apex-deploy.sh
 ```
 
 ### **Phase 4: Documentation Migration**
@@ -76,7 +76,7 @@ sed -i 's/wmacs/apex/g' apex-deploy.sh
 ## 📊 **BENEFITS ACHIEVED**
 
 ### **Typing Efficiency:**
-- **Before:** "wmacs guardian mcp" (17 characters)
+- **Before:** "apex guardian mcp" (17 characters)
 - **After:** "apex" (4 characters)
 - **Improvement:** 76% reduction in typing
 
@@ -101,7 +101,7 @@ sed -i 's/wmacs/apex/g' apex-deploy.sh
 ✅ **Deployment Standards Active**
 
 ### **You Can Now:**
-1. **Stop typing "wmacs guardian mcp"** - APEX auto-activates
+1. **Stop typing "apex guardian mcp"** - APEX auto-activates
 2. **Use short commands** - "apex" for full activation
 3. **Trust consistent application** - Memory ensures every interaction
 4. **Rely on MCP enforcement** - No more manual SSH operations
@@ -111,19 +111,19 @@ sed -i 's/wmacs/apex/g' apex-deploy.sh
 ### **Quick Migration:**
 ```bash
 # Rename core directory
-mv wmacs apex
+mv apex apex
 
 # Update project configuration
-sed -i 's/wmacs/apex/g' apex/config/project.json
-sed -i 's/WMACS/APEX/g' apex/config/project.json
+sed -i 's/apex/apex/g' apex/config/project.json
+sed -i 's/APEX/APEX/g' apex/config/project.json
 
 # Update deployment wrapper
-sed -i 's/wmacs/apex/g' deploy.sh
-sed -i 's/WMACS/APEX/g' deploy.sh
+sed -i 's/apex/apex/g' deploy.sh
+sed -i 's/APEX/APEX/g' deploy.sh
 
 # Update workflows
-sed -i 's/wmacs/apex/g' .windsurf/workflows/*.md
-sed -i 's/WMACS/APEX/g' .windsurf/workflows/*.md
+sed -i 's/apex/apex/g' .windsurf/workflows/*.md
+sed -i 's/APEX/APEX/g' .windsurf/workflows/*.md
 ```
 
 ### **Validation:**
@@ -140,7 +140,7 @@ node apex/apex-smart-sync.js
 
 ## 🎉 **APEX GUARDIAN IS NOW ACTIVE**
 
-**You no longer need to type "wmacs guardian mcp" - APEX Guardian auto-activates on every interaction in this repository!**
+**You no longer need to type "apex guardian mcp" - APEX Guardian auto-activates on every interaction in this repository!**
 
 **Just type "apex" if you want to explicitly activate or emphasize APEX operations.**
 

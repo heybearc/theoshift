@@ -1,6 +1,6 @@
-# WMACS Deployment Architecture - Best Practices
+# APEX Deployment Architecture - Best Practices
 
-## 🛡️ WMACS Guardian: Proper Staging-to-Production Flow
+## 🛡️ APEX Guardian: Proper Staging-to-Production Flow
 
 ### 🎯 **CORE PRINCIPLE: Environment Isolation**
 
@@ -163,9 +163,9 @@ curl -v http://server:3001/api/auth/providers
 ssh server "journalctl -u service-name -f"
 ```
 
-### 8. **WMACS Guardian Enforcement**
+### 8. **APEX Guardian Enforcement**
 
-The WMACS Guardian will enforce:
+The APEX Guardian will enforce:
 - ✅ Environment isolation
 - ✅ Proper configuration management
 - ✅ Artifact-based deployments

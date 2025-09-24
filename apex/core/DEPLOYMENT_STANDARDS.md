@@ -1,17 +1,17 @@
-# WMACS DEPLOYMENT STANDARDS
+# APEX DEPLOYMENT STANDARDS
 **Version:** 1.0  
 **Effective Date:** 2025-09-24  
-**Scope:** All WMACS-managed repositories and deployments
+**Scope:** All APEX-managed repositories and deployments
 
-## 🛡️ WMACS DEPLOYMENT RULES
+## 🛡️ APEX DEPLOYMENT RULES
 
-### WMACS-DEPLOY-001: Git-Based Container Deployment
+### APEX-DEPLOY-001: Git-Based Container Deployment
 **Rule:** All staging and production containers MUST use direct git repository deployment
 - **Rationale:** Ensures exact code parity between environments
 - **Implementation:** Clone repository directly on target containers
 - **Verification:** Commit hash validation required for all deployments
 
-### WMACS-DEPLOY-002: Repository Synchronization Verification
+### APEX-DEPLOY-002: Repository Synchronization Verification
 **Rule:** ALL deployments MUST verify repository synchronization before application restart
 - **Required Checks:**
   1. Commit hash verification between local and container
@@ -19,16 +19,16 @@
   3. Branch alignment confirmation
   4. Deployment integrity validation
 
-### WMACS-DEPLOY-003: Forced Synchronization Protocol
+### APEX-DEPLOY-003: Forced Synchronization Protocol
 **Rule:** Use `git reset --hard origin/branch` for critical deployments
 - **When to Use:** When deployment verification fails
 - **Safety:** Always backup current state before forced sync
 - **Validation:** Confirm synchronization with hash checks
 
-### WMACS-DEPLOY-004: MCP-Only Deployment Operations
+### APEX-DEPLOY-004: MCP-Only Deployment Operations
 **Rule:** NO manual SSH commands for deployments - MCP operations ONLY
 - **Benefits:** Structured operations, audit trails, error handling
-- **Required:** All deployment operations through WMACS MCP tools
+- **Required:** All deployment operations through APEX MCP tools
 - **Exception:** Emergency recovery only (with documentation)
 
 ## 📋 STANDARD DEPLOYMENT WORKFLOW
@@ -109,7 +109,7 @@ curl -s -o /dev/null -w '%{http_code}' http://container/health
 ## 🌐 MULTI-REPOSITORY STANDARDIZATION
 
 ### Repository Requirements
-- **WMACS Configuration:** All repos MUST have `wmacs/` directory
+- **APEX Configuration:** All repos MUST have `apex/` directory
 - **MCP Integration:** Standardized MCP server operations
 - **Environment Config:** Consistent environment configuration
 - **Deployment Scripts:** Standardized deployment tooling
@@ -137,25 +137,25 @@ curl -s -o /dev/null -w '%{http_code}' http://container/health
 - **Measurement:** Time from issue detection to resolution
 - **Validation:** Automated rollback success rate
 
-## 🛡️ WMACS CASCADE RULES INTEGRATION
+## 🛡️ APEX CASCADE RULES INTEGRATION
 
-### WMACS-COMPLEX-001 Compliance
+### APEX-COMPLEX-001 Compliance
 - Simple, reliable deployment over complex CI/CD systems
 - Direct git operations over build artifacts
 - MCP operations over manual procedures
 
-### WMACS-AUDIT-001 Compliance
+### APEX-AUDIT-001 Compliance
 - Complete audit trail for all deployments
 - Repository state tracking
 - Deployment validation logging
 
-### WMACS-RECOVERY-001 Compliance
+### APEX-RECOVERY-001 Compliance
 - Automated rollback capabilities
 - Emergency recovery procedures
 - State preservation protocols
 
 ---
 
-**WMACS GUARDIAN ENFORCEMENT:** These standards are enforced through MCP operations and automated validation. Non-compliance triggers automatic remediation procedures.
+**APEX GUARDIAN ENFORCEMENT:** These standards are enforced through MCP operations and automated validation. Non-compliance triggers automatic remediation procedures.
 
-**NEXT STEPS:** Implement enhanced MCP deployment tools across all WMACS repositories.
+**NEXT STEPS:** Implement enhanced MCP deployment tools across all APEX repositories.

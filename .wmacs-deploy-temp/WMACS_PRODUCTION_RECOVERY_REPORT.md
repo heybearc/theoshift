@@ -1,4 +1,4 @@
-# WMACS Guardian: Production Recovery Report
+# APEX Guardian: Production Recovery Report
 
 ## 🛡️ **Emergency Response Summary**
 
@@ -47,8 +47,8 @@ ssh root@10.92.3.22 "grep -r '10.92.3.24' /opt/jw-attendant-production-fixed/"
 
 ### **Step 3: Clean Deployment Verification**
 ```bash
-# Used WMACS clean deployment script
-./wmacs-clean-deploy.sh production $(git rev-parse HEAD)
+# Used APEX clean deployment script
+./apex-clean-deploy.sh production $(git rev-parse HEAD)
 # Result: Script correctly identified contamination and blocked deployment
 ```
 
@@ -102,7 +102,7 @@ Response Time: Ready in 378ms
 
 ---
 
-## 🛡️ **WMACS Guardian Enhancements**
+## 🛡️ **APEX Guardian Enhancements**
 
 ### **New Guardian Rules Added:**
 1. **Cross-Environment Contamination Detection**
@@ -121,9 +121,9 @@ Response Time: Ready in 378ms
    - Remove custom pages that cause redirect loops
 
 ### **Updated Tools:**
-- `wmacs-clean-deploy.sh` - Enhanced contamination detection
-- `WMACS_SHARED_CASCADE_RULES.md` - Added cross-environment prevention
-- `WMACS_SYSTEM_CONFIG.md` - Updated deployment standards
+- `apex-clean-deploy.sh` - Enhanced contamination detection
+- `APEX_SHARED_CASCADE_RULES.md` - Added cross-environment prevention
+- `APEX_SYSTEM_CONFIG.md` - Updated deployment standards
 
 ---
 
@@ -147,7 +147,7 @@ Response Time: Ready in 378ms
 
 ### **Prevention Strategies:**
 1. **Mandatory Clean Deployments**
-   - Use `wmacs-clean-deploy.sh` for all deployments
+   - Use `apex-clean-deploy.sh` for all deployments
    - Exclude development files automatically
    - Verify zero cross-environment references
 
@@ -182,7 +182,7 @@ Response Time: Ready in 378ms
 ## 🚀 **Future Recommendations**
 
 ### **Immediate Actions:**
-1. **Update all workspaces** with WMACS Guardian system
+1. **Update all workspaces** with APEX Guardian system
 2. **Implement clean deployment** for all environments
 3. **Add automated testing** for cross-environment contamination
 
@@ -197,14 +197,14 @@ Response Time: Ready in 378ms
 
 **For similar issues:**
 - Use command: `guardian save me`
-- Run: `./wmacs-clean-deploy.sh production <commit-sha>`
+- Run: `./apex-clean-deploy.sh production <commit-sha>`
 - Check: `curl -s http://server:3001/api/auth/providers`
 
 **Guardian Tools Available:**
-- `wmacs-clean-deploy.sh` - Clean deployment script
-- `wmacs-health-check.sh` - Environment validation
-- `WMACS_SHARED_CASCADE_RULES.md` - Complete rule system
+- `apex-clean-deploy.sh` - Clean deployment script
+- `apex-health-check.sh` - Environment validation
+- `APEX_SHARED_CASCADE_RULES.md` - Complete rule system
 
 ---
 
-**🛡️ WMACS Guardian: Production environment successfully recovered and secured against future cross-environment contamination.**
+**🛡️ APEX Guardian: Production environment successfully recovered and secured against future cross-environment contamination.**

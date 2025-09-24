@@ -1,8 +1,8 @@
-# WMACS BRANCHING STRATEGY - JW ATTENDANT SCHEDULER
+# APEX BRANCHING STRATEGY - JW ATTENDANT SCHEDULER
 ## Foundation-First Development with Stability Priority
 
 **📅 Strategy Date:** September 23, 2025  
-**🛡️ WMACS Compliance:** Foundation stability over feature velocity  
+**🛡️ APEX Compliance:** Foundation stability over feature velocity  
 **🎯 Current Focus:** Admin module foundation before event features
 
 ---
@@ -21,7 +21,7 @@ MERGE FROM: staging (after full validation)
 
 #### **`staging`** - Integration & Testing  
 ```
-PURPOSE: Integration testing, WMACS validation
+PURPOSE: Integration testing, APEX validation
 PROTECTION: Direct commits allowed for rapid iteration
 DEPLOYMENT: Container 135 (10.92.3.25) for testing
 MERGE FROM: feature branches, direct development
@@ -35,7 +35,7 @@ CURRENT STATUS: Active development branch ✅
 PURPOSE: Replace NextAuth complexity with simple stub
 PARENT: staging
 FOCUS: Unblock admin module with minimal auth
-WMACS RULE: WMACS-COMPLEX-001 (Proportional complexity)
+APEX RULE: APEX-COMPLEX-001 (Proportional complexity)
 ```
 
 #### **`feature/admin-foundation`** - Admin Module Foundation
@@ -43,7 +43,7 @@ WMACS RULE: WMACS-COMPLEX-001 (Proportional complexity)
 PURPOSE: Complete admin module functionality
 PARENT: feature/auth-stub
 FOCUS: User management, data relationships
-WMACS RULE: WMACS-STABILITY-001 (Foundation first)
+APEX RULE: APEX-STABILITY-001 (Foundation first)
 ```
 
 #### **`feature/user-attendant-linking`** - Data Relationships
@@ -51,7 +51,7 @@ WMACS RULE: WMACS-STABILITY-001 (Foundation first)
 PURPOSE: Connect users to attendant records
 PARENT: feature/admin-foundation  
 FOCUS: Import previous data, establish relationships
-WMACS RULE: WMACS-ARCH-001 (Foundation before features)
+APEX RULE: APEX-ARCH-001 (Foundation before features)
 ```
 
 ---
@@ -60,7 +60,7 @@ WMACS RULE: WMACS-ARCH-001 (Foundation before features)
 
 ### **PHASE 1: AUTH STUB IMPLEMENTATION (Today)**
 **Branch:** `feature/auth-stub`  
-**WMACS Rule:** WMACS-COMPLEX-001 (Simple solutions first)
+**APEX Rule:** APEX-COMPLEX-001 (Simple solutions first)
 
 #### **Tasks:**
 1. Create simple auth stub replacing NextAuth
@@ -76,7 +76,7 @@ WMACS RULE: WMACS-ARCH-001 (Foundation before features)
 
 ### **PHASE 2: ADMIN MODULE FOUNDATION (This Week)**
 **Branch:** `feature/admin-foundation`  
-**WMACS Rule:** WMACS-STABILITY-001 (Foundation stability priority)
+**APEX Rule:** APEX-STABILITY-001 (Foundation stability priority)
 
 #### **Tasks:**
 1. Complete user management functionality
@@ -92,7 +92,7 @@ WMACS RULE: WMACS-ARCH-001 (Foundation before features)
 
 ### **PHASE 3: USER-ATTENDANT LINKING (Next Week)**
 **Branch:** `feature/user-attendant-linking`  
-**WMACS Rule:** WMACS-ARCH-001 (Data relationships before features)
+**APEX Rule:** APEX-ARCH-001 (Data relationships before features)
 
 #### **Tasks:**
 1. Connect invited users to attendant records
@@ -113,7 +113,7 @@ WMACS RULE: WMACS-ARCH-001 (Foundation before features)
 ### **DEVELOPMENT FLOW:**
 ```
 1. Create feature branch from staging
-2. Develop with WMACS rule compliance
+2. Develop with APEX rule compliance
 3. Test on staging environment (Container 135)
 4. Merge back to staging when stable
 5. Deploy staging to production when ready
@@ -135,17 +135,17 @@ DATABASE: Container 131 (10.92.3.21) - Shared across environments
 
 ---
 
-## 🛡️ WMACS COMPLIANCE CHECKPOINTS
+## 🛡️ APEX COMPLIANCE CHECKPOINTS
 
 ### **CHECKPOINT 1: Before Feature Branch Creation**
-- [ ] WMACS rule compliance validated
+- [ ] APEX rule compliance validated
 - [ ] Foundation dependencies confirmed
 - [ ] Business value justification documented
 - [ ] Complexity appropriateness verified
 
 ### **CHECKPOINT 2: Before Merge to Staging**
 - [ ] Feature functionality validated
-- [ ] WMACS rules followed throughout development
+- [ ] APEX rules followed throughout development
 - [ ] No rabbit hole violations (>90 minutes on single issue)
 - [ ] Foundation stability maintained
 
@@ -162,17 +162,17 @@ DATABASE: Container 131 (10.92.3.21) - Shared across environments
 ### **METRIC 1: Foundation Stability**
 - **Target:** Admin module 100% functional before event features
 - **Measurement:** User management, invitations, data import working
-- **WMACS Rule:** WMACS-STABILITY-001 compliance
+- **APEX Rule:** APEX-STABILITY-001 compliance
 
 ### **METRIC 2: Complexity Appropriateness**
 - **Target:** Auth complexity matches actual security needs
 - **Measurement:** Simple stub vs enterprise auth comparison
-- **WMACS Rule:** WMACS-COMPLEX-001 compliance
+- **APEX Rule:** APEX-COMPLEX-001 compliance
 
 ### **METRIC 3: Development Velocity**
 - **Target:** No >90 minute rabbit holes
 - **Measurement:** Time tracking on single issues
-- **WMACS Rule:** WMACS-UNIVERSAL-001 compliance
+- **APEX Rule:** APEX-UNIVERSAL-001 compliance
 
 ---
 
@@ -197,4 +197,4 @@ git checkout -b feature/auth-stub
 
 ---
 
-**🛡️ WMACS CASCADE RULES: This branching strategy prioritizes foundation stability over feature velocity, following the established admin-first architecture that prevents the connection problems experienced in previous attempts.**
+**🛡️ APEX CASCADE RULES: This branching strategy prioritizes foundation stability over feature velocity, following the established admin-first architecture that prevents the connection problems experienced in previous attempts.**

@@ -1,20 +1,20 @@
-# WMACS Guardian - Quick Setup Guide
+# APEX Guardian - Quick Setup Guide
 
 ## 🚀 **One-Line Setup for Any Workspace**
 
 ```bash
-curl -s https://raw.githubusercontent.com/heybearc/jw-attendant-scheduler/feature/api-foundation/wmacs-setup.sh | bash -s "your-workspace-name"
+curl -s https://raw.githubusercontent.com/heybearc/jw-attendant-scheduler/feature/api-foundation/apex-setup.sh | bash -s "your-workspace-name"
 ```
 
 ## 📋 **What This Does**
 
-1. **Downloads** complete WMACS Guardian system
-2. **Creates** `.wmacs/` directory with all tools
+1. **Downloads** complete APEX Guardian system
+2. **Creates** `.apex/` directory with all tools
 3. **Installs** shared CASCADE rules
 4. **Sets up** environment templates
 5. **Configures** deployment scripts
 6. **Adds** health monitoring
-7. **Updates** package.json with WMACS commands
+7. **Updates** package.json with APEX commands
 
 ## 🛡️ **Instant Guardian Protection**
 
@@ -29,31 +29,31 @@ After setup, your workspace will have:
 ## 🎯 **Usage Examples**
 
 ```bash
-# Setup WMACS in current directory
-curl -s https://raw.githubusercontent.com/heybearc/jw-attendant-scheduler/feature/api-foundation/wmacs-setup.sh | bash -s "my-project"
+# Setup APEX in current directory
+curl -s https://raw.githubusercontent.com/heybearc/jw-attendant-scheduler/feature/api-foundation/apex-setup.sh | bash -s "my-project"
 
 # Deploy to staging
-npm run wmacs:deploy:staging
+npm run apex:deploy:staging
 
 # Deploy to production
-npm run wmacs:deploy:production
+npm run apex:deploy:production
 
 # Health check
-npm run wmacs:health
+npm run apex:health
 ```
 
 ## 📁 **Directory Structure Created**
 
 ```
-.wmacs/
-├── WMACS_SHARED_CASCADE_RULES.md    # Complete Guardian rules
+.apex/
+├── APEX_SHARED_CASCADE_RULES.md    # Complete Guardian rules
 ├── config/
 │   ├── workspace-config.json        # Workspace settings
-│   ├── WMACS_SYSTEM_CONFIG.md       # System standards
-│   └── WMACS_DEPLOYMENT_ARCHITECTURE.md
+│   ├── APEX_SYSTEM_CONFIG.md       # System standards
+│   └── APEX_DEPLOYMENT_ARCHITECTURE.md
 ├── tools/
-│   ├── wmacs-clean-deploy.sh        # Clean deployment script
-│   └── wmacs-health-check.sh        # Health monitoring
+│   ├── apex-clean-deploy.sh        # Clean deployment script
+│   └── apex-health-check.sh        # Health monitoring
 ├── env-templates/
 │   ├── .env.staging                 # Staging template
 │   └── .env.production              # Production template
@@ -64,9 +64,9 @@ npm run wmacs:health
 
 After setup, customize:
 
-1. **Environment Templates**: Edit `.wmacs/env-templates/`
-2. **Server IPs**: Update `.wmacs/config/workspace-config.json`
-3. **Deployment Settings**: Modify `.wmacs/tools/wmacs-clean-deploy.sh`
+1. **Environment Templates**: Edit `.apex/env-templates/`
+2. **Server IPs**: Update `.apex/config/workspace-config.json`
+3. **Deployment Settings**: Modify `.apex/tools/apex-clean-deploy.sh`
 
 ## 🆘 **Emergency Support**
 
@@ -86,4 +86,4 @@ The system automatically enforces:
 
 ---
 
-**🛡️ WMACS Guardian: Universal protection for all workspaces**
+**🛡️ APEX Guardian: Universal protection for all workspaces**

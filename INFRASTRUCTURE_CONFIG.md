@@ -68,7 +68,7 @@ DATABASE_URL="postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_sche
 
 ---
 
-## 🛡️ WMACS GUARDIAN VALIDATION
+## 🛡️ APEX GUARDIAN VALIDATION
 
 ### **CONTAINER VERIFICATION COMMANDS:**
 ```bash
@@ -161,6 +161,6 @@ ssh root@10.92.3.21 "systemctl status postgresql && sudo -u postgres psql -c 'SE
 
 ---
 
-**🛡️ WMACS CASCADE RULES: This infrastructure configuration is IMMUTABLE and takes precedence over all other documentation. Any changes require explicit approval and must be updated in this authoritative source.**
+**🛡️ APEX CASCADE RULES: This infrastructure configuration is IMMUTABLE and takes precedence over all other documentation. Any changes require explicit approval and must be updated in this authoritative source.**
 
-**📋 VALIDATION:** All WMACS tools and deployment scripts must reference this file for accurate container and network information.**
+**📋 VALIDATION:** All APEX tools and deployment scripts must reference this file for accurate container and network information.**

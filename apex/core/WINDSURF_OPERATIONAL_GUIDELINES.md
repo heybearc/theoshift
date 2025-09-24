@@ -1,11 +1,11 @@
 # Windsurf Operational Guidelines & Guardrails
 
-**WMACS Guardian System - Operational Standards for AI-Driven Development**
+**APEX Guardian System - Operational Standards for AI-Driven Development**
 
 ## Core Principles
 
 ### 1. Research-Backed Decision Making
-- **MANDATORY**: All architectural suggestions must pass WMACS Research Advisor analysis
+- **MANDATORY**: All architectural suggestions must pass APEX Research Advisor analysis
 - **NO EXCEPTIONS**: Decisions affecting system reliability require industry validation
 - **DOCUMENTATION**: All overrides must include documented reasoning with evidence
 
@@ -29,7 +29,7 @@
    ❌ "We can skip staging for this small change"
    ❌ "Manual deployment will be faster"
    ```
-   **Trigger**: WMACS Research Advisor auto-pushback
+   **Trigger**: APEX Research Advisor auto-pushback
    **Alternative**: Use proper staging → production workflow
 
 2. **Removing Multi-Agent Systems Without Analysis**
@@ -72,11 +72,11 @@
 
 ### ✅ APPROVED PATTERNS (Fast-Track)
 
-1. **WMACS Guardian Synchronization**
+1. **APEX Guardian Synchronization**
    ```
-   ✅ "Synchronize WMACS Guardian across repositories"
-   ✅ "Update shared WMACS implementation"
-   ✅ "Implement git submodule for WMACS"
+   ✅ "Synchronize APEX Guardian across repositories"
+   ✅ "Update shared APEX implementation"
+   ✅ "Implement git submodule for APEX"
    ```
    **Reasoning**: Industry best practice, DRY principle, operational reliability
 
@@ -148,7 +148,7 @@ QOS Agent (Oversight)
 
 ## Monitoring and Alerting
 
-### WMACS Guardian Monitoring
+### APEX Guardian Monitoring
 - **Deadlock Detection**: Automatic detection within 60 seconds
 - **Recovery Triggers**: Force recovery after 2 minutes of failed attempts
 - **Health Checks**: Container and service health validation every 30 seconds
@@ -161,7 +161,7 @@ QOS Agent (Oversight)
 ## Knowledge Management
 
 ### Learning System
-- **Mistake Recording**: All failures recorded in WMACS knowledge base
+- **Mistake Recording**: All failures recorded in APEX knowledge base
 - **Pattern Recognition**: Automatic detection of recurring issues
 - **Solution Evolution**: Continuous improvement of recovery strategies
 
@@ -173,7 +173,7 @@ QOS Agent (Oversight)
 ## Enforcement Mechanisms
 
 ### Automatic Enforcement
-1. **WMACS Research Advisor**: Automatic analysis of all suggestions
+1. **APEX Research Advisor**: Automatic analysis of all suggestions
 2. **Anti-Pattern Detection**: Real-time identification of problematic patterns
 3. **Pushback Generation**: Automatic resistance to high-risk suggestions
 
@@ -191,7 +191,7 @@ QOS Agent (Oversight)
 3. **Database Recovery**: Connection pool reset and query optimization
 
 ### Escalation Path
-1. **WMACS Guardian**: Automatic recovery attempt
+1. **APEX Guardian**: Automatic recovery attempt
 2. **QOS Agent**: Coordinated recovery strategy
 3. **Manual Intervention**: Human oversight for complex failures
 
@@ -200,5 +200,5 @@ QOS Agent (Oversight)
 **Compliance Level**: MANDATORY  
 **Review Frequency**: Weekly  
 **Last Updated**: 2025-09-18  
-**Enforcement**: WMACS Research Advisor + QOS Agent
-# WMACS Enhancement - Tue Sep 23 19:17:20 EDT 2025
+**Enforcement**: APEX Research Advisor + QOS Agent
+# APEX Enhancement - Tue Sep 23 19:17:20 EDT 2025

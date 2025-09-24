@@ -27,17 +27,17 @@ Key Models:
 4. **Position Management**: 192 role positions with department organization
 5. **Shift System**: Multiple shifts per position with capacity limits
 
-## 🛡️ WMACS GUARDIAN SYSTEM (PRESERVE CORE)
+## 🛡️ APEX GUARDIAN SYSTEM (PRESERVE CORE)
 
 ### Keep These Files:
 ```bash
-wmacs/wmacs-guardian.js          # Fixed SSH command construction
-wmacs/wmacs-research-advisor.js  # Industry best practices analysis
-wmacs/WINDSURF_OPERATIONAL_GUIDELINES.md  # Core operational rules
-wmacs-config.js                  # Container configuration (fix django→nextjs)
+apex/apex-guardian.js          # Fixed SSH command construction
+apex/apex-research-advisor.js  # Industry best practices analysis
+apex/WINDSURF_OPERATIONAL_GUIDELINES.md  # Core operational rules
+apex-config.js                  # Container configuration (fix django→nextjs)
 ```
 
-### WMACS Value:
+### APEX Value:
 - **Battle-tested deployment pipeline**
 - **Automatic error recovery**
 - **SSH command execution with timeouts**
@@ -124,7 +124,7 @@ PORT=3001
 
 ### High-Value Components (KEEP):
 1. **Database Schema** - Months of business logic
-2. **WMACS Guardian** - Deployment automation
+2. **APEX Guardian** - Deployment automation
 3. **Role-Based Access Control** - 5-tier permission system
 4. **Position Management** - 192 standardized positions
 5. **Assignment Workflow** - Proven scheduling logic
@@ -133,7 +133,7 @@ PORT=3001
 1. **Multiple Auth Systems** - NextAuth + JWT + bcrypt chaos
 2. **Debug Files** - 91 test/debug/old files
 3. **Migration Artifacts** - Flask/Django remnants
-4. **Excessive WMACS Tools** - Over-engineered debugging
+4. **Excessive APEX Tools** - Over-engineered debugging
 
 ## 📊 CLEAN SLATE METRICS
 
@@ -153,7 +153,7 @@ PORT=3001
 
 - ✅ **Backup created**: backup-before-cleanup branch
 - ✅ **Schema documented**: Complete Prisma schema preserved
-- ✅ **WMACS core identified**: Guardian + Research Advisor
+- ✅ **APEX core identified**: Guardian + Research Advisor
 - ✅ **Environment configs**: Database URLs and secrets
 - ✅ **Business rules documented**: Assignment logic patterns
 - ✅ **API endpoints mapped**: Required endpoint list

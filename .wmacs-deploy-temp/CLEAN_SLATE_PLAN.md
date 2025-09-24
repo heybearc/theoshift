@@ -11,10 +11,10 @@ Eliminate Flask→Django→NextJS migration debt and create a clean, maintainabl
 prisma/schema.prisma
 .env.local (database config)
 
-# WMACS Guardian (valuable system)
-wmacs/wmacs-guardian.js
-wmacs/wmacs-research-advisor.js
-wmacs/WINDSURF_OPERATIONAL_GUIDELINES.md
+# APEX Guardian (valuable system)
+apex/apex-guardian.js
+apex/apex-research-advisor.js
+apex/WINDSURF_OPERATIONAL_GUIDELINES.md
 
 # Infrastructure
 .github/workflows/
@@ -50,7 +50,7 @@ ssh root@10.92.3.24 "npm cache clean --force"
 rm -rf node_modules/
 rm -rf .next/
 rm -rf app/ (rebuild from scratch)
-rm wmacs-*.js (keep only core guardian)
+rm apex-*.js (keep only core guardian)
 rm test-*.js
 rm *-old.* *-test.* *-working.*
 
@@ -92,12 +92,12 @@ npm install next-auth @auth/prisma-adapter
 - /admin (user management)
 ```
 
-## 📋 PHASE 4: WMACS INTEGRATION (30 minutes)
+## 📋 PHASE 4: APEX INTEGRATION (30 minutes)
 
 ### Restore Guardian System:
 ```bash
-# Copy preserved WMACS files
-# Update wmacs-config.js (fix "django" → "nextjs")
+# Copy preserved APEX files
+# Update apex-config.js (fix "django" → "nextjs")
 # Test deployment pipeline
 ```
 

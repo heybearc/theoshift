@@ -1,6 +1,6 @@
-# WMACS Server Operations MCP
+# APEX Server Operations MCP
 
-A Model Context Protocol server for automated server-side operations within the WMACS (Windsurf MCP Artifact CI/CD System) framework, maintaining strict guardrails and audit trails.
+A Model Context Protocol server for automated server-side operations within the APEX (Windsurf MCP Artifact CI/CD System) framework, maintaining strict guardrails and audit trails.
 
 ## Features
 
@@ -49,7 +49,7 @@ Audit trail of recent operations:
 }
 ```
 
-## Integration with WMACS
+## Integration with APEX
 
 ### GitHub Actions Integration
 Add to `.github/workflows/mcp-ci-cd.yml`:
@@ -59,7 +59,7 @@ Add to `.github/workflows/mcp-ci-cd.yml`:
   if: steps.deploy.conclusion == 'success'
   run: |
     echo '{"environment": "${{ env.ENVIRONMENT }}", "reason": "Automated deployment restart", "clearCache": true}' | \
-    npx mcp-server-ops-wmacs restart_application
+    npx mcp-server-ops-apex restart_application
 ```
 
 ### Windsurf Integration
@@ -68,7 +68,7 @@ Add to `mcp-claude-desktop-config.json`:
 ```json
 {
   "mcpServers": {
-    "wmacs-server-ops": {
+    "apex-server-ops": {
       "command": "node",
       "args": ["/path/to/mcp-server-ops/src/index.js"],
       "env": {
@@ -92,7 +92,7 @@ Add to `mcp-claude-desktop-config.json`:
 - Environment-specific restrictions
 
 ### Audit Trail
-- All operations logged to `/var/log/wmacs-mcp-ops.log`
+- All operations logged to `/var/log/apex-mcp-ops.log`
 - Timestamped with reason codes
 - Rate limiting prevents abuse
 
@@ -134,7 +134,7 @@ mcp-call check_application_status '{
 
 ## Guardrails Compliance
 
-✅ **Maintains WMACS Principles**:
+✅ **Maintains APEX Principles**:
 - Code-first approach (operations defined in code)
 - Audit trail and transparency
 - Automated with human oversight
@@ -168,4 +168,4 @@ npm start
 - `LOG_LEVEL`: Logging level (default: info)
 - `MAX_OPERATIONS_PER_HOUR`: Rate limit (default: 10)
 
-This MCP server enables automated server-side operations while maintaining the strict guardrails and principles of the WMACS system.
+This MCP server enables automated server-side operations while maintaining the strict guardrails and principles of the APEX system.

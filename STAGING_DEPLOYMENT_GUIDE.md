@@ -5,7 +5,7 @@
 **Target Environment:** Staging Server (10.92.3.24:3001)  
 **Database:** PostgreSQL Server (10.92.3.21:5432)  
 **Branch:** `staging` (merged with admin module Phase 2)  
-**Deployment Type:** Battle-tested CI/CD approach (per WMACS specs)  
+**Deployment Type:** Battle-tested CI/CD approach (per APEX specs)  
 
 ## 🎯 PRE-DEPLOYMENT CHECKLIST
 
@@ -20,7 +20,7 @@
 - [ ] Staging server accessible (10.92.3.24)
 - [ ] Database connectivity verified (10.92.3.21:5432)
 - [ ] Node.js and npm/yarn available
-- [ ] Environment variables configured per WMACS specs
+- [ ] Environment variables configured per APEX specs
 - [ ] SMTP settings (optional for email testing)
 
 ## 🔧 DEPLOYMENT STEPS
@@ -66,7 +66,7 @@ cat >> .env.local << EOF
 # Database (per SSH config specs)
 DATABASE_URL="postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler"
 
-# NextAuth Configuration (per WMACS specs)
+# NextAuth Configuration (per APEX specs)
 NEXTAUTH_URL="http://10.92.3.24:3001"
 NEXTAUTH_SECRET="staging-secret-2024-secure"
 
