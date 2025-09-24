@@ -1,24 +1,9 @@
-import { useEffect } from 'react'
-import { useRouter } from 'next/router'
-import { useSession } from 'next-auth/react'
+import { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
+import { authOptions } from './api/auth/[...nextauth]'
 
 export default function Home() {
-  const router = useRouter()
-  const { data: session, status } = useSession()
-
-  useEffect(() => {
-    if (status === 'loading') return // Still loading
-
-    if (session) {
-      // User is signed in, redirect to admin
-      router.push('/admin')
-    } else {
-      // User is not signed in, redirect to sign in
-      router.push('/auth/signin')
-    }
-  }, [session, status, router])
-
-  // Show loading while redirecting
+  // This component should never render since we redirect on the server
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700">
       <div className="text-center">
@@ -27,4 +12,37 @@ export default function Home() {
       </div>
     </div>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  try {
+    const session = await getServerSession(context.req, context.res, authOptions)
+    
+    if (session && session.user?.role === 'ADMIN') {
+      // User is signed in as admin, redirect to admin dashboard
+      return {
+        redirect: {
+          destination: '/admin',
+          permanent: false,
+        },
+      }
+    } else {
+      // User is not signed in or not admin, redirect to sign in
+      return {
+        redirect: {
+          destination: '/auth/signin',
+          permanent: false,
+        },
+      }
+    }
+  } catch (error) {
+    // If there's any error with session checking, redirect to sign in
+    console.error('Session check error:', error)
+    return {
+      redirect: {
+        destination: '/auth/signin',
+        permanent: false,
+      },
+    }
+  }
 }
