@@ -17,7 +17,7 @@ This document outlines the enforcement mechanisms that ensure compliance with op
 
 ```javascript
 // Example integration in Windsurf workflows
-const APEXResearchAdvisor = require('./apex/apex-research-advisor.js');
+const APEXResearchAdvisor = require('./wmacs/wmacs-research-advisor.js');
 const advisor = new APEXResearchAdvisor();
 
 // Automatic analysis of user suggestions
@@ -109,7 +109,7 @@ const antiPatterns = [
    ```javascript
    // Hook into Windsurf command execution
    async function executeWithGuardian(command, context) {
-     const analysis = await apex.analyzeCommand(command, context);
+     const analysis = await wmacs.analyzeCommand(command, context);
      
      if (analysis.blocked) {
        throw new Error(`Command blocked: ${analysis.reason}`);
@@ -189,7 +189,7 @@ const antiPatterns = [
 
 ### Project-Specific Rules
 ```javascript
-// apex-config.js enforcement section
+// wmacs-config.js enforcement section
 module.exports = {
   enforcement: {
     strictMode: true, // Enable all enforcement mechanisms

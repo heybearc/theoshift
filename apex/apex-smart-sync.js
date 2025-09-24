@@ -12,8 +12,10 @@ const { execSync } = require('child_process');
 
 class APEXSmartSync {
   constructor() {
-    this.sharedSystemPath = path.join(process.env.HOME, 'Documents/Cloudy-Work/shared/apex-guardian-system');
-    this.localApexPath = path.join(process.cwd(), 'apex');
+    // Auto-detect repository type and set appropriate paths
+    this.detectRepositoryType();
+    this.setSharedSystemPath();
+    this.setLocalPath();
     
     // Files that are always synced from shared system
     this.syncableFiles = [

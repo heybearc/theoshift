@@ -22,7 +22,12 @@
     "enabled": true,
     "serverType": "repository-focused",
     "sharedBase": true,
-    "operations": ["restart_application", "update_symlink", "deploy_code", "health_check"]
+    "operations": [
+      "restart_application",
+      "update_symlink",
+      "deploy_code",
+      "health_check"
+    ]
   },
   "environments": {
     "staging": {
@@ -33,7 +38,7 @@
     },
     "production": {
       "container": 132,
-      "ip": "10.92.3.22", 
+      "ip": "10.92.3.22",
       "port": 3001,
       "url": "https://jw-production.cloudigan.net"
     },
@@ -67,7 +72,7 @@
     "enforcement": "enhanced",
     "rules": [
       "WMACS-INFRA-001",
-      "WMACS-CICD-001", 
+      "WMACS-CICD-001",
       "WMACS-MERGE-001",
       "WMACS-AUTH-001"
     ],

@@ -36,10 +36,10 @@ cp apex/config/project.json apex/config/project.json.backup 2>/dev/null || true
 cp apex/config/environments.json apex/config/environments.json.backup 2>/dev/null || true
 ```
 
-### 3. Execute Smart Sync
+### 3. Execute Universal Sync (Backward Compatible)
 // turbo
 ```bash
-node apex/apex-smart-sync.js
+node apex/apex-universal-sync.js
 ```
 
 ### 4. Validate Deployment Tools

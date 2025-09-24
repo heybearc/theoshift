@@ -7,7 +7,7 @@
 ### Morning Startup Checklist
 1. **APEX System Health Check**
    ```bash
-   cd ~/Documents/Cloudy-Work/shared/apex-guardian-system
+   cd ~/Documents/Cloudy-Work/shared/wmacs-guardian-system
    ./health-check.sh
    ```
 
@@ -20,7 +20,7 @@
 3. **Knowledge Base Review**
    ```bash
    # Check for new patterns or issues from previous day
-   node apex-research-advisor.js review-learnings
+   node wmacs-research-advisor.js review-learnings
    ```
 
 ### Development Workflow
@@ -29,13 +29,13 @@
 1. **Environment Validation**
    ```bash
    # In project directory
-   node apex/apex-guardian.js start staging
+   node wmacs/wmacs-guardian.js start staging
    ```
 
 2. **Research Advisor Activation**
    ```bash
    # Enable real-time monitoring
-   node apex/apex-auto-advisor.js monitor &
+   node wmacs/wmacs-auto-advisor.js monitor &
    ```
 
 3. **QOS Agent Coordination**
@@ -46,7 +46,7 @@
 #### Making Architectural Decisions
 1. **Pre-Decision Analysis**
    ```bash
-   node apex/apex-research-advisor.js analyze "your architectural suggestion"
+   node wmacs/wmacs-research-advisor.js analyze "your architectural suggestion"
    ```
 
 2. **Industry Standards Validation**
@@ -63,9 +63,9 @@
 1. **Staging First Validation**
    ```bash
    # Deploy to staging
-   node apex/apex-guardian.js start staging
+   node wmacs/wmacs-guardian.js start staging
    # Validate functionality
-   node apex/apex-guardian.js test staging
+   node wmacs/wmacs-guardian.js test staging
    ```
 
 2. **Code Parity Verification**
@@ -77,7 +77,7 @@
 3. **Production Deployment**
    ```bash
    # Only after staging validation
-   node apex/apex-guardian.js start production
+   node wmacs/wmacs-guardian.js start production
    ```
 
 ## Weekly Maintenance
@@ -85,23 +85,23 @@
 ### APEX System Updates
 1. **Master Repository Updates**
    ```bash
-   cd ~/Documents/Cloudy-Work/shared/apex-guardian-system
+   cd ~/Documents/Cloudy-Work/shared/wmacs-guardian-system
    git pull origin main
    ```
 
 2. **Project Synchronization**
    ```bash
-   ./sync-apex.sh
+   ./sync-wmacs.sh
    ```
 
 3. **Testing Validation**
    ```bash
    # Test in each project
    cd applications/jw-attendant-scheduler
-   node apex/apex-guardian.js test
+   node wmacs/wmacs-guardian.js test
    
    cd applications/ldc-construction-tools
-   node apex/apex-guardian.js test
+   node wmacs/wmacs-guardian.js test
    ```
 
 ### Knowledge Base Maintenance
@@ -126,8 +126,8 @@
 1. **APEX Guardian Failure**
    ```bash
    # Force restart Guardian system
-   pkill -f apex-guardian
-   node apex/apex-guardian.js start --force-recovery
+   pkill -f wmacs-guardian
+   node wmacs/wmacs-guardian.js start --force-recovery
    ```
 
 2. **Research Advisor Unavailable**
@@ -152,7 +152,7 @@
 2. **Override Execution**
    ```bash
    # Emergency override with full logging
-   APEX_EMERGENCY_OVERRIDE=true node apex/apex-guardian.js emergency-mode
+   APEX_EMERGENCY_OVERRIDE=true node wmacs/wmacs-guardian.js emergency-mode
    ```
 
 3. **Post-Emergency Actions**
@@ -168,7 +168,7 @@
 **Symptoms**: Guardian fails to initialize
 **Diagnosis**:
 ```bash
-node apex/apex-guardian.js diagnose
+node wmacs/wmacs-guardian.js diagnose
 ```
 **Resolution**:
 1. Check container connectivity
