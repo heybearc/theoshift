@@ -3,6 +3,12 @@
   "type": "nextjs",
   "description": "JW Attendant Scheduler - Kingdom Hall Event Management System",
   "version": "2.0.0",
+  "mcp": {
+    "enabled": true,
+    "serverType": "repository-focused",
+    "sharedBase": true,
+    "operations": ["restart_application", "update_symlink", "deploy_code", "health_check"]
+  },
   "environments": {
     "staging": {
       "container": 134,
@@ -51,6 +57,7 @@
       "WMACS-AUTH-001"
     ],
     "foundationFirst": true,
-    "complexityValidation": true
+    "complexityValidation": true,
+    "mcpIntegration": true
   }
 }
