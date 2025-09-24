@@ -114,7 +114,7 @@ export default function AdminPage() {
               <div className="module-icon events">📧</div>
               <h4>Email Configuration</h4>
               <p>Configure SMTP settings and manage email templates for notifications.</p>
-              <a href="/admin/email" className="module-link">
+              <a href="/admin/email-config" className="module-link">
                 Configure Email →
               </a>
             </div>
@@ -141,7 +141,7 @@ export default function AdminPage() {
               <div className="module-icon" style={{background: 'linear-gradient(135deg, #9f7aea, #b794f6)'}}>📋</div>
               <h4>Audit Logs</h4>
               <p>View comprehensive audit trails of all system activities and changes.</p>
-              <a href="/admin/audit" className="module-link">
+              <a href="/admin/audit-logs" className="module-link">
                 View Logs →
               </a>
             </div>
@@ -150,7 +150,7 @@ export default function AdminPage() {
               <div className="module-icon" style={{background: 'linear-gradient(135deg, #38b2ac, #4fd1c7)'}}>⚡</div>
               <h4>System Operations</h4>
               <p>Perform system maintenance, backups, and operational tasks safely.</p>
-              <a href="/admin/operations" className="module-link">
+              <a href="/admin/system-ops" className="module-link">
                 System Ops →
               </a>
             </div>
