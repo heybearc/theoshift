@@ -80,10 +80,8 @@ export async function GET(request: NextRequest) {
     const eventsQuery = `
       SELECT 
         e.*,
-        u.name as created_by_name,
-        (SELECT COUNT(*) FROM event_attendants ea WHERE ea.event_id = e.id) as assigned_attendants
+        0 as assigned_attendants
       FROM events e
-      LEFT JOIN users u ON e.created_by = u.id
       ${whereClause}
       ORDER BY e.start_date DESC, e.start_time DESC
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
