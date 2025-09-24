@@ -17,16 +17,35 @@ class WMACSSmartSync {
     
     // Files that are always synced from shared system
     this.syncableFiles = [
+      // Core WMACS components
       'WINDSURF_OPERATIONAL_GUIDELINES.md',
       'ENFORCEMENT_MECHANISMS.md',
       'OPERATIONAL_PROCEDURES.md',
       'USAGE_GUIDE.md',
+      'cascade-rules.json',
+      'health-check.sh',
+      
+      // WMACS advisors and tools
       'wmacs-research-advisor.js',
       'wmacs-auto-advisor.js',
       'wmacs-architectural-guardian.js',
       'wmacs-admin-comprehensive-tester.js',
-      'cascade-rules.json',
-      'health-check.sh'
+      
+      // NEW: Deployment standards (shared components)
+      'DEPLOYMENT_STANDARDS.md',
+      'wmacs-deployment-rules.json',
+      'wmacs-enhanced-deployment.js',
+      
+      // NEW: MCP integration components
+      'base-server.js'
+    ];
+    
+    // Repository-specific files (never synced - preserved locally)
+    this.repositorySpecificFiles = [
+      'config/project.json',
+      'config/environments.json',
+      'logs/',
+      'setup-wmacs-deployment-standards.sh'
     ];
     
     // Files that are NEVER overwritten (protected)
