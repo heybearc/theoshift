@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Fix the deprecated experimental option
-  serverExternalPackages: ['@prisma/client'],
+  // Configure external packages for Next.js 14.2.33
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client'],
+  },
   
   // Configure for reverse proxy setup with FQDN
   async headers() {
