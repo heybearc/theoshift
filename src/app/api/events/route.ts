@@ -1,46 +1,33 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
-import { successResponse, errorResponse, handleAPIError } from '@/lib/api-utils'
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from '@/lib/auth-stub';
+import { prisma } from '@/lib/prisma';
 
-// Event validation schema
-const EventSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().optional(),
-  date: z.string().datetime('Invalid date format'),
-  location: z.string().min(1, 'Location is required'),
-  type: z.enum(['MEETING', 'SERVICE', 'ASSEMBLY', 'CONVENTION', 'OTHER']),
-  attendantsNeeded: z.number().int().min(0, 'Attendants needed must be non-negative'),
-  isActive: z.boolean().default(true)
-})
-
-// GET /api/events - List all events
 export async function GET(request: NextRequest) {
   try {
-    // For now, skip authentication to test the API
-    // TODO: Add authentication back when testing is complete
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const search = searchParams.get('search') || '';
+    const type = searchParams.get('type') || '';
+
+    const skip = (page - 1) * limit;
+
+    // Build where clause
+    const where: any = {};
     
-<<<<<<< HEAD
-    if (query.search) {
+    if (search) {
       where.OR = [
-        { name: { contains: query.search, mode: 'insensitive' } },
-        { description: { contains: query.search, mode: 'insensitive' } },
-        { location: { contains: query.search, mode: 'insensitive' } }
-      ]
-    }
-    
-    if (query.status) {
-      where.status = query.status
-    }
-    
-    if (query.startDate) {
-      where.startDate = { gte: new Date(query.startDate) }
-    }
-    
-    if (query.endDate) {
-      where.endDate = { lte: new Date(query.endDate) }
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { location: { contains: search, mode: 'insensitive' } }
+      ];
     }
 
-    // Get events and total count
+    if (type) {
+      where.type = type;
+    }
+
+    // Get events with pagination
     const [events, total] = await Promise.all([
       prisma.events.findMany({
         where,
@@ -49,151 +36,90 @@ export async function GET(request: NextRequest) {
         orderBy: { startDate: 'desc' },
         select: {
           id: true,
-          name: true,
+          title: true,
           description: true,
           startDate: true,
           endDate: true,
           location: true,
-          status: true,
+          type: true,
+          isActive: true,
           createdAt: true,
-          updatedAt: true,
-          _count: {
-            select: {
-              event_attendant_associations: true,
-              event_positions: true,
-              assignments: true
-            }
-          }
+          updatedAt: true
         }
       }),
       prisma.events.count({ where })
-    ])
+    ]);
 
-    const pagination = createPagination(page, limit, total)
-
-    return successResponse(events, undefined, pagination)
-  } catch (error) {
-    return handleAPIError(error)
-  }
-}
-
-/**
- * POST /api/events - Create new event (Admin/Overseer only)
- */
-export async function POST(req: NextRequest) {
-  try {
-    // Check authentication and permissions
-    const session = await getAuthenticatedSession()
-    if (!session) {
-      return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 })
-    }
-
-    const canCreateEvents = ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER'].includes(session.user.role)
-    if (!canCreateEvents) {
-      return NextResponse.json({ success: false, error: 'Insufficient permissions to create events' }, { status: 403 })
-    }
-
-    const body = await req.json()
-    const data = CreateEventSchema.parse(body)
-
-    // Validate date range
-    const startDate = new Date(data.startDate)
-    const endDate = new Date(data.endDate)
-    
-    if (endDate <= startDate) {
-      return errorResponse('End date must be after start date', 400)
-    }
-
-    // Create event
-    const event = await prisma.events.create({
+    return NextResponse.json({
+      success: true,
       data: {
-        id: crypto.randomUUID(),
-        ...data,
-        startDate,
-        endDate,
-        updatedAt: new Date(),
-        createdBy: session.user.id
-=======
-    // Mock data for Phase 4 implementation
-    const mockEvents = [
-      {
-        id: '1',
-        title: 'Circuit Assembly',
-        description: 'Semi-annual circuit assembly',
-        date: '2024-01-15T09:00:00Z',
-        location: 'Assembly Hall',
-        type: 'ASSEMBLY',
-        attendantsNeeded: 12,
-        isActive: true,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z'
->>>>>>> feature/api-foundation
-      },
-      {
-        id: '2', 
-        title: 'Midweek Meeting',
-        description: 'Regular midweek meeting',
-        date: '2024-01-17T19:00:00Z',
-        location: 'Kingdom Hall',
-        type: 'MEETING',
-        attendantsNeeded: 4,
-        isActive: true,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z'
-      },
-      {
-        id: '3',
-        title: 'Weekend Meeting',
-        description: 'Public meeting and Watchtower study',
-        date: '2024-01-21T10:00:00Z',
-        location: 'Kingdom Hall',
-        type: 'MEETING',
-        attendantsNeeded: 6,
-        isActive: true,
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z'
+        events,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        }
       }
-    ]
-
-    return successResponse({
-      events: mockEvents,
-      total: mockEvents.length
-    })
+    });
 
   } catch (error) {
-    return handleAPIError(error)
+    console.error('Events API error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to fetch events' },
+      { status: 500 }
+    );
   }
 }
 
-// POST /api/events - Create new event
 export async function POST(request: NextRequest) {
   try {
-    // For now, skip authentication to test the API
-    // TODO: Add authentication back when testing is complete
-
-    const body = await request.json()
-    const validatedData = EventSchema.parse(body)
-
-    // Mock creation for Phase 4 - will be replaced with database integration
-    const newEvent = {
-      id: Date.now().toString(),
-      ...validatedData,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+    const session = await getServerSession();
+    
+    if (!session?.user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
     }
 
-    return successResponse(
-      { event: newEvent },
-      'Event created successfully'
-    )
+    const data = await request.json();
+    
+    // Validate required fields
+    if (!data.title || !data.startDate) {
+      return NextResponse.json(
+        { success: false, error: 'Title and start date are required' },
+        { status: 400 }
+      );
+    }
+
+    const startDate = new Date(data.startDate);
+    const endDate = data.endDate ? new Date(data.endDate) : startDate;
+
+    const event = await prisma.events.create({
+      data: {
+        title: data.title,
+        description: data.description || '',
+        startDate,
+        endDate,
+        location: data.location || '',
+        type: data.type || 'MEETING',
+        isActive: data.isActive !== false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: event
+    });
 
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return errorResponse(
-        'Validation failed: ' + error.issues.map(e => e.message).join(', '),
-        400
-      )
-    }
-    return handleAPIError(error)
+    console.error('Create event error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to create event' },
+      { status: 500 }
+    );
   }
 }
