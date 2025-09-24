@@ -3,8 +3,8 @@
   "version": "2.0.0-clean-slate",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "wmacs:deploy": "node wmacs/wmacs-guardian.js deploy",
@@ -15,13 +15,13 @@
     "@auth/prisma-adapter": "^2.4.2",
     "@prisma/client": "^5.19.1",
     "bcryptjs": "^2.4.3",
-    "next": "15.5.3",
+    "next": "14.2.33",
     "next-auth": "^4.24.7",
     "nodemailer": "^6.9.8",
     "pg": "^8.11.3",
     "prisma": "^5.19.1",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -32,9 +32,9 @@
     "@types/nodemailer": "^6.4.14",
     "@types/pg": "^8.10.9",
     "@types/react": "^18",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "15.5.3",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.33",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
