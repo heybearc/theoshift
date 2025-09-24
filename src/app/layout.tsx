@@ -1,6 +1,7 @@
 'use client'
 
 import { SessionProvider } from '@/lib/auth-stub'
+import './globals.css'
 
 export default function RootLayout({
   children,
