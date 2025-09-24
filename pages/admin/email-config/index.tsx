@@ -2,7 +2,7 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import AdminLayout from '../../../components/AdminLayout'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function EmailConfigPage() {
   const [authType, setAuthType] = useState<'smtp' | 'gmail'>('gmail')
@@ -26,26 +26,63 @@ export default function EmailConfigPage() {
 
   const [saving, setSaving] = useState(false)
   const [testing, setTesting] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
+
+  // Load configuration on component mount
+  useEffect(() => {
+    loadConfiguration()
+  }, [])
+
+  const loadConfiguration = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/admin/email-config')
+      const data = await response.json()
+
+      if (data.success && data.data) {
+        setAuthType(data.data.authType || 'gmail')
+        setConfig(data.data.config || {
+          gmailEmail: '',
+          gmailAppPassword: '',
+          smtpServer: 'smtp.gmail.com',
+          smtpPort: '587',
+          smtpUser: '',
+          smtpPassword: '',
+          smtpSecure: true,
+          fromEmail: '',
+          fromName: 'JW Attendant Scheduler',
+          replyToEmail: ''
+        })
+      }
+    } catch (error) {
+      console.error('Error loading email configuration:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleSave = async () => {
     setSaving(true)
     setStatus('idle')
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch('/api/admin/email-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ authType, config })
+      })
+
+      const data = await response.json()
       
-      // Here you would make the actual API call to save configuration
-      // const response = await fetch('/api/admin/email-config', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ authType, config })
-      // })
-      
-      setStatus('success')
-      setTimeout(() => setStatus('idle'), 3000)
+      if (data.success) {
+        setStatus('success')
+        setTimeout(() => setStatus('idle'), 3000)
+      } else {
+        throw new Error(data.error || 'Failed to save configuration')
+      }
     } catch (error) {
+      console.error('Error saving configuration:', error)
       setStatus('error')
       setTimeout(() => setStatus('idle'), 3000)
     } finally {
@@ -57,18 +94,21 @@ export default function EmailConfigPage() {
     setTesting(true)
     
     try {
-      // Simulate test email
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const response = await fetch('/api/admin/email-config/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ authType, config })
+      })
+
+      const data = await response.json()
       
-      // Here you would make the actual API call to send test email
-      // const response = await fetch('/api/admin/email-config/test', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ authType, config })
-      // })
-      
-      alert('✅ Test email sent successfully!')
+      if (data.success) {
+        alert('✅ Test email sent successfully!')
+      } else {
+        throw new Error(data.error || 'Failed to send test email')
+      }
     } catch (error) {
+      console.error('Error sending test email:', error)
       alert('❌ Failed to send test email. Please check your configuration.')
     } finally {
       setTesting(false)
@@ -78,6 +118,19 @@ export default function EmailConfigPage() {
   const isGmailConfigValid = authType === 'gmail' && config.gmailEmail && config.gmailAppPassword
   const isSmtpConfigValid = authType === 'smtp' && config.smtpServer && config.smtpUser && config.smtpPassword
   const isConfigValid = (isGmailConfigValid || isSmtpConfigValid) && config.fromEmail && config.fromName
+
+  if (loading) {
+    return (
+      <AdminLayout title="Email Configuration" breadcrumbs={[{ label: 'Email Configuration' }]}>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading email configuration...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    )
+  }
 
   return (
     <AdminLayout title="Email Configuration" breadcrumbs={[{ label: 'Email Configuration' }]}>

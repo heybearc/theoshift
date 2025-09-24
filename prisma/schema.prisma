@@ -425,3 +425,13 @@ enum UserRole {
   KEYMAN
   ATTENDANT
 }
+
+model system_settings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  updatedBy String?
+}
