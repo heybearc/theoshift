@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 
 /**
- * WMACS Enhanced Deployment Tool
- * Implements WMACS deployment standards with repository verification
- * Standardized for use across all WMACS repositories
+ * APEX Enhanced Deployment Tool
+ * Implements APEX deployment standards with repository verification
+ * Standardized for use across all APEX repositories
  */
 
 const { spawn } = require('child_process');
 const fs = require('fs');
 const crypto = require('crypto');
 
-class WMACSEnhancedDeployment {
+class APEXEnhancedDeployment {
   constructor(projectPath = '.') {
     this.projectPath = projectPath;
     this.loadConfiguration();
@@ -19,18 +19,18 @@ class WMACSEnhancedDeployment {
 
   loadConfiguration() {
     try {
-      this.config = JSON.parse(fs.readFileSync(`${this.projectPath}/wmacs/config/project.json`, 'utf8'));
-      this.environments = JSON.parse(fs.readFileSync(`${this.projectPath}/wmacs/config/environments.json`, 'utf8'));
+      this.config = JSON.parse(fs.readFileSync(`${this.projectPath}/apex/config/project.json`, 'utf8'));
+      this.environments = JSON.parse(fs.readFileSync(`${this.projectPath}/apex/config/environments.json`, 'utf8'));
     } catch (error) {
-      throw new Error(`WMACS configuration not found. Ensure wmacs/config/ directory exists with project.json and environments.json`);
+      throw new Error(`APEX configuration not found. Ensure apex/config/ directory exists with project.json and environments.json`);
     }
   }
 
   async deployToEnvironment(environment, options = {}) {
     const startTime = Date.now();
-    this.log(`🛡️ WMACS Enhanced Deployment: ${environment.toUpperCase()}`);
+    this.log(`🛡️ APEX Enhanced Deployment: ${environment.toUpperCase()}`);
     this.log(`📋 Reason: ${options.reason || 'Standard deployment'}`);
-    this.log(`🎯 Following WMACS Deployment Standards v1.0`);
+    this.log(`🎯 Following APEX Deployment Standards v1.0`);
     
     const envConfig = this.environments[environment];
     if (!envConfig) {
@@ -38,20 +38,20 @@ class WMACSEnhancedDeployment {
     }
 
     try {
-      // Phase 1: Pre-Deployment Verification (WMACS-DEPLOY-001)
+      // Phase 1: Pre-Deployment Verification (APEX-DEPLOY-001)
       await this.preDeploymentVerification();
       
-      // Phase 2: Repository Synchronization (WMACS-DEPLOY-002)
+      // Phase 2: Repository Synchronization (APEX-DEPLOY-002)
       await this.repositorySynchronization(envConfig, options.forcSync || false);
       
-      // Phase 3: Application Deployment (WMACS-DEPLOY-003)
+      // Phase 3: Application Deployment (APEX-DEPLOY-003)
       await this.applicationDeployment(envConfig, options);
       
-      // Phase 4: Post-Deployment Validation (WMACS-DEPLOY-004)
+      // Phase 4: Post-Deployment Validation (APEX-DEPLOY-004)
       const validation = await this.postDeploymentValidation(envConfig);
       
       const duration = Date.now() - startTime;
-      this.log(`🎉 WMACS Deployment: SUCCESS (${duration}ms)`);
+      this.log(`🎉 APEX Deployment: SUCCESS (${duration}ms)`);
       this.log(`🌐 Application: ${envConfig.url}`);
       
       return {
@@ -63,7 +63,7 @@ class WMACSEnhancedDeployment {
       };
       
     } catch (error) {
-      this.log(`❌ WMACS Deployment: FAILED - ${error.message}`);
+      this.log(`❌ APEX Deployment: FAILED - ${error.message}`);
       
       // Attempt automatic rollback if enabled
       if (options.autoRollback) {
@@ -122,7 +122,7 @@ class WMACSEnhancedDeployment {
     if (needsSync || forceSync) {
       this.log(`🔧 Repository synchronization required`);
       
-      // WMACS-DEPLOY-003: Forced Synchronization Protocol
+      // APEX-DEPLOY-003: Forced Synchronization Protocol
       await this.executeCommand(
         `ssh ${envConfig.ssh} "cd ${envConfig.path} && git fetch origin --force"`
       );
@@ -131,7 +131,7 @@ class WMACSEnhancedDeployment {
         `ssh ${envConfig.ssh} "cd ${envConfig.path} && git reset --hard origin/${this.localState.branch}"`
       );
       
-      // Verify synchronization (WMACS-DEPLOY-002)
+      // Verify synchronization (APEX-DEPLOY-002)
       const verifyCommit = await this.executeCommand(
         `ssh ${envConfig.ssh} "cd ${envConfig.path} && git rev-parse HEAD"`
       );
@@ -349,7 +349,7 @@ async function main() {
   
   if (!environment) {
     console.log(`
-🛡️ WMACS Enhanced Deployment Tool v1.0
+🛡️ APEX Enhanced Deployment Tool v1.0
 
 Usage:
   node wmacs-enhanced-deployment.js <environment> [options]
@@ -372,13 +372,13 @@ Examples:
   }
 
   const options = {
-    reason: args.find(arg => arg.startsWith('--reason'))?.split('=')[1] || 'WMACS Enhanced Deployment',
+    reason: args.find(arg => arg.startsWith('--reason'))?.split('=')[1] || 'APEX Enhanced Deployment',
     forceSync: args.includes('--force-sync'),
     clearCache: !args.includes('--no-cache'),
     autoRollback: args.includes('--auto-rollback')
   };
 
-  const deployment = new WMACSEnhancedDeployment();
+  const deployment = new APEXEnhancedDeployment();
   
   try {
     const result = await deployment.deployToEnvironment(environment, options);
@@ -400,4 +400,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { WMACSEnhancedDeployment };
+module.exports = { APEXEnhancedDeployment };

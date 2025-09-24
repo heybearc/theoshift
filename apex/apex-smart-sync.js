@@ -373,8 +373,8 @@ module.exports = WMACSGuardian;
 
 // CLI Interface
 if (require.main === module) {
-  const sync = new WMACSSmartSync();
+  const sync = new APEXSmartSync();
   sync.sync();
 }
 
-module.exports = WMACSSmartSync;
+module.exports = APEXSmartSync;
