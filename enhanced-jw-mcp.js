@@ -291,10 +291,28 @@ Last checked: ${healthData.timestamp}`;
   async performRealHealthCheck() {
     const { execSync } = require('child_process');
     const fs = require('fs');
+    const path = require('path');
     
     try {
+      // Find the project root by looking for package.json
+      let projectRoot = process.cwd();
+      const possibleRoots = [
+        process.cwd(),
+        path.join(process.cwd(), '..'),
+        '/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler',
+        __dirname
+      ];
+      
+      for (const root of possibleRoots) {
+        const packageJsonPath = path.join(root, 'package.json');
+        if (fs.existsSync(packageJsonPath)) {
+          projectRoot = root;
+          break;
+        }
+      }
+      
       // Detect technology stack from package.json
-      const packageJsonPath = './package.json';
+      const packageJsonPath = path.join(projectRoot, 'package.json');
       let framework = 'Unknown';
       let adminCount = 0;
       
@@ -313,8 +331,9 @@ Last checked: ${healthData.timestamp}`;
       
       // Count admin modules
       try {
-        if (fs.existsSync('./pages/admin')) {
-          const adminDirs = fs.readdirSync('./pages/admin', { withFileTypes: true })
+        const adminPath = path.join(projectRoot, 'pages', 'admin');
+        if (fs.existsSync(adminPath)) {
+          const adminDirs = fs.readdirSync(adminPath, { withFileTypes: true })
             .filter(dirent => dirent.isDirectory())
             .length;
           adminCount = adminDirs;
