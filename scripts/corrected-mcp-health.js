@@ -11,6 +11,7 @@ const fs = require('fs');
 class CorrectedMCPHealth {
     constructor() {
         this.serverHost = 'jws';
+        this.sshConfig = '-F /Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant';
         this.projectPath = '/opt/jw-attendant-scheduler';
         this.healthData = {};
     }
@@ -18,7 +19,7 @@ class CorrectedMCPHealth {
     async detectTechnologyStack() {
         try {
             // Read package.json to determine actual stack
-            const packageJson = execSync(`ssh ${this.serverHost} "cd ${this.projectPath} && cat package.json"`, { encoding: 'utf8' });
+            const packageJson = execSync(`ssh ${this.sshConfig} ${this.serverHost} "cd ${this.projectPath} && cat package.json"`, { encoding: 'utf8' });
             const pkg = JSON.parse(packageJson);
 
             const hasNext = !!pkg.dependencies?.next;
@@ -69,7 +70,7 @@ class CorrectedMCPHealth {
 
     async checkRunningProcesses() {
         try {
-            const processes = execSync(`ssh ${this.serverHost} "ps aux | grep -E '(node|next|npm)' | grep -v grep"`, { encoding: 'utf8' });
+            const processes = execSync(`ssh ${this.sshConfig} ${this.serverHost} "ps aux | grep -E '(node|next|npm)' | grep -v grep"`, { encoding: 'utf8' });
             const processLines = processes.split('\n').filter(line => line.trim());
 
             return {
@@ -91,7 +92,7 @@ class CorrectedMCPHealth {
 
     async checkPorts() {
         try {
-            const ports = execSync(`ssh ${this.serverHost} "ss -tlnp | grep -E ':(3000|3001)'"`, { encoding: 'utf8' });
+            const ports = execSync(`ssh ${this.sshConfig} ${this.serverHost} "ss -tlnp | grep -E ':(3000|3001)'"`, { encoding: 'utf8' });
             const portLines = ports.split('\n').filter(line => line.trim());
 
             const port3000 = portLines.some(line => line.includes(':3000'));
@@ -117,7 +118,7 @@ class CorrectedMCPHealth {
     async checkDatabase() {
         try {
             // Check if Prisma schema exists
-            const prismaSchema = execSync(`ssh ${this.serverHost} "cd ${this.projectPath} && ls prisma/schema.prisma 2>/dev/null || echo 'not found'"`, { encoding: 'utf8' });
+            const prismaSchema = execSync(`ssh ${this.sshConfig} ${this.serverHost} "cd ${this.projectPath} && ls prisma/schema.prisma 2>/dev/null || echo 'not found'"`, { encoding: 'utf8' });
             
             if (prismaSchema.includes('not found')) {
                 return {
@@ -128,7 +129,7 @@ class CorrectedMCPHealth {
             }
 
             // Try to read database URL from .env
-            const envCheck = execSync(`ssh ${this.serverHost} "cd ${this.projectPath} && grep DATABASE_URL .env 2>/dev/null || echo 'not found'"`, { encoding: 'utf8' });
+            const envCheck = execSync(`ssh ${this.sshConfig} ${this.serverHost} "cd ${this.projectPath} && grep DATABASE_URL .env 2>/dev/null || echo 'not found'"`, { encoding: 'utf8' });
             
             if (envCheck.includes('postgresql://')) {
                 return {
@@ -156,11 +157,11 @@ class CorrectedMCPHealth {
     async checkAdminModules() {
         try {
             // Count actual admin modules in pages/admin/
-            const adminModules = execSync(`ssh ${this.serverHost} "cd ${this.projectPath} && find pages/admin -maxdepth 1 -type d | grep -v '^pages/admin$' | wc -l"`, { encoding: 'utf8' });
+            const adminModules = execSync(`ssh ${this.sshConfig} ${this.serverHost} "cd ${this.projectPath} && find pages/admin -maxdepth 1 -type d | grep -v '^pages/admin$' | wc -l"`, { encoding: 'utf8' });
             const moduleCount = parseInt(adminModules.trim());
 
             // List the modules
-            const moduleList = execSync(`ssh ${this.serverHost} "cd ${this.projectPath} && find pages/admin -maxdepth 1 -type d | grep -v '^pages/admin$' | sed 's|pages/admin/||'"`, { encoding: 'utf8' });
+            const moduleList = execSync(`ssh ${this.sshConfig} ${this.serverHost} "cd ${this.projectPath} && find pages/admin -maxdepth 1 -type d | grep -v '^pages/admin$' | sed 's|pages/admin/||'"`, { encoding: 'utf8' });
             const modules = moduleList.split('\n').filter(m => m.trim());
 
             return {
