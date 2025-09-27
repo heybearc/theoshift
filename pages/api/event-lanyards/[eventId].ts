@@ -6,11 +6,8 @@ import { z } from 'zod'
 
 // Validation schema for lanyard creation
 const lanyardSchema = z.object({
-  lanyardNumber: z.string().min(1, 'Lanyard number is required').max(50),
-  type: z.enum(['ATTENDANT', 'OVERSEER', 'KEYMAN', 'SECURITY', 'MEDICAL', 'SPECIAL']),
-  color: z.string().min(1, 'Color is required').max(50),
-  description: z.string().optional(),
-  isActive: z.boolean().default(true)
+  badgeNumber: z.string().min(1, 'Badge number is required').max(50),
+  notes: z.string().optional()
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -29,6 +26,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       case 'GET':
         const lanyards = await prisma.lanyards.findMany({
           where: { lanyardSettingId: eventId },
+          orderBy: { badgeNumber: 'asc' }
+        })
 
         return res.status(200).json({
           success: true,
@@ -43,9 +42,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           data: {
             id: crypto.randomUUID(),
             lanyardSettingId: eventId,
-            badgeNumber: validatedData.lanyardNumber,
+            badgeNumber: validatedData.badgeNumber,
             status: 'AVAILABLE',
-            notes: validatedData.description,
+            notes: validatedData.notes,
             createdAt: new Date(),
             updatedAt: new Date()
           }

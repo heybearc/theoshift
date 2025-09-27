@@ -113,6 +113,7 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).json({
     success: true,
     data: {
+      id: crypto.randomUUID(),
       events,
       pagination: {
         page: pageNum,
@@ -151,17 +152,14 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, userId: str
   // Create event
   const event = await prisma.events.create({
     data: {
+      id: crypto.randomUUID(),
       name: data.name,
       description: data.description,
-      eventType: data.eventType,
+      eventType: data.eventType as any,
       startDate: startDate,
       endDate: endDate,
-      startTime: data.startTime,
-      endTime: data.endTime,
       location: data.location,
-      capacity: data.capacity,
-      attendantsNeeded: data.attendantsNeeded,
-      status: data.status,
+      status: data.status as any,
       createdBy: userId,
       updatedAt: new Date()
     },

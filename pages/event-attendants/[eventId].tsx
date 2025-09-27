@@ -1,7 +1,7 @@
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
-import AdminLayout from '../../../components/AdminLayout'
+import AdminLayout from '../../components/AdminLayout'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
