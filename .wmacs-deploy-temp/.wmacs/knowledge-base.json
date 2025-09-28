@@ -311,13 +311,6 @@
       "confidence": "High"
     },
     {
-<<<<<<< HEAD
-      "timestamp": "2025-09-22T18:20:12.705Z",
-      "suggestion": "Dashboard API fetch failing - investigate authentication redirect flow and API endpoint accessibility",
-=======
-      "timestamp": "2025-09-23T13:32:18.757Z",
-      "suggestion": "test",
->>>>>>> feature/api-foundation
       "research": {
         "standardsCount": 0,
         "practicesCount": 0,
