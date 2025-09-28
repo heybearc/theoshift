@@ -1,0 +1,179 @@
+{
+  "wmacs_deployment_rules": {
+    "version": "1.0",
+    "effective_date": "2025-09-24",
+    "scope": "all_wmacs_repositories",
+    "enforcement": "automatic",
+    
+    "rules": {
+      "WMACS-DEPLOY-001": {
+        "name": "Git-Based Container Deployment",
+        "description": "All containers must use direct git repository deployment",
+        "enforcement": "mandatory",
+        "validation": [
+          "verify_git_repository_exists",
+          "confirm_direct_clone_deployment",
+          "validate_no_build_artifacts"
+        ],
+        "exceptions": "emergency_recovery_only"
+      },
+      
+      "WMACS-DEPLOY-002": {
+        "name": "Repository Synchronization Verification",
+        "description": "All deployments must verify repository synchronization",
+        "enforcement": "mandatory",
+        "validation": [
+          "commit_hash_verification",
+          "critical_file_hash_validation",
+          "branch_alignment_confirmation"
+        ],
+        "failure_action": "force_synchronization"
+      },
+      
+      "WMACS-DEPLOY-003": {
+        "name": "Forced Synchronization Protocol",
+        "description": "Use git reset --hard for critical deployments",
+        "enforcement": "conditional",
+        "triggers": [
+          "synchronization_verification_failure",
+          "deployment_integrity_mismatch",
+          "manual_force_sync_request"
+        ],
+        "safety_measures": [
+          "backup_current_state",
+          "log_forced_sync_operation",
+          "verify_post_sync_integrity"
+        ]
+      },
+      
+      "WMACS-DEPLOY-004": {
+        "name": "MCP-Only Deployment Operations",
+        "description": "No manual SSH commands for deployments",
+        "enforcement": "mandatory",
+        "allowed_operations": [
+          "wmacs_enhanced_deployment",
+          "wmacs_mcp_restart",
+          "wmacs_mcp_recovery"
+        ],
+        "exceptions": [
+          "emergency_recovery",
+          "initial_setup",
+          "debugging_with_approval"
+        ]
+      },
+      
+      "WMACS-DEPLOY-005": {
+        "name": "Post-Deployment Validation",
+        "description": "All deployments must pass health validation",
+        "enforcement": "mandatory",
+        "validation_threshold": 0.75,
+        "required_endpoints": [
+          "/admin",
+          "/api/admin/users",
+          "/dashboard"
+        ],
+        "failure_action": "automatic_rollback"
+      }
+    },
+    
+    "deployment_workflow": {
+      "phases": [
+        {
+          "name": "pre_deployment_verification",
+          "rules": ["WMACS-DEPLOY-001"],
+          "timeout": 30,
+          "required": true
+        },
+        {
+          "name": "repository_synchronization",
+          "rules": ["WMACS-DEPLOY-002", "WMACS-DEPLOY-003"],
+          "timeout": 120,
+          "required": true
+        },
+        {
+          "name": "application_deployment",
+          "rules": ["WMACS-DEPLOY-004"],
+          "timeout": 180,
+          "required": true
+        },
+        {
+          "name": "post_deployment_validation",
+          "rules": ["WMACS-DEPLOY-005"],
+          "timeout": 60,
+          "required": true
+        }
+      ]
+    },
+    
+    "environment_requirements": {
+      "staging": {
+        "validation_threshold": 0.75,
+        "auto_rollback": true,
+        "force_sync_allowed": true,
+        "cache_clearing": true
+      },
+      "production": {
+        "validation_threshold": 0.90,
+        "auto_rollback": true,
+        "force_sync_allowed": false,
+        "cache_clearing": false,
+        "approval_required": true
+      }
+    },
+    
+    "repository_standards": {
+      "required_structure": {
+        "wmacs/": "WMACS configuration directory",
+        "wmacs/config/": "Environment and project configuration",
+        "wmacs/core/": "WMACS deployment tools and rules",
+        "wmacs/logs/": "Deployment and operation logs"
+      },
+      
+      "required_files": [
+        "wmacs/config/project.json",
+        "wmacs/config/environments.json",
+        "wmacs/core/wmacs-enhanced-deployment.js",
+        "wmacs/core/DEPLOYMENT_STANDARDS.md"
+      ],
+      
+      "critical_files_for_validation": [
+        "src/app/layout.tsx",
+        "package.json",
+        "next.config.js"
+      ]
+    },
+    
+    "mcp_integration": {
+      "required_operations": [
+        "restart_application",
+        "update_repository",
+        "validate_deployment",
+        "health_check",
+        "rollback_deployment"
+      ],
+      
+      "operation_standards": {
+        "timeout": 60,
+        "retry_attempts": 3,
+        "error_handling": "structured",
+        "logging": "comprehensive",
+        "audit_trail": "mandatory"
+      }
+    },
+    
+    "compliance_monitoring": {
+      "automated_checks": [
+        "repository_structure_validation",
+        "deployment_rule_compliance",
+        "mcp_operation_usage",
+        "post_deployment_health"
+      ],
+      
+      "reporting": {
+        "deployment_success_rate": "daily",
+        "rule_compliance_rate": "weekly",
+        "repository_synchronization_accuracy": "per_deployment"
+      }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "timestamp": "2025-09-13T02:58:04.266Z",
+  "staging_url": "http://10.92.3.24:3001",
+  "health_checks": [
+    {
+      "check": "connectivity",
+      "status": "PASS",
+      "response_time_ms": 82,
+      "details": "HTTP 200"
+    },
+    {
+      "check": "frontend",
+      "status": "PASS",
+      "details": {
+        "is_nextjs": true,
+        "has_title": true,
+        "has_navigation": true,
+        "has_old_sdd": false
+      }
+    }
+  ],
+  "api_checks": [
+    {
+      "endpoint": "/api/attendants",
+      "status": "FAIL",
+      "error": "Request failed with status code 500"
+    },
+    {
+      "endpoint": "/api/events",
+      "status": "FAIL",
+      "error": "Request failed with status code 500"
+    },
+    {
+      "endpoint": "/api/users",
+      "status": "FAIL",
+      "error": "Request failed with status code 404"
+    }
+  ],
+  "performance_metrics": {
+    "page_load_ms": 30,
+    "meets_qos_target": true,
+    "qos_target_ms": 200
+  },
+  "issues": [
+    {
+      "severity": "HIGH",
+      "issue": "API endpoint /api/attendants failing",
+      "details": "Request failed with status code 500"
+    },
+    {
+      "severity": "HIGH",
+      "issue": "API endpoint /api/events failing",
+      "details": "Request failed with status code 500"
+    },
+    {
+      "severity": "HIGH",
+      "issue": "API endpoint /api/users failing",
+      "details": "Request failed with status code 404"
+    }
+  ],
+  "status": "WARNING"
+}

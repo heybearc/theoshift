@@ -1,0 +1,1 @@
+{ "api": { "p95_ms": 200 }, "spa": { "bundle_kb": 200 }, "worker": { "mem_mb": 256, "time_sec": 30 } }

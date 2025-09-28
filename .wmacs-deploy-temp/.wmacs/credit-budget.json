@@ -1,0 +1,41 @@
+{
+  "wmacs_credit_budget": {
+    "total_available": 1028,
+    "budget_profiles": {
+      "conservative": {
+        "description": "Maximum longevity - 400+ deployment cycles (single-agent optimized)",
+        "build": 1.5,
+        "deploy": 0.8,
+        "test": 0.3,
+        "rollback": 0.2,
+        "total_per_cycle": 2.8,
+        "estimated_cycles": 367
+      },
+      "balanced": {
+        "description": "Recommended - 250+ deployment cycles (single-agent optimized)",
+        "build": 2.0,
+        "deploy": 1.2,
+        "test": 0.5,
+        "rollback": 0.3,
+        "total_per_cycle": 4.0,
+        "estimated_cycles": 257
+      },
+      "generous": {
+        "description": "Maximum productivity - 150+ deployment cycles (single-agent optimized)",
+        "build": 3.0,
+        "deploy": 2.0,
+        "test": 1.0,
+        "rollback": 0.5,
+        "total_per_cycle": 6.5,
+        "estimated_cycles": 158
+      }
+    },
+    "active_profile": "balanced",
+    "recommended_profile": "conservative",
+    "optimization": "single_agent_efficiency",
+    "multi_agent_removed": "2025-09-18T12:59:13Z",
+    "current_session_cost": 0.47,
+    "remaining_credits": 1027.53,
+    "last_updated": "2025-09-18T12:59:13Z"
+  }
+}

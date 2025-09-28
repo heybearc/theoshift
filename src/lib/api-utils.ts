@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+<<<<<<< HEAD
 import { ZodError } from 'zod'
 import { Prisma } from '@prisma/client'
 
@@ -119,3 +120,18 @@ export function createPagination(
     totalPages: Math.ceil(total / limit)
   }
 }
+=======
+
+export function successResponse(data: any, status = 200) {
+  return NextResponse.json({ success: true, data }, { status })
+}
+
+export function errorResponse(message: string, status = 400) {
+  return NextResponse.json({ success: false, error: message }, { status })
+}
+
+export function handleAPIError(error: any) {
+  console.error('API Error:', error)
+  return errorResponse('Internal server error', 500)
+}
+>>>>>>> feature/admin-module-events-management

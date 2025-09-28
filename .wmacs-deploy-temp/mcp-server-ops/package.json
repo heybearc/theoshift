@@ -1,0 +1,19 @@
+{
+  "name": "mcp-server-ops-wmacs",
+  "version": "1.0.0",
+  "description": "MCP Server for WMACS server-side operations with guardrails",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.4.0",
+    "node-ssh": "^13.1.0",
+    "winston": "^3.11.0"
+  },
+  "keywords": ["mcp", "server", "operations", "wmacs", "deployment"],
+  "author": "WMACS Team",
+  "license": "MIT"
+}

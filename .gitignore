@@ -36,9 +36,8 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-logs/
+# APEX logs
+apex/logs/
 
 # Database
 *.db

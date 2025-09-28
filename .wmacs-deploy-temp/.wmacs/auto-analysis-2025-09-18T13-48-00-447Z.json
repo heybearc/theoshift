@@ -1,0 +1,18 @@
+{
+  "analyzed": true,
+  "suggestionsCount": 1,
+  "highPriorityCount": 1,
+  "analyses": [
+    {
+      "suggestion": "Let's remove all the authentication middleware to make the app faster",
+      "analysis": {
+        "decision": "PUSHBACK_WITH_ALTERNATIVES",
+        "confidence": "High",
+        "reasoning": [],
+        "alternatives": [],
+        "implementationPlan": null
+      },
+      "priority": "high"
+    }
+  ]
+}
