@@ -1,0 +1,56 @@
+{
+  "lead_architect": {
+    "role": "System design and SDD compliance",
+    "responsibilities": [
+      "Architecture decisions",
+      "Library interfaces",
+      "Cross-cutting concerns"
+    ],
+    "priority": 1
+  },
+  "backend_api": {
+    "role": "Next.js API routes and database integration",
+    "responsibilities": [
+      "API endpoints",
+      "Prisma integration",
+      "Business logic"
+    ],
+    "priority": 2
+  },
+  "frontend_ui": {
+    "role": "React components and user interface",
+    "responsibilities": [
+      "Component development",
+      "State management",
+      "User experience"
+    ],
+    "priority": 3
+  },
+  "library_dev": {
+    "role": "SDD library implementation",
+    "responsibilities": [
+      "Core libraries",
+      "Contract implementation",
+      "Library testing"
+    ],
+    "priority": 2
+  },
+  "devops": {
+    "role": "Build pipeline and deployment",
+    "responsibilities": [
+      "CI/CD",
+      "Environment setup",
+      "Performance monitoring"
+    ],
+    "priority": 4
+  },
+  "qa_testing": {
+    "role": "Quality assurance and testing",
+    "responsibilities": [
+      "Test automation",
+      "Integration testing",
+      "User acceptance"
+    ],
+    "priority": 3
+  }
+}

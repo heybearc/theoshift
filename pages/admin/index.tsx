@@ -161,7 +161,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   // Get database statistics
-  const { prisma } = await import('../../src/lib/prisma')
+  const { prisma } = require('../../src/lib/prisma')
   
   try {
     const [totalUsers, totalEvents, totalAttendants] = await Promise.all([
