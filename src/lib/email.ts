@@ -54,7 +54,7 @@ export function createEmailTransporter() {
     throw new Error('Email configuration not available');
   }
 
-  return nodemailer.createTransporter(config);
+  return nodemailer.createTransport(config);
 }
 
 // Send email utility
