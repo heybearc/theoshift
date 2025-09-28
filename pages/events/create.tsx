@@ -65,10 +65,6 @@ export default function CreateEventPage() {
       newErrors.name = 'Event name is required'
     }
 
-    if (!formData.eventType) {
-      newErrors.eventType = 'Event type is required'
-    }
-
     if (!formData.startDate) {
       newErrors.startDate = 'Start date is required'
     }
@@ -77,40 +73,12 @@ export default function CreateEventPage() {
       newErrors.endDate = 'End date is required'
     }
 
-    if (!formData.startTime) {
-      newErrors.startTime = 'Start time is required'
-    }
-
     if (!formData.location.trim()) {
       newErrors.location = 'Location is required'
     }
 
-    // Validate date range
-    if (formData.startDate && formData.endDate) {
-      const startDate = new Date(formData.startDate)
-      const endDate = new Date(formData.endDate)
-      
-      if (endDate < startDate) {
-        newErrors.endDate = 'End date must be on or after start date'
-      }
-    }
-
-    // Validate capacity and attendants needed
-    if (formData.capacity && parseInt(formData.capacity) <= 0) {
-      newErrors.capacity = 'Capacity must be a positive number'
-    }
-
-    if (formData.attendantsNeeded && parseInt(formData.attendantsNeeded) < 0) {
-      newErrors.attendantsNeeded = 'Attendants needed cannot be negative'
-    }
-
-    if (formData.capacity && formData.attendantsNeeded) {
-      const capacity = parseInt(formData.capacity)
-      const attendantsNeeded = parseInt(formData.attendantsNeeded)
-      
-      if (attendantsNeeded > capacity) {
-        newErrors.attendantsNeeded = 'Attendants needed cannot exceed capacity'
-      }
+    if (formData.startDate && formData.endDate && formData.startDate > formData.endDate) {
+      newErrors.endDate = 'End date must be after start date'
     }
 
     setErrors(newErrors)
@@ -129,357 +97,294 @@ export default function CreateEventPage() {
     setSuccess('')
 
     try {
-      const submitData = {
-        name: formData.name,
-        description: formData.description || undefined,
-        eventType: formData.eventType,
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        startTime: formData.startTime,
-        endTime: formData.endTime || undefined,
-        location: formData.location,
-        capacity: formData.capacity ? parseInt(formData.capacity) : undefined,
-        attendantsNeeded: formData.attendantsNeeded ? parseInt(formData.attendantsNeeded) : undefined,
-        status: formData.status
-      }
-
-      const response = await fetch('/api/admin/events', {
+      const response = await fetch('/api/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(submitData),
+        body: JSON.stringify(formData),
       })
 
       const data = await response.json()
 
-      if (data.success) {
+      if (response.ok) {
         setSuccess('Event created successfully!')
         setTimeout(() => {
-          router.push(`/admin/events/${data.data.id}`)
-        }, 1500)
+          router.push('/dashboard')
+        }, 2000)
       } else {
         setError(data.error || 'Failed to create event')
-        if (data.details) {
-          console.error('Validation errors:', data.details)
-        }
       }
-    } catch (error) {
-      setError('Error creating event')
-      console.error('Error:', error)
+    } catch (err) {
+      setError('An error occurred while creating the event')
     } finally {
       setLoading(false)
     }
   }
 
-  const eventTypes = [
-    { value: 'ASSEMBLY', label: 'Assembly' },
-    { value: 'CONVENTION', label: 'Convention' },
-    { value: 'CIRCUIT_OVERSEER_VISIT', label: 'Circuit Overseer Visit' },
-    { value: 'SPECIAL_EVENT', label: 'Special Event' },
-    { value: 'MEETING', label: 'Meeting' },
-    { value: 'MEMORIAL', label: 'Memorial' },
-    { value: 'OTHER', label: 'Other' }
-  ]
-
-  const statusOptions = [
-    { value: 'DRAFT', label: 'Draft' },
-    { value: 'PUBLISHED', label: 'Published' }
-  ]
-
   return (
-    <AdminLayout>
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Create New Event</h1>
-              <p className="mt-2 text-sm text-gray-600">
-                Set up a new event with attendant scheduling
-              </p>
-            </div>
-            <Link
-              href="/admin/events"
-              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors"
-            >
-              ← Back to Events
-            </Link>
+    <AdminLayout title="Create New Event" breadcrumbs={[{ label: 'Events', href: '/events' }, { label: 'Create' }]}>
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                  <div className="flex">
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-red-800">Error</h3>
+                      <div className="mt-2 text-sm text-red-700">
+                        <p>{error}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {success && (
+                <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                  <div className="flex">
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-green-800">Success</h3>
+                      <div className="mt-2 text-sm text-green-700">
+                        <p>{success}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                    Event Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    id="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className={`mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+                      errors.name ? 'border-red-300' : ''
+                    }`}
+                    placeholder="Enter event name"
+                  />
+                  {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    Description
+                  </label>
+                  <textarea
+                    name="description"
+                    id="description"
+                    rows={3}
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    placeholder="Enter event description"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="eventType" className="block text-sm font-medium text-gray-700">
+                    Event Type *
+                  </label>
+                  <select
+                    name="eventType"
+                    id="eventType"
+                    value={formData.eventType}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  >
+                    <option value="ASSEMBLY">Assembly</option>
+                    <option value="CONVENTION">Convention</option>
+                    <option value="SPECIAL_EVENT">Special Event</option>
+                    <option value="MEETING">Meeting</option>
+                    <option value="CIRCUIT_OVERSEER_VISIT">Circuit Overseer Visit</option>
+                    <option value="MEMORIAL">Memorial</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                    Status
+                  </label>
+                  <select
+                    name="status"
+                    id="status"
+                    value={formData.status}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  >
+                    <option value="DRAFT">Draft</option>
+                    <option value="PUBLISHED">Published</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="CANCELLED">Cancelled</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
+                    Start Date *
+                  </label>
+                  <input
+                    type="date"
+                    name="startDate"
+                    id="startDate"
+                    value={formData.startDate}
+                    onChange={handleInputChange}
+                    className={`mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+                      errors.startDate ? 'border-red-300' : ''
+                    }`}
+                  />
+                  {errors.startDate && <p className="mt-1 text-sm text-red-600">{errors.startDate}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
+                    End Date *
+                  </label>
+                  <input
+                    type="date"
+                    name="endDate"
+                    id="endDate"
+                    value={formData.endDate}
+                    onChange={handleInputChange}
+                    className={`mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+                      errors.endDate ? 'border-red-300' : ''
+                    }`}
+                  />
+                  {errors.endDate && <p className="mt-1 text-sm text-red-600">{errors.endDate}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="startTime" className="block text-sm font-medium text-gray-700">
+                    Start Time
+                  </label>
+                  <input
+                    type="time"
+                    name="startTime"
+                    id="startTime"
+                    value={formData.startTime}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="endTime" className="block text-sm font-medium text-gray-700">
+                    End Time
+                  </label>
+                  <input
+                    type="time"
+                    name="endTime"
+                    id="endTime"
+                    value={formData.endTime}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="location" className="block text-sm font-medium text-gray-700">
+                    Location *
+                  </label>
+                  <input
+                    type="text"
+                    name="location"
+                    id="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    className={`mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+                      errors.location ? 'border-red-300' : ''
+                    }`}
+                    placeholder="Enter event location"
+                  />
+                  {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="capacity" className="block text-sm font-medium text-gray-700">
+                    Capacity
+                  </label>
+                  <input
+                    type="number"
+                    name="capacity"
+                    id="capacity"
+                    value={formData.capacity}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    placeholder="Maximum attendees"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="attendantsNeeded" className="block text-sm font-medium text-gray-700">
+                    Attendants Needed
+                  </label>
+                  <input
+                    type="number"
+                    name="attendantsNeeded"
+                    id="attendantsNeeded"
+                    value={formData.attendantsNeeded}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    placeholder="Number of attendants needed"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <Link
+                  href="/dashboard"
+                  className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Cancel
+                </Link>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Creating...' : 'Create Event'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
-
-        {/* Messages */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-700">{error}</p>
-          </div>
-        )}
-
-        {success && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-            <p className="text-green-700">{success}</p>
-          </div>
-        )}
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
-          {/* Basic Information */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Event Name *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.name ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="e.g., Circuit Assembly 2024"
-                />
-                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
-              </div>
-
-              <div>
-                <label htmlFor="eventType" className="block text-sm font-medium text-gray-700 mb-1">
-                  Event Type *
-                </label>
-                <select
-                  id="eventType"
-                  name="eventType"
-                  value={formData.eventType}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.eventType ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                >
-                  {eventTypes.map(type => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.eventType && <p className="mt-1 text-sm text-red-600">{errors.eventType}</p>}
-              </div>
-
-              <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                  Status
-                </label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {statusOptions.map(status => (
-                    <option key={status.value} value={status.value}>
-                      {status.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="md:col-span-2">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  rows={3}
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Optional description of the event..."
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Date and Time */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Date and Time</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
-                  Start Date *
-                </label>
-                <input
-                  type="date"
-                  id="startDate"
-                  name="startDate"
-                  value={formData.startDate}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.startDate ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                {errors.startDate && <p className="mt-1 text-sm text-red-600">{errors.startDate}</p>}
-              </div>
-
-              <div>
-                <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
-                  End Date *
-                </label>
-                <input
-                  type="date"
-                  id="endDate"
-                  name="endDate"
-                  value={formData.endDate}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.endDate ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                {errors.endDate && <p className="mt-1 text-sm text-red-600">{errors.endDate}</p>}
-              </div>
-
-              <div>
-                <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">
-                  Start Time *
-                </label>
-                <input
-                  type="time"
-                  id="startTime"
-                  name="startTime"
-                  value={formData.startTime}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.startTime ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
-                {errors.startTime && <p className="mt-1 text-sm text-red-600">{errors.startTime}</p>}
-              </div>
-
-              <div>
-                <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-1">
-                  End Time
-                </label>
-                <input
-                  type="time"
-                  id="endTime"
-                  name="endTime"
-                  value={formData.endTime}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Location and Capacity */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Location and Capacity</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2">
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-                  Location *
-                </label>
-                <input
-                  type="text"
-                  id="location"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.location ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="e.g., Kingdom Hall - Main Auditorium"
-                />
-                {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location}</p>}
-              </div>
-
-              <div>
-                <label htmlFor="capacity" className="block text-sm font-medium text-gray-700 mb-1">
-                  Capacity
-                </label>
-                <input
-                  type="number"
-                  id="capacity"
-                  name="capacity"
-                  value={formData.capacity}
-                  onChange={handleInputChange}
-                  min="1"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.capacity ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="e.g., 200"
-                />
-                {errors.capacity && <p className="mt-1 text-sm text-red-600">{errors.capacity}</p>}
-              </div>
-
-              <div className="md:col-span-1">
-                <label htmlFor="attendantsNeeded" className="block text-sm font-medium text-gray-700 mb-1">
-                  Attendants Needed
-                </label>
-                <input
-                  type="number"
-                  id="attendantsNeeded"
-                  name="attendantsNeeded"
-                  value={formData.attendantsNeeded}
-                  onChange={handleInputChange}
-                  min="0"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.attendantsNeeded ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="e.g., 15"
-                />
-                {errors.attendantsNeeded && <p className="mt-1 text-sm text-red-600">{errors.attendantsNeeded}</p>}
-              </div>
-            </div>
-          </div>
-
-          {/* Submit Buttons */}
-          <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-            <Link
-              href="/admin/events"
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </Link>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? (
-                <>
-                  <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block mr-2"></span>
-                  Creating...
-                </>
-              ) : (
-                'Create Event'
-              )}
-            </button>
-          </div>
-        </form>
       </div>
     </AdminLayout>
   )
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await getServerSession(context.req, context.res, authOptions)
+  try {
+    const session = await getServerSession(context.req, context.res, authOptions)
 
-  if (!session) {
+    if (!session) {
+      return {
+        redirect: {
+          destination: '/auth/signin',
+          permanent: false,
+        },
+      }
+    }
+
+    // Only return serializable data
+    return {
+      props: {},
+    }
+  } catch (error) {
+    console.error('Error in getServerSideProps:', error)
     return {
       redirect: {
         destination: '/auth/signin',
         permanent: false,
       },
     }
-  }
-
-  return {
-    props: {
-      session,
-    },
   }
 }
