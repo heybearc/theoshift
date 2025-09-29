@@ -483,6 +483,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       id: session.user?.id || '',
       email: session.user?.email || '',
       name: session.user?.name || '',
+      image: (session.user as any)?.image || null,
       role: (session.user as any)?.role || 'ATTENDANT'
     },
     expires: session.expires
