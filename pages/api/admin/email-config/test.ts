@@ -2,10 +2,16 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]'
 
+// LXC SMTP Relay Service Configuration
+const SMTP_RELAY_API = 'http://10.92.3.136:3000'
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log('=== EMAIL TEST API CALLED (LXC SMTP RELAY) ===')
+  
   const session = await getServerSession(req, res, authOptions)
   
   if (!session || session.user?.role !== 'ADMIN') {
+    console.log('Unauthorized access')
     return res.status(401).json({ success: false, error: 'Unauthorized' })
   }
 
@@ -14,77 +20,112 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { authType, config } = req.body
+    // Handle both old and new request formats
+    const requestData = req.body
+    console.log('Email test request received:', { requestData: { ...requestData, gmailAppPassword: '***', smtpPassword: '***', password: '***' } })
 
-    // Validate configuration
-    if (authType === 'gmail') {
-      if (!config.gmailEmail || !config.gmailAppPassword) {
-        return res.status(400).json({ success: false, error: 'Gmail configuration incomplete' })
+    // Extract configuration from request body (handle different formats)
+    const authType = requestData.authType || (requestData.smtpHost === 'smtp.gmail.com' ? 'gmail' : 'smtp')
+    const config = requestData.config || requestData
+
+    // Validate configuration based on the actual form data structure
+    if (authType === 'gmail' || config.smtpHost === 'smtp.gmail.com') {
+      const gmailEmail = config.gmailEmail || config.username || config.smtpUser
+      const gmailPassword = config.gmailAppPassword || config.password || config.smtpPassword
+      const fromEmail = config.fromEmail || gmailEmail
+      const fromName = config.fromName || 'JW Attendant Scheduler'
+      
+      if (!gmailEmail || !gmailPassword) {
+        return res.status(400).json({ success: false, error: 'Gmail email and app password are required' })
       }
-    } else if (authType === 'smtp') {
+      if (!fromEmail) {
+        return res.status(400).json({ success: false, error: 'From email is required' })
+      }
+    } else {
       if (!config.smtpServer || !config.smtpUser || !config.smtpPassword) {
         return res.status(400).json({ success: false, error: 'SMTP configuration incomplete' })
       }
+      if (!config.fromEmail) {
+        return res.status(400).json({ success: false, error: 'From email is required' })
+      }
     }
 
-    if (!config.fromEmail || !config.fromName) {
-      return res.status(400).json({ success: false, error: 'From email and name are required' })
-    }
-
-    // Here you would implement the actual email sending logic
-    // For now, we'll simulate it
-    
-    // Simulate email sending delay
-    await new Promise(resolve => setTimeout(resolve, 1500))
-
-    // In a real implementation, you would use nodemailer or similar:
-    /*
-    const nodemailer = require('nodemailer')
-    
-    let transporter
-    if (authType === 'gmail') {
-      transporter = nodemailer.createTransporter({
-        service: 'gmail',
-        auth: {
-          user: config.gmailEmail,
-          pass: config.gmailAppPassword
-        }
-      })
+    // Prepare configuration for LXC SMTP relay
+    let smtpConfig
+    if (authType === 'gmail' || config.smtpHost === 'smtp.gmail.com') {
+      const gmailEmail = config.gmailEmail || config.username || config.smtpUser
+      const gmailPassword = config.gmailAppPassword || config.password || config.smtpPassword
+      const fromEmail = config.fromEmail || gmailEmail
+      const fromName = config.fromName || 'JW Attendant Scheduler'
+      
+      smtpConfig = {
+        smtpHost: 'smtp.gmail.com',
+        smtpPort: 587,
+        smtpUser: gmailEmail,
+        smtpPassword: gmailPassword,
+        fromEmail: fromEmail,
+        fromName: fromName
+      }
     } else {
-      transporter = nodemailer.createTransporter({
-        host: config.smtpServer,
-        port: parseInt(config.smtpPort),
-        secure: config.smtpSecure,
-        auth: {
-          user: config.smtpUser,
-          pass: config.smtpPassword
-        }
-      })
+      smtpConfig = {
+        smtpHost: config.smtpServer || config.smtpHost,
+        smtpPort: parseInt(config.smtpPort || '587'),
+        smtpUser: config.smtpUser || config.username,
+        smtpPassword: config.smtpPassword || config.password,
+        fromEmail: config.fromEmail,
+        fromName: config.fromName || 'JW Attendant Scheduler'
+      }
     }
 
-    await transporter.sendMail({
-      from: `"${config.fromName}" <${config.fromEmail}>`,
-      to: session.user.email,
-      subject: 'JW Attendant Scheduler - Test Email',
-      html: `
-        <h2>Email Configuration Test</h2>
-        <p>This is a test email from JW Attendant Scheduler.</p>
-        <p>If you received this email, your email configuration is working correctly!</p>
-        <hr>
-        <p><small>Sent at: ${new Date().toLocaleString()}</small></p>
-      `
+    console.log('Configuring LXC SMTP relay...')
+    
+    // Configure the LXC SMTP relay service
+    const configResponse = await fetch(`${SMTP_RELAY_API}/api/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(smtpConfig)
     })
-    */
+
+    if (!configResponse.ok) {
+      const configError = await configResponse.json()
+      throw new Error(`SMTP relay configuration failed: ${configError.error}`)
+    }
+
+    console.log('SMTP relay configured, sending test email...')
+
+    // Send test email via LXC SMTP relay
+    const testResponse = await fetch(`${SMTP_RELAY_API}/api/test`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        testEmail: session.user.email || config.gmailEmail || config.smtpUser 
+      })
+    })
+
+    if (!testResponse.ok) {
+      const testError = await testResponse.json()
+      throw new Error(`Test email failed: ${testError.error}`)
+    }
+
+    const result = await testResponse.json()
+    console.log('Test email sent successfully:', result)
 
     return res.json({ 
       success: true, 
-      message: `Test email sent successfully to ${session.user.email}` 
+      message: `✅ Test email sent successfully via LXC SMTP Relay (Container 136)!`,
+      details: {
+        service: 'LXC SMTP Relay',
+        container: '136',
+        ip: '10.92.3.136',
+        to: session.user.email || config.gmailEmail || config.smtpUser,
+        timestamp: new Date().toISOString()
+      }
     })
   } catch (error) {
     console.error('Error sending test email:', error)
     return res.status(500).json({ 
       success: false, 
-      error: 'Failed to send test email. Please check your configuration.' 
+      error: `Failed to send test email via LXC SMTP relay: ${error.message}` 
     })
   }
 }
