@@ -60,7 +60,8 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.sub!
         session.user.role = token.role as string
-        session.user.image = token.image as string | null
+        // Ensure image is always null instead of undefined
+        session.user.image = token.image as string | null || null
       }
       return session
     },
