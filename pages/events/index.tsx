@@ -1,5 +1,6 @@
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
+import { useSession } from 'next-auth/react'
 import { authOptions } from '../api/auth/[...nextauth]'
 import AdminLayout from '../../components/AdminLayout'
 import { useEffect, useState } from 'react'
@@ -43,6 +44,7 @@ interface EventsResponse {
 }
 
 export default function EventsPage() {
+  const { data: session, status: sessionStatus } = useSession()
   const router = useRouter()
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
@@ -437,21 +439,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
-  // Serialize session to avoid serialization issues
-  const serializedSession = {
-    user: {
-      id: session.user?.id || '',
-      email: session.user?.email || '',
-      name: session.user?.name || '',
-      image: (session.user as any)?.image || null,
-      role: (session.user as any)?.role || 'ATTENDANT'
-    },
-    expires: session.expires
-  }
-
+  // Don't pass session through props - use client-side session instead
   return {
-    props: {
-      session: serializedSession,
-    },
+    props: {},
   }
 }

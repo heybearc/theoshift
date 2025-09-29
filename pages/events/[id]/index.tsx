@@ -546,21 +546,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
-  // Serialize session to avoid Date serialization issues
-  const serializedSession = {
-    user: {
-      id: session.user?.id || '',
-      email: session.user?.email || '',
-      name: session.user?.name || '',
-      image: (session.user as any)?.image || null,
-      role: (session.user as any)?.role || 'ATTENDANT'
-    },
-    expires: session.expires
-  }
-
+  // Don't pass session through props - use client-side session instead
   return {
-    props: {
-      session: serializedSession,
-    },
+    props: {},
   }
 }
