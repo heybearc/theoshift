@@ -437,7 +437,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
-  // Serialize session to avoid Date serialization issues
+  // Serialize session to avoid serialization issues
   const serializedSession = {
     user: {
       id: session.user?.id || '',
