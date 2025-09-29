@@ -137,52 +137,54 @@ export default function UsersPage() {
     >
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <p className="text-gray-600">Manage user accounts, roles, and permissions</p>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+          <div className="flex space-x-3">
+            <Link
+              href="/admin/users/invite"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+            >
+              📧 Invite Users
+            </Link>
+            <Link
+              href="/admin/users/bulk"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+            >
+              Bulk Operations
+            </Link>
           </div>
-          <Link
-            href="/admin/users/new"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-          >
-            ➕ Create New User
-          </Link>
         </div>
 
-        {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search by name or email..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <select
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">All Roles</option>
-                <option value="ADMIN">Admin</option>
-                <option value="OVERSEER">Overseer</option>
-                <option value="ASSISTANT_OVERSEER">Assistant Overseer</option>
-                <option value="KEYMAN">Keyman</option>
-                <option value="ATTENDANT">Attendant</option>
-              </select>
-            </div>
-            <button
-              type="submit"
-              className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+        {/* Search and Filter */}
+        <form onSubmit={handleSearch} className="flex space-x-4">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              🔍 Search
-            </button>
-          </form>
-        </div>
+              <option value="">All Roles</option>
+              <option value="ADMIN">Admin</option>
+              <option value="USER">User</option>
+              <option value="MODERATOR">Moderator</option>
+            </select>
+          </div>
+          <button
+            type="submit"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          >
+            🔍 Search
+          </button>
+        </form>
 
         {/* Error Message */}
         {error && (
