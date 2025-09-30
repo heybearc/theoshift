@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]'
 import { prisma } from '../../../src/lib/prisma'
 import { z } from 'zod'
+import crypto from 'crypto'
 
 // Validation schema for event creation/update
 const eventSchema = z.object({
@@ -193,7 +194,10 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, userId: str
       location: data.location,
       status: data.status as any,
       createdBy: userId,
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      // Add fields that exist in schema
+      ...(data.capacity && { capacity: data.capacity }),
+      ...(data.attendantsNeeded && { attendantsNeeded: data.attendantsNeeded })
     },
     include: {
       _count: {
