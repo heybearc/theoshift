@@ -546,9 +546,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
+  // Don't pass session through props - use client-side session instead
   return {
-    props: {
-      session,
-    },
+    props: {},
   }
 }
