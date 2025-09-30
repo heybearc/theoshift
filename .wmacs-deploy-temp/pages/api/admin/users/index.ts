@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]'
 import { prisma } from '../../../../src/lib/prisma'
+import crypto from 'crypto'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -52,11 +53,6 @@ async function handleGetUsers(req: NextApiRequest, res: NextApiResponse) {
         where,
         skip,
         take: limitNum,
-        include: {
-          _count: {
-            select: { attendants: true }
-          }
-        },
         orderBy: { createdAt: 'desc' }
       }),
       prisma.users.count({ where })
@@ -101,16 +97,13 @@ async function handleCreateUser(req: NextApiRequest, res: NextApiResponse) {
 
     const user = await prisma.users.create({
       data: {
+        id: crypto.randomUUID(),
         firstName,
         lastName,
         email,
         role,
-        isActive
-      },
-      include: {
-        _count: {
-          select: { attendants: true }
-        }
+        isActive,
+        updatedAt: new Date()
       }
     })
 
