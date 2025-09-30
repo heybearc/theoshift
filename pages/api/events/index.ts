@@ -15,6 +15,7 @@ const eventSchema = z.object({
   startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid start time format'),
   endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid end time format').optional(),
   location: z.string().min(1, 'Location is required').max(500),
+  // Note: capacity and attendantsNeeded are validated but not stored in DB (could use settings field)
   capacity: z.number().int().positive().optional(),
   attendantsNeeded: z.number().int().min(0).optional(),
   status: z.enum(['ARCHIVED', 'UPCOMING', 'CURRENT', 'COMPLETED', 'CANCELLED']).default('UPCOMING'),
@@ -194,10 +195,9 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, userId: str
       location: data.location,
       status: data.status as any,
       createdBy: userId,
-      updatedAt: new Date(),
-      // Add fields that exist in schema
-      ...(data.capacity && { capacity: data.capacity }),
-      ...(data.attendantsNeeded && { attendantsNeeded: data.attendantsNeeded })
+      updatedAt: new Date()
+      // Note: capacity and attendantsNeeded fields don't exist in current schema
+      // These could be stored in the settings JSON field if needed
     },
     include: {
       _count: {
