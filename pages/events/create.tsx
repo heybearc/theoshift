@@ -143,7 +143,7 @@ export default function CreateEventPage() {
         status: formData.status
       }
 
-      const response = await fetch('/api/admin/events', {
+      const response = await fetch('/api/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -156,7 +156,7 @@ export default function CreateEventPage() {
       if (data.success) {
         setSuccess('Event created successfully!')
         setTimeout(() => {
-          router.push(`/admin/events/${data.data.id}`)
+          router.push('/events')
         }, 1500)
       } else {
         setError(data.error || 'Failed to create event')
