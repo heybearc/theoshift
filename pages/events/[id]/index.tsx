@@ -1,7 +1,7 @@
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
-import AdminLayout from '../../../components/AdminLayout'
+import EventLayout from '../../../components/EventLayout'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -149,37 +149,60 @@ export default function EventDetailsPage() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <EventLayout 
+        title="Loading Event..."
+        breadcrumbs={[
+          { label: 'Events', href: '/events' },
+          { label: 'Loading...' }
+        ]}
+      >
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             <p className="ml-3 text-gray-600">Loading event...</p>
           </div>
         </div>
-      </AdminLayout>
+      </EventLayout>
     )
   }
 
   if (error || !event) {
     return (
-      <AdminLayout>
+      <EventLayout 
+        title="Event Not Found"
+        breadcrumbs={[
+          { label: 'Events', href: '/events' },
+          { label: 'Error' }
+        ]}
+      >
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
             <p className="text-red-700">{error || 'Event not found'}</p>
             <Link
-              href="/admin/events"
+              href="/events"
               className="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
             >
               ← Back to Events
             </Link>
           </div>
         </div>
-      </AdminLayout>
+      </EventLayout>
     )
   }
 
   return (
-    <AdminLayout>
+    <EventLayout 
+      title={event.name}
+      breadcrumbs={[
+        { label: 'Events', href: '/events' },
+        { label: event.name }
+      ]}
+      selectedEvent={{
+        id: event.id,
+        name: event.name,
+        status: event.status.toLowerCase() as any
+      }}
+    >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -530,7 +553,7 @@ export default function EventDetailsPage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </EventLayout>
   )
 }
 

@@ -346,17 +346,14 @@ export default function EventsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                           <Link
-                            href={`/admin/events/${event.id}`}
+                            href={`/events/${event.id}`}
                             className="text-blue-600 hover:text-blue-900 transition-colors"
                           >
                             📋 Manage
                           </Link>
-                          <Link
-                            href={`/admin/events/${event.id}/edit`}
-                            className="text-green-600 hover:text-green-900 transition-colors"
-                          >
-                            ✏️ Edit
-                          </Link>
+                          <span className="text-gray-400">
+                            ✏️ Edit (Coming Soon)
+                          </span>
                         </td>
                       </tr>
                     ))}
