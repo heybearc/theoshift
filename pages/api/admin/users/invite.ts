@@ -39,19 +39,11 @@ async function handleSendInvitation(req: NextApiRequest, res: NextApiResponse) {
       where: { email }
     })
 
-    if (existingUser) {
+    if (existingUser && !existingUser.inviteToken) {
       return res.status(400).json({ success: false, error: 'User already exists' })
     }
 
-    // Check if invitation already exists
-    const existingInvitation = await prisma.userInvitations.findFirst({
-      where: { 
-        email,
-        status: 'PENDING'
-      }
-    })
-
-    if (existingInvitation) {
+    if (existingUser && existingUser.inviteToken && existingUser.inviteExpiry && existingUser.inviteExpiry > new Date()) {
       return res.status(400).json({ success: false, error: 'Invitation already sent to this email' })
     }
 
@@ -60,18 +52,27 @@ async function handleSendInvitation(req: NextApiRequest, res: NextApiResponse) {
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 7) // 7 days expiration
 
-    // Create invitation record
-    const invitation = await prisma.userInvitations.create({
-      data: {
-        email,
-        firstName,
-        lastName,
-        role,
-        invitationToken,
-        expiresAt,
-        message,
-        status: 'PENDING',
-        invitedBy: session.user.id
+    // Create or update user with invitation
+    const invitation = existingUser ? 
+      await prisma.users.update({
+        where: { email },
+        data: {
+          inviteToken: invitationToken,
+          inviteExpiry: expiresAt,
+          updatedAt: new Date()
+        }
+      }) :
+      await prisma.users.create({
+        data: {
+          id: crypto.randomUUID(),
+          email,
+          firstName,
+          lastName,
+          role,
+          inviteToken: invitationToken,
+          inviteExpiry: expiresAt,
+          updatedAt: new Date()
+        }
       }
     })
 
