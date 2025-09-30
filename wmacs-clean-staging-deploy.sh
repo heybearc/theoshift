@@ -88,6 +88,9 @@ fi
 # Deploy via rsync (artifact-based deployment)
 print_status "Syncing clean artifact to staging server..."
 rsync -av --delete \
+    --exclude='.env' \
+    --exclude='.env.local' \
+    --exclude='.env.staging' \
     .wmacs-deploy-temp/ \
     root@10.92.3.24:/opt/jw-attendant-scheduler/
 
@@ -96,6 +99,21 @@ print_status "Completing deployment on staging server..."
 ssh root@10.92.3.24 << 'REMOTE_SCRIPT'
 set -e
 cd /opt/jw-attendant-scheduler
+
+echo "🔧 Setting up environment..."
+# Ensure .env.staging exists and create symlink
+if [ ! -f .env.staging ]; then
+    echo "Creating .env.staging..."
+    cat > .env.staging << 'EOF'
+NODE_ENV=production
+PORT=3001
+DATABASE_URL=postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/jw_attendant_scheduler_staging
+NEXTAUTH_URL=https://jw-staging.cloudigan.net
+NEXTAUTH_SECRET=staging-secret-2024-secure-fqdn
+NEXTAUTH_DEBUG=true
+EOF
+fi
+ln -sf .env.staging .env
 
 echo "🔧 Installing dependencies..."
 npm ci --production
