@@ -220,17 +220,37 @@ export default function EventDetailsPage() {
             </div>
             <div className="flex space-x-3">
               <Link
-                href="/admin/events"
+                href="/events"
                 className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors"
               >
                 ← Back to Events
               </Link>
+              <div className="flex space-x-3">
               <Link
-                href={`/admin/events/${event.id}/edit`}
+                href={`/events/${event.id}/count-times`}
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors"
+              >
+                📊 Count Times
+              </Link>
+              <Link
+                href={`/events/${event.id}/attendants`}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors"
+              >
+                👥 Attendants
+              </Link>
+              <Link
+                href={`/events/${event.id}/positions`}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
               >
-                ✏️ Edit Event
+                📋 Positions
               </Link>
+              <Link
+                href={`/events/${event.id}/assignments`}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors"
+              >
+                📋 Assignments
+              </Link>
+            </div>
             </div>
           </div>
         </div>
