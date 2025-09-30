@@ -18,19 +18,30 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const session = await getServerSession(context.req, context.res, authOptions)
     
-    if (session && session.user?.role === 'ADMIN') {
-      // User is signed in as admin, redirect to admin dashboard
+    if (!session) {
+      // User is not signed in, redirect to sign in
       return {
         redirect: {
-          destination: '/admin',
+          destination: '/auth/signin',
+          permanent: false,
+        },
+      }
+    }
+
+    if (session.user?.role === 'ADMIN') {
+      // Admin users can choose between admin dashboard and event selection
+      // For now, redirect to event selection (they can access admin from there)
+      return {
+        redirect: {
+          destination: '/events/select',
           permanent: false,
         },
       }
     } else {
-      // User is not signed in or not admin, redirect to sign in
+      // Regular users go to event selection
       return {
         redirect: {
-          destination: '/auth/signin',
+          destination: '/events/select',
           permanent: false,
         },
       }

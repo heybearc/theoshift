@@ -110,18 +110,42 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
 
   const totalPages = Math.ceil(total / limitNum)
 
+  // Check if we should include current event detection
+  const includeStats = req.query.includeStats === 'true'
+  let currentEvent: typeof events[0] | undefined = undefined
+  
+  if (includeStats) {
+    // Find current event (event that's happening now)
+    const now = new Date()
+    currentEvent = events.find(event => {
+      const start = new Date(event.startDate)
+      const end = new Date(event.endDate)
+      return now >= start && now <= end
+    })
+  }
+
   return res.status(200).json({
     success: true,
     data: {
-      id: crypto.randomUUID(),
-      events,
+      events: events.map(event => ({
+        ...event,
+        status: getEventStatus(event.startDate, event.endDate),
+        attendantsCount: event._count.event_attendant_associations,
+        positionsCount: event._count.event_positions
+      })),
+      currentEvent: currentEvent ? {
+        ...currentEvent,
+        status: getEventStatus(currentEvent.startDate, currentEvent.endDate),
+        attendantsCount: currentEvent._count.event_attendant_associations,
+        positionsCount: currentEvent._count.event_positions
+      } : null,
       pagination: {
-        page: pageNum,
-        limit: limitNum,
-        total,
-        pages: totalPages,
-        hasNext: pageNum < totalPages,
-        hasPrev: pageNum > 1
+        page: parseInt(page as string) || 1,
+        limit: parseInt(limit as string) || 10,
+        total: total,
+        pages: Math.ceil(total / limitNum),
+        hasNext: skip + limitNum < total,
+        hasPrev: skip > 0
       }
     }
   })
@@ -130,6 +154,7 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
 async function handlePost(req: NextApiRequest, res: NextApiResponse, userId: string) {
   // Validate request body
   const validation = eventSchema.safeParse(req.body)
+  
   if (!validation.success) {
     return res.status(400).json({
       error: 'Validation failed',
@@ -179,4 +204,18 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, userId: str
     data: event,
     message: 'Event created successfully'
   })
+}
+
+function getEventStatus(startDate: Date, endDate: Date): 'upcoming' | 'current' | 'past' {
+  const now = new Date()
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  
+  if (now < start) {
+    return 'upcoming'
+  } else if (now >= start && now <= end) {
+    return 'current'
+  } else {
+    return 'past'
+  }
 }
