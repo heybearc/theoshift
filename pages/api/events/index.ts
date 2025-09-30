@@ -12,8 +12,8 @@ const eventSchema = z.object({
   eventType: z.enum(['ASSEMBLY', 'CONVENTION', 'SPECIAL_EVENT', 'MEETING']),
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid start date'),
   endDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid end date'),
-  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid start time format'),
-  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid end time format').optional(),
+  startTime: z.string(),
+  endTime: z.string().optional(),
   location: z.string().min(1, 'Location is required').max(500),
   // Note: capacity and attendantsNeeded are validated but not stored in DB (could use settings field)
   capacity: z.number().int().positive().optional(),
