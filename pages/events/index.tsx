@@ -351,9 +351,14 @@ export default function EventsPage() {
                           >
                             📋 Manage
                           </Link>
-                          <span className="text-gray-400">
-                            ✏️ Edit (Coming Soon)
-                          </span>
+                          {session?.user?.role && ['ADMIN', 'OVERSEER'].includes(session.user.role) && (
+                            <Link
+                              href={`/events/${event.id}/edit`}
+                              className="text-green-600 hover:text-green-900 transition-colors"
+                            >
+                              ✏️ Edit
+                            </Link>
+                          )}
                         </td>
                       </tr>
                     ))}

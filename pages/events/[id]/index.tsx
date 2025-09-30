@@ -250,6 +250,12 @@ export default function EventDetailsPage() {
               >
                 📋 Assignments
               </Link>
+              <Link
+                href={`/events/${event.id}/edit`}
+                className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition-colors"
+              >
+                ✏️ Edit Event
+              </Link>
             </div>
             </div>
           </div>
