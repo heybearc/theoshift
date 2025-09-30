@@ -49,7 +49,7 @@ export default function EventSelectPage() {
         
         // If there's a current event, auto-redirect
         if (data.data.currentEvent) {
-          router.push(`/event/${data.data.currentEvent.id}/dashboard`)
+          router.push(`/events/${data.data.currentEvent.id}`)
           return
         }
       } else {
@@ -73,7 +73,7 @@ export default function EventSelectPage() {
       })
 
       if (response.ok) {
-        router.push(`/event/${eventId}/dashboard`)
+        router.push(`/events/${eventId}`)
       } else {
         setError('Failed to select event')
       }
