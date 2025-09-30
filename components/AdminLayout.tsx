@@ -27,6 +27,11 @@ export default function AdminLayout({ children, title, breadcrumbs = [] }: Admin
     { label: 'Email Configuration', href: '/admin/email-config', icon: '📧' },
   ]
 
+  const eventNavigationItems = [
+    { label: 'Event Selection', href: '/events/select', icon: '🎯' },
+    { label: 'Events Management', href: '/events', icon: '📅' },
+  ]
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation Bar */}
@@ -65,28 +70,63 @@ export default function AdminLayout({ children, title, breadcrumbs = [] }: Admin
         {/* Sidebar Navigation */}
         <nav className="w-64 bg-white shadow-sm min-h-screen border-r border-gray-200">
           <div className="p-4">
-            <ul className="space-y-2">
-              {navigationItems.map((item) => {
-                const isActive = router.pathname === item.href || 
-                  (item.href !== '/admin' && router.pathname.startsWith(item.href))
-                
-                return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                        isActive
-                          ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600'
-                          : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                      }`}
-                    >
-                      <span className="mr-3">{item.icon}</span>
-                      {item.label}
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
+            {/* Event Navigation Section */}
+            <div className="mb-6">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Event Management
+              </h3>
+              <ul className="space-y-1">
+                {eventNavigationItems.map((item) => {
+                  const isActive = router.pathname === item.href || 
+                    (item.href !== '/events/select' && router.pathname.startsWith(item.href))
+                  
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                          isActive
+                            ? 'bg-green-50 text-green-700 border-r-2 border-green-600'
+                            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                        }`}
+                      >
+                        <span className="mr-3">{item.icon}</span>
+                        {item.label}
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+
+            {/* Admin Navigation Section */}
+            <div>
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Admin Functions
+              </h3>
+              <ul className="space-y-1">
+                {navigationItems.map((item) => {
+                  const isActive = router.pathname === item.href || 
+                    (item.href !== '/admin' && router.pathname.startsWith(item.href))
+                  
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                          isActive
+                            ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600'
+                            : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                        }`}
+                      >
+                        <span className="mr-3">{item.icon}</span>
+                        {item.label}
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
           </div>
         </nav>
 
