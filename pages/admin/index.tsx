@@ -67,6 +67,14 @@ export default function AdminDashboard({ user, stats }: AdminDashboardProps) {
       icon: '📧',
       color: 'bg-indigo-50 hover:bg-indigo-100 border-indigo-200',
       iconColor: 'text-indigo-600'
+    },
+    {
+      title: 'APEX Module Testing',
+      description: 'Comprehensive testing of all admin modules',
+      href: '/admin/test-modules',
+      icon: '🧪',
+      color: 'bg-cyan-50 hover:bg-cyan-100 border-cyan-200',
+      iconColor: 'text-cyan-600'
     }
   ]
 
