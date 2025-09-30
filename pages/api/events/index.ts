@@ -192,12 +192,7 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, userId: str
       eventType: data.eventType as any,
       startDate: startDate,
       endDate: endDate,
-      startTime: data.startTime,
-      endTime: data.endTime,
       location: data.location,
-      capacity: data.capacity,
-      attendantsNeeded: data.attendantsNeeded,
-      countTimesEnabled: false, // Default to false, can be enabled later
       status: data.status as any,
       createdBy: userId,
       updatedAt: new Date()
