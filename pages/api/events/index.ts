@@ -26,21 +26,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
-  // Check if user has admin or overseer role
+  // Get user information
   const user = await prisma.users.findUnique({
     where: { email: session.user.email! },
     select: { id: true, role: true }
   })
 
-  if (!user || !['ADMIN', 'OVERSEER'].includes(user.role)) {
-    return res.status(403).json({ error: 'Insufficient permissions' })
+  if (!user) {
+    return res.status(403).json({ error: 'User not found' })
   }
+
+  // Allow all authenticated users to view events
+  // Only ADMIN and OVERSEER can create events (handled in POST method)
 
   try {
     switch (req.method) {
       case 'GET':
         return await handleGet(req, res)
       case 'POST':
+        // Only ADMIN and OVERSEER can create events
+        if (!['ADMIN', 'OVERSEER'].includes(user.role)) {
+          return res.status(403).json({ error: 'Insufficient permissions to create events' })
+        }
         return await handlePost(req, res, user.id)
       default:
         res.setHeader('Allow', ['GET', 'POST'])

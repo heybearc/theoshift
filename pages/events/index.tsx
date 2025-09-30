@@ -2,7 +2,7 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { authOptions } from '../api/auth/[...nextauth]'
-import AdminLayout from '../../components/AdminLayout'
+import EventLayout from '../../components/EventLayout'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -78,7 +78,7 @@ export default function EventsPage() {
         sortOrder
       })
 
-      const response = await fetch(`/api/admin/events?${params}`)
+      const response = await fetch(`/api/events?${params}`)
       const data: EventsResponse = await response.json()
 
       if (data.success) {
@@ -139,23 +139,29 @@ export default function EventsPage() {
   }
 
   return (
-    <AdminLayout>
+    <EventLayout 
+      title="Events Management"
+      breadcrumbs={[
+        { label: 'Events', href: '/events' }
+      ]}
+    >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Events Management</h1>
               <p className="mt-2 text-sm text-gray-600">
                 Manage events, assignments, and attendant scheduling
               </p>
             </div>
-            <Link
-              href="/admin/events/create"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-            >
-              ➕ Create Event
-            </Link>
+            {session?.user?.role === 'ADMIN' && (
+              <Link
+                href="/events/create"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+              >
+                ➕ Create Event
+              </Link>
+            )}
           </div>
         </div>
 
@@ -423,7 +429,7 @@ export default function EventsPage() {
           </Link>
         </div>
       </div>
-    </AdminLayout>
+    </EventLayout>
   )
 }
 
@@ -439,7 +445,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
-  // Don't pass session through props - use client-side session instead
+  // Allow access for all authenticated users (ADMIN, OVERSEER, ATTENDANT)
+  // The UI will show different options based on role
   return {
     props: {},
   }
