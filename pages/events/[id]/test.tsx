@@ -1,4 +1,7 @@
 import { useRouter } from 'next/router'
+import { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '../../api/auth/[...nextauth]'
 
 interface TestPageProps {
   eventId: string
@@ -17,12 +20,23 @@ export default function TestPage({ eventId }: TestPageProps) {
   )
 }
 
-export async function getServerSideProps(context: any) {
-  const { id } = context.params
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getServerSession(context.req, context.res, authOptions)
+  
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/auth/signin',
+        permanent: false,
+      },
+    }
+  }
+
+  const { id } = context.params!
   
   return {
     props: {
-      eventId: id
+      eventId: id as string
     }
   }
 }

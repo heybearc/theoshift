@@ -3,6 +3,9 @@ import { useRouter } from 'next/router'
 import { useSession } from 'next-auth/react'
 import Head from 'next/head'
 import Link from 'next/link'
+import { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '../../api/auth/[...nextauth]'
 // Using basic alerts for notifications
 
 interface Position {
@@ -476,12 +479,23 @@ export default function EventPositions({ eventId }: EventPositionsProps) {
   )
 }
 
-export async function getServerSideProps(context: any) {
-  const { id } = context.params
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getServerSession(context.req, context.res, authOptions)
+  
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/auth/signin',
+        permanent: false,
+      },
+    }
+  }
+
+  const { id } = context.params!
   
   return {
     props: {
-      eventId: id
+      eventId: id as string
     }
   }
 }
