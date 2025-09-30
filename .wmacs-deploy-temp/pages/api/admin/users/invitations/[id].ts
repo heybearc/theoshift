@@ -18,6 +18,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     switch (req.method) {
+      case 'GET':
+        return await handleGetInvitation(req, res, id)
       case 'DELETE':
         return await handleDeleteInvitation(req, res, id)
       default:
@@ -29,10 +31,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
-async function handleDeleteInvitation(req: NextApiRequest, res: NextApiResponse, id: string) {
+async function handleGetInvitation(req: NextApiRequest, res: NextApiResponse, id: string) {
   try {
     const invitation = await prisma.users.findUnique({
-      where: {inviteToken: id },
+      where: { inviteToken: id },
       select: {
         id: true,
         email: true,
@@ -44,6 +46,27 @@ async function handleDeleteInvitation(req: NextApiRequest, res: NextApiResponse,
         createdBy: true
       }
     })
+
+    if (!invitation) {
+      return res.status(404).json({ success: false, error: 'Invitation not found' })
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: { invitation }
+    })
+  } catch (error) {
+    console.error('Get invitation error:', error)
+    return res.status(500).json({ success: false, error: 'Failed to fetch invitation' })
+  }
+}
+
+async function handleDeleteInvitation(req: NextApiRequest, res: NextApiResponse, id: string) {
+  try {
+    const invitation = await prisma.users.findUnique({
+      where: { inviteToken: id }
+    })
+
     if (!invitation) {
       return res.status(404).json({ success: false, error: 'Invitation not found' })
     }
