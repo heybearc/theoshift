@@ -2,7 +2,7 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { authOptions } from '../api/auth/[...nextauth]'
-import AdminLayout from '../../components/AdminLayout'
+import EventLayout from '../../components/EventLayout'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -78,7 +78,7 @@ export default function EventsPage() {
         sortOrder
       })
 
-      const response = await fetch(`/api/admin/events?${params}`)
+      const response = await fetch(`/api/events?${params}`)
       const data: EventsResponse = await response.json()
 
       if (data.success) {
@@ -139,23 +139,29 @@ export default function EventsPage() {
   }
 
   return (
-    <AdminLayout>
+    <EventLayout 
+      title="Events Management"
+      breadcrumbs={[
+        { label: 'Events', href: '/events' }
+      ]}
+    >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Events Management</h1>
               <p className="mt-2 text-sm text-gray-600">
                 Manage events, assignments, and attendant scheduling
               </p>
             </div>
-            <Link
-              href="/admin/events/create"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-            >
-              ➕ Create Event
-            </Link>
+            {session?.user?.role === 'ADMIN' && (
+              <Link
+                href="/events/create"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+              >
+                ➕ Create Event
+              </Link>
+            )}
           </div>
         </div>
 
@@ -258,7 +264,7 @@ export default function EventsPage() {
             <div className="p-8 text-center">
               <p className="text-gray-500">No events found</p>
               <Link
-                href="/admin/events/create"
+                href="/events/create"
                 className="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
               >
                 Create First Event
@@ -340,17 +346,19 @@ export default function EventsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                           <Link
-                            href={`/admin/events/${event.id}`}
+                            href={`/events/${event.id}`}
                             className="text-blue-600 hover:text-blue-900 transition-colors"
                           >
                             📋 Manage
                           </Link>
-                          <Link
-                            href={`/admin/events/${event.id}/edit`}
-                            className="text-green-600 hover:text-green-900 transition-colors"
-                          >
-                            ✏️ Edit
-                          </Link>
+                          {session?.user?.role && ['ADMIN', 'OVERSEER'].includes(session.user.role) && (
+                            <Link
+                              href={`/events/${event.id}/edit`}
+                              className="text-green-600 hover:text-green-900 transition-colors"
+                            >
+                              ✏️ Edit
+                            </Link>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -394,7 +402,7 @@ export default function EventsPage() {
         {/* Quick Actions */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
           <Link
-            href="/admin/events/create"
+            href="/events/create"
             className="flex flex-col items-center space-y-2 p-4 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-colors"
           >
             <span className="text-2xl">➕</span>
@@ -423,7 +431,7 @@ export default function EventsPage() {
           </Link>
         </div>
       </div>
-    </AdminLayout>
+    </EventLayout>
   )
 }
 
@@ -439,7 +447,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
-  // Don't pass session through props - use client-side session instead
+  // Allow access for all authenticated users (ADMIN, OVERSEER, ATTENDANT)
+  // The UI will show different options based on role
   return {
     props: {},
   }

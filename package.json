@@ -3,7 +3,7 @@
   "version": "2.1.2-integrated",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 3001",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.4.2",
+    "@modelcontextprotocol/sdk": "^1.18.2",
     "@prisma/client": "^5.19.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/nodemailer": "^6.4.15",

@@ -1,7 +1,7 @@
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
-import AdminLayout from '../../components/AdminLayout'
+import EventLayout from '../../components/EventLayout'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
@@ -37,7 +37,7 @@ export default function CreateEventPage() {
     location: '',
     capacity: '',
     attendantsNeeded: '',
-    status: 'DRAFT'
+    status: 'UPCOMING'
   })
 
   const [errors, setErrors] = useState<Partial<EventFormData>>({})
@@ -143,7 +143,7 @@ export default function CreateEventPage() {
         status: formData.status
       }
 
-      const response = await fetch('/api/admin/events', {
+      const response = await fetch('/api/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -156,7 +156,7 @@ export default function CreateEventPage() {
       if (data.success) {
         setSuccess('Event created successfully!')
         setTimeout(() => {
-          router.push(`/admin/events/${data.data.id}`)
+          router.push('/events')
         }, 1500)
       } else {
         setError(data.error || 'Failed to create event')
@@ -175,32 +175,37 @@ export default function CreateEventPage() {
   const eventTypes = [
     { value: 'ASSEMBLY', label: 'Assembly' },
     { value: 'CONVENTION', label: 'Convention' },
-    { value: 'CIRCUIT_OVERSEER_VISIT', label: 'Circuit Overseer Visit' },
     { value: 'SPECIAL_EVENT', label: 'Special Event' },
-    { value: 'MEETING', label: 'Meeting' },
-    { value: 'MEMORIAL', label: 'Memorial' },
-    { value: 'OTHER', label: 'Other' }
+    { value: 'MEETING', label: 'Meeting' }
   ]
 
   const statusOptions = [
-    { value: 'DRAFT', label: 'Draft' },
-    { value: 'PUBLISHED', label: 'Published' }
+    { value: 'UPCOMING', label: 'Upcoming' },
+    { value: 'CURRENT', label: 'Current' },
+    { value: 'COMPLETED', label: 'Completed' },
+    { value: 'CANCELLED', label: 'Cancelled' },
+    { value: 'ARCHIVED', label: 'Archived' }
   ]
 
   return (
-    <AdminLayout>
+    <EventLayout 
+      title="Create New Event"
+      breadcrumbs={[
+        { label: 'Events', href: '/events' },
+        { label: 'Create Event' }
+      ]}
+    >
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Create New Event</h1>
               <p className="mt-2 text-sm text-gray-600">
                 Set up a new event with attendant scheduling
               </p>
             </div>
             <Link
-              href="/admin/events"
+              href="/events"
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors"
             >
               ← Back to Events
@@ -461,7 +466,7 @@ export default function CreateEventPage() {
           </div>
         </form>
       </div>
-    </AdminLayout>
+    </EventLayout>
   )
 }
 
@@ -477,7 +482,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
-  // Don't pass session through props - use client-side session instead
+  // Only ADMIN and OVERSEER can create events
+  if (!['ADMIN', 'OVERSEER'].includes(session.user?.role || '')) {
+    return {
+      redirect: {
+        destination: '/events',
+        permanent: false,
+      },
+    }
+  }
+
   return {
     props: {},
   }

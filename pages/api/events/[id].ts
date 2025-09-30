@@ -8,15 +8,16 @@ import { z } from 'zod'
 const updateEventSchema = z.object({
   name: z.string().min(1, 'Event name is required').max(255).optional(),
   description: z.string().optional(),
-  eventType: z.enum(['ASSEMBLY', 'CONVENTION', 'CIRCUIT_OVERSEER_VISIT', 'SPECIAL_EVENT', 'MEETING', 'MEMORIAL', 'OTHER']).optional(),
+  eventType: z.enum(['ASSEMBLY', 'CONVENTION', 'SPECIAL_EVENT', 'MEETING']).optional(),
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid start date').optional(),
   endDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid end date').optional(),
-  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid start time format').optional(),
-  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid end time format').optional(),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
   location: z.string().min(1, 'Location is required').max(500).optional(),
   capacity: z.number().int().positive().optional(),
   attendantsNeeded: z.number().int().min(0).optional(),
-  status: z.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'COMPLETED']).optional(),
+  countTimesEnabled: z.boolean().optional(),
+  status: z.enum(['ARCHIVED', 'UPCOMING', 'CURRENT', 'COMPLETED', 'CANCELLED']).optional(),
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -179,6 +180,7 @@ async function handlePut(req: NextApiRequest, res: NextApiResponse, id: string, 
   if (data.location !== undefined) updateData.location = data.location
   if (data.capacity !== undefined) updateData.capacity = data.capacity
   if (data.attendantsNeeded !== undefined) updateData.attendantsNeeded = data.attendantsNeeded
+  if (data.countTimesEnabled !== undefined) updateData.countTimesEnabled = data.countTimesEnabled
   if (data.status !== undefined) updateData.status = data.status
 
   // Update event
