@@ -121,18 +121,19 @@ npm ci --production
 echo "🏗️ Building application..."
 npm run build
 
-echo "🔄 Restarting application..."
+echo " Restarting application..."
 # Kill any existing processes on port 3001
 pkill -f "next.*3001" || true
 sleep 2
 
-# Start application in background
-nohup npm start -- --port 3001 > /var/log/jw-attendant-scheduler.log 2>&1 &
+# Export DATABASE_URL and start Next.js in production mode
+export DATABASE_URL='postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/jw_attendant_scheduler_staging'
+PORT=3001 nohup npm start > /dev/null 2>&1 &> /var/log/jw-attendant-scheduler.log 2>&1 &
 
-echo "⏳ Waiting for startup..."
+echo " Waiting for startup..."
 sleep 5
 
-echo "✅ Deployment completed"
+echo " Deployment completed"
 REMOTE_SCRIPT
 
 # Step 5: Verify deployment (CASCADE RULE)
