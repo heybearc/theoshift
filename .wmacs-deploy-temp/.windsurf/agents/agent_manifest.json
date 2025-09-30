@@ -1,0 +1,14 @@
+{
+  "project_root": "/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler",
+  "spawned_agents": [
+    "Performance",
+    "Frontend",
+    "Lead Architect",
+    "Testing",
+    "Backend",
+    "QA",
+    "Security"
+  ],
+  "spawn_timestamp": "auto-generated",
+  "coordination_protocol": "lead_architect_primary"
+}

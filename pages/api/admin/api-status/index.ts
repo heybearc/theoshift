@@ -45,7 +45,7 @@ async function getApiStatus() {
       const checkStart = Date.now()
       let status = 'healthy'
       let responseTime = 0
-      let error = null
+      let error: string | null = null
 
       try {
         // For now, we'll simulate endpoint checks
@@ -82,7 +82,7 @@ async function getApiStatus() {
   // Database connectivity check
   let dbStatus = 'healthy'
   let dbResponseTime = 0
-  let dbError = null
+  let dbError: string | null = null
   
   try {
     const dbStart = Date.now()

@@ -1,0 +1,108 @@
+{
+  "wmacs-snippets": {
+    "WMACS Guardian Check": {
+      "prefix": "wmacs-check",
+      "body": [
+        "// 🛡️ WMACS Guardian: ${1:Operation} validation",
+        "const wmacs = require('./wmacs/wmacs-guardian.js');",
+        "const advisor = require('./wmacs/wmacs-research-advisor.js');",
+        "",
+        "// Validate operation against WMACS rules",
+        "if (!wmacs.validateOperation('${2:operation}', '${3:target}')) {",
+        "  throw new Error('WMACS Guardian: Operation blocked by cascade rules');",
+        "}",
+        "",
+        "// Research Advisor analysis",
+        "const analysis = advisor.analyze('${4:suggestion}');",
+        "if (analysis.decision === 'PUSHBACK_WITH_ALTERNATIVES') {",
+        "  console.warn('⚠️ WMACS Research Advisor:', analysis.reasoning);",
+        "}"
+      ],
+      "description": "Add WMACS Guardian validation to code"
+    },
+    "Container SSH Command": {
+      "prefix": "wmacs-ssh",
+      "body": [
+        "# 🛡️ WMACS Guardian: Container ${1|134 (staging),132 (production),131 (database)|} access",
+        "ssh ${2|jws,root@10.92.3.22,postgres@10.92.3.21|} \"cd ${3:/opt/jw-attendant-scheduler} && ${4:command}\""
+      ],
+      "description": "Generate WMACS-compliant SSH command"
+    },
+    "CI/CD Pipeline Step": {
+      "prefix": "wmacs-cicd",
+      "body": [
+        "## ${1:Step Name} - WMACS Enforced",
+        "",
+        "### Prerequisites",
+        "- [ ] Staging validation complete (Container 134)",
+        "- [ ] WMACS Guardian approval obtained", 
+        "- [ ] Research Advisor analysis passed",
+        "",
+        "### Execution",
+        "```bash",
+        "# WMACS Guardian: ${2:operation} on ${3|staging (134),production (132),database (131)|}",
+        "${4:command}",
+        "```",
+        "",
+        "### Validation",
+        "```bash",
+        "# Verify operation success",
+        "node wmacs/wmacs-guardian.js validate ${5:target}",
+        "```"
+      ],
+      "description": "Create WMACS-compliant CI/CD pipeline step"
+    },
+    "Environment Configuration": {
+      "prefix": "wmacs-env",
+      "body": [
+        "// 🛡️ WMACS Guardian: Environment configuration",
+        "module.exports = {",
+        "  environments: {",
+        "    staging: {",
+        "      container: '134',",
+        "      host: '10.92.3.24',", 
+        "      port: 3001,",
+        "      path: '/opt/jw-attendant-scheduler'",
+        "    },",
+        "    production: {",
+        "      container: '132',",
+        "      host: '10.92.3.22',",
+        "      port: 3001,", 
+        "      path: '/opt/jw-attendant-production'",
+        "    },",
+        "    database: {",
+        "      container: '131',",
+        "      host: '10.92.3.21',",
+        "      port: 5432",
+        "    }",
+        "  },",
+        "  wmacs: {",
+        "    guardian: true,",
+        "    cascadeRules: true,",
+        "    enforcementLevel: 'MANDATORY'",
+        "  }",
+        "};"
+      ],
+      "description": "Generate WMACS environment configuration"
+    },
+    "Deployment Command": {
+      "prefix": "wmacs-deploy",
+      "body": [
+        "# 🛡️ WMACS Guardian: ${1|Staging,Production|} deployment",
+        "# Container: ${2|134 (staging),132 (production)|}",
+        "# Host: ${3|10.92.3.24,10.92.3.22|}",
+        "",
+        "# Pre-deployment validation",
+        "node wmacs/wmacs-research-advisor.js analyze \"${4:deployment description}\"",
+        "",
+        "# Execute deployment",
+        "${5:deployment command}",
+        "",
+        "# Post-deployment validation", 
+        "curl -f http://${3}:3001/auth/signin",
+        "node wmacs/wmacs-guardian.js validate ${2}"
+      ],
+      "description": "Generate WMACS-compliant deployment command"
+    }
+  }
+}

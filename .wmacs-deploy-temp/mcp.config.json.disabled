@@ -1,0 +1,43 @@
+{
+  "servers": {
+    "github": {
+      "url": "http://localhost:3100",
+      "tools": [
+        "get_diff",
+        "list_prs",
+        "comment_pr"
+      ],
+      "auth": {
+        "tokenEnv": "GITHUB_TOKEN"
+      }
+    },
+    "files": {
+      "url": "http://localhost:3101",
+      "tools": [
+        "read_file",
+        "read_file_section"
+      ]
+    },
+    "metrics": {
+      "url": "http://localhost:3102",
+      "tools": [
+        "get_size_json",
+        "get_perf_json",
+        "get_lhci_json"
+      ]
+    },
+    "contracts": {
+      "url": "http://localhost:3103",
+      "tools": [
+        "run_schemathesis",
+        "run_dredd"
+      ]
+    },
+    "policy": {
+      "url": "http://localhost:3104",
+      "tools": [
+        "evaluate_opa"
+      ]
+    }
+  }
+}
