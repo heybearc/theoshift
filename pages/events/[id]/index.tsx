@@ -77,7 +77,7 @@ export default function EventDetailsPage() {
 
     try {
       setLoading(true)
-      const response = await fetch(`/api/admin/events/${id}`)
+      const response = await fetch(`/api/events/${id}`)
       const data = await response.json()
 
       if (data.success) {

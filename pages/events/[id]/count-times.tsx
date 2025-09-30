@@ -82,7 +82,7 @@ export default function EventCountTimesPage() {
   const enableCountTimes = async () => {
     try {
       const response = await fetch(`/api/events/${eventId}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ countTimesEnabled: true })
       })
