@@ -50,9 +50,12 @@ interface Event {
   status: string
 }
 
-export default function EventAssignments() {
+interface EventAssignmentsProps {
+  eventId: string
+}
+
+export default function EventAssignments({ eventId }: EventAssignmentsProps) {
   const router = useRouter()
-  const { id: eventId } = router.query
   const { data: session, status } = useSession()
   const [event, setEvent] = useState<Event | null>(null)
   const [assignments, setAssignments] = useState<Assignment[]>([])
@@ -611,4 +614,14 @@ export default function EventAssignments() {
       </div>
     </>
   )
+}
+
+export async function getServerSideProps(context: any) {
+  const { id } = context.params
+  
+  return {
+    props: {
+      eventId: id
+    }
+  }
 }

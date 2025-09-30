@@ -25,9 +25,12 @@ interface Event {
   status: string
 }
 
-export default function EventAttendants() {
+interface EventAttendantsProps {
+  eventId: string
+}
+
+export default function EventAttendants({ eventId }: EventAttendantsProps) {
   const router = useRouter()
-  const { id: eventId } = router.query
   const { data: session, status } = useSession()
   const [event, setEvent] = useState<Event | null>(null)
   const [attendants, setAttendants] = useState<Attendant[]>([])
@@ -410,4 +413,14 @@ export default function EventAttendants() {
       </div>
     </>
   )
+}
+
+export async function getServerSideProps(context: any) {
+  const { id } = context.params
+  
+  return {
+    props: {
+      eventId: id
+    }
+  }
 }

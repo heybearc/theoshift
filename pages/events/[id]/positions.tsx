@@ -27,9 +27,12 @@ interface Event {
   status: string
 }
 
-export default function EventPositions() {
+interface EventPositionsProps {
+  eventId: string
+}
+
+export default function EventPositions({ eventId }: EventPositionsProps) {
   const router = useRouter()
-  const { id: eventId } = router.query
   const { data: session, status } = useSession()
   const [event, setEvent] = useState<Event | null>(null)
   const [positions, setPositions] = useState<Position[]>([])
@@ -471,4 +474,14 @@ export default function EventPositions() {
       </div>
     </>
   )
+}
+
+export async function getServerSideProps(context: any) {
+  const { id } = context.params
+  
+  return {
+    props: {
+      eventId: id
+    }
+  }
 }
