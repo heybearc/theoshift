@@ -36,16 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 async function handleGetUser(req: NextApiRequest, res: NextApiResponse, id: string) {
   try {
     const user = await prisma.users.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: { attendants: true }
-        },
-        attendants: {
-          take: 5,
-          orderBy: { createdAt: 'desc' }
-        }
-      }
+      where: { id }
     })
 
     if (!user) {
@@ -94,21 +85,21 @@ async function handleUpdateUser(req: NextApiRequest, res: NextApiResponse, id: s
 
 async function handleDeleteUser(req: NextApiRequest, res: NextApiResponse, id: string) {
   try {
-    // Check if user has attendants
-    const userWithAttendants = await prisma.users.findUnique({
-      where: { id },
-      include: {
-        _count: {
-          select: { attendants: true }
-        }
-      }
+    // Check if user exists
+    const user = await prisma.users.findUnique({
+      where: { id }
     })
 
-    if (!userWithAttendants) {
+    if (!user) {
       return res.status(404).json({ success: false, error: 'User not found' })
     }
 
-    if (userWithAttendants._count.attendants > 0) {
+    // Check if user has associated attendants
+    const attendantCount = await prisma.attendants.count({
+      where: { userId: id }
+    })
+
+    if (attendantCount > 0) {
       return res.status(400).json({ 
         success: false, 
         error: 'Cannot delete user with associated attendants' 
