@@ -221,19 +221,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   try {
-    const invitation = await prisma.userInvitations.findFirst({
+    const invitation = await prisma.users.findFirst({
       where: {
-        invitationToken: token,
-        status: 'PENDING'
+        inviteToken: token
       },
-      include: {
-        invitedByUser: {
-          select: {
-            firstName: true,
-            lastName: true,
-            email: true
-          }
-        }
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        inviteToken: true,
+        inviteExpiry: true
       }
     })
 
@@ -253,10 +251,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           email: invitation.email,
           firstName: invitation.firstName,
           lastName: invitation.lastName,
-          role: invitation.role,
-          invitedByUser: invitation.invitedByUser,
-          expiresAt: invitation.expiresAt.toISOString(),
-          message: invitation.message
+          inviteToken: invitation.inviteToken,
+          inviteExpiry: invitation.inviteExpiry?.toISOString() || null
         }
       }
     }
