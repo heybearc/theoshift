@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.4.2",
+    "@modelcontextprotocol/sdk": "^1.18.2",
     "@prisma/client": "^5.19.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/nodemailer": "^6.4.15",

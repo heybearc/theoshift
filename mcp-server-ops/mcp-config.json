@@ -2,7 +2,7 @@
   "mcpServers": {
     "enhanced-jw-mcp-cicd": {
       "command": "node",
-      "args": ["/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-server-ops/enhanced-jw-mcp-cicd.js"],
+      "args": ["/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-server-ops/enhanced-jw-mcp-cicd.cjs"],
       "env": {
         "NODE_ENV": "production"
       }
