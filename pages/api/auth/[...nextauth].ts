@@ -100,4 +100,10 @@ export const authOptions: NextAuthOptions = {
   },
 }
 
-export default NextAuth(authOptions)
+const handler = NextAuth(authOptions)
+
+// Log all auth requests
+export default async function auth(req: any, res: any) {
+  logAuth(`Auth request: ${req.method} ${req.url}`)
+  return await handler(req, res)
+}
