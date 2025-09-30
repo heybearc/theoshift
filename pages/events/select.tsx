@@ -44,6 +44,13 @@ export default function EventSelectPage() {
     try {
       setError('')
       const response = await fetch('/api/events?includeStats=true')
+      
+      // Check if unauthorized
+      if (response.status === 401 || response.status === 403) {
+        router.push('/auth/signin')
+        return
+      }
+      
       const data: EventsResponse = await response.json()
 
       if (data.success) {
