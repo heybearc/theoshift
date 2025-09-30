@@ -65,11 +65,6 @@ async function handleUpdateUser(req: NextApiRequest, res: NextApiResponse, id: s
         ...(email && { email }),
         ...(role && { role }),
         ...(typeof isActive === 'boolean' && { isActive })
-      },
-      include: {
-        _count: {
-          select: { attendants: true }
-        }
       }
     })
 
