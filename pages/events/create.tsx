@@ -37,7 +37,7 @@ export default function CreateEventPage() {
     location: '',
     capacity: '',
     attendantsNeeded: '',
-    status: 'DRAFT'
+    status: 'UPCOMING'
   })
 
   const [errors, setErrors] = useState<Partial<EventFormData>>({})
@@ -175,16 +175,16 @@ export default function CreateEventPage() {
   const eventTypes = [
     { value: 'ASSEMBLY', label: 'Assembly' },
     { value: 'CONVENTION', label: 'Convention' },
-    { value: 'CIRCUIT_OVERSEER_VISIT', label: 'Circuit Overseer Visit' },
     { value: 'SPECIAL_EVENT', label: 'Special Event' },
-    { value: 'MEETING', label: 'Meeting' },
-    { value: 'MEMORIAL', label: 'Memorial' },
-    { value: 'OTHER', label: 'Other' }
+    { value: 'MEETING', label: 'Meeting' }
   ]
 
   const statusOptions = [
-    { value: 'DRAFT', label: 'Draft' },
-    { value: 'PUBLISHED', label: 'Published' }
+    { value: 'UPCOMING', label: 'Upcoming' },
+    { value: 'CURRENT', label: 'Current' },
+    { value: 'COMPLETED', label: 'Completed' },
+    { value: 'CANCELLED', label: 'Cancelled' },
+    { value: 'ARCHIVED', label: 'Archived' }
   ]
 
   return (

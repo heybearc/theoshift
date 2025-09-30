@@ -9,7 +9,7 @@ import crypto from 'crypto'
 const eventSchema = z.object({
   name: z.string().min(1, 'Event name is required').max(255),
   description: z.string().optional(),
-  eventType: z.enum(['ASSEMBLY', 'CONVENTION', 'CIRCUIT_OVERSEER_VISIT', 'SPECIAL_EVENT', 'MEETING', 'MEMORIAL', 'OTHER']),
+  eventType: z.enum(['ASSEMBLY', 'CONVENTION', 'SPECIAL_EVENT', 'MEETING']),
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid start date'),
   endDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid end date'),
   startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid start time format'),
@@ -17,7 +17,7 @@ const eventSchema = z.object({
   location: z.string().min(1, 'Location is required').max(500),
   capacity: z.number().int().positive().optional(),
   attendantsNeeded: z.number().int().min(0).optional(),
-  status: z.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'COMPLETED']).default('DRAFT'),
+  status: z.enum(['ARCHIVED', 'UPCOMING', 'CURRENT', 'COMPLETED', 'CANCELLED']).default('UPCOMING'),
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
