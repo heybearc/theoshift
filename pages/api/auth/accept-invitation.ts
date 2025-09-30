@@ -19,10 +19,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     // Find the invitation
-    const invitation = await prisma.userInvitations.findFirst({
+    const invitation = await prisma.users.findFirst({
       where: {
-        invitationToken: token,
-        status: 'PENDING'
+        inviteToken: token
       }
     })
 
@@ -31,66 +30,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Check if invitation is expired
-    if (new Date() > invitation.expiresAt) {
-      await prisma.userInvitations.update({
-        where: { id: invitation.id },
-        data: { status: 'EXPIRED' }
-      })
+    if (invitation.inviteExpiry && new Date() > invitation.inviteExpiry) {
       return res.status(400).json({ success: false, error: 'Invitation has expired' })
     }
 
-    // Check if user already exists
-    const existingUser = await prisma.users.findUnique({
-      where: { email: invitation.email }
-    })
-
-    if (existingUser) {
-      return res.status(400).json({ success: false, error: 'User already exists' })
+    // Check if user already has a password (already activated)
+    if (invitation.passwordHash) {
+      return res.status(400).json({ success: false, error: 'Invitation has already been used' })
     }
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Create the user
-    const user = await prisma.users.create({
-      data: {
-        firstName: invitation.firstName,
-        lastName: invitation.lastName,
-        email: invitation.email,
-        password: hashedPassword,
-        role: invitation.role,
-        isActive: true,
-        emailVerified: new Date() // Mark as verified since they came from invitation
-      }
-    })
-
-    // Update invitation status
-    await prisma.userInvitations.update({
+    // Update the user with password and clear invitation token
+    const user = await prisma.users.update({
       where: { id: invitation.id },
-      data: { 
-        status: 'ACCEPTED',
-        acceptedAt: new Date()
+      data: {
+        passwordHash: hashedPassword,
+        inviteToken: null,
+        inviteExpiry: null,
+        updatedAt: new Date()
       }
     })
 
-    // Log the account creation
-    console.log(`User account created via invitation: ${user.email} (${user.role})`)
-
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
-      message: 'Account created successfully',
+      message: 'Account activated successfully',
       data: {
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role
-        }
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role
       }
     })
   } catch (error) {
     console.error('Accept invitation error:', error)
-    return res.status(500).json({ success: false, error: 'Failed to create account' })
+    return res.status(500).json({ success: false, error: 'Failed to accept invitation' })
   }
 }
