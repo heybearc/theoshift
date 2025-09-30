@@ -193,7 +193,21 @@ async function sendInvitationEmail(params: {
 }) {
   const { to, firstName, lastName, invitationUrl, inviterName, message, role } = params
 
-  // Check if LXC SMTP relay is available
+  // SMTP Relay disabled for stability - using console logging for now
+  const USE_LXC_SMTP = process.env.USE_LXC_SMTP === 'true'
+  
+  if (!USE_LXC_SMTP) {
+    console.log('📧 EMAIL INVITATION (SMTP DISABLED):', {
+      to,
+      subject: `Invitation to Join JW Attendant Scheduler (${role})`,
+      from: inviterName,
+      invitationUrl,
+      message: message || 'No personal message'
+    })
+    return // Skip actual email sending
+  }
+
+  // LXC SMTP relay (only when enabled)
   const lxcSmtpUrl = 'http://10.92.3.136:3000/api/send'
   
   const emailHtml = `

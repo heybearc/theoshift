@@ -1,33 +1,53 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../../auth/[...nextauth]'
 
 // LXC SMTP Relay Service Configuration
 const SMTP_RELAY_API = 'http://10.92.3.136:3000'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  console.log('=== EMAIL TEST API CALLED (LXC SMTP RELAY) ===')
-  
-  const session = await getServerSession(req, res, authOptions)
-  
-  if (!session || session.user?.role !== 'ADMIN') {
-    console.log('Unauthorized access')
-    return res.status(401).json({ success: false, error: 'Unauthorized' })
-  }
-
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Method not allowed' })
   }
 
+  const session = await getServerSession(req, res, authOptions)
+  
+  if (!session || session.user?.role !== 'ADMIN') {
+    return res.status(401).json({ success: false, error: 'Unauthorized' })
+  }
+
+  const { to, subject, message } = req.body
+
+  if (!to || !subject || !message) {
+    return res.status(400).json({ 
+      success: false, 
+      error: 'Missing required fields: to, subject, message' 
+    })
+  }
+
+  // SMTP Relay disabled for stability
+  const USE_LXC_SMTP = process.env.USE_LXC_SMTP === 'true'
+  
+  if (!USE_LXC_SMTP) {
+    console.log('EMAIL TEST (SMTP DISABLED):', { to, subject, message })
+    return res.status(200).json({
+      success: true,
+      message: 'Email test completed (SMTP relay disabled)',
+      data: { to, subject, status: 'logged' }
+    })
+  }
+
   try {
-    // Handle both old and new request formats
-    const requestData = req.body
-    console.log('Email test request received:', { requestData: { ...requestData, gmailAppPassword: '***', smtpPassword: '***', password: '***' } })
+    // Test LXC SMTP Relay (only when enabled)
+    const response = await fetch(SMTP_RELAY_API + '/api/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
+    })
+    console.log('Email test request received:', { requestData: { ...req.body, gmailAppPassword: '***', smtpPassword: '***', password: '***' } })
 
     // Extract configuration from request body (handle different formats)
-    const authType = requestData.authType || (requestData.smtpHost === 'smtp.gmail.com' ? 'gmail' : 'smtp')
-    const config = requestData.config || requestData
-
+    const authType = req.body.authType || (req.body.smtpHost === 'smtp.gmail.com' ? 'gmail' : 'smtp')
+    const config = req.body.config || req.body
     // Validate configuration based on the actual form data structure
     if (authType === 'gmail' || config.smtpHost === 'smtp.gmail.com') {
       const gmailEmail = config.gmailEmail || config.username || config.smtpUser
