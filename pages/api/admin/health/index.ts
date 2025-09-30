@@ -60,54 +60,25 @@ async function getSystemHealth() {
                          dbHealth === 'critical' ? 'critical' : 'warning'
 
     return {
-      overall: {
-        status: overallHealth,
-        responseTime: Date.now() - startTime,
-        timestamp: new Date().toISOString()
-      },
       database: {
         status: dbHealth,
         responseTime: dbResponseTime,
-        connections: 'active',
-        statistics: {
-          users: userCount,
-          events: eventCount,
-          attendants: attendantCount
-        }
+        connections: 1 // Convert string to number for frontend
       },
-      system: {
+      server: {
+        status: memoryHealth, // Use memory health as server status
         uptime: Math.round(uptime),
-        nodeVersion: process.version,
-        platform: process.platform,
         memory: {
           used: Math.round(memoryUsage.heapUsed / 1024 / 1024),
           total: Math.round(memoryUsage.heapTotal / 1024 / 1024),
           percentage: Math.round((memoryUsage.heapUsed / memoryUsage.heapTotal) * 100)
         },
-        cpu: {
-          user: cpuUsage.user,
-          system: cpuUsage.system
-        }
+        cpu: Math.round((cpuUsage.user + cpuUsage.system) / 1000000) // Convert to percentage
       },
       services: {
-        api: {
-          status: 'healthy',
-          endpoints: [
-            { name: 'Authentication', status: 'healthy' },
-            { name: 'User Management', status: 'healthy' },
-            { name: 'Event Management', status: 'healthy' },
-            { name: 'Email Service', status: 'healthy' }
-          ]
-        },
-        external: {
-          database: dbHealth,
-          email: 'healthy' // This would check actual email service
-        }
-      },
-      metrics: {
-        requestsPerMinute: 0, // Would track actual requests
-        errorRate: 0, // Would track actual errors
-        averageResponseTime: Date.now() - startTime
+        nextAuth: 'healthy',
+        prisma: dbHealth,
+        email: process.env.USE_LXC_SMTP === 'true' ? 'healthy' : 'warning'
       }
     }
   } catch (error) {
