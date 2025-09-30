@@ -59,18 +59,11 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse, eventId: str
   // Verify event exists and user has access
   const event = await prisma.events.findUnique({
     where: { id: eventId },
-    select: { id: true, countTimesEnabled: true }
+    select: { id: true }
   })
 
   if (!event) {
     return res.status(404).json({ error: 'Event not found' })
-  }
-
-  if (!event.countTimesEnabled) {
-    return res.status(200).json({
-      success: true,
-      data: []
-    })
   }
 
   // Fetch count sessions for this event
@@ -100,18 +93,14 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse, eventId: str
 }
 
 async function handlePost(req: NextApiRequest, res: NextApiResponse, eventId: string, userId: string) {
-  // Verify event exists and count times are enabled
+  // Verify event exists
   const event = await prisma.events.findUnique({
     where: { id: eventId },
-    select: { id: true, countTimesEnabled: true }
+    select: { id: true }
   })
 
   if (!event) {
     return res.status(404).json({ error: 'Event not found' })
-  }
-
-  if (!event.countTimesEnabled) {
-    return res.status(400).json({ error: 'Count times are not enabled for this event' })
   }
 
   // Validate request body
