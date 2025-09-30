@@ -171,13 +171,8 @@ model events {
   status                       EventStatus                    @default(UPCOMING)
   startDate                    DateTime
   endDate                      DateTime
-  startTime                    String?                        // Event start time (HH:MM format)
-  endTime                      String?                        // Event end time (HH:MM format)
   location                     String?
   venue                        String?
-  capacity                     Int?                           // Maximum attendee capacity
-  attendantsNeeded             Int?                           // Number of attendants needed
-  countTimesEnabled            Boolean                        @default(false) // Enable count times feature
   isActive                     Boolean                        @default(true)
   settings                     Json?
   createdAt                    DateTime                       @default(now())
