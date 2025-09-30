@@ -14,19 +14,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { id } = req.query
 
     if (!id || typeof id !== 'string') {
+      return res.status(400).json({ success: false, error: 'Invalid invitation ID' })
     }
 
     switch (req.method) {
-      case 'GET':
-        return await handleGetInvitation(req, res, id)
       case 'DELETE':
         return await handleDeleteInvitation(req, res, id)
       default:
         return res.status(405).json({ success: false, error: 'Method not allowed' })
     }
-{{ ... }}
-    console.error('Get invitation error:', error)
-    return res.status(500).json({ success: false, error: 'Failed to fetch invitation' })
+  } catch (error) {
+    console.error('Invitation API error:', error)
+    return res.status(500).json({ success: false, error: 'Internal server error' })
   }
 }
 
