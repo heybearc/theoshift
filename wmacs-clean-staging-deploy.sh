@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# 🛡️ WMACS GUARDIAN: Clean Staging Deployment Script
+# 🛡️ APEX GUARDIAN: Clean Staging Deployment Script
 # Following CASCADE RULES - Artifact-based deployment only
 
 set -e
 
-echo "🛡️ WMACS GUARDIAN: CLEAN STAGING DEPLOYMENT"
+echo "🛡️ APEX GUARDIAN: CLEAN STAGING DEPLOYMENT"
 echo "Following CASCADE RULES - No direct server modifications"
 echo "=========================================="
 
@@ -21,7 +21,7 @@ print_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 print_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-# WMACS Guardian Rule Validation
+# APEX Guardian Rule Validation
 print_status "Validating CASCADE RULE compliance..."
 
 # Check we're in project root
@@ -146,4 +146,4 @@ fi
 
 # Cleanup
 rm -rf .wmacs-deploy-temp
-print_success "🛡️ WMACS GUARDIAN: Clean deployment completed successfully"
+print_success "🛡️ APEX GUARDIAN: Clean deployment completed successfully"
