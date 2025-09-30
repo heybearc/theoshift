@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { useSession } from 'next-auth/react'
 import Head from 'next/head'
 import Link from 'next/link'
-import { toast } from 'react-hot-toast'
+// Using basic alerts for notifications
 
 interface Assignment {
   id: string
@@ -87,7 +87,7 @@ export default function EventAssignments() {
       }
     } catch (error) {
       console.error('Error fetching event:', error)
-      toast.error('Failed to load event data')
+      alert('Failed to load event data')
     }
   }
 
@@ -100,7 +100,7 @@ export default function EventAssignments() {
       }
     } catch (error) {
       console.error('Error fetching assignments:', error)
-      toast.error('Failed to load assignments')
+      alert('Failed to load assignments')
     } finally {
       setLoading(false)
     }
@@ -134,7 +134,7 @@ export default function EventAssignments() {
     e.preventDefault()
     
     if (!formData.userId || !formData.positionId || !formData.shiftStart || !formData.shiftEnd) {
-      toast.error('Please fill in all required fields')
+      alert('Please fill in all required fields')
       return
     }
 
@@ -143,7 +143,7 @@ export default function EventAssignments() {
     const endTime = new Date(formData.shiftEnd)
     
     if (endTime <= startTime) {
-      toast.error('End time must be after start time')
+      alert('End time must be after start time')
       return
     }
 
@@ -166,16 +166,16 @@ export default function EventAssignments() {
       })
 
       if (response.ok) {
-        toast.success(editingAssignment ? 'Assignment updated successfully' : 'Assignment created successfully')
+        alert(editingAssignment ? 'Assignment updated successfully' : 'Assignment created successfully')
         closeModal()
         fetchAssignments()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Failed to save assignment')
+        alert(error.error || 'Failed to save assignment')
       }
     } catch (error) {
       console.error('Error saving assignment:', error)
-      toast.error('Failed to save assignment')
+      alert('Failed to save assignment')
     }
   }
 
@@ -202,15 +202,15 @@ export default function EventAssignments() {
       })
 
       if (response.ok) {
-        toast.success('Assignment deleted successfully')
+        alert('Assignment deleted successfully')
         fetchAssignments()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Failed to delete assignment')
+        alert(error.error || 'Failed to delete assignment')
       }
     } catch (error) {
       console.error('Error deleting assignment:', error)
-      toast.error('Failed to delete assignment')
+      alert('Failed to delete assignment')
     }
   }
 
@@ -225,15 +225,15 @@ export default function EventAssignments() {
       })
 
       if (response.ok) {
-        toast.success('Assignment status updated')
+        alert('Assignment status updated')
         fetchAssignments()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Failed to update status')
+        alert(error.error || 'Failed to update status')
       }
     } catch (error) {
       console.error('Error updating status:', error)
-      toast.error('Failed to update status')
+      alert('Failed to update status')
     }
   }
 

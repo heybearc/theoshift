@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { useSession } from 'next-auth/react'
 import Head from 'next/head'
 import Link from 'next/link'
-import { toast } from 'react-hot-toast'
+// Using basic alerts for notifications
 
 interface Position {
   id: string
@@ -73,7 +73,7 @@ export default function EventPositions() {
       }
     } catch (error) {
       console.error('Error fetching event:', error)
-      toast.error('Failed to load event data')
+      alert('Failed to load event data')
     }
   }
 
@@ -86,7 +86,7 @@ export default function EventPositions() {
       }
     } catch (error) {
       console.error('Error fetching positions:', error)
-      toast.error('Failed to load positions')
+      alert('Failed to load positions')
     } finally {
       setLoading(false)
     }
@@ -96,7 +96,7 @@ export default function EventPositions() {
     e.preventDefault()
     
     if (!formData.positionName.trim() || !formData.department) {
-      toast.error('Position name and department are required')
+      alert('Position name and department are required')
       return
     }
 
@@ -116,18 +116,18 @@ export default function EventPositions() {
       })
 
       if (response.ok) {
-        toast.success(editingPosition ? 'Position updated successfully' : 'Position created successfully')
+        alert(editingPosition ? 'Position updated successfully' : 'Position created successfully')
         setShowCreateModal(false)
         setEditingPosition(null)
         setFormData({ positionName: '', department: '', description: '', requirements: '' })
         fetchPositions()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Failed to save position')
+        alert(error.error || 'Failed to save position')
       }
     } catch (error) {
       console.error('Error saving position:', error)
-      toast.error('Failed to save position')
+      alert('Failed to save position')
     }
   }
 
@@ -153,15 +153,15 @@ export default function EventPositions() {
       })
 
       if (response.ok) {
-        toast.success('Position deleted successfully')
+        alert('Position deleted successfully')
         fetchPositions()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Failed to delete position')
+        alert(error.error || 'Failed to delete position')
       }
     } catch (error) {
       console.error('Error deleting position:', error)
-      toast.error('Failed to delete position')
+      alert('Failed to delete position')
     }
   }
 

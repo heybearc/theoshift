@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { useSession } from 'next-auth/react'
 import Head from 'next/head'
 import Link from 'next/link'
-import { toast } from 'react-hot-toast'
+// Using basic alerts for notifications
 
 interface Attendant {
   id: string
@@ -53,7 +53,7 @@ export default function EventAttendants() {
       }
     } catch (error) {
       console.error('Error fetching event:', error)
-      toast.error('Failed to load event data')
+      alert('Failed to load event data')
     }
   }
 
@@ -66,7 +66,7 @@ export default function EventAttendants() {
       }
     } catch (error) {
       console.error('Error fetching attendants:', error)
-      toast.error('Failed to load attendants')
+      alert('Failed to load attendants')
     } finally {
       setLoading(false)
     }
@@ -92,7 +92,7 @@ export default function EventAttendants() {
 
   const handleAddAttendants = async () => {
     if (selectedAttendants.length === 0) {
-      toast.error('Please select at least one attendant')
+      alert('Please select at least one attendant')
       return
     }
 
@@ -108,18 +108,18 @@ export default function EventAttendants() {
       })
 
       if (response.ok) {
-        toast.success('Attendants added successfully')
+        alert('Attendants added successfully')
         setShowAddModal(false)
         setSelectedAttendants([])
         fetchEventAttendants()
         fetchAvailableAttendants()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Failed to add attendants')
+        alert(error.error || 'Failed to add attendants')
       }
     } catch (error) {
       console.error('Error adding attendants:', error)
-      toast.error('Failed to add attendants')
+      alert('Failed to add attendants')
     }
   }
 
@@ -134,16 +134,16 @@ export default function EventAttendants() {
       })
 
       if (response.ok) {
-        toast.success('Attendant removed successfully')
+        alert('Attendant removed successfully')
         fetchEventAttendants()
         fetchAvailableAttendants()
       } else {
         const error = await response.json()
-        toast.error(error.error || 'Failed to remove attendant')
+        alert(error.error || 'Failed to remove attendant')
       }
     } catch (error) {
       console.error('Error removing attendant:', error)
-      toast.error('Failed to remove attendant')
+      alert('Failed to remove attendant')
     }
   }
 
