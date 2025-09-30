@@ -33,6 +33,8 @@ export default function EventSelectPage() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  
+  // Cache buster: v2.0
 
   useEffect(() => {
     fetchEvents()
