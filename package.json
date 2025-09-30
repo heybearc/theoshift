@@ -1,6 +1,6 @@
 {
   "name": "jw-attendant-scheduler",
-  "version": "2.1.0-admin-modules",
+  "version": "2.1.2-integrated",
   "private": true,
   "scripts": {
     "dev": "next dev",
