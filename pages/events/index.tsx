@@ -264,7 +264,7 @@ export default function EventsPage() {
             <div className="p-8 text-center">
               <p className="text-gray-500">No events found</p>
               <Link
-                href="/admin/events/create"
+                href="/events/create"
                 className="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
               >
                 Create First Event
@@ -400,7 +400,7 @@ export default function EventsPage() {
         {/* Quick Actions */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
           <Link
-            href="/admin/events/create"
+            href="/events/create"
             className="flex flex-col items-center space-y-2 p-4 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-colors"
           >
             <span className="text-2xl">➕</span>

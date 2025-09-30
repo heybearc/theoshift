@@ -1,7 +1,7 @@
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
-import AdminLayout from '../../components/AdminLayout'
+import EventLayout from '../../components/EventLayout'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
@@ -188,19 +188,24 @@ export default function CreateEventPage() {
   ]
 
   return (
-    <AdminLayout>
+    <EventLayout 
+      title="Create New Event"
+      breadcrumbs={[
+        { label: 'Events', href: '/events' },
+        { label: 'Create Event' }
+      ]}
+    >
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Create New Event</h1>
               <p className="mt-2 text-sm text-gray-600">
                 Set up a new event with attendant scheduling
               </p>
             </div>
             <Link
-              href="/admin/events"
+              href="/events"
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors"
             >
               ← Back to Events
@@ -461,7 +466,7 @@ export default function CreateEventPage() {
           </div>
         </form>
       </div>
-    </AdminLayout>
+    </EventLayout>
   )
 }
 
@@ -477,7 +482,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
-  // Don't pass session through props - use client-side session instead
+  // Only ADMIN and OVERSEER can create events
+  if (!['ADMIN', 'OVERSEER'].includes(session.user?.role || '')) {
+    return {
+      redirect: {
+        destination: '/events',
+        permanent: false,
+      },
+    }
+  }
+
   return {
     props: {},
   }
