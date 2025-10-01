@@ -210,6 +210,12 @@ export default function EventCountTimesPage() {
                         {session.status}
                       </span>
                       <Link
+                        href={`/events/${eventId}/count-times/${session.id}/enter-count`}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm transition-colors"
+                      >
+                        📝 Enter Counts
+                      </Link>
+                      <Link
                         href={`/events/${eventId}/count-times/${session.id}`}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors"
                       >
