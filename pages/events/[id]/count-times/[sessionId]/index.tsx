@@ -1,6 +1,6 @@
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../../../api/auth/[...nextauth]'
+import { authOptions } from '../../../../api/auth/[...nextauth]'
 import EventLayout from '../../../../../components/EventLayout'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
