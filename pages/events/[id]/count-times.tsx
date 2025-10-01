@@ -34,7 +34,6 @@ interface CountSession {
 interface Event {
   id: string
   name: string
-  countTimesEnabled: boolean
 }
 
 export default function EventCountTimesPage() {
@@ -78,22 +77,6 @@ export default function EventCountTimesPage() {
       console.error('Error:', err)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const enableCountTimes = async () => {
-    try {
-      const response = await fetch(`/api/events/${eventId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ countTimesEnabled: true })
-      })
-      
-      if (response.ok) {
-        setEvent(prev => prev ? { ...prev, countTimesEnabled: true } : null)
-      }
-    } catch (err) {
-      console.error('Error enabling count times:', err)
     }
   }
 
@@ -180,34 +163,17 @@ export default function EventCountTimesPage() {
               >
                 ← Back to Event
               </Link>
-              {event.countTimesEnabled && (
-                <button
-                  onClick={() => setShowCreateModal(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
-                >
-                  ➕ New Count Session
-                </button>
-              )}
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
+              >
+                ➕ New Count Session
+              </button>
             </div>
           </div>
         </div>
 
-        {!event.countTimesEnabled ? (
-          /* Count Times Disabled */
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
-            <div className="text-6xl mb-4">📊</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Count Times Not Enabled</h3>
-            <p className="text-gray-600 mb-6">
-              Enable count times to track attendance at different points during the event.
-            </p>
-            <button
-              onClick={enableCountTimes}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-            >
-              Enable Count Times
-            </button>
-          </div>
-        ) : countSessions.length === 0 ? (
+        {countSessions.length === 0 ? (
           /* No Count Sessions */
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
             <div className="text-6xl mb-4">📋</div>
