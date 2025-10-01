@@ -79,6 +79,13 @@ export default function EventsPage() {
       })
 
       const response = await fetch(`/api/events?${params}`)
+      
+      // Handle authentication errors
+      if (response.status === 401) {
+        router.push('/auth/signin')
+        return
+      }
+
       const data: EventsResponse = await response.json()
 
       if (data.success) {
