@@ -1,7 +1,7 @@
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
@@ -133,6 +133,16 @@ export default function EventSelectPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700">
       <div className="container mx-auto px-4 py-8">
+        {/* Sign Out Button - Top Right */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+            className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+          >
+            🚪 Sign Out
+          </button>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-4">
