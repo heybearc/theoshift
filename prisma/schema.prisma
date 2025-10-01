@@ -237,7 +237,7 @@ model position_counts {
   id              String          @id
   countSessionId  String
   positionId      String
-  attendeeCount   Int
+  attendeeCount   Int?
   notes           String?
   countedBy       String?
   countedAt       DateTime        @default(now())
