@@ -2,6 +2,7 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import EventLayout from '../../../components/EventLayout'
+import CreateCountSessionModal from '../../../components/CreateCountSessionModal'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
@@ -43,6 +44,7 @@ export default function EventCountTimesPage() {
   const [countSessions, setCountSessions] = useState<CountSession[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   useEffect(() => {
     if (eventId) {
@@ -95,26 +97,19 @@ export default function EventCountTimesPage() {
     }
   }
 
-  const createCountSession = async () => {
-    const sessionName = prompt('Enter count session name (e.g., "First Count", "Second Count"):')
-    if (!sessionName) return
-
-    try {
-      const response = await fetch(`/api/events/${eventId}/count-sessions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionName,
-          countTime: new Date().toISOString()
-        })
-      })
-      
-      if (response.ok) {
-        fetchEventAndCountSessions()
-      }
-    } catch (err) {
-      console.error('Error creating count session:', err)
+  const createCountSession = async (data: { sessionName: string; countTime: string; notes?: string }) => {
+    const response = await fetch(`/api/events/${eventId}/count-sessions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Failed to create count session')
     }
+    
+    await fetchEventAndCountSessions()
   }
 
   if (loading) {
@@ -187,7 +182,7 @@ export default function EventCountTimesPage() {
               </Link>
               {event.countTimesEnabled && (
                 <button
-                  onClick={createCountSession}
+                  onClick={() => setShowCreateModal(true)}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
                 >
                   ➕ New Count Session
@@ -221,7 +216,7 @@ export default function EventCountTimesPage() {
               Create your first count session to start tracking attendance.
             </p>
             <button
-              onClick={createCountSession}
+              onClick={() => setShowCreateModal(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
             >
               Create First Count Session
@@ -289,6 +284,13 @@ export default function EventCountTimesPage() {
             ))}
           </div>
         )}
+
+        {/* Create Count Session Modal */}
+        <CreateCountSessionModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onSubmit={createCountSession}
+        />
       </div>
     </EventLayout>
   )

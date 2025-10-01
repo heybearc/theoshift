@@ -1,19 +1,93 @@
 #!/usr/bin/env node
 
-// JW Attendant Scheduler MCP Server
-// Simplified version that matches working LDC MCP pattern
+/**
+ * JW Attendant Scheduler MCP Server with CI/CD Capabilities
+ * Proper MCP SDK implementation with stdio transport
+ */
+
+const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
+const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
+const { CallToolRequestSchema, ListToolsRequestSchema } = require('@modelcontextprotocol/sdk/types.js');
 
 class JWMCP {
   constructor() {
-    this.name = 'jw-attendant-scheduler-mcp';
-    this.version = '1.0.0';
-    
-    // Credit savings tracking
-    this.creditSavings = {
-      batchedOperations: 0,
-      cachedResponses: 0,
-      optimizedQueries: 0
-    };
+    this.server = new Server(
+      {
+        name: 'enhanced-jw-mcp-cicd',
+        version: '1.0.0',
+      },
+      {
+        capabilities: {
+          tools: {},
+        },
+      }
+    );
+
+    this.setupToolHandlers();
+  }
+
+  setupToolHandlers() {
+    // List available tools
+    this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
+      tools: this.getTools()
+    }));
+
+    // Handle tool calls
+    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+      const { name, arguments: args } = request.params;
+      return await this.handleToolCall(name, args || {});
+    });
+  }
+
+  getTools() {
+    return [
+      {
+        name: 'jw_health_check',
+        description: 'Health check for JW Attendant Scheduler infrastructure',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            useCache: { type: 'boolean', default: true }
+          }
+        }
+      },
+      {
+        name: 'jw_event_operations',
+        description: 'Event management operations for JW Attendant Scheduler',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            operations: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'List of operations to perform'
+            }
+          }
+        }
+      },
+      {
+        name: 'jw_intelligent_deploy',
+        description: 'Intelligent deployment for JW Attendant Scheduler',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            target: { type: 'string', enum: ['staging', 'production'], default: 'staging' },
+            phases: { type: 'array', items: { type: 'string' } },
+            autoPromote: { type: 'boolean', default: false }
+          }
+        }
+      },
+      {
+        name: 'jw_application_restart',
+        description: 'Restart JW Attendant Scheduler application',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            force: { type: 'boolean', default: false }
+          }
+        }
+      }
+    ];
   }
 
   // Health check tool
@@ -182,16 +256,16 @@ Status: healthy and responding`
         throw new Error(`Unknown tool: ${name}`);
     }
   }
+
+  async run() {
+    const transport = new StdioServerTransport();
+    await this.server.connect(transport);
+    console.error('JW Attendant Scheduler MCP Server running on stdio');
+  }
 }
 
-// Export for use as MCP server
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = JWMCP;
-}
-
-// Simple stdio interface for testing
+// Start the server
 if (require.main === module) {
   const server = new JWMCP();
-  console.log('JW Attendant Scheduler MCP Server');
-  console.log('Available tools:', server.getTools().map(t => t.name).join(', '));
+  server.run().catch(console.error);
 }

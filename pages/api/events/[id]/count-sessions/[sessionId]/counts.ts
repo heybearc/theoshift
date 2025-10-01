@@ -110,7 +110,7 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, eventId: st
     positionCount = await prisma.position_counts.update({
       where: { id: existingCount.id },
       data: {
-        attendeeCount: data.attendeeCount,
+        attendeeCount: data.attendeeCount ?? null,
         notes: data.notes,
         countedBy: userId,
         countedAt: new Date(),
@@ -134,7 +134,7 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, eventId: st
         id: crypto.randomUUID(),
         countSessionId: sessionId,
         positionId: data.positionId,
-        attendeeCount: data.attendeeCount,
+        attendeeCount: data.attendeeCount ?? null,
         notes: data.notes,
         countedBy: userId,
         countedAt: new Date(),
