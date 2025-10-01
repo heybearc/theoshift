@@ -6,6 +6,16 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 
+// Helper function to format date for input[type="date"] without timezone issues
+const formatDateForInput = (dateString: string): string => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 interface EventFormData {
   name: string
   description: string
@@ -86,8 +96,8 @@ export default function EditEventPage() {
           name: eventData.name || '',
           description: eventData.description || '',
           eventType: eventData.eventType || 'ASSEMBLY',
-          startDate: eventData.startDate ? new Date(eventData.startDate).toISOString().split('T')[0] : '',
-          endDate: eventData.endDate ? new Date(eventData.endDate).toISOString().split('T')[0] : '',
+          startDate: formatDateForInput(eventData.startDate),
+          endDate: formatDateForInput(eventData.endDate),
           startTime: eventData.startTime || '09:30',
           endTime: eventData.endTime || '16:00',
           location: eventData.location || '',
