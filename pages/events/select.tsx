@@ -51,6 +51,13 @@ export default function EventSelectPage() {
         router.push('/auth/signin')
         return
       }
+
+      // Check for other errors
+      if (!response.ok) {
+        setError(`Server error: ${response.status}`)
+        setLoading(false)
+        return
+      }
       
       const data: EventsResponse = await response.json()
 
@@ -66,7 +73,7 @@ export default function EventSelectPage() {
         setError('Failed to load events')
       }
     } catch (err) {
-      setError('Error loading events')
+      setError(`Error loading events: ${err instanceof Error ? err.message : 'Unknown error'}`)
       console.error('Error fetching events:', err)
     } finally {
       setLoading(false)
