@@ -114,7 +114,10 @@ export default function EventsPage() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
+    if (!dateString) return 'No date'
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return 'Invalid date'
+    return date.toLocaleDateString()
   }
 
   const formatTime = (timeString: string) => {
