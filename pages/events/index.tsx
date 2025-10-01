@@ -82,6 +82,7 @@ export default function EventsPage() {
       
       // Handle authentication errors
       if (response.status === 401) {
+        setLoading(false)
         router.push('/auth/signin')
         return
       }
@@ -91,6 +92,7 @@ export default function EventsPage() {
       if (data.success) {
         setEvents(data.data.events)
         setPagination(data.data.pagination)
+        setError('')
       } else {
         setError('Failed to fetch events')
       }
