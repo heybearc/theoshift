@@ -138,6 +138,10 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
     data: {
       events: events.map(event => ({
         ...event,
+        startDate: event.startDate?.toISOString() || null,
+        endDate: event.endDate?.toISOString() || null,
+        createdAt: event.createdAt?.toISOString() || null,
+        updatedAt: event.updatedAt?.toISOString() || null,
         status: getEventStatus(event.startDate, event.endDate),
         attendantsCount: event._count.event_attendant_associations,
         positionsCount: event._count.event_positions
