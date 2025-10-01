@@ -47,6 +47,7 @@ export default function EventSelectPage() {
       
       // Check if unauthorized
       if (response.status === 401 || response.status === 403) {
+        setLoading(false)
         router.push('/auth/signin')
         return
       }
