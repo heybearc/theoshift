@@ -171,6 +171,8 @@ model events {
   status                       EventStatus                    @default(UPCOMING)
   startDate                    DateTime                       @db.Date
   endDate                      DateTime                       @db.Date
+  startTime                    String?
+  endTime                      String?
   location                     String?
   venue                        String?
   isActive                     Boolean                        @default(true)
