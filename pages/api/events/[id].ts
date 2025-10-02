@@ -169,8 +169,9 @@ async function handlePut(req: NextApiRequest, res: NextApiResponse, id: string, 
   if (data.name !== undefined) updateData.name = data.name
   if (data.description !== undefined) updateData.description = data.description
   if (data.eventType !== undefined) updateData.eventType = data.eventType
-  if (data.startDate !== undefined) updateData.startDate = new Date(data.startDate)
-  if (data.endDate !== undefined) updateData.endDate = new Date(data.endDate)
+  // For DATE fields, pass string directly to avoid timezone conversion
+  if (data.startDate !== undefined) updateData.startDate = data.startDate
+  if (data.endDate !== undefined) updateData.endDate = data.endDate
   if (data.location !== undefined) updateData.location = data.location
   if (data.venue !== undefined) updateData.venue = data.venue
   if (data.status !== undefined) updateData.status = data.status
