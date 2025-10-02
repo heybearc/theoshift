@@ -178,24 +178,22 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, userId: str
   const data = validation.data
 
   // Additional validation: end date must be >= start date
-  const startDate = new Date(data.startDate)
-  const endDate = new Date(data.endDate)
-  
-  if (endDate < startDate) {
+  // Compare as strings to avoid timezone issues with DATE fields
+  if (data.endDate < data.startDate) {
     return res.status(400).json({
       error: 'End date must be on or after start date'
     })
   }
 
-  // Create event
+  // Create event - pass date strings directly for DATE fields
   const event = await prisma.events.create({
     data: {
       id: crypto.randomUUID(),
       name: data.name,
       description: data.description,
       eventType: data.eventType as any,
-      startDate: startDate,
-      endDate: endDate,
+      startDate: data.startDate,
+      endDate: data.endDate,
       location: data.location,
       status: data.status as any,
       createdBy: userId,
