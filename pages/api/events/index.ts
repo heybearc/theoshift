@@ -185,15 +185,15 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, userId: str
     })
   }
 
-  // Create event - pass date strings directly for DATE fields
+  // Create event - convert date strings to Date at local midnight
   const event = await prisma.events.create({
     data: {
       id: crypto.randomUUID(),
       name: data.name,
       description: data.description,
       eventType: data.eventType as any,
-      startDate: data.startDate,
-      endDate: data.endDate,
+      startDate: new Date(data.startDate + 'T00:00:00'),
+      endDate: new Date(data.endDate + 'T00:00:00'),
       location: data.location,
       status: data.status as any,
       createdBy: userId,
