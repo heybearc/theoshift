@@ -169,8 +169,8 @@ model events {
   description                  String?
   eventType                    EventType                      @default(ASSEMBLY)
   status                       EventStatus                    @default(UPCOMING)
-  startDate                    DateTime
-  endDate                      DateTime
+  startDate                    DateTime                       @db.Date
+  endDate                      DateTime                       @db.Date
   location                     String?
   venue                        String?
   isActive                     Boolean                        @default(true)
