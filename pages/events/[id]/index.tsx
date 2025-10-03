@@ -157,6 +157,98 @@ export default function EventDetailsPage() {
     return statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'
   }
 
+  // Quick Actions functions
+  const handleStatusChange = async (newStatus: string) => {
+    if (!event) return
+    
+    const confirmMessage = `Are you sure you want to change the event status to ${newStatus}?`
+    if (!confirm(confirmMessage)) return
+
+    try {
+      const response = await fetch(`/api/events/${event.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      })
+
+      if (response.ok) {
+        fetchEvent() // Refresh event data
+        alert(`Event status updated to ${newStatus}`)
+      } else {
+        alert('Failed to update event status')
+      }
+    } catch (error) {
+      console.error('Error updating status:', error)
+      alert('Error updating event status')
+    }
+  }
+
+  const handleCloneEvent = async () => {
+    if (!event) return
+    
+    const eventName = prompt('Enter name for the cloned event:', `${event.name} (Copy)`)
+    if (!eventName) return
+
+    try {
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: eventName,
+          description: event.description,
+          eventType: event.eventType,
+          startDate: event.startDate,
+          endDate: event.endDate,
+          startTime: event.startTime,
+          endTime: event.endTime,
+          location: event.location,
+          capacity: event.capacity,
+          attendantsNeeded: event.attendantsNeeded,
+          status: 'UPCOMING'
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        alert('Event cloned successfully!')
+        router.push(`/events/${data.data.id}`)
+      } else {
+        alert('Failed to clone event')
+      }
+    } catch (error) {
+      console.error('Error cloning event:', error)
+      alert('Error cloning event')
+    }
+  }
+
+  const handleExportData = () => {
+    if (!event) return
+    
+    const csvData = [
+      ['Event Details'],
+      ['Name', event.name],
+      ['Type', event.eventType],
+      ['Status', event.status],
+      ['Start Date', formatDate(event.startDate)],
+      ['End Date', formatDate(event.endDate)],
+      ['Location', event.location || 'Not specified'],
+      [''],
+      ['Statistics'],
+      ['Total Positions', event._count.event_positions.toString()],
+      ['Total Assignments', event._count.assignments.toString()],
+      ['Attendants Linked', event._count.event_attendant_associations.toString()]
+    ]
+
+    const csvContent = csvData.map(row => row.join(',')).join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${event.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_export.csv`
+    a.click()
+    window.URL.revokeObjectURL(url)
+  }
+
   if (loading) {
     return (
       <EventLayout 
@@ -259,6 +351,12 @@ export default function EventDetailsPage() {
                 className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors"
               >
                 📋 Assignments
+              </Link>
+              <Link
+                href={`/admin/events/${event.id}/lanyards`}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded transition-colors"
+              >
+                🏷️ Lanyards
               </Link>
               <Link
                 href={`/events/${event.id}/edit`}
@@ -526,36 +624,53 @@ export default function EventDetailsPage() {
             <div className="bg-white shadow rounded-lg p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
               <div className="space-y-3">
-                <Link
-                  href={`/admin/events/${event.id}/attendants`}
+                {/* Status Change Actions */}
+                {event.status === 'UPCOMING' && (
+                  <button
+                    onClick={() => handleStatusChange('CURRENT')}
+                    className="w-full flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors"
+                  >
+                    🚀 Start Event
+                  </button>
+                )}
+                {event.status === 'CURRENT' && (
+                  <button
+                    onClick={() => handleStatusChange('COMPLETED')}
+                    className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors"
+                  >
+                    ✅ Complete Event
+                  </button>
+                )}
+                
+                {/* Workflow Actions */}
+                <button
+                  onClick={handleExportData}
                   className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                 >
-                  👥 Manage Attendants
-                </Link>
-                <Link
-                  href={`/admin/events/${event.id}/positions`}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  📍 Manage Positions
-                </Link>
-                <Link
-                  href={`/admin/events/${event.id}/assignments`}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  📋 Manage Assignments
-                </Link>
-                <Link
-                  href={`/admin/events/${event.id}/lanyards`}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  🏷️ Manage Lanyards
-                </Link>
+                  📊 Export Data
+                </button>
                 <button
                   onClick={() => window.print()}
                   className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   🖨️ Print Report
                 </button>
+                <button
+                  onClick={handleCloneEvent}
+                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  📋 Clone Event
+                </button>
+                
+                {/* Archive Action (only for completed events) */}
+                {event.status === 'COMPLETED' && (
+                  <button
+                    onClick={() => handleStatusChange('ARCHIVED')}
+                    className="w-full flex items-center justify-center px-4 py-2 border border-yellow-300 bg-yellow-50 rounded-md text-sm font-medium text-yellow-700 hover:bg-yellow-100 transition-colors"
+                  >
+                    🗑️ Archive Event
+                  </button>
+                )}
               </div>
             </div>
 
