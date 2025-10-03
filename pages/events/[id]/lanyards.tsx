@@ -74,18 +74,24 @@ export default function EventLanyardsPage() {
       
       // Fetch event details
       const eventResponse = await fetch(`/api/events/${id}`)
-      const eventData = await eventResponse.json()
-      setEvent(eventData.data)
+      if (eventResponse.ok) {
+        const eventData = await eventResponse.json()
+        setEvent(eventData.data)
+      }
       
       // Fetch lanyards for this event
       const lanyardsResponse = await fetch(`/api/event-lanyards/${id}`)
-      const lanyardsData = await lanyardsResponse.json()
-      setLanyards(lanyardsData.data || [])
+      if (lanyardsResponse.ok) {
+        const lanyardsData = await lanyardsResponse.json()
+        setLanyards(lanyardsData.data || [])
+      }
       
       // Fetch attendants for this event
       const attendantsResponse = await fetch(`/api/event-attendants/${id}?limit=100`)
-      const attendantsData = await attendantsResponse.json()
-      setAttendants(attendantsData.data.associations || [])
+      if (attendantsResponse.ok) {
+        const attendantsData = await attendantsResponse.json()
+        setAttendants(attendantsData.data?.associations || [])
+      }
       
     } catch (error) {
       setError('Failed to load event and lanyards')
