@@ -98,7 +98,11 @@ export default function EventDetailsPage() {
   }, [id])
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    // Parse ISO date string directly to avoid timezone conversion
+    // Input: "2025-11-01T00:00:00.000Z" -> Extract: "2025-11-01"
+    const datePart = dateString.split('T')[0]
+    const [year, month, day] = datePart.split('-')
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day)).toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
