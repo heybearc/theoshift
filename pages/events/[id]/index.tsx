@@ -190,20 +190,28 @@ export default function EventDetailsPage() {
     if (!eventName) return
 
     try {
+      // Format dates properly for the API
+      const startDate = typeof event.startDate === 'string' 
+        ? event.startDate.split('T')[0]
+        : new Date(event.startDate).toISOString().split('T')[0]
+      const endDate = typeof event.endDate === 'string' 
+        ? event.endDate.split('T')[0]
+        : new Date(event.endDate).toISOString().split('T')[0]
+
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: eventName,
-          description: event.description,
+          description: event.description || '',
           eventType: event.eventType,
-          startDate: event.startDate,
-          endDate: event.endDate,
-          startTime: event.startTime,
-          endTime: event.endTime,
+          startDate: startDate,
+          endDate: endDate,
+          startTime: event.startTime || '09:00',
+          endTime: event.endTime || '17:00',
           location: event.location,
-          capacity: event.capacity,
-          attendantsNeeded: event.attendantsNeeded,
+          capacity: event.capacity || 100,
+          attendantsNeeded: event.attendantsNeeded || 10,
           status: 'UPCOMING'
         })
       })
@@ -213,11 +221,13 @@ export default function EventDetailsPage() {
         alert('Event cloned successfully!')
         router.push(`/events/${data.data.id}`)
       } else {
-        alert('Failed to clone event')
+        const errorData = await response.json()
+        console.error('Clone event error:', errorData)
+        alert(`Failed to clone event: ${errorData.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error cloning event:', error)
-      alert('Error cloning event')
+      alert('Error cloning event. Please try again.')
     }
   }
 
