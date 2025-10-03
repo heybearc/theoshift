@@ -36,6 +36,7 @@ export default function EventLanyardsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [editingLanyard, setEditingLanyard] = useState<Lanyard | null>(null)
   const [formData, setFormData] = useState({
     badgeNumber: '',
     notes: ''
@@ -101,10 +102,126 @@ export default function EventLanyardsPage() {
     }
   }
 
+  const handleEditLanyard = (lanyard: Lanyard) => {
+    setEditingLanyard(lanyard)
+    setFormData({
+      badgeNumber: lanyard.badgeNumber,
+      notes: lanyard.notes || ''
+    })
+    setShowCreateForm(true)
+  }
+
+  const handleUpdateLanyard = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingLanyard) return
+    
+    try {
+      const response = await fetch(`/api/event-lanyards/${id}/${editingLanyard.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (response.ok) {
+        setFormData({ badgeNumber: '', notes: '' })
+        setShowCreateForm(false)
+        setEditingLanyard(null)
+        fetchEventAndLanyards()
+      } else {
+        setError('Failed to update lanyard')
+      }
+    } catch (error) {
+      setError('Error updating lanyard')
+      console.error('Error:', error)
+    }
+  }
+
+  const handleDeleteLanyard = async (lanyardId: string) => {
+    if (!confirm('Are you sure you want to delete this lanyard?')) return
+    
+    try {
+      const response = await fetch(`/api/event-lanyards/${id}/${lanyardId}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        fetchEventAndLanyards()
+      } else {
+        setError('Failed to delete lanyard')
+      }
+    } catch (error) {
+      setError('Error deleting lanyard')
+      console.error('Error:', error)
+    }
+  }
+
+  const handleCheckOut = async (lanyardId: string) => {
+    const attendantName = prompt('Enter attendant name for check-out:')
+    if (!attendantName) return
+
+    try {
+      const response = await fetch(`/api/event-lanyards/${id}/${lanyardId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'CHECKED_OUT',
+          isCheckedOut: true,
+          checkedOutTo: attendantName,
+          checkedOutAt: new Date().toISOString()
+        }),
+      })
+
+      if (response.ok) {
+        fetchEventAndLanyards()
+      } else {
+        setError('Failed to check out lanyard')
+      }
+    } catch (error) {
+      setError('Error checking out lanyard')
+      console.error('Error:', error)
+    }
+  }
+
+  const handleCheckIn = async (lanyardId: string) => {
+    try {
+      const response = await fetch(`/api/event-lanyards/${id}/${lanyardId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'AVAILABLE',
+          isCheckedOut: false,
+          checkedOutTo: null,
+          checkedInAt: new Date().toISOString()
+        }),
+      })
+
+      if (response.ok) {
+        fetchEventAndLanyards()
+      } else {
+        setError('Failed to check in lanyard')
+      }
+    } catch (error) {
+      setError('Error checking in lanyard')
+      console.error('Error:', error)
+    }
+  }
+
+  const resetForm = () => {
+    setFormData({ badgeNumber: '', notes: '' })
+    setShowCreateForm(false)
+    setEditingLanyard(null)
+  }
+
   const getStatusBadge = (status: string) => {
     const statusColors = {
       AVAILABLE: 'bg-green-100 text-green-800',
-      ASSIGNED: 'bg-blue-100 text-blue-800',
+      CHECKED_OUT: 'bg-blue-100 text-blue-800',
       LOST: 'bg-red-100 text-red-800',
       DAMAGED: 'bg-yellow-100 text-yellow-800'
     }
@@ -190,11 +307,13 @@ export default function EventLanyardsPage() {
           </div>
         </div>
 
-        {/* Create Form */}
+        {/* Create/Edit Form */}
         {showCreateForm && (
           <div className="bg-white shadow rounded-lg p-6 mb-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Add New Lanyard</h3>
-            <form onSubmit={handleCreateLanyard} className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              {editingLanyard ? 'Edit Lanyard' : 'Add New Lanyard'}
+            </h3>
+            <form onSubmit={editingLanyard ? handleUpdateLanyard : handleCreateLanyard} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="badgeNumber" className="block text-sm font-medium text-gray-700 mb-1">
@@ -227,7 +346,7 @@ export default function EventLanyardsPage() {
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
-                  onClick={() => setShowCreateForm(false)}
+                  onClick={resetForm}
                   className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   Cancel
@@ -236,7 +355,7 @@ export default function EventLanyardsPage() {
                   type="submit"
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
                 >
-                  Create Lanyard
+                  {editingLanyard ? 'Update Lanyard' : 'Create Lanyard'}
                 </button>
               </div>
             </form>
@@ -320,12 +439,35 @@ export default function EventLanyardsPage() {
                         {lanyard.notes || '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button className="text-blue-600 hover:text-blue-900 mr-3">
-                          Edit
-                        </button>
-                        <button className="text-red-600 hover:text-red-900">
-                          Delete
-                        </button>
+                        <div className="flex space-x-2">
+                          <button 
+                            onClick={() => handleEditLanyard(lanyard)}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            Edit
+                          </button>
+                          {!lanyard.isCheckedOut ? (
+                            <button 
+                              onClick={() => handleCheckOut(lanyard.id)}
+                              className="text-green-600 hover:text-green-900"
+                            >
+                              Check Out
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => handleCheckIn(lanyard.id)}
+                              className="text-orange-600 hover:text-orange-900"
+                            >
+                              Check In
+                            </button>
+                          )}
+                          <button 
+                            onClick={() => handleDeleteLanyard(lanyard.id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
