@@ -8,15 +8,13 @@ import { useRouter } from 'next/router'
 
 interface Lanyard {
   id: string
-  lanyardNumber: string
-  color: string
+  badgeNumber: string
   status: string
-  assignedTo?: {
-    id: string
-    firstName: string
-    lastName: string
-    email: string
-  }
+  notes?: string
+  isCheckedOut: boolean
+  checkedOutTo?: string
+  checkedOutAt?: string
+  checkedInAt?: string
   createdAt: string
   updatedAt: string
 }
@@ -39,8 +37,8 @@ export default function EventLanyardsPage() {
   const [error, setError] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [formData, setFormData] = useState({
-    lanyardNumber: '',
-    color: 'blue'
+    badgeNumber: '',
+    notes: ''
   })
 
   const fetchEventAndLanyards = async () => {
@@ -91,7 +89,7 @@ export default function EventLanyardsPage() {
       })
 
       if (response.ok) {
-        setFormData({ lanyardNumber: '', color: 'blue' })
+        setFormData({ badgeNumber: '', notes: '' })
         setShowCreateForm(false)
         fetchEventAndLanyards()
       } else {
@@ -199,38 +197,31 @@ export default function EventLanyardsPage() {
             <form onSubmit={handleCreateLanyard} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="lanyardNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                    Lanyard Number *
+                  <label htmlFor="badgeNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                    Badge Number *
                   </label>
                   <input
                     type="text"
-                    id="lanyardNumber"
-                    value={formData.lanyardNumber}
-                    onChange={(e) => setFormData({ ...formData, lanyardNumber: e.target.value })}
+                    id="badgeNumber"
+                    value={formData.badgeNumber}
+                    onChange={(e) => setFormData({ ...formData, badgeNumber: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g., L001, A-1, etc."
                     required
                   />
                 </div>
                 <div>
-                  <label htmlFor="color" className="block text-sm font-medium text-gray-700 mb-1">
-                    Color
+                  <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+                    Notes
                   </label>
-                  <select
-                    id="color"
-                    value={formData.color}
-                    onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                  <input
+                    type="text"
+                    id="notes"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="blue">Blue</option>
-                    <option value="red">Red</option>
-                    <option value="green">Green</option>
-                    <option value="yellow">Yellow</option>
-                    <option value="purple">Purple</option>
-                    <option value="orange">Orange</option>
-                    <option value="black">Black</option>
-                    <option value="white">White</option>
-                  </select>
+                    placeholder="Optional notes"
+                  />
                 </div>
               </div>
               <div className="flex justify-end space-x-3">
@@ -284,16 +275,16 @@ export default function EventLanyardsPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Lanyard Number
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Color
+                      Badge Number
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Assigned To
+                      Checked Out
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Notes
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
@@ -304,12 +295,7 @@ export default function EventLanyardsPage() {
                   {lanyards.map((lanyard) => (
                     <tr key={lanyard.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {lanyard.lanyardNumber}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${lanyard.color}-100 text-${lanyard.color}-800`}>
-                          {lanyard.color}
-                        </span>
+                        {lanyard.badgeNumber}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(lanyard.status)}`}>
@@ -317,16 +303,21 @@ export default function EventLanyardsPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {lanyard.assignedTo ? (
+                        {lanyard.isCheckedOut ? (
                           <div>
                             <div className="font-medium text-gray-900">
-                              {lanyard.assignedTo.firstName} {lanyard.assignedTo.lastName}
+                              {lanyard.checkedOutTo || 'Unknown'}
                             </div>
-                            <div className="text-gray-500">{lanyard.assignedTo.email}</div>
+                            <div className="text-gray-500 text-xs">
+                              {lanyard.checkedOutAt ? new Date(lanyard.checkedOutAt).toLocaleDateString() : ''}
+                            </div>
                           </div>
                         ) : (
-                          <span className="text-gray-400">Unassigned</span>
+                          <span className="text-gray-400">Available</span>
                         )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {lanyard.notes || '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button className="text-blue-600 hover:text-blue-900 mr-3">
