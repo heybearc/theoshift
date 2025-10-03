@@ -167,6 +167,8 @@ export default function EventLanyardsPage() {
   const handleCheckOut = async (lanyardId: string) => {
     const attendantName = prompt('Enter attendant name for check-out:')
     if (!attendantName) return
+    
+    const phoneNumber = prompt('Enter attendant phone number (optional):') || ''
 
     try {
       const response = await fetch(`/api/event-lanyards/${id}/${lanyardId}`, {
@@ -178,7 +180,8 @@ export default function EventLanyardsPage() {
           status: 'CHECKED_OUT',
           isCheckedOut: true,
           checkedOutTo: attendantName,
-          checkedOutAt: new Date().toISOString()
+          checkedOutAt: new Date().toISOString(),
+          notes: phoneNumber ? `Phone: ${phoneNumber}` : undefined
         }),
       })
 
@@ -571,6 +574,11 @@ export default function EventLanyardsPage() {
                             <div className="text-gray-500 text-xs">
                               {lanyard.checkedOutAt ? new Date(lanyard.checkedOutAt).toLocaleDateString() : ''}
                             </div>
+                            {lanyard.notes && lanyard.notes.includes('Phone:') && (
+                              <div className="text-blue-600 text-xs">
+                                {lanyard.notes}
+                              </div>
+                            )}
                           </div>
                         ) : (
                           <span className="text-gray-400">Available</span>
