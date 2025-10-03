@@ -28,13 +28,30 @@ interface Event {
   status: string
 }
 
+interface Attendant {
+  id: string
+  users: {
+    id: string
+    firstName: string
+    lastName: string
+    email: string
+    role: string
+  }
+  role?: string
+}
+
 export default function EventLanyardsPage() {
   const router = useRouter()
   const { id } = router.query
   const [event, setEvent] = useState<Event | null>(null)
   const [lanyards, setLanyards] = useState<Lanyard[]>([])
+  const [attendants, setAttendants] = useState<Attendant[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [showCheckOutModal, setShowCheckOutModal] = useState(false)
+  const [selectedLanyardId, setSelectedLanyardId] = useState<string>('')
+  const [selectedAttendant, setSelectedAttendant] = useState<Attendant | null>(null)
+  const [attendantSearch, setAttendantSearch] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [showBulkForm, setShowBulkForm] = useState(false)
   const [editingLanyard, setEditingLanyard] = useState<Lanyard | null>(null)
@@ -51,29 +68,27 @@ export default function EventLanyardsPage() {
 
   const fetchEventAndLanyards = async () => {
     if (!id) return
-
+    
     try {
       setLoading(true)
       
       // Fetch event details
       const eventResponse = await fetch(`/api/events/${id}`)
       const eventData = await eventResponse.json()
+      setEvent(eventData.data)
       
-      if (eventData.success) {
-        setEvent(eventData.data)
-      }
-
-      // Fetch lanyards
+      // Fetch lanyards for this event
       const lanyardsResponse = await fetch(`/api/event-lanyards/${id}`)
       const lanyardsData = await lanyardsResponse.json()
+      setLanyards(lanyardsData.data || [])
       
-      if (lanyardsData.success) {
-        setLanyards(lanyardsData.data || [])
-      } else {
-        setError(lanyardsData.error || 'Failed to fetch lanyards')
-      }
+      // Fetch attendants for this event
+      const attendantsResponse = await fetch(`/api/event-attendants/${id}?limit=100`)
+      const attendantsData = await attendantsResponse.json()
+      setAttendants(attendantsData.data.associations || [])
+      
     } catch (error) {
-      setError('Error fetching data')
+      setError('Failed to load event and lanyards')
       console.error('Error:', error)
     } finally {
       setLoading(false)
@@ -164,14 +179,19 @@ export default function EventLanyardsPage() {
     }
   }
 
-  const handleCheckOut = async (lanyardId: string) => {
-    const attendantName = prompt('Enter attendant name for check-out:')
-    if (!attendantName) return
-    
-    const phoneNumber = prompt('Enter attendant phone number (optional):') || ''
+  const handleCheckOut = (lanyardId: string) => {
+    setSelectedLanyardId(lanyardId)
+    setShowCheckOutModal(true)
+    setSelectedAttendant(null)
+    setAttendantSearch('')
+  }
+
+  const confirmCheckOut = async () => {
+    if (!selectedAttendant || !selectedLanyardId) return
 
     try {
-      const response = await fetch(`/api/event-lanyards/${id}/${lanyardId}`, {
+      const attendantName = `${selectedAttendant.users.firstName} ${selectedAttendant.users.lastName}`
+      const response = await fetch(`/api/event-lanyards/${id}/${selectedLanyardId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -181,11 +201,12 @@ export default function EventLanyardsPage() {
           isCheckedOut: true,
           checkedOutTo: attendantName,
           checkedOutAt: new Date().toISOString(),
-          notes: phoneNumber ? `Phone: ${phoneNumber}` : undefined
+          notes: `Role: ${selectedAttendant.role || selectedAttendant.users.role} | Email: ${selectedAttendant.users.email}`
         }),
       })
 
       if (response.ok) {
+        setShowCheckOutModal(false)
         fetchEventAndLanyards()
       } else {
         setError('Failed to check out lanyard')
@@ -207,7 +228,9 @@ export default function EventLanyardsPage() {
           status: 'AVAILABLE',
           isCheckedOut: false,
           checkedOutTo: null,
-          checkedInAt: new Date().toISOString()
+          checkedOutAt: null,
+          checkedInAt: new Date().toISOString(),
+          notes: null
         }),
       })
 
@@ -503,6 +526,78 @@ export default function EventLanyardsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        )}
+
+        {/* Check Out Modal */}
+        {showCheckOutModal && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="mt-3">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Check Out Lanyard</h3>
+                
+                <div className="mb-4">
+                  <label htmlFor="attendantSearch" className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Attendant
+                  </label>
+                  <input
+                    type="text"
+                    id="attendantSearch"
+                    value={attendantSearch}
+                    onChange={(e) => setAttendantSearch(e.target.value)}
+                    placeholder="Search attendants..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  
+                  {attendantSearch && (
+                    <div className="mt-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md">
+                      {attendants
+                        .filter(attendant => {
+                          const fullName = `${attendant.users.firstName} ${attendant.users.lastName}`.toLowerCase()
+                          const role = (attendant.role || attendant.users.role || '').toLowerCase()
+                          const email = attendant.users.email.toLowerCase()
+                          const search = attendantSearch.toLowerCase()
+                          return fullName.includes(search) || role.includes(search) || email.includes(search)
+                        })
+                        .map(attendant => (
+                          <div
+                            key={attendant.id}
+                            onClick={() => {
+                              setSelectedAttendant(attendant)
+                              setAttendantSearch(`${attendant.users.firstName} ${attendant.users.lastName}`)
+                            }}
+                            className="p-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                          >
+                            <div className="font-medium text-gray-900">
+                              {attendant.users.firstName} {attendant.users.lastName}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              {attendant.role || attendant.users.role} • {attendant.users.email}
+                            </div>
+                          </div>
+                        ))
+                      }
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => setShowCheckOutModal(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmCheckOut}
+                    disabled={!selectedAttendant}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-md transition-colors"
+                  >
+                    Check Out
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
