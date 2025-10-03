@@ -127,6 +127,30 @@ export default function EventsPage() {
     })
   }
 
+  const handleDeleteEvent = async (eventId: string, eventName: string) => {
+    if (!confirm(`Are you sure you want to delete "${eventName}"? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/events/${eventId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        // Refresh the events list
+        fetchEvents()
+        alert('Event deleted successfully')
+      } else {
+        const error = await response.json()
+        alert(`Failed to delete event: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Delete error:', error)
+      alert('Failed to delete event')
+    }
+  }
+
   const getStatusBadge = (status: string) => {
     const statusColors = {
       DRAFT: 'bg-gray-100 text-gray-800',
@@ -364,12 +388,22 @@ export default function EventsPage() {
                             📋 Manage
                           </Link>
                           {session?.user?.role && ['ADMIN', 'OVERSEER'].includes(session.user.role) && (
-                            <Link
-                              href={`/events/${event.id}/edit`}
-                              className="text-green-600 hover:text-green-900 transition-colors"
-                            >
-                              ✏️ Edit
-                            </Link>
+                            <>
+                              <Link
+                                href={`/events/${event.id}/edit`}
+                                className="text-green-600 hover:text-green-900 transition-colors"
+                              >
+                                ✏️ Edit
+                              </Link>
+                              {session.user.role === 'ADMIN' && (
+                                <button
+                                  onClick={() => handleDeleteEvent(event.id, event.name)}
+                                  className="text-red-600 hover:text-red-900 transition-colors ml-2"
+                                >
+                                  🗑️ Delete
+                                </button>
+                              )}
+                            </>
                           )}
                         </td>
                       </tr>
