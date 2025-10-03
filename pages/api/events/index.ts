@@ -142,13 +142,13 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
         endDate: event.endDate?.toISOString() || null,
         createdAt: event.createdAt?.toISOString() || null,
         updatedAt: event.updatedAt?.toISOString() || null,
-        status: getEventStatus(event.startDate, event.endDate),
+        status: event.status,
         attendantsCount: event._count.event_attendant_associations,
         positionsCount: event._count.event_positions
       })),
       currentEvent: currentEvent ? {
         ...currentEvent,
-        status: getEventStatus(currentEvent.startDate, currentEvent.endDate),
+        status: currentEvent.status,
         attendantsCount: currentEvent._count.event_attendant_associations,
         positionsCount: currentEvent._count.event_positions
       } : null,
