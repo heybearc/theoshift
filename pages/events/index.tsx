@@ -115,9 +115,15 @@ export default function EventsPage() {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'No date'
-    const date = new Date(dateString)
-    if (isNaN(date.getTime())) return 'Invalid date'
-    return date.toLocaleDateString()
+    try {
+      // Parse ISO date string directly to avoid timezone conversion
+      // Input: "2025-10-20T00:00:00.000Z" -> Extract: "2025-10-20"
+      const datePart = dateString.split('T')[0]
+      const [year, month, day] = datePart.split('-')
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day)).toLocaleDateString()
+    } catch {
+      return 'Invalid date'
+    }
   }
 
   const formatTime = (timeString: string) => {
