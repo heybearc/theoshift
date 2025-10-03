@@ -36,9 +36,16 @@ export default function EventLanyardsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [showBulkForm, setShowBulkForm] = useState(false)
   const [editingLanyard, setEditingLanyard] = useState<Lanyard | null>(null)
   const [formData, setFormData] = useState({
     badgeNumber: '',
+    notes: ''
+  })
+  const [bulkData, setBulkData] = useState({
+    startNumber: 1,
+    endNumber: 10,
+    prefix: '',
     notes: ''
   })
 
@@ -212,9 +219,50 @@ export default function EventLanyardsPage() {
     }
   }
 
+  const handleBulkCreate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    try {
+      const { startNumber, endNumber, prefix, notes } = bulkData
+      const promises: Promise<Response>[] = []
+      
+      for (let i = startNumber; i <= endNumber; i++) {
+        const badgeNumber = prefix ? `${prefix}${i}` : i.toString()
+        promises.push(
+          fetch(`/api/event-lanyards/${id}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              badgeNumber,
+              notes
+            }),
+          })
+        )
+      }
+
+      const results = await Promise.all(promises)
+      const successCount = results.filter(r => r.ok).length
+      
+      if (successCount > 0) {
+        setBulkData({ startNumber: 1, endNumber: 10, prefix: '', notes: '' })
+        setShowBulkForm(false)
+        fetchEventAndLanyards()
+        alert(`Successfully created ${successCount} lanyards`)
+      } else {
+        setError('Failed to create lanyards')
+      }
+    } catch (error) {
+      setError('Error creating bulk lanyards')
+      console.error('Error:', error)
+    }
+  }
+
   const resetForm = () => {
     setFormData({ badgeNumber: '', notes: '' })
     setShowCreateForm(false)
+    setShowBulkForm(false)
     setEditingLanyard(null)
   }
 
@@ -303,6 +351,12 @@ export default function EventLanyardsPage() {
               >
                 + Add Lanyard
               </button>
+              <button
+                onClick={() => setShowBulkForm(true)}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"
+              >
+                📦 Bulk Create
+              </button>
             </div>
           </div>
         </div>
@@ -356,6 +410,93 @@ export default function EventLanyardsPage() {
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
                 >
                   {editingLanyard ? 'Update Lanyard' : 'Create Lanyard'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Bulk Create Form */}
+        {showBulkForm && (
+          <div className="bg-white shadow rounded-lg p-6 mb-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Bulk Create Lanyards</h3>
+            <form onSubmit={handleBulkCreate} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label htmlFor="prefix" className="block text-sm font-medium text-gray-700 mb-1">
+                    Prefix (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    id="prefix"
+                    value={bulkData.prefix}
+                    onChange={(e) => setBulkData({ ...bulkData, prefix: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g., L, A-, etc."
+                  />
+                </div>
+                <div>
+                  <label htmlFor="startNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                    Start Number *
+                  </label>
+                  <input
+                    type="number"
+                    id="startNumber"
+                    value={bulkData.startNumber}
+                    onChange={(e) => setBulkData({ ...bulkData, startNumber: parseInt(e.target.value) || 1 })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    min="1"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="endNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                    End Number *
+                  </label>
+                  <input
+                    type="number"
+                    id="endNumber"
+                    value={bulkData.endNumber}
+                    onChange={(e) => setBulkData({ ...bulkData, endNumber: parseInt(e.target.value) || 10 })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    min="1"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="bulkNotes" className="block text-sm font-medium text-gray-700 mb-1">
+                    Notes (All)
+                  </label>
+                  <input
+                    type="text"
+                    id="bulkNotes"
+                    value={bulkData.notes}
+                    onChange={(e) => setBulkData({ ...bulkData, notes: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Optional notes for all"
+                  />
+                </div>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-md">
+                <p className="text-sm text-gray-600">
+                  <strong>Preview:</strong> Will create {Math.max(0, bulkData.endNumber - bulkData.startNumber + 1)} lanyards: 
+                  {bulkData.prefix}{bulkData.startNumber} to {bulkData.prefix}{bulkData.endNumber}
+                </p>
+              </div>
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"
+                  disabled={bulkData.endNumber < bulkData.startNumber}
+                >
+                  Create {Math.max(0, bulkData.endNumber - bulkData.startNumber + 1)} Lanyards
                 </button>
               </div>
             </form>
