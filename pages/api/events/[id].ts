@@ -11,6 +11,8 @@ const updateEventSchema = z.object({
   eventType: z.enum(['ASSEMBLY', 'CONVENTION', 'SPECIAL_EVENT', 'MEETING']).optional(),
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid start date').optional(),
   endDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid end date').optional(),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
   location: z.string().min(1, 'Location is required').max(500).optional(),
   venue: z.string().optional(),
   status: z.enum(['ARCHIVED', 'UPCOMING', 'CURRENT', 'COMPLETED', 'CANCELLED']).optional(),
@@ -171,6 +173,8 @@ async function handlePut(req: NextApiRequest, res: NextApiResponse, id: string, 
   if (data.eventType !== undefined) updateData.eventType = data.eventType
   if (data.startDate !== undefined) updateData.startDate = new Date(data.startDate + 'T00:00:00')
   if (data.endDate !== undefined) updateData.endDate = new Date(data.endDate + 'T00:00:00')
+  if (data.startTime !== undefined) updateData.startTime = data.startTime
+  if (data.endTime !== undefined) updateData.endTime = data.endTime
   if (data.location !== undefined) updateData.location = data.location
   if (data.venue !== undefined) updateData.venue = data.venue
   if (data.status !== undefined) updateData.status = data.status
