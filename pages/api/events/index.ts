@@ -194,6 +194,8 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, userId: str
       eventType: data.eventType as any,
       startDate: new Date(data.startDate + 'T00:00:00'),
       endDate: new Date(data.endDate + 'T00:00:00'),
+      startTime: data.startTime,
+      endTime: data.endTime,
       location: data.location,
       status: data.status as any,
       createdBy: userId,
