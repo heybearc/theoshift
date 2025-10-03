@@ -25,7 +25,6 @@ interface EventFormData {
   location: string
   capacity: string
   attendantsNeeded: string
-  countTimesEnabled: boolean
   status: string
 }
 
@@ -41,7 +40,6 @@ interface Event {
   location?: string
   capacity?: number
   attendantsNeeded?: number
-  countTimesEnabled: boolean
   status: string
   createdAt: string
   updatedAt: string
@@ -59,7 +57,7 @@ export default function EditEventPage() {
   const [formData, setFormData] = useState<EventFormData>({
     name: '',
     description: '',
-    eventType: 'ASSEMBLY',
+    eventType: 'CIRCUIT_ASSEMBLY',
     startDate: '',
     endDate: '',
     startTime: '09:30',
@@ -67,7 +65,6 @@ export default function EditEventPage() {
     location: '',
     capacity: '',
     attendantsNeeded: '',
-    countTimesEnabled: false,
     status: 'UPCOMING'
   })
 
@@ -93,7 +90,7 @@ export default function EditEventPage() {
         setFormData({
           name: eventData.name || '',
           description: eventData.description || '',
-          eventType: eventData.eventType || 'ASSEMBLY',
+          eventType: eventData.eventType || 'CIRCUIT_ASSEMBLY',
           startDate: formatDateForInput(eventData.startDate),
           endDate: formatDateForInput(eventData.endDate),
           startTime: eventData.startTime || '09:30',
@@ -101,7 +98,6 @@ export default function EditEventPage() {
           location: eventData.location || '',
           capacity: eventData.capacity ? eventData.capacity.toString() : '',
           attendantsNeeded: eventData.attendantsNeeded ? eventData.attendantsNeeded.toString() : '',
-          countTimesEnabled: eventData.countTimesEnabled || false,
           status: eventData.status || 'UPCOMING'
         })
       } else {
@@ -216,7 +212,6 @@ export default function EditEventPage() {
         location: formData.location,
         capacity: formData.capacity ? parseInt(formData.capacity) : undefined,
         attendantsNeeded: formData.attendantsNeeded ? parseInt(formData.attendantsNeeded) : undefined,
-        countTimesEnabled: formData.countTimesEnabled,
         status: formData.status
       }
 
@@ -250,10 +245,10 @@ export default function EditEventPage() {
   }
 
   const eventTypes = [
-    { value: 'ASSEMBLY', label: 'Assembly' },
-    { value: 'CONVENTION', label: 'Convention' },
+    { value: 'CIRCUIT_ASSEMBLY', label: 'Circuit Assembly' },
+    { value: 'REGIONAL_CONVENTION', label: 'Regional Convention' },
     { value: 'SPECIAL_EVENT', label: 'Special Event' },
-    { value: 'MEETING', label: 'Meeting' }
+    { value: 'OTHER', label: 'Other' }
   ]
 
   const statusOptions = [
@@ -564,29 +559,6 @@ export default function EditEventPage() {
             </div>
           </div>
 
-          {/* Features */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-6">Features</h3>
-            
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="countTimesEnabled"
-                  name="countTimesEnabled"
-                  checked={formData.countTimesEnabled}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="countTimesEnabled" className="ml-2 block text-sm text-gray-900">
-                  Enable Count Times
-                </label>
-              </div>
-              <p className="text-sm text-gray-600 ml-6">
-                Allow attendants to submit attendance counts during the event
-              </p>
-            </div>
-          </div>
 
           {/* Submit Buttons */}
           <div className="flex justify-end space-x-3">

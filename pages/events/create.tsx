@@ -29,7 +29,7 @@ export default function CreateEventPage() {
   const [formData, setFormData] = useState<EventFormData>({
     name: '',
     description: '',
-    eventType: 'ASSEMBLY',
+    eventType: 'CIRCUIT_ASSEMBLY',
     startDate: '',
     endDate: '',
     startTime: '09:30',
@@ -173,10 +173,10 @@ export default function CreateEventPage() {
   }
 
   const eventTypes = [
-    { value: 'ASSEMBLY', label: 'Assembly' },
-    { value: 'CONVENTION', label: 'Convention' },
+    { value: 'CIRCUIT_ASSEMBLY', label: 'Circuit Assembly' },
+    { value: 'REGIONAL_CONVENTION', label: 'Regional Convention' },
     { value: 'SPECIAL_EVENT', label: 'Special Event' },
-    { value: 'MEETING', label: 'Meeting' }
+    { value: 'OTHER', label: 'Other' }
   ]
 
   const statusOptions = [
