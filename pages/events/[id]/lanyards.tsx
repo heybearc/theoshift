@@ -1,7 +1,7 @@
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../../../api/auth/[...nextauth]'
-import EventLayout from '../../../../components/EventLayout'
+import { authOptions } from '../../api/auth/[...nextauth]'
+import EventLayout from '../../../components/EventLayout'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -58,7 +58,7 @@ export default function EventLanyardsPage() {
       }
 
       // Fetch lanyards
-      const lanyardsResponse = await fetch(`/api/admin/events/${id}/lanyards`)
+      const lanyardsResponse = await fetch(`/api/event-lanyards/${id}`)
       const lanyardsData = await lanyardsResponse.json()
       
       if (lanyardsData.success) {
@@ -82,7 +82,7 @@ export default function EventLanyardsPage() {
     e.preventDefault()
     
     try {
-      const response = await fetch(`/api/admin/events/${id}/lanyards`, {
+      const response = await fetch(`/api/event-lanyards/${id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
