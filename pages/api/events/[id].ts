@@ -8,7 +8,7 @@ import { z } from 'zod'
 const updateEventSchema = z.object({
   name: z.string().min(1, 'Event name is required').max(255).optional(),
   description: z.string().optional(),
-  eventType: z.enum(['ASSEMBLY', 'CONVENTION', 'SPECIAL_EVENT', 'MEETING']).optional(),
+  eventType: z.enum(['CIRCUIT_ASSEMBLY', 'REGIONAL_CONVENTION', 'SPECIAL_EVENT', 'OTHER']).optional(),
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid start date').optional(),
   endDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid end date').optional(),
   startTime: z.string().optional(),

@@ -167,7 +167,7 @@ model events {
   id                           String                         @id
   name                         String
   description                  String?
-  eventType                    EventType                      @default(ASSEMBLY)
+  eventType                    EventType                      @default(CIRCUIT_ASSEMBLY)
   status                       EventStatus                    @default(UPCOMING)
   startDate                    DateTime                       @db.Date
   endDate                      DateTime                       @db.Date
@@ -392,10 +392,10 @@ enum EventStatus {
 }
 
 enum EventType {
-  ASSEMBLY
-  CONVENTION
+  CIRCUIT_ASSEMBLY
+  REGIONAL_CONVENTION
   SPECIAL_EVENT
-  MEETING
+  OTHER
 }
 
 enum ExperienceLevel {

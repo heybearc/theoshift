@@ -9,7 +9,7 @@ import crypto from 'crypto'
 const eventSchema = z.object({
   name: z.string().min(1, 'Event name is required').max(255),
   description: z.string().optional(),
-  eventType: z.enum(['ASSEMBLY', 'CONVENTION', 'SPECIAL_EVENT', 'MEETING']),
+  eventType: z.enum(['CIRCUIT_ASSEMBLY', 'REGIONAL_CONVENTION', 'SPECIAL_EVENT', 'OTHER']),
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid start date'),
   endDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid end date'),
   startTime: z.string(),

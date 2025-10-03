@@ -169,12 +169,9 @@ export default function EventsPage() {
 
   const getEventTypeLabel = (type: string) => {
     const typeLabels = {
-      ASSEMBLY: 'Assembly',
-      CONVENTION: 'Convention',
-      CIRCUIT_OVERSEER_VISIT: 'CO Visit',
+      CIRCUIT_ASSEMBLY: 'Circuit Assembly',
+      REGIONAL_CONVENTION: 'Regional Convention',
       SPECIAL_EVENT: 'Special Event',
-      MEETING: 'Meeting',
-      MEMORIAL: 'Memorial',
       OTHER: 'Other'
     }
     return typeLabels[type as keyof typeof typeLabels] || type
@@ -234,12 +231,9 @@ export default function EventsPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Types</option>
-                <option value="ASSEMBLY">Assembly</option>
-                <option value="CONVENTION">Convention</option>
-                <option value="CIRCUIT_OVERSEER_VISIT">CO Visit</option>
+                <option value="CIRCUIT_ASSEMBLY">Circuit Assembly</option>
+                <option value="REGIONAL_CONVENTION">Regional Convention</option>
                 <option value="SPECIAL_EVENT">Special Event</option>
-                <option value="MEETING">Meeting</option>
-                <option value="MEMORIAL">Memorial</option>
                 <option value="OTHER">Other</option>
               </select>
             </div>
