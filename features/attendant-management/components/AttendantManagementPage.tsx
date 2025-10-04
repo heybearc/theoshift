@@ -158,159 +158,158 @@ export default function AttendantManagementPage({
           )}
 
           <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {eventId ? 'Event Attendants' : 'Attendant Management'}
-                </h1>
-                <p className="text-gray-600 mt-2">
-                  {eventId 
-                    ? `Manage attendants for ${eventName}` 
-                    : 'Manage all attendants across the organization'
-                  }
-                </p>
-              </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {eventId ? 'Event Attendants' : 'Attendant Management'}
+              </h1>
+              <p className="text-gray-600 mt-2">
+                {eventId 
+                  ? `Manage attendants for ${eventName}` 
+                  : 'Manage all attendants across the organization'
+                }
+              </p>
+            </div>
+            
+            <div className="flex space-x-3">
+              {eventId && (
+                <Link
+                  href={`/events/${eventId}`}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  ← Back to Event
+                </Link>
+              )}
               
-              <div className="flex space-x-3">
-                {eventId && (
-                  <Link
-                    href={`/events/${eventId}`}
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors"
-                  >
-                    ← Back to Event
-                  </Link>
-                )}
-                
-                <ActionButton
-                  onClick={() => setShowBulkImportModal(true)}
-                  variant="secondary"
-                >
-                  📥 Bulk Import
-                </ActionButton>
-                
-                <ActionButton
-                  onClick={handleCreateNew}
-                  variant="primary"
-                >
-                  + Add Attendant
-                </ActionButton>
+              <ActionButton
+                onClick={() => setShowBulkImportModal(true)}
+                variant="secondary"
+              >
+                📥 Bulk Import
+              </ActionButton>
+              
+              <ActionButton
+                onClick={handleCreateNew}
+                variant="primary"
+              >
+                + Add Attendant
+              </ActionButton>
+            </div>
+          </div>
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="flex">
+              <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="ml-3">
+                <h4 className="text-sm font-medium text-red-800">Error</h4>
+                <p className="text-sm text-red-700 mt-1">{error}</p>
               </div>
             </div>
           </div>
+        )}
 
-          {/* Error Display */}
-          {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
-              <div className="flex">
-                <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div className="ml-3">
-                  <h4 className="text-sm font-medium text-red-800">Error</h4>
-                  <p className="text-sm text-red-700 mt-1">{error}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Stats Card */}
-          {stats && !loading && (
-            <div className="mb-6">
-              <AttendantStatsCard stats={stats} />
-            </div>
-          )}
-
-          {/* Filters */}
+        {/* Stats Card */}
+        {stats && !loading && (
           <div className="mb-6">
-            <AttendantFilters
-              filters={filters}
-              onFiltersChange={setFilters}
-              congregations={congregations}
-              loading={loading}
-            />
+            <AttendantStatsCard stats={stats} />
           </div>
+        )}
 
-          {/* Bulk Actions */}
-          {selectedAttendantIds.length > 0 && (
-            <div className="mb-6 bg-blue-50 border border-blue-200 rounded-md p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="ml-2 text-sm font-medium text-blue-800">
-                    {selectedAttendantIds.length} attendant(s) selected
-                  </span>
-                </div>
-                <div className="flex space-x-2">
-                  <ActionButton
-                    onClick={() => setSelectedAttendantIds([])}
-                    variant="secondary"
-                    size="sm"
-                  >
-                    Clear Selection
-                  </ActionButton>
-                  <ActionButton
-                    onClick={handleBulkDelete}
-                    variant="danger"
-                    size="sm"
-                  >
-                    Delete Selected
-                  </ActionButton>
-                </div>
-              </div>
-            </div>
-          )}
+        {/* Filters */}
+        <div className="mb-6">
+          <AttendantFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            congregations={congregations}
+            loading={loading}
+          />
+        </div>
 
-          {/* Attendants Table */}
-          <div className="mb-6">
-            <AttendantTable
-              attendants={attendants}
-              loading={loading}
-              onEdit={handleEditAttendant}
-              onDelete={handleDeleteAttendant}
-              onSelect={setSelectedAttendantIds}
-              selectedIds={selectedAttendantIds}
-            />
-          </div>
-
-          {/* Pagination */}
-          {pagination.pages > 1 && (
+        {/* Bulk Actions */}
+        {selectedAttendantIds.length > 0 && (
+          <div className="mb-6 bg-blue-50 border border-blue-200 rounded-md p-4">
             <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-700">
-                Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
-                {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
-                {pagination.total} results
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="ml-2 text-sm font-medium text-blue-800">
+                  {selectedAttendantIds.length} attendant(s) selected
+                </span>
               </div>
-              
               <div className="flex space-x-2">
                 <ActionButton
-                  onClick={() => setPage(pagination.page - 1)}
-                  disabled={pagination.page <= 1}
+                  onClick={() => setSelectedAttendantIds([])}
                   variant="secondary"
                   size="sm"
                 >
-                  Previous
+                  Clear Selection
                 </ActionButton>
-                
-                <span className="px-3 py-1 text-sm text-gray-700">
-                  Page {pagination.page} of {pagination.pages}
-                </span>
-                
                 <ActionButton
-                  onClick={() => setPage(pagination.page + 1)}
-                  disabled={pagination.page >= pagination.pages}
-                  variant="secondary"
+                  onClick={handleBulkDelete}
+                  variant="danger"
                   size="sm"
                 >
-                  Next
+                  Delete Selected
                 </ActionButton>
               </div>
             </div>
-          )}
+          </div>
+        )}
+
+        {/* Attendants Table */}
+        <div className="mb-6">
+          <AttendantTable
+            attendants={attendants}
+            loading={loading}
+            onEdit={handleEditAttendant}
+            onDelete={handleDeleteAttendant}
+            onSelect={setSelectedAttendantIds}
+            selectedIds={selectedAttendantIds}
+          />
         </div>
+
+        {/* Pagination */}
+        {pagination.pages > 1 && (
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-700">
+              Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
+              {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
+              {pagination.total} results
+            </div>
+            
+            <div className="flex space-x-2">
+              <ActionButton
+                onClick={() => setPage(pagination.page - 1)}
+                disabled={pagination.page <= 1}
+                variant="secondary"
+                size="sm"
+              >
+                Previous
+              </ActionButton>
+              
+              <span className="px-3 py-1 text-sm text-gray-700">
+                Page {pagination.page} of {pagination.pages}
+              </span>
+              
+              <ActionButton
+                onClick={() => setPage(pagination.page + 1)}
+                disabled={pagination.page >= pagination.pages}
+                variant="secondary"
+                size="sm"
+              >
+                Next
+              </ActionButton>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Modals */}
+      {/* Modals - Outside main container for proper z-index */}
       <AttendantCreateModal
         isOpen={showCreateModal}
         onClose={handleCloseCreateModal}
