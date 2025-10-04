@@ -75,23 +75,26 @@ export default function EventLanyardsPage() {
       
       // Fetch event details
       const eventResponse = await fetch(`/api/events/${id}`)
-      if (eventResponse.ok) {
-        const eventData = await eventResponse.json()
-        setEvent(eventData.data)
-      } else if (eventResponse.status === 401) {
-        setError('Please sign in to view lanyards')
-        return
-      } else if (eventResponse.status === 403) {
-        setError('You do not have permission to view this event')
-        return
-      } else if (eventResponse.status === 404) {
-        setError('Event not found. Please check the event ID or select a different event.')
-        return
-      } else {
-        const errorData = await eventResponse.json().catch(() => ({ error: 'Unknown error' }))
-        setError(`Failed to load event: ${errorData.error || 'Unknown error'}`)
+      
+      // Handle non-OK responses
+      if (!eventResponse.ok) {
+        if (eventResponse.status === 401) {
+          setError('Please sign in to view lanyards')
+        } else if (eventResponse.status === 403) {
+          setError('You do not have permission to view this event')
+        } else if (eventResponse.status === 404) {
+          setError('Event not found. Please check the event ID or select a different event.')
+        } else {
+          const errorData = await eventResponse.json().catch(() => ({ error: 'Unknown error' }))
+          setError(`Failed to load event: ${errorData.error || 'Unknown error'}`)
+        }
+        setLoading(false)
         return
       }
+      
+      // Parse successful response
+      const eventData = await eventResponse.json()
+      setEvent(eventData.data)
       
       // Fetch lanyards for this event
       const lanyardsResponse = await fetch(`/api/event-lanyards/${id}`)
