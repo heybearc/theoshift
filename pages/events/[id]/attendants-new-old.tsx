@@ -12,12 +12,12 @@ interface Event {
   status: string
 }
 
-interface EventAttenданtsPageProps {
+interface EventAttendan tsPageProps {
   eventId: string
   event: Event | null
 }
 
-export default function EventAttenданtsPage({ eventId, event }: EventAttenданtsPageProps) {
+export default function EventAttendan tsPage({ eventId, event }: EventAttendan tsPageProps) {
   return (
     <AttendantManagementPage 
       eventId={eventId}
