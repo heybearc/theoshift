@@ -78,7 +78,8 @@ async function handleGetAttendants(req: NextApiRequest, res: NextApiResponse) {
     formsOfService = '',
     isActive = '',
     hasUser = '',
-    includeStats = 'false'
+    includeStats = 'false',
+    eventId = ''
   } = req.query
 
   const pageNum = parseInt(page as string)
@@ -121,6 +122,14 @@ async function handleGetAttendants(req: NextApiRequest, res: NextApiResponse) {
     } else {
       where.userId = null
     }
+  }
+
+  // For event-specific attendants, we would filter by event assignments
+  // For now, we'll return all attendants when eventId is provided
+  // TODO: Implement proper event-attendant relationship filtering
+  if (eventId) {
+    // This would typically join with event_attendants table
+    // For now, just return all attendants
   }
 
   try {
