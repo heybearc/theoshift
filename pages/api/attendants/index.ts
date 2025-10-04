@@ -151,7 +151,7 @@ async function handleGetAttendants(req: NextApiRequest, res: NextApiResponse) {
       prisma.attendants.count({ where })
     ])
 
-    let stats = undefined
+    let stats: any = undefined
     if (includeStats === 'true') {
       stats = await generateAttendantStats()
     }
