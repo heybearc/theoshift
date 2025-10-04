@@ -100,7 +100,13 @@ export default function EventLanyardsPage() {
       const lanyardsResponse = await fetch(`/api/event-lanyards/${id}`)
       if (lanyardsResponse.ok) {
         const lanyardsData = await lanyardsResponse.json()
-        setLanyards(lanyardsData.data || [])
+        // Sort lanyards numerically by badge number
+        const sortedLanyards = (lanyardsData.data || []).sort((a: any, b: any) => {
+          const numA = parseInt(a.badgeNumber) || 0
+          const numB = parseInt(b.badgeNumber) || 0
+          return numA - numB
+        })
+        setLanyards(sortedLanyards)
       } else {
         console.warn('Failed to load lanyards:', lanyardsResponse.status)
         setLanyards([])

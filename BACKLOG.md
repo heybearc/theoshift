@@ -78,6 +78,46 @@ lrwxrwxrwx 1 root root  12 Sep 30 21:51 .env -> .env.staging
 
 ---
 
+## 🔧 Infrastructure Issues
+
+### MEDIUM PRIORITY: APEX MCP Restart Tool Not Working
+**ID**: INFRA-001  
+**Priority**: Medium  
+**Status**: Open  
+**Created**: 2025-10-04  
+**Component**: APEX MCP / Deployment  
+
+#### Problem Description:
+The APEX MCP `jw_application_restart` tool reports success but doesn't actually start the Next.js application. The tool returns "healthy and responding" status even when the application is not running.
+
+#### Current Impact:
+- Manual SSH intervention required to start application
+- APEX deployments don't properly restart the app
+- False positive health checks
+- Deployment workflow broken
+
+#### Workaround:
+```bash
+ssh root@10.92.3.24 'cd /opt/jw-attendant-scheduler && (PORT=3001 npm start > /dev/null 2>&1 &)'
+```
+
+#### Root Cause Investigation Needed:
+- Check APEX restart script implementation
+- Verify process management strategy
+- Review health check logic
+- Determine why process doesn't persist
+
+#### Permanent Fix Needed:
+1. Fix APEX MCP restart tool to properly start application
+2. Implement proper process management (PM2, systemd, or supervisor)
+3. Add real health checks (not just process checks)
+4. Update deployment scripts to verify app is actually serving requests
+5. Add startup validation to confirm port 3001 is listening
+
+---
+
+---
+
 ## 🔧 Technical Debt
 
 (Add technical debt items here)
