@@ -37,6 +37,7 @@ interface Attendant {
     lastName: string
     email: string
     role: string
+    phone?: string
   }
   role?: string
 }
@@ -248,7 +249,7 @@ export default function EventLanyardsPage() {
           isCheckedOut: true,
           checkedOutTo: attendantName,
           checkedOutAt: new Date().toISOString(),
-          notes: `Role: ${selectedAttendant.role || selectedAttendant.users.role} | Email: ${selectedAttendant.users.email}`
+          notes: selectedAttendant.users.phone || ''
         }),
       })
 
@@ -772,6 +773,9 @@ export default function EventLanyardsPage() {
                             </div>
                             <div className="text-sm text-gray-600">
                               {attendant.role || attendant.users.role} • {attendant.users.email}
+                              {attendant.users.phone && (
+                                <span className="ml-2">📞 {attendant.users.phone}</span>
+                              )}
                             </div>
                           </div>
                         ))
@@ -841,7 +845,7 @@ export default function EventLanyardsPage() {
                       Checked Out
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Notes
+                      Phone Number
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
@@ -868,9 +872,9 @@ export default function EventLanyardsPage() {
                             <div className="text-gray-500 text-xs">
                               {lanyard.checkedOutAt ? new Date(lanyard.checkedOutAt).toLocaleDateString() : ''}
                             </div>
-                            {lanyard.notes && lanyard.notes.includes('Phone:') && (
+                            {lanyard.notes && (
                               <div className="text-blue-600 text-xs">
-                                {lanyard.notes}
+                                📞 {lanyard.notes}
                               </div>
                             )}
                           </div>
