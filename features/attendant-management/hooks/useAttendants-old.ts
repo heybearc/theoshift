@@ -2,14 +2,14 @@ import { useState, useEffect, useCallback } from 'react'
 import { attendantService } from '../services/attendantService'
 import { Attendant, AttendantSearchFilters, AttendantStats } from '../types'
 
-interface UseAttendantsOptions {
+interface UseAttendan tsOptions {
   eventId?: string
   initialFilters?: AttendantSearchFilters
   pageSize?: number
   includeStats?: boolean
 }
 
-interface UseAttendantsReturn {
+interface UseAttendan tsReturn {
   attendants: Attendant[]
   loading: boolean
   error: string | null
@@ -29,7 +29,7 @@ interface UseAttendantsReturn {
   deleteAttendant: (id: string) => Promise<void>
 }
 
-export function useAttendants(options: UseAttendantsOptions = {}): UseAttendantsReturn {
+export function useAttendants(options: UseAttendan tsOptions = {}): UseAttendan tsReturn {
   const {
     eventId,
     initialFilters = {},
