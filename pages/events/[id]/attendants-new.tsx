@@ -41,10 +41,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params!
   
   // Fetch event data for context
-  let event = null
+  let event: Event | null = null
   try {
     // This would typically fetch from your API or database
-    // For now, we'll pass null and let the component handle it
+    // For now, we'll pass sample data
     event = {
       id: id as string,
       name: 'Sample Event', // This should come from your API
@@ -55,6 +55,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   } catch (error) {
     console.error('Error fetching event:', error)
+    event = null
   }
   
   return {
