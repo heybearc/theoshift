@@ -5,6 +5,7 @@ import EventLayout from '../../../components/EventLayout'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import Head from 'next/head'
 
 interface Lanyard {
   id: string
@@ -409,14 +410,65 @@ export default function EventLanyardsPage() {
   }
 
   return (
-    <EventLayout 
-      title={`Lanyards - ${event?.name || 'Event'}`}
-      breadcrumbs={[
-        { label: 'Events', href: '/events' },
-        { label: event?.name || 'Event', href: `/events/${id}` },
-        { label: 'Lanyards' }
-      ]}
-    >
+    <>
+      <Head>
+        <style>{`
+          @media print {
+            @page { margin: 0.5in; }
+            body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+            .print\\:hidden { display: none !important; }
+            button, .no-print { display: none !important; }
+            table { page-break-inside: auto; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+            thead { display: table-header-group; }
+          }
+        `}</style>
+      </Head>
+      <EventLayout 
+        title={`Lanyards - ${event?.name || 'Event'}`}
+        breadcrumbs={[
+          { label: 'Events', href: '/events' },
+          { label: event?.name || 'Event', href: `/events/${id}` },
+          { label: 'Lanyards' }
+        ]}
+      >
+        {/* Print-only header with form fields */}
+      <div className="hidden print:block mb-8 border-2 border-black p-6">
+        <h1 className="text-2xl font-bold text-center mb-6">LANYARD TRACKING FORM</h1>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="font-semibold">Event Name:</label>
+            <div className="border-b border-black mt-1">{event?.name || '_'.repeat(40)}</div>
+          </div>
+          <div>
+            <label className="font-semibold">Date:</label>
+            <div className="border-b border-black mt-1">
+              {event?.startDate ? new Date(event.startDate).toLocaleDateString() : '_'.repeat(20)}
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="font-semibold">Department/Section:</label>
+            <div className="border-b border-black mt-1">{'_'.repeat(40)}</div>
+          </div>
+          <div>
+            <label className="font-semibold">Overseer Name:</label>
+            <div className="border-b border-black mt-1">{'_'.repeat(40)}</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="font-semibold">Contact Phone:</label>
+            <div className="border-b border-black mt-1">{'_'.repeat(30)}</div>
+          </div>
+          <div>
+            <label className="font-semibold">Total Lanyards:</label>
+            <div className="border-b border-black mt-1">{lanyards.length}</div>
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <div className="flex items-center justify-between">
@@ -449,6 +501,13 @@ export default function EventLanyardsPage() {
                 className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"
               >
                 📦 Bulk Create
+              </button>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors"
+              >
+                📄 Export to PDF
               </button>
             </div>
           </div>
@@ -789,6 +848,7 @@ export default function EventLanyardsPage() {
         </div>
       </div>
     </EventLayout>
+    </>
   )
 }
 
