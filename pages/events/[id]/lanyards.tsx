@@ -428,13 +428,18 @@ export default function EventLanyardsPage() {
                 ← Back to Event
               </Link>
               <button
+                type="button"
                 onClick={() => setShowCreateForm(true)}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
               >
                 + Add Lanyard
               </button>
               <button
-                onClick={() => setShowBulkForm(true)}
+                type="button"
+                onClick={() => {
+                  console.log('Bulk Create clicked')
+                  setShowBulkForm(true)
+                }}
                 className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"
               >
                 📦 Bulk Create
