@@ -610,16 +610,16 @@ export default function EventLanyardsPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-                    Notes
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number
                   </label>
                   <input
-                    type="text"
-                    id="notes"
+                    type="tel"
+                    id="phone"
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Optional notes"
+                    placeholder="e.g., 216-469-8897"
                   />
                 </div>
               </div>
@@ -690,16 +690,16 @@ export default function EventLanyardsPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="bulkNotes" className="block text-sm font-medium text-gray-700 mb-1">
-                    Notes (All)
+                  <label htmlFor="bulkPhone" className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number (All)
                   </label>
                   <input
-                    type="text"
-                    id="bulkNotes"
+                    type="tel"
+                    id="bulkPhone"
                     value={bulkData.notes}
                     onChange={(e) => setBulkData({ ...bulkData, notes: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Optional notes for all"
+                    placeholder="Phone number for all lanyards (optional)"
                   />
                 </div>
               </div>
