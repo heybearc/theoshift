@@ -350,27 +350,46 @@ export default function EventLanyardsPage() {
   if (error) {
     return (
       <EventLayout 
-        title="Error"
+        title="Lanyards - Error"
         breadcrumbs={[
           { label: 'Events', href: '/events' },
-          { label: 'Error' }
+          { label: 'Lanyards' }
         ]}
       >
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Error Loading Lanyards</h3>
-                <div className="mt-2 text-sm text-red-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg shadow-sm">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="ml-4 flex-1">
+                <h3 className="text-lg font-semibold text-red-800 mb-2">
+                  Unable to Load Lanyards
+                </h3>
+                <div className="text-sm text-red-700 mb-4">
                   <p>{error}</p>
                 </div>
-                <div className="mt-4">
+                <div className="flex gap-3">
                   <Link
                     href="/events"
-                    className="text-sm font-medium text-red-800 hover:text-red-900 underline"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
                   >
-                    ← Back to Events List
+                    <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Events
                   </Link>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                  >
+                    <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Try Again
+                  </button>
                 </div>
               </div>
             </div>
