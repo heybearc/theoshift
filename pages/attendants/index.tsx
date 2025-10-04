@@ -2,9 +2,20 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import AttendantManagementPage from '../../features/attendant-management/components/AttendantManagementPage'
+import EventLayout from '../../components/EventLayout'
 
 export default function AttenданtsPage() {
-  return <AttendantManagementPage />
+  return (
+    <EventLayout 
+      title="Attendant Management | JW Attendant Scheduler"
+      breadcrumbs={[
+        { label: 'Home', href: '/events' },
+        { label: 'Attendants' }
+      ]}
+    >
+      <AttendantManagementPage />
+    </EventLayout>
+  )
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
