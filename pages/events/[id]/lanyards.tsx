@@ -609,19 +609,6 @@ export default function EventLanyardsPage() {
                     required
                   />
                 </div>
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., 216-469-8897"
-                  />
-                </div>
               </div>
               <div className="flex justify-end space-x-3">
                 <button
@@ -687,19 +674,6 @@ export default function EventLanyardsPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     min="1"
                     required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="bulkPhone" className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone Number (All)
-                  </label>
-                  <input
-                    type="tel"
-                    id="bulkPhone"
-                    value={bulkData.notes}
-                    onChange={(e) => setBulkData({ ...bulkData, notes: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Phone number for all lanyards (optional)"
                   />
                 </div>
               </div>
