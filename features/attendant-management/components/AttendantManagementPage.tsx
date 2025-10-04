@@ -308,22 +308,22 @@ export default function AttendantManagementPage({
             </div>
           )}
         </div>
-
-        {/* Modals */}
-        <AttendantCreateModal
-          isOpen={showCreateModal}
-          onClose={handleCloseCreateModal}
-          onSave={handleSaveAttendant}
-          attendant={editingAttendant}
-        />
-
-        <BulkImportModal
-          isOpen={showBulkImportModal}
-          onClose={() => setShowBulkImportModal(false)}
-          onImport={handleBulkImport}
-          eventId={eventId}
-        />
       </div>
+
+      {/* Modals */}
+      <AttendantCreateModal
+        isOpen={showCreateModal}
+        onClose={handleCloseCreateModal}
+        onSave={handleSaveAttendant}
+        attendant={editingAttendant}
+      />
+
+      <BulkImportModal
+        isOpen={showBulkImportModal}
+        onClose={() => setShowBulkImportModal(false)}
+        onImport={handleBulkImport}
+        eventId={eventId}
+      />
     </>
   )
 }
