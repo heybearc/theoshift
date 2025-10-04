@@ -116,7 +116,7 @@ class AttendantService {
     }
     if (filters?.isActive !== undefined) params.append('isActive', filters.isActive.toString())
 
-    const response = await fetch(`/api/event-attendants/${eventId}?${params}`)
+    const response = await fetch(`${this.baseUrl}?${params}`)
     if (!response.ok) {
       throw new Error(`Failed to fetch event attendants: ${response.statusText}`)
     }

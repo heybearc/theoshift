@@ -43,15 +43,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   // Fetch event data for context
   let event: Event | null = null
   try {
-    // This would typically fetch from your API or database
-    // For now, we'll pass sample data
-    event = {
-      id: id as string,
-      name: 'Sample Event', // This should come from your API
-      eventType: 'ASSEMBLY',
-      startDate: new Date().toISOString(),
-      endDate: new Date().toISOString(),
-      status: 'ACTIVE'
+    // Fetch real event data from the API
+    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/events/${id}`)
+    if (response.ok) {
+      const eventData = await response.json()
+      if (eventData.success) {
+        event = eventData.data
+      }
     }
   } catch (error) {
     console.error('Error fetching event:', error)
