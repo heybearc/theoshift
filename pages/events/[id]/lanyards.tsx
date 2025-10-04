@@ -56,6 +56,17 @@ export default function EventLanyardsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [showBulkForm, setShowBulkForm] = useState(false)
   const [editingLanyard, setEditingLanyard] = useState<Lanyard | null>(null)
+  
+  // PDF Export Header Fields
+  const [exportInfo, setExportInfo] = useState({
+    circuitConvention: '',
+    assemblyOverseerName: '',
+    attendantOverseerName: '',
+    phone: '',
+    lanyardsReceivedBy: '',
+    lanyardsReturnedTo: '',
+    lanyardsToRecover: ''
+  })
   const [formData, setFormData] = useState({
     badgeNumber: '',
     notes: ''
@@ -432,39 +443,96 @@ export default function EventLanyardsPage() {
           { label: 'Lanyards' }
         ]}
       >
-        {/* Print-only header with form fields */}
-      <div className="hidden print:block mb-8 border-2 border-black p-6">
-        <h1 className="text-2xl font-bold text-center mb-6">LANYARD TRACKING FORM</h1>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="font-semibold">Event Name:</label>
-            <div className="border-b border-black mt-1">{event?.name || '_'.repeat(40)}</div>
-          </div>
-          <div>
-            <label className="font-semibold">Date:</label>
-            <div className="border-b border-black mt-1">
-              {event?.startDate ? new Date(event.startDate).toLocaleDateString() : '_'.repeat(20)}
+        {/* Export Information Form - Visible on screen and in print */}
+      <div className="max-w-7xl mx-auto mb-6">
+        <div className="bg-white shadow rounded-lg p-6 print:shadow-none print:border-2 print:border-black">
+          <h2 className="text-xl font-bold text-center mb-6 print:text-2xl">Attendant Lanyard Tracking</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Date:</label>
+              <div className="print:border-b print:border-black print:min-h-[24px]">
+                {event?.startDate ? new Date(event.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Circuit/Convention:</label>
+              <input
+                type="text"
+                value={exportInfo.circuitConvention}
+                onChange={(e) => setExportInfo({...exportInfo, circuitConvention: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md print:border-0 print:border-b print:border-black print:p-0"
+                placeholder="e.g., OH 19B"
+              />
             </div>
           </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="font-semibold">Department/Section:</label>
-            <div className="border-b border-black mt-1">{'_'.repeat(40)}</div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Assembly Overseer/ CC Name:</label>
+              <input
+                type="text"
+                value={exportInfo.assemblyOverseerName}
+                onChange={(e) => setExportInfo({...exportInfo, assemblyOverseerName: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md print:border-0 print:border-b print:border-black print:p-0"
+                placeholder="Enter name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Attendant Overseer Name:</label>
+              <input
+                type="text"
+                value={exportInfo.attendantOverseerName}
+                onChange={(e) => setExportInfo({...exportInfo, attendantOverseerName: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md print:border-0 print:border-b print:border-black print:p-0"
+                placeholder="Enter name"
+              />
+            </div>
           </div>
-          <div>
-            <label className="font-semibold">Overseer Name:</label>
-            <div className="border-b border-black mt-1">{'_'.repeat(40)}</div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Phone:</label>
+              <input
+                type="tel"
+                value={exportInfo.phone}
+                onChange={(e) => setExportInfo({...exportInfo, phone: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md print:border-0 print:border-b print:border-black print:p-0"
+                placeholder="216-469-8897"
+              />
+            </div>
           </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="font-semibold">Contact Phone:</label>
-            <div className="border-b border-black mt-1">{'_'.repeat(30)}</div>
-          </div>
-          <div>
-            <label className="font-semibold">Total Lanyards:</label>
-            <div className="border-b border-black mt-1">{lanyards.length}</div>
+
+          <div className="border-t pt-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Number of Lanyards received by AH:</label>
+                <input
+                  type="text"
+                  value={exportInfo.lanyardsReceivedBy}
+                  onChange={(e) => setExportInfo({...exportInfo, lanyardsReceivedBy: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md print:border-0 print:border-b print:border-black print:p-0"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Lanyards returned to AH:</label>
+                <input
+                  type="text"
+                  value={exportInfo.lanyardsReturnedTo}
+                  onChange={(e) => setExportInfo({...exportInfo, lanyardsReturnedTo: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md print:border-0 print:border-b print:border-black print:p-0"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Lanyards to recover and return:</label>
+                <input
+                  type="text"
+                  value={exportInfo.lanyardsToRecover}
+                  onChange={(e) => setExportInfo({...exportInfo, lanyardsToRecover: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md print:border-0 print:border-b print:border-black print:p-0"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
