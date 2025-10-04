@@ -71,12 +71,23 @@ export default function EventLanyardsPage() {
     
     try {
       setLoading(true)
+      setError('')
       
       // Fetch event details
       const eventResponse = await fetch(`/api/events/${id}`)
       if (eventResponse.ok) {
         const eventData = await eventResponse.json()
         setEvent(eventData.data)
+      } else if (eventResponse.status === 401) {
+        setError('Please sign in to view lanyards')
+        return
+      } else if (eventResponse.status === 403) {
+        setError('You do not have permission to view this event')
+        return
+      } else {
+        const errorData = await eventResponse.json().catch(() => ({ error: 'Unknown error' }))
+        setError(`Failed to load event: ${errorData.error || 'Unknown error'}`)
+        return
       }
       
       // Fetch lanyards for this event
@@ -84,6 +95,9 @@ export default function EventLanyardsPage() {
       if (lanyardsResponse.ok) {
         const lanyardsData = await lanyardsResponse.json()
         setLanyards(lanyardsData.data || [])
+      } else {
+        console.warn('Failed to load lanyards:', lanyardsResponse.status)
+        setLanyards([])
       }
       
       // Fetch attendants for this event
@@ -91,6 +105,9 @@ export default function EventLanyardsPage() {
       if (attendantsResponse.ok) {
         const attendantsData = await attendantsResponse.json()
         setAttendants(attendantsData.data?.associations || [])
+      } else {
+        console.warn('Failed to load attendants:', attendantsResponse.status)
+        setAttendants([])
       }
       
     } catch (error) {
