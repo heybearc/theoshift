@@ -84,6 +84,9 @@ export default function EventLanyardsPage() {
       } else if (eventResponse.status === 403) {
         setError('You do not have permission to view this event')
         return
+      } else if (eventResponse.status === 404) {
+        setError('Event not found. Please check the event ID or select a different event.')
+        return
       } else {
         const errorData = await eventResponse.json().catch(() => ({ error: 'Unknown error' }))
         setError(`Failed to load event: ${errorData.error || 'Unknown error'}`)
@@ -360,6 +363,14 @@ export default function EventLanyardsPage() {
                 <h3 className="text-sm font-medium text-red-800">Error Loading Lanyards</h3>
                 <div className="mt-2 text-sm text-red-700">
                   <p>{error}</p>
+                </div>
+                <div className="mt-4">
+                  <Link
+                    href="/events"
+                    className="text-sm font-medium text-red-800 hover:text-red-900 underline"
+                  >
+                    ← Back to Events List
+                  </Link>
                 </div>
               </div>
             </div>
