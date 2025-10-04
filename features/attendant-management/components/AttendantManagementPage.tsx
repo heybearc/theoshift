@@ -6,6 +6,7 @@ import Link from 'next/link'
 
 // Feature components
 import { useAttendants } from '../hooks/useAttendants'
+import { attendantService } from '../services/attendantService'
 import AttendantFilters from './molecules/AttendantFilters'
 import AttendantTable from './organisms/AttendantTable'
 import AttendantCreateModal from './organisms/AttendantCreateModal'
@@ -78,11 +79,16 @@ export default function AttendantManagementPage({
   }
 
   // Handle bulk import
-  const handleBulkImport = async (data: AttendantBulkImport) => {
-    // This would call the bulk import API
-    // For now, we'll just refresh the data
-    await refresh()
-    return { created: 0, updated: 0, errors: [] }
+  const handleBulkImport = async (data: AttendantBulkImport): Promise<any> => {
+    try {
+      // Call the bulk import service
+      const response = await attendantService.bulkImport(data)
+      await refresh() // Refresh the data after import
+      return response.data
+    } catch (error) {
+      console.error('Bulk import error:', error)
+      throw error
+    }
   }
 
   // Handle attendant deletion
