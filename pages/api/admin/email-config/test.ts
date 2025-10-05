@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
+import { authOptions } from '../../auth/[...nextauth]'
 
 // LXC SMTP Relay Service Configuration
 const SMTP_RELAY_API = 'http://10.92.3.136:3000'

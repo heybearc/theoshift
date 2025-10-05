@@ -26,8 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         lastName: {
           equals: lastName as string,
           mode: 'insensitive'
-        },
-        isActive: true
+        }
       },
       include: {
         users: {
@@ -50,17 +49,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // If eventId provided, get event-specific information
-    let eventAssignments = []
-    if (eventId) {
-      // Get assignments for this attendant in the specific event
+    let eventAssignments: any[] = []
+    if (eventId && attendant.userId) {
+      // Get assignments for this attendant in the specific event (only if they have a user account)
       const assignments = await prisma.assignments.findMany({
         where: {
           eventId: eventId as string,
-          OR: [
-            { userId: attendant.userId },
-            // For attendants without user accounts, we'll need to match by attendant data
-            // This would require additional logic to match attendant to assignments
-          ]
+          userId: attendant.userId
         },
         include: {
           event_positions: {
@@ -68,13 +63,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               positionName: true,
               department: true,
               description: true
-            }
-          },
-          position_shifts: {
-            select: {
-              shiftName: true,
-              startTime: true,
-              endTime: true
             }
           }
         }
@@ -92,8 +80,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           lastName: attendant.lastName,
           email: attendant.email,
           phone: attendant.phone,
-          congregation: attendant.congregation,
-          formsOfService: attendant.formsOfService,
+          congregation: (attendant as any).congregation || 'Not specified',
+          formsOfService: (attendant as any).formsOfService || [],
           hasUserAccount: !!attendant.userId
         },
         assignments: eventAssignments
