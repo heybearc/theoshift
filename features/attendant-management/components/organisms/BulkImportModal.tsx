@@ -11,25 +11,59 @@ export default function BulkImportModal({
   loading = false
 }: BulkImportModalProps) {
   const [csvText, setCsvText] = useState('')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [parsedData, setParsedData] = useState<AttendantImportRow[]>([])
   const [errors, setErrors] = useState<string[]>([])
   const [importing, setImporting] = useState(false)
   const [step, setStep] = useState<'input' | 'preview' | 'results'>('input')
   const [importResults, setImportResults] = useState<any>(null)
+  const [uploadMethod, setUploadMethod] = useState<'file' | 'text'>('file')
 
   const csvTemplate = `firstName,lastName,email,phone,congregation,formsOfService,isActive,notes
 John,Smith,john.smith@example.com,216-555-0123,Central Congregation,"Elder,Exemplary",true,Available for all assignments
 Jane,Doe,jane.doe@example.com,216-555-0124,North Congregation,"Ministerial Servant,Regular Pioneer",true,
 Mike,Johnson,mike.j@example.com,,South Congregation,"Other Department",false,Currently unavailable`
 
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+        setErrors(['Please select a CSV file'])
+        return
+      }
+      setSelectedFile(file)
+      setErrors([])
+    }
+  }
+
+  const handleFileUpload = () => {
+    if (!selectedFile) {
+      setErrors(['Please select a CSV file'])
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const csvContent = e.target?.result as string
+      parseCsvContent(csvContent)
+    }
+    reader.onerror = () => {
+      setErrors(['Error reading file'])
+    }
+    reader.readAsText(selectedFile)
+  }
+
   const handleCsvParse = () => {
     if (!csvText.trim()) {
       setErrors(['Please enter CSV data'])
       return
     }
+    parseCsvContent(csvText)
+  }
 
+  const parseCsvContent = (csvContent: string) => {
     try {
-      const lines = csvText.trim().split('\n')
+      const lines = csvContent.trim().split('\n')
       const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''))
       
       const requiredHeaders = ['firstName', 'lastName', 'email', 'congregation', 'formsOfService']
@@ -125,10 +159,14 @@ Mike,Johnson,mike.j@example.com,,South Congregation,"Other Department",false,Cur
 
   const handleReset = () => {
     setCsvText('')
+    setSelectedFile(null)
     setParsedData([])
     setErrors([])
     setStep('input')
     setImportResults(null)
+    // Reset file input
+    const fileInput = document.getElementById('csv-file-input') as HTMLInputElement
+    if (fileInput) fileInput.value = ''
   }
 
   const handleClose = () => {
@@ -224,27 +262,100 @@ Mike,Johnson,mike.j@example.com,,South Congregation,"Other Department",false,Cur
                 </div>
               </div>
 
-              <div className="flex justify-between items-center">
+              {/* Upload Method Tabs */}
+              <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-4">
+                <button
+                  type="button"
+                  onClick={() => setUploadMethod('file')}
+                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                    uploadMethod === 'file'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  📁 Upload CSV File
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUploadMethod('text')}
+                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                    uploadMethod === 'text'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  📝 Paste CSV Text
+                </button>
+              </div>
+
+              <div className="flex justify-between items-center mb-4">
                 <label className="block text-sm font-medium text-gray-700">
-                  CSV Data
+                  {uploadMethod === 'file' ? 'CSV File Upload' : 'CSV Data'}
                 </label>
                 <ActionButton
                   onClick={downloadTemplate}
                   variant="secondary"
                   size="sm"
                 >
-                  Download Template
+                  📥 Download Template
                 </ActionButton>
               </div>
 
-              <textarea
-                value={csvText}
-                onChange={(e) => setCsvText(e.target.value)}
-                disabled={importing}
-                rows={12}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-                placeholder="Paste your CSV data here or download the template to get started..."
-              />
+              {uploadMethod === 'file' ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center w-full">
+                    <label htmlFor="csv-file-input" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg className="w-8 h-8 mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <p className="mb-2 text-sm text-gray-500">
+                          <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500">CSV files only</p>
+                      </div>
+                      <input
+                        id="csv-file-input"
+                        type="file"
+                        accept=".csv,text/csv"
+                        onChange={handleFileSelect}
+                        disabled={importing}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                  
+                  {selectedFile && (
+                    <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md">
+                      <div className="flex items-center">
+                        <svg className="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-sm text-green-800 font-medium">{selectedFile.name}</span>
+                        <span className="text-xs text-green-600 ml-2">({(selectedFile.size / 1024).toFixed(1)} KB)</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedFile(null)}
+                        className="text-green-600 hover:text-green-800 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <textarea
+                  value={csvText}
+                  onChange={(e) => setCsvText(e.target.value)}
+                  disabled={importing}
+                  rows={12}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                  placeholder="Paste your CSV data here or download the template to get started..."
+                />
+              )}
 
               {errors.length > 0 && (
                 <div className="bg-red-50 border border-red-200 rounded-md p-4">
@@ -359,8 +470,12 @@ Mike,Johnson,mike.j@example.com,,South Congregation,"Other Department",false,Cur
                 <ActionButton onClick={handleClose} variant="secondary">
                   Cancel
                 </ActionButton>
-                <ActionButton onClick={handleCsvParse} variant="primary">
-                  Parse CSV
+                <ActionButton 
+                  onClick={uploadMethod === 'file' ? handleFileUpload : handleCsvParse} 
+                  variant="primary"
+                  disabled={uploadMethod === 'file' ? !selectedFile : !csvText.trim()}
+                >
+                  {uploadMethod === 'file' ? 'Process File' : 'Parse CSV'}
                 </ActionButton>
               </>
             )}
