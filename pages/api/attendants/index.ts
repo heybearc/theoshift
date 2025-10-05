@@ -310,24 +310,24 @@ async function handleBulkImport(req: NextApiRequest, res: NextApiResponse) {
           results.created++
         }
 
-        // If eventId provided, associate with event
+        // If eventId provided, associate with event (only if attendant has a user account)
         if (validatedData.eventId) {
           const attendant = await prisma.attendants.findFirst({
             where: { email: attendantData.email }
           })
           
-          if (attendant) {
+          if (attendant && attendant.userId) {
             await prisma.event_attendant_associations.upsert({
               where: {
                 eventId_userId: {
                   eventId: validatedData.eventId,
-                  userId: attendant.id
+                  userId: attendant.userId
                 }
               },
               create: {
                 id: crypto.randomUUID(),
                 eventId: validatedData.eventId,
-                userId: attendant.id,
+                userId: attendant.userId,
                 isActive: true,
                 updatedAt: new Date()
               },
