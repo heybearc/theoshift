@@ -101,7 +101,8 @@ class AttendantService {
     
     if (!response.ok) {
       const error = await response.json()
-      throw new Error(error.error || 'Failed to import attendants')
+      console.error('Bulk import error:', error)
+      throw new Error(error.error || `Failed to import attendants (${response.status}: ${response.statusText})`)
     }
     return response.json()
   }
