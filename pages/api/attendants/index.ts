@@ -310,32 +310,56 @@ async function handleBulkImport(req: NextApiRequest, res: NextApiResponse) {
           results.created++
         }
 
-        // If eventId provided, associate with event (only if attendant has a user account)
+        // If eventId provided, associate with event
         if (validatedData.eventId) {
           const attendant = await prisma.attendants.findFirst({
             where: { email: attendantData.email }
           })
           
-          if (attendant && attendant.userId) {
-            await prisma.event_attendant_associations.upsert({
-              where: {
-                eventId_userId: {
+          if (attendant) {
+            if (attendant.userId) {
+              // Create user-based association for attendants with user accounts
+              await prisma.event_attendant_associations.upsert({
+                where: {
+                  eventId_userId: {
+                    eventId: validatedData.eventId,
+                    userId: attendant.userId
+                  }
+                },
+                create: {
+                  id: crypto.randomUUID(),
                   eventId: validatedData.eventId,
-                  userId: attendant.userId
+                  userId: attendant.userId,
+                  isActive: true,
+                  updatedAt: new Date()
+                },
+                update: {
+                  isActive: true,
+                  updatedAt: new Date()
                 }
-              },
-              create: {
-                id: crypto.randomUUID(),
-                eventId: validatedData.eventId,
-                userId: attendant.userId,
-                isActive: true,
-                updatedAt: new Date()
-              },
-              update: {
-                isActive: true,
-                updatedAt: new Date()
-              }
-            })
+              })
+            } else {
+              // Create attendant-based association for attendants without user accounts
+              await prisma.event_attendant_associations.upsert({
+                where: {
+                  eventId_attendantId: {
+                    eventId: validatedData.eventId,
+                    attendantId: attendant.id
+                  }
+                },
+                create: {
+                  id: crypto.randomUUID(),
+                  eventId: validatedData.eventId,
+                  attendantId: attendant.id,
+                  isActive: true,
+                  updatedAt: new Date()
+                },
+                update: {
+                  isActive: true,
+                  updatedAt: new Date()
+                }
+              })
+            }
           }
         }
       } catch (error) {

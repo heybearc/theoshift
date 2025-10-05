@@ -52,6 +52,7 @@ model attendants {
   createdAt            DateTime        @default(now())
   updatedAt            DateTime
   users                users?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event_attendant_associations event_attendant_associations[]
 }
 
 model count_sessions {
@@ -130,7 +131,8 @@ model email_configurations {
 model event_attendant_associations {
   id                    String   @id
   eventId               String
-  userId                String
+  userId                String?  // Made optional to support attendant-only associations
+  attendantId           String?  // Direct attendant association for non-user attendants
   role                  UserRole @default(ATTENDANT)
   isActive              Boolean  @default(true)
   assignedDepartments   Json?
@@ -138,9 +140,12 @@ model event_attendant_associations {
   createdAt             DateTime @default(now())
   updatedAt             DateTime
   events                events   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  users                 users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  users                 users?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attendants            attendants? @relation(fields: [attendantId], references: [id], onDelete: Cascade)
 
+  // Ensure either userId OR attendantId is provided, but not both
   @@unique([eventId, userId])
+  @@unique([eventId, attendantId])
 }
 
 model event_positions {
