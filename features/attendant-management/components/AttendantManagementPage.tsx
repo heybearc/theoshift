@@ -324,7 +324,10 @@ export default function AttendantManagementPage({
               <select
                 id="pageSize"
                 value={pagination.limit === 999999 ? -1 : pagination.limit}
-                onChange={(e) => setPageSize(Number(e.target.value))}
+                onChange={(e) => {
+                  e.preventDefault()
+                  setPageSize(Number(e.target.value))
+                }}
                 disabled={loading}
                 className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
@@ -347,6 +350,7 @@ export default function AttendantManagementPage({
                 disabled={pagination.page <= 1 || loading}
                 variant="secondary"
                 size="sm"
+                type="button"
               >
                 Previous
               </ActionButton>
@@ -362,6 +366,7 @@ export default function AttendantManagementPage({
                 disabled={pagination.page >= pagination.pages || loading}
                 variant="secondary"
                 size="sm"
+                type="button"
               >
                 Next
               </ActionButton>
