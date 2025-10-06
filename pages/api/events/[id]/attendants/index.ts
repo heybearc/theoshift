@@ -31,6 +31,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return await handleGetEventAttendants(req, res, eventId, event)
     }
 
+    if (req.method === 'POST') {
+      return await handleCreateEventAttendant(req, res, eventId, event)
+    }
+
     return res.status(405).json({ success: false, error: 'Method not allowed' })
   } catch (error) {
     console.error('Event attendants API error:', error)
@@ -87,5 +91,63 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
   } catch (error) {
     console.error('Get event attendants error:', error)
     return res.status(500).json({ success: false, error: 'Failed to fetch attendants' })
+  }
+}
+
+async function handleCreateEventAttendant(req: NextApiRequest, res: NextApiResponse, eventId: string, event: any) {
+  try {
+    const { firstName, lastName, email, phone, congregation, notes } = req.body
+
+    if (!firstName || !lastName || !email) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'First name, last name, and email are required' 
+      })
+    }
+
+    // Create new attendant
+    const attendant = await prisma.attendants.create({
+      data: {
+        id: require('crypto').randomUUID(),
+        firstName,
+        lastName,
+        email,
+        phone: phone || null,
+        notes: notes || null,
+        congregation: congregation || '',
+        isAvailable: true,
+        isActive: true
+      }
+    })
+
+    // Create association with the event
+    await prisma.event_attendant_associations.create({
+      data: {
+        id: require('crypto').randomUUID(),
+        eventId,
+        attendantId: attendant.id
+      }
+    })
+
+    return res.status(201).json({
+      success: true,
+      data: {
+        id: attendant.id,
+        firstName: attendant.firstName,
+        lastName: attendant.lastName,
+        email: attendant.email,
+        phone: attendant.phone,
+        congregation: congregation || '',
+        formsOfService: [],
+        isActive: true,
+        notes: attendant.notes,
+        userId: attendant.userId,
+        createdAt: attendant.createdAt,
+        updatedAt: attendant.updatedAt
+      }
+    })
+  } catch (error) {
+    console.error('Create event attendant error:', error)
+    return res.status(500).json({ success: false, error: 'Failed to create attendant' })
   }
 }
