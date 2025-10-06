@@ -333,7 +333,6 @@ export default function EventAttendantManagementPage({
         {/* Pagination controls - show if there are multiple pages */}
         {pagination.pages > 1 && (
           <div className="flex items-center gap-2">
-{{ ... }}
             <ActionButton
               onClick={() => {
                 console.log('APEX GUARDIAN: Previous button clicked, setPage function:', typeof setPage)
