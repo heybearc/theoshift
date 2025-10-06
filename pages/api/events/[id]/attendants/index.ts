@@ -75,9 +75,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       case 'GET':
         return await handleGetEventAttendants(req, res, eventId)
       case 'POST':
-        return res.status(501).json({ success: false, error: 'Create functionality temporarily disabled' })
+        return await handleCreateEventAttendant(req, res, eventId)
       case 'PUT':
-        return res.status(501).json({ success: false, error: 'Bulk import functionality temporarily disabled' })
+        return await handleBulkImportEventAttendants(req, res, eventId)
       default:
         return res.status(405).json({ success: false, error: 'Method not allowed' })
     }
@@ -194,9 +194,142 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
   }
 }
 
-// Temporarily disabled - will be implemented in next phase
+async function handleCreateEventAttendant(req: NextApiRequest, res: NextApiResponse, eventId: string) {
+  try {
+    const validatedData = eventAttendantCreateSchema.parse(req.body)
 
-// Temporarily disabled - will be implemented in next phase
+    // Check if attendant with email already exists in this event
+    const existingAttendants = await prisma.$queryRaw`
+      SELECT * FROM event_attendants 
+      WHERE event_id = ${eventId} AND email = ${validatedData.email}
+    ` as any[]
+    
+    if (existingAttendants.length > 0) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Attendant with this email already exists in this event' 
+      })
+    }
+
+    // If userId provided, verify user exists
+    if (validatedData.userId) {
+      const user = await prisma.users.findUnique({
+        where: { id: validatedData.userId }
+      })
+      if (!user) {
+        return res.status(400).json({ success: false, error: 'User not found' })
+      }
+    }
+
+    const attendantId = crypto.randomUUID()
+    
+    await prisma.$executeRaw`
+      INSERT INTO event_attendants (
+        id, event_id, first_name, last_name, email, phone, congregation, 
+        forms_of_service, is_active, notes, user_id, created_at, updated_at
+      ) VALUES (
+        ${attendantId}, ${eventId}, ${validatedData.firstName}, ${validatedData.lastName}, 
+        ${validatedData.email}, ${validatedData.phone}, ${validatedData.congregation},
+        ${JSON.stringify(validatedData.formsOfService)}, ${validatedData.isActive}, 
+        ${validatedData.notes}, ${validatedData.userId}, NOW(), NOW()
+      )
+    `
+    
+    const attendantResult = await prisma.$queryRaw`
+      SELECT * FROM event_attendants WHERE id = ${attendantId}
+    ` as any[]
+    
+    return res.status(201).json({
+      success: true,
+      data: attendantResult[0]
+    })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ success: false, error: error.errors[0].message })
+    }
+    console.error('Create event attendant error:', error)
+    return res.status(500).json({ success: false, error: 'Failed to create attendant' })
+  }
+}
+
+async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApiResponse, eventId: string) {
+  try {
+    const validatedData = bulkImportSchema.parse(req.body)
+    
+    const results = {
+      created: 0,
+      updated: 0,
+      errors: [] as Array<{ row: number, email: string, error: string }>
+    }
+
+    for (let i = 0; i < validatedData.attendants.length; i++) {
+      const attendantData = validatedData.attendants[i]
+      
+      try {
+        // Parse forms of service from comma-separated string
+        const formsOfService = attendantData.formsOfService
+          .split(',')
+          .map(form => form.trim())
+          .filter(form => FORMS_OF_SERVICE.includes(form as FormOfService)) as FormOfService[]
+
+        // Check if attendant exists in this event
+        const existingAttendants = await prisma.$queryRaw`
+          SELECT * FROM event_attendants 
+          WHERE event_id = ${eventId} AND email = ${attendantData.email}
+        ` as any[]
+
+        if (existingAttendants.length > 0) {
+          // Update existing attendant
+          await prisma.$executeRaw`
+            UPDATE event_attendants 
+            SET first_name = ${attendantData.firstName}, 
+                last_name = ${attendantData.lastName},
+                phone = ${attendantData.phone},
+                congregation = ${attendantData.congregation},
+                forms_of_service = ${JSON.stringify(formsOfService)},
+                is_active = ${attendantData.isActive},
+                notes = ${attendantData.notes},
+                updated_at = NOW()
+            WHERE event_id = ${eventId} AND email = ${attendantData.email}
+          `
+          results.updated++
+        } else {
+          // Create new attendant
+          const attendantId = crypto.randomUUID()
+          await prisma.$executeRaw`
+            INSERT INTO event_attendants (
+              id, event_id, first_name, last_name, email, phone, congregation, 
+              forms_of_service, is_active, notes, created_at, updated_at
+            ) VALUES (
+              ${attendantId}, ${eventId}, ${attendantData.firstName}, ${attendantData.lastName}, 
+              ${attendantData.email}, ${attendantData.phone}, ${attendantData.congregation},
+              ${JSON.stringify(formsOfService)}, ${attendantData.isActive}, 
+              ${attendantData.notes}, NOW(), NOW()
+            )
+          `
+          results.created++
+        }
+      } catch (error) {
+        results.errors.push({
+          row: i + 1,
+          email: attendantData.email,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        })
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: results
+    })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ success: false, error: error.errors[0].message })
+    }
+    console.error('Bulk import event attendants error:', error)
+    return res.status(500).json({ success: false, error: 'Failed to import attendants' })
+  }
+}
 
 async function generateEventAttendantStats(eventId: string) {
   // Simplified stats using raw queries

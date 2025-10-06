@@ -1,7 +1,7 @@
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
-import EventAttendantManagementPageSimple from '../../../features/attendant-management/components/EventAttendantManagementPageSimple'
+import EventAttendantManagementPage from '../../../features/attendant-management/components/EventAttendantManagementPage'
 import EventLayout from '../../../components/EventLayout'
 import ErrorBoundary from '../../../components/ErrorBoundary'
 
@@ -35,7 +35,7 @@ export default function EventAttenданtsPage({ eventId, event }: EventAttenд�
       }}
     >
       <ErrorBoundary>
-        <EventAttendantManagementPageSimple 
+        <EventAttendantManagementPage 
           eventId={eventId}
           eventName={event?.name}
         />
