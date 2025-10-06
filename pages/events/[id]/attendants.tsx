@@ -1,7 +1,7 @@
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
-import AttendantManagementPage from '../../../features/attendant-management/components/AttendantManagementPage'
+import EventAttendantManagementPage from '../../../features/attendant-management/components/EventAttendantManagementPage'
 import EventLayout from '../../../components/EventLayout'
 
 interface Event {
@@ -33,7 +33,7 @@ export default function EventAttenданtsPage({ eventId, event }: EventAttenд�
         status: event?.status
       }}
     >
-      <AttendantManagementPage 
+      <EventAttendantManagementPage 
         eventId={eventId}
         eventName={event?.name}
       />
