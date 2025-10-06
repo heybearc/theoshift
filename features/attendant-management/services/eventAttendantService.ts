@@ -1,16 +1,46 @@
-// APEX GUARDIAN Event-Specific Attendant Service Layer
-// Industry best practice: Event-scoped data management
+// APEX GUARDIAN Event-Specific Attendant Service - FIXED VERSION
+// Using proper event_attendant_associations architecture
 
 import { 
   Attendant, 
+  AttendantSearchFilters, 
+  AttendantStats, 
   AttendantCreateInput, 
-  AttendantUpdateInput,
-  AttendantSearchFilters,
-  AttendantBulkImport,
-  AttendantsResponse,
-  AttendantResponse,
-  AttendantBulkResponse
+  AttendantBulkImport 
 } from '../types'
+
+interface EventAttendantResponse {
+  success: boolean
+  data?: {
+    attendants: Attendant[]
+    pagination: {
+      page: number
+      limit: number
+      total: number
+      pages: number
+    }
+    stats?: AttendantStats
+    eventId: string
+    eventName?: string
+  }
+  error?: string
+}
+
+interface EventAttendantCreateResponse {
+  success: boolean
+  data?: Attendant
+  error?: string
+}
+
+interface EventAttendantBulkImportResponse {
+  success: boolean
+  data?: {
+    created: number
+    updated: number
+    errors: Array<{ row: number, email: string, error: string }>
+  }
+  error?: string
+}
 
 class EventAttendantService {
   private getBaseUrl(eventId: string) {
@@ -21,7 +51,7 @@ class EventAttendantService {
     page?: number 
     limit?: number 
     includeStats?: boolean 
-  }): Promise<AttendantsResponse> {
+  }): Promise<EventAttendantResponse> {
     const params = new URLSearchParams()
     
     if (filters?.page) params.append('page', filters.page.toString())
