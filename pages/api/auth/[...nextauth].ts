@@ -1,6 +1,5 @@
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { prisma } from '../../../src/lib/prisma'
 import bcrypt from 'bcryptjs'
 import fs from 'fs'
@@ -16,7 +15,6 @@ const logAuth = (message: string) => {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -79,7 +77,7 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   session: {
-    strategy: 'database',
+    strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
@@ -91,9 +89,11 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
+      logAuth(`Session callback - token exists: ${!!token}`)
       if (token) {
         session.user.id = token.sub!
         session.user.role = token.role as string
+        logAuth(`Session created for: ${session.user.email} (${session.user.role})`)
       }
       return session
     },
