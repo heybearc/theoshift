@@ -27,7 +27,7 @@ INSERT INTO event_attendants (
     updated_at
 )
 SELECT DISTINCT
-    eaa.event_id,
+    eaa."eventId",
     a.first_name,
     a.last_name,
     a.email,
@@ -49,10 +49,10 @@ SELECT DISTINCT
     a.updated_at
 FROM attendants a
 INNER JOIN event_attendant_associations eaa ON (
-    (eaa.attendant_id = a.id AND eaa.attendant_id IS NOT NULL) OR
-    (eaa.user_id = a.user_id AND eaa.user_id IS NOT NULL)
+    (eaa."attendantId" = a.id AND eaa."attendantId" IS NOT NULL) OR
+    (eaa."userId" = a."userId" AND eaa."userId" IS NOT NULL)
 )
-WHERE eaa.is_active = true
+WHERE eaa."isActive" = true
 ON CONFLICT (event_id, email) DO NOTHING; -- Prevent duplicates
 
 -- Step 2: Verify migration results
