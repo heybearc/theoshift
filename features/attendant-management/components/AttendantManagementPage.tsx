@@ -325,6 +325,8 @@ export default function AttendantManagementPage({
                 id="pageSize"
                 value={pagination.limit === 999999 ? -1 : pagination.limit}
                 onChange={(e) => {
+                  console.log('Select changed, setPageSize function:', typeof setPageSize)
+                  console.log('New value:', e.target.value)
                   e.preventDefault()
                   setPageSize(Number(e.target.value))
                 }}
@@ -339,14 +341,33 @@ export default function AttendantManagementPage({
               </select>
               <span className="text-sm text-gray-700">per page</span>
             </div>
+            
+            {/* Debug button - always visible */}
+            <ActionButton
+              onClick={() => {
+                console.log('DEBUG: Test button clicked!')
+                console.log('setPageSize type:', typeof setPageSize)
+                console.log('Current pagination:', pagination)
+                setPageSize(50)
+              }}
+              variant="primary"
+              size="sm"
+              type="button"
+            >
+              Test Button (Set to 50)
+            </ActionButton>
           </div>
 
-          {/* Pagination controls - only show if not showing all */}
-          {pagination.limit !== 999999 && pagination.pages > 1 && (
+          {/* Pagination controls - show if there are multiple pages */}
+          {pagination.pages > 1 && (
             <div className="flex items-center gap-2">
               {/* Previous button */}
               <ActionButton
-                onClick={() => setPage(pagination.page - 1)}
+                onClick={() => {
+                  console.log('Previous button clicked, setPage function:', typeof setPage)
+                  console.log('Current pagination:', pagination)
+                  setPage(pagination.page - 1)
+                }}
                 disabled={pagination.page <= 1 || loading}
                 variant="secondary"
                 size="sm"
@@ -362,7 +383,11 @@ export default function AttendantManagementPage({
 
               {/* Next button */}
               <ActionButton
-                onClick={() => setPage(pagination.page + 1)}
+                onClick={() => {
+                  console.log('Next button clicked, setPage function:', typeof setPage)
+                  console.log('Current pagination:', pagination)
+                  setPage(pagination.page + 1)
+                }}
                 disabled={pagination.page >= pagination.pages || loading}
                 variant="secondary"
                 size="sm"
