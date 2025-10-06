@@ -1,243 +1,118 @@
-import { NextApiRequest, NextApiResponse } from 'next'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '../auth/[...nextauth]'
-import { prisma } from '../../../src/lib/prisma'
-import { z } from 'zod'
-
-// Validation schema for event updates
-const updateEventSchema = z.object({
-  name: z.string().min(1, 'Event name is required').max(255).optional(),
-  description: z.string().optional(),
-  eventType: z.enum(['CIRCUIT_ASSEMBLY', 'REGIONAL_CONVENTION', 'SPECIAL_EVENT', 'OTHER']).optional(),
-  startDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid start date').optional(),
-  endDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid end date').optional(),
-  startTime: z.string().optional(),
-  endTime: z.string().optional(),
-  location: z.string().min(1, 'Location is required').max(500).optional(),
-  venue: z.string().optional(),
-  status: z.enum(['ARCHIVED', 'UPCOMING', 'CURRENT', 'COMPLETED', 'CANCELLED']).optional(),
-})
+import { NextApiRequest, NextApiResponse } from "next"
+import { getServerSession } from "next-auth"
+import { authOptions } from "../auth/[...nextauth]"
+import { prisma } from "../../../src/lib/prisma"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const session = await getServerSession(req, res, authOptions)
+  
+  if (!session) {
+    return res.status(401).json({ error: "Unauthorized" })
+  }
+
   const { id } = req.query
 
-  if (!id || typeof id !== 'string') {
-    return res.status(400).json({ error: 'Event ID is required' })
-  }
-
-  // Check authentication
-  const session = await getServerSession(req, res, authOptions)
-  if (!session || !session.user) {
-    return res.status(401).json({ error: 'Unauthorized' })
-  }
-
-  // Check if user has admin or overseer role
-  const user = await prisma.users.findUnique({
-    where: { email: session.user.email! },
-    select: { id: true, role: true }
-  })
-
-  if (!user || !['ADMIN', 'OVERSEER'].includes(user.role)) {
-    return res.status(403).json({ error: 'Insufficient permissions' })
+  if (!id || typeof id !== "string") {
+    return res.status(400).json({ error: "Event ID is required" })
   }
 
   try {
-    switch (req.method) {
-      case 'GET':
-        return await handleGet(req, res, id)
-      case 'PUT':
-        return await handlePut(req, res, id, user.id)
-      case 'DELETE':
-        return await handleDelete(req, res, id, user.role)
-      default:
-        res.setHeader('Allow', ['GET', 'PUT', 'DELETE'])
-        return res.status(405).json({ error: 'Method not allowed' })
-    }
-  } catch (error) {
-    console.error('Event API error:', error)
-    return res.status(500).json({ error: 'Internal server error' })
-  }
-}
-
-async function handleGet(req: NextApiRequest, res: NextApiResponse, id: string) {
-  const event = await prisma.events.findUnique({
-    where: { id },
-    include: {
-      event_attendant_associations: {
+    if (req.method === "GET") {
+      const event = await prisma.events.findUnique({
+        where: { id },
         include: {
-          users: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true
-            }
-          }
-        }
-      },
-      assignments: {
-        include: {
-          users: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true
+          positions: {
+            include: {
+              shifts: true,
+              assignments: {
+                include: {
+                  attendant: {
+                    select: {
+                      id: true,
+                      firstName: true,
+                      lastName: true,
+                      email: true
+                    }
+                  }
+                }
+              }
             }
           },
-          event_positions: {
-            select: {
-              id: true,
-              positionNumber: true,
-              positionName: true,
-              department: true
-            }
-          }
-        }
-      },
-      event_positions: {
-        include: {
-          position_shifts: true,
-          _count: {
-            select: {
-              assignments: true
-            }
-          }
-        }
-      },
-      departments: {
-        include: {
-          station_ranges: true
-        }
-      },
-      _count: {
-        select: {
           event_attendant_associations: true,
           assignments: true,
           event_positions: true
         }
-      }
-    }
-  })
-
-  if (!event) {
-    return res.status(404).json({ error: 'Event not found' })
-  }
-
-  return res.status(200).json({
-    success: true,
-    data: event
-  })
-}
-
-async function handlePut(req: NextApiRequest, res: NextApiResponse, id: string, userId: string) {
-  // Check if event exists
-  const existingEvent = await prisma.events.findUnique({
-    where: { id }
-  })
-
-  if (!existingEvent) {
-    return res.status(404).json({ error: 'Event not found' })
-  }
-
-  // Validate request body
-  const validation = updateEventSchema.safeParse(req.body)
-  if (!validation.success) {
-    return res.status(400).json({
-      error: 'Validation failed',
-      details: validation.error.errors
-    })
-  }
-
-  const data = validation.data
-
-  // Additional validation: if both dates are provided, end date must be >= start date
-  if (data.startDate && data.endDate) {
-    const startDate = new Date(data.startDate)
-    const endDate = new Date(data.endDate)
-    
-    if (endDate < startDate) {
-      return res.status(400).json({
-        error: 'End date must be on or after start date'
       })
-    }
-  }
 
-  // Prepare update data
-  const updateData: any = {
-    updatedAt: new Date()
-  }
+      if (!event) {
+        return res.status(404).json({ error: "Event not found" })
+      }
 
-  if (data.name !== undefined) updateData.name = data.name
-  if (data.description !== undefined) updateData.description = data.description
-  if (data.eventType !== undefined) updateData.eventType = data.eventType
-  if (data.startDate !== undefined) updateData.startDate = new Date(data.startDate + 'T00:00:00')
-  if (data.endDate !== undefined) updateData.endDate = new Date(data.endDate + 'T00:00:00')
-  if (data.startTime !== undefined) updateData.startTime = data.startTime
-  if (data.endTime !== undefined) updateData.endTime = data.endTime
-  if (data.location !== undefined) updateData.location = data.location
-  if (data.venue !== undefined) updateData.venue = data.venue
-  if (data.status !== undefined) updateData.status = data.status
-
-  // Update event
-  const event = await prisma.events.update({
-    where: { id },
-    data: updateData,
-    include: {
-      _count: {
-        select: {
-          event_attendant_associations: true,
-          assignments: true,
-          event_positions: true
+      // Transform new positions to match old event_positions format for compatibility
+      const transformedEvent = {
+        ...event,
+        event_positions: event.positions.map(position => ({
+          id: position.id,
+          positionNumber: position.positionNumber,
+          title: position.name,
+          department: position.area || "General",
+          description: position.description,
+          _count: {
+            assignments: position.assignments.length
+          }
+        })),
+        _count: {
+          event_attendant_associations: event.event_attendant_associations.length,
+          assignments: event.assignments.length,
+          event_positions: event.positions.length
         }
       }
+
+      return res.status(200).json(transformedEvent)
     }
-  })
 
-  return res.status(200).json({
-    success: true,
-    data: event,
-    message: 'Event updated successfully'
-  })
-}
+    if (req.method === "PUT") {
+      const { name, description, eventType, startDate, endDate, location, status } = req.body
 
-async function handleDelete(req: NextApiRequest, res: NextApiResponse, id: string, userRole: string) {
-  // Only admins can delete events
-  if (userRole !== 'ADMIN') {
-    return res.status(403).json({ error: 'Only administrators can delete events' })
-  }
-
-  // Check if event exists
-  const existingEvent = await prisma.events.findUnique({
-    where: { id },
-    include: {
-      _count: {
-        select: {
-          assignments: true,
-          event_attendant_associations: true
+      const event = await prisma.events.update({
+        where: { id },
+        data: {
+          name,
+          description,
+          eventType,
+          startDate: startDate ? new Date(startDate) : undefined,
+          endDate: endDate ? new Date(endDate) : undefined,
+          location,
+          status,
+          updatedAt: new Date()
         }
-      }
+      })
+
+      return res.status(200).json(event)
     }
-  })
 
-  if (!existingEvent) {
-    return res.status(404).json({ error: 'Event not found' })
+    if (req.method === "DELETE") {
+      // Check if event has positions or other dependencies
+      const positionsCount = await prisma.positions.count({
+        where: { eventId: id }
+      })
+
+      if (positionsCount > 0) {
+        return res.status(400).json({ 
+          error: `Cannot delete event with ${positionsCount} position(s). Remove positions first.` 
+        })
+      }
+
+      await prisma.events.delete({
+        where: { id }
+      })
+
+      return res.status(200).json({ message: "Event deleted successfully" })
+    }
+
+    return res.status(405).json({ error: "Method not allowed" })
+  } catch (error) {
+    console.error("Event API error:", error)
+    return res.status(500).json({ error: "Internal server error" })
   }
-
-  // Check if event has assignments (prevent deletion if it does)
-  if (existingEvent._count.assignments > 0 || existingEvent._count.event_attendant_associations > 0) {
-    return res.status(400).json({
-      error: 'Cannot delete event with existing assignments. Please remove all assignments first.'
-    })
-  }
-
-  // Delete event (cascade will handle related records)
-  await prisma.events.delete({
-    where: { id }
-  })
-
-  return res.status(200).json({
-    success: true,
-    message: 'Event deleted successfully'
-  })
 }
