@@ -52,7 +52,10 @@ export function useAttendants(options: UseAttendantsOptions = {}): UseAttendants
 
   const fetchAttendants = useCallback(async () => {
     try {
-      console.log('fetchAttendants called with pagination:', pagination)
+      console.log('fetchAttendants called with:')
+      console.log('- eventId:', eventId)
+      console.log('- pagination:', pagination)
+      console.log('- filters:', filters)
       setLoading(true)
       setError(null)
 
@@ -71,6 +74,7 @@ export function useAttendants(options: UseAttendantsOptions = {}): UseAttendants
           })
       
       console.log('API response:', response)
+      console.log('Attendants returned:', response.data?.attendants?.length || 0)
 
       if (response.success) {
         setAttendants(response.data.attendants)
