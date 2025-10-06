@@ -28,25 +28,25 @@ INSERT INTO event_attendants (
 )
 SELECT DISTINCT
     eaa."eventId",
-    a.first_name,
-    a.last_name,
+    a."firstName",
+    a."lastName",
     a.email,
     a.phone,
     a.congregation,
-    a.forms_of_service,
-    a.is_active,
-    a.availability_status,
-    a.is_available,
-    a.serving_as,
+    a."formsOfService",
+    a."isActive",
+    a."availabilityStatus",
+    a."isAvailable",
+    a."servingAs",
     a.skills,
-    a.preferred_departments,
-    a.unavailable_dates,
-    a.total_assignments,
-    a.total_hours,
+    a."preferredDepartments",
+    a."unavailableDates",
+    a."totalAssignments",
+    a."totalHours",
     a.notes,
-    a.user_id,
-    a.created_at,
-    a.updated_at
+    a."userId",
+    a."createdAt",
+    a."updatedAt"
 FROM attendants a
 INNER JOIN event_attendant_associations eaa ON (
     (eaa."attendantId" = a.id AND eaa."attendantId" IS NOT NULL) OR
@@ -87,12 +87,7 @@ BEGIN
     END IF;
 END $$;
 
--- Step 3: Create backup of original data (for rollback if needed)
-CREATE TABLE attendants_backup AS SELECT * FROM attendants;
-CREATE TABLE event_attendant_associations_backup AS SELECT * FROM event_attendant_associations;
-
-COMMENT ON TABLE attendants_backup IS 'Backup of original attendants table before migration to event-specific model';
-COMMENT ON TABLE event_attendant_associations_backup IS 'Backup of original associations before migration';
+-- Step 3: Create backup of original data (for rollback if needed) - SKIPPED (already exists)
 
 -- Step 4: Add migration metadata
 CREATE TABLE IF NOT EXISTS migration_log (
