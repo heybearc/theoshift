@@ -107,15 +107,23 @@ class AttendantService {
     return response.json()
   }
 
-  async getEventAttendants(eventId: string, filters?: AttendantSearchFilters): Promise<AttendantsResponse> {
+  async getEventAttendants(eventId: string, filters?: AttendantSearchFilters & { 
+    page?: number 
+    limit?: number 
+    includeStats?: boolean 
+  }): Promise<AttendantsResponse> {
     const params = new URLSearchParams({ eventId })
     
+    if (filters?.page) params.append('page', filters.page.toString())
+    if (filters?.limit) params.append('limit', filters.limit.toString())
     if (filters?.search) params.append('search', filters.search)
     if (filters?.congregation) params.append('congregation', filters.congregation)
     if (filters?.formsOfService?.length) {
       params.append('formsOfService', filters.formsOfService.join(','))
     }
     if (filters?.isActive !== undefined) params.append('isActive', filters.isActive.toString())
+    if (filters?.hasUser !== undefined) params.append('hasUser', filters.hasUser.toString())
+    if (filters?.includeStats) params.append('includeStats', 'true')
 
     const response = await fetch(`${this.baseUrl}?${params}`)
     if (!response.ok) {

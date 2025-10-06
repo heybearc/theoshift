@@ -124,12 +124,41 @@ async function handleGetAttendants(req: NextApiRequest, res: NextApiResponse) {
     }
   }
 
-  // For event-specific attendants, we would filter by event assignments
-  // For now, we'll return all attendants when eventId is provided
-  // TODO: Implement proper event-attendant relationship filtering
+  // For event-specific attendants, we'll handle this after the main query
+  let eventAssociatedIds: string[] = []
   if (eventId) {
-    // This would typically join with event_attendants table
-    // For now, just return all attendants
+    // Get attendant IDs associated with this event
+    const associations = await prisma.event_attendant_associations.findMany({
+      where: { 
+        eventId: eventId as string,
+        isActive: true
+      },
+      select: { userId: true, attendantId: true } as any
+    })
+    
+    // Collect both user-based and direct attendant associations
+    const userIds = associations.filter(a => a.userId).map(a => a.userId!)
+    const attendantIds = associations.filter(a => (a as any).attendantId).map(a => (a as any).attendantId!)
+    
+    // Get attendants by user IDs
+    if (userIds.length > 0) {
+      const userAttendants = await prisma.attendants.findMany({
+        where: { userId: { in: userIds } },
+        select: { id: true }
+      })
+      eventAssociatedIds.push(...userAttendants.map(a => a.id))
+    }
+    
+    // Add direct attendant IDs
+    eventAssociatedIds.push(...attendantIds)
+    
+    // Filter by associated attendants
+    if (eventAssociatedIds.length > 0) {
+      where.id = { in: eventAssociatedIds }
+    } else {
+      // No attendants associated with this event
+      where.id = { in: [] } // This will return no results
+    }
   }
 
   try {

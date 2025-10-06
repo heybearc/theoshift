@@ -56,7 +56,12 @@ export function useAttendants(options: UseAttendantsOptions = {}): UseAttendants
       setError(null)
 
       const response = eventId
-        ? await attendantService.getEventAttendants(eventId, filters)
+        ? await attendantService.getEventAttendants(eventId, {
+            ...filters,
+            page: pagination.page,
+            limit: pagination.limit,
+            includeStats
+          })
         : await attendantService.getAttendants({
             ...filters,
             page: pagination.page,
