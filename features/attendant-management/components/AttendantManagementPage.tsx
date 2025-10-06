@@ -12,6 +12,7 @@ import AttendantTable from './organisms/AttendantTable'
 import AttendantCreateModal from './organisms/AttendantCreateModal'
 import BulkImportModal from './organisms/BulkImportModal'
 import AttendantStatsCard from './organisms/AttendantStatsCard'
+import PaginationControls from './molecules/PaginationControls'
 import ActionButton from './atoms/ActionButton'
 
 // Types
@@ -50,13 +51,14 @@ export default function AttendantManagementPage({
     filters,
     setFilters,
     setPage,
+    setPageSize,
     refresh,
     createAttendant,
     updateAttendant,
     deleteAttendant
   } = useAttendants({
     eventId,
-    pageSize: 20,
+    pageSize: 25,
     includeStats: true
   })
 
@@ -87,6 +89,23 @@ export default function AttendantManagementPage({
       return response.data
     } catch (error) {
       console.error('Bulk import error:', error)
+      throw error
+    }
+  }
+
+  // Handle bulk status change
+  const handleBulkStatusChange = async (attendantIds: string[], isActive: boolean) => {
+    try {
+      // Update each attendant's status
+      const updatePromises = attendantIds.map(id => 
+        attendantService.updateAttendant(id, { isActive })
+      )
+      
+      await Promise.all(updatePromises)
+      await refresh() // Refresh the data after updates
+      setSelectedAttendantIds([]) // Clear selection
+    } catch (error) {
+      console.error('Bulk status change error:', error)
       throw error
     }
   }
@@ -241,13 +260,27 @@ export default function AttendantManagementPage({
                   {selectedAttendantIds.length} attendant(s) selected
                 </span>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex flex-wrap gap-2">
                 <ActionButton
                   onClick={() => setSelectedAttendantIds([])}
                   variant="secondary"
                   size="sm"
                 >
                   Clear Selection
+                </ActionButton>
+                <ActionButton
+                  onClick={() => handleBulkStatusChange(selectedAttendantIds, true)}
+                  variant="primary"
+                  size="sm"
+                >
+                  Activate Selected
+                </ActionButton>
+                <ActionButton
+                  onClick={() => handleBulkStatusChange(selectedAttendantIds, false)}
+                  variant="secondary"
+                  size="sm"
+                >
+                  Deactivate Selected
                 </ActionButton>
                 <ActionButton
                   onClick={handleBulkDelete}
@@ -270,43 +303,20 @@ export default function AttendantManagementPage({
             onDelete={handleDeleteAttendant}
             onSelect={setSelectedAttendantIds}
             selectedIds={selectedAttendantIds}
+            onBulkStatusChange={handleBulkStatusChange}
           />
         </div>
 
         {/* Pagination */}
-        {pagination.pages > 1 && (
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-700">
-              Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
-              {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
-              {pagination.total} results
-            </div>
-            
-            <div className="flex space-x-2">
-              <ActionButton
-                onClick={() => setPage(pagination.page - 1)}
-                disabled={pagination.page <= 1}
-                variant="secondary"
-                size="sm"
-              >
-                Previous
-              </ActionButton>
-              
-              <span className="px-3 py-1 text-sm text-gray-700">
-                Page {pagination.page} of {pagination.pages}
-              </span>
-              
-              <ActionButton
-                onClick={() => setPage(pagination.page + 1)}
-                disabled={pagination.page >= pagination.pages}
-                variant="secondary"
-                size="sm"
-              >
-                Next
-              </ActionButton>
-            </div>
-          </div>
-        )}
+        <PaginationControls
+          currentPage={pagination.page}
+          totalPages={pagination.pages}
+          totalItems={pagination.total}
+          pageSize={pagination.limit === 999999 ? -1 : pagination.limit}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+          loading={loading}
+        />
       </div>
 
       {/* Modals - Outside main container for proper z-index */}

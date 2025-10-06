@@ -10,7 +10,8 @@ export default function AttendantTable({
   onEdit,
   onDelete,
   onSelect,
-  selectedIds = []
+  selectedIds = [],
+  onBulkStatusChange
 }: AttendantTableProps) {
   const [sortField, setSortField] = useState<keyof Attendant>('lastName')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
@@ -103,12 +104,13 @@ export default function AttendantTable({
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
+      {/* Mobile-friendly responsive table */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               {onSelect && (
-                <th className="px-6 py-3 text-left">
+                <th className="px-3 py-3 text-left w-12">
                   <input
                     type="checkbox"
                     checked={allSelected}
@@ -122,7 +124,7 @@ export default function AttendantTable({
               )}
               
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 min-w-[180px]"
                 onClick={() => handleSort('lastName')}
               >
                 <div className="flex items-center space-x-1">
@@ -132,7 +134,7 @@ export default function AttendantTable({
               </th>
               
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 min-w-[200px]"
                 onClick={() => handleSort('email')}
               >
                 <div className="flex items-center space-x-1">
@@ -141,12 +143,12 @@ export default function AttendantTable({
                 </div>
               </th>
               
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
                 Phone
               </th>
               
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 min-w-[140px]"
                 onClick={() => handleSort('congregation')}
               >
                 <div className="flex items-center space-x-1">
@@ -155,12 +157,12 @@ export default function AttendantTable({
                 </div>
               </th>
               
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">
                 Forms of Service
               </th>
               
               <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 min-w-[80px]"
                 onClick={() => handleSort('isActive')}
               >
                 <div className="flex items-center space-x-1">
@@ -169,11 +171,11 @@ export default function AttendantTable({
                 </div>
               </th>
               
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
                 User Account
               </th>
               
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
                 Actions
               </th>
             </tr>
@@ -183,7 +185,7 @@ export default function AttendantTable({
             {sortedAttendants.map((attendant) => (
               <tr key={attendant.id} className="hover:bg-gray-50">
                 {onSelect && (
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 py-4">
                     <input
                       type="checkbox"
                       checked={selectedIds.includes(attendant.id)}
@@ -193,48 +195,54 @@ export default function AttendantTable({
                   </td>
                 )}
                 
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-3 py-4">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 h-10 w-10">
-                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                        <span className="text-blue-600 font-medium text-sm">
+                    <div className="flex-shrink-0 h-8 w-8">
+                      <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                        <span className="text-blue-600 font-medium text-xs">
                           {attendant.firstName[0]}{attendant.lastName[0]}
                         </span>
                       </div>
                     </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">
+                    <div className="ml-3">
+                      <div className="text-sm font-medium text-gray-900 break-words">
                         {attendant.firstName} {attendant.lastName}
                       </div>
                     </div>
                   </div>
                 </td>
                 
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {attendant.email}
+                <td className="px-3 py-4 text-sm text-gray-500">
+                  <div className="break-all max-w-[200px]">
+                    {attendant.email}
+                  </div>
                 </td>
                 
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {attendant.phone || 'Not provided'}
+                <td className="px-3 py-4 text-sm text-gray-500">
+                  <div className="break-words">
+                    {attendant.phone || 'N/A'}
+                  </div>
                 </td>
                 
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {attendant.congregation}
+                <td className="px-3 py-4 text-sm text-gray-500">
+                  <div className="break-words max-w-[140px]">
+                    {attendant.congregation}
+                  </div>
                 </td>
                 
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex flex-wrap gap-1">
+                <td className="px-3 py-4">
+                  <div className="flex flex-wrap gap-1 max-w-[150px]">
                     {(attendant.formsOfService as any[])?.map((form, index) => (
                       <FormOfServiceBadge key={index} form={form} />
                     ))}
                   </div>
                 </td>
                 
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-3 py-4">
                   <StatusBadge isActive={attendant.isActive} />
                 </td>
                 
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-3 py-4 text-sm text-gray-500">
                   {attendant.users ? (
                     <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800">
                       Linked
@@ -246,8 +254,8 @@ export default function AttendantTable({
                   )}
                 </td>
                 
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex space-x-2">
+                <td className="px-3 py-4 text-sm font-medium">
+                  <div className="flex flex-col sm:flex-row gap-1">
                     {onEdit && (
                       <ActionButton
                         onClick={() => onEdit(attendant)}

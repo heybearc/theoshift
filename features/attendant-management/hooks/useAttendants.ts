@@ -23,6 +23,7 @@ interface UseAttendantsReturn {
   filters: AttendantSearchFilters
   setFilters: (filters: AttendantSearchFilters) => void
   setPage: (page: number) => void
+  setPageSize: (pageSize: number) => void
   refresh: () => Promise<void>
   createAttendant: (data: any) => Promise<void>
   updateAttendant: (id: string, data: any) => Promise<void>
@@ -81,6 +82,14 @@ export function useAttendants(options: UseAttendantsOptions = {}): UseAttendants
 
   const setPage = useCallback((page: number) => {
     setPagination(prev => ({ ...prev, page }))
+  }, [])
+
+  const setPageSize = useCallback((pageSize: number) => {
+    setPagination(prev => ({ 
+      ...prev, 
+      limit: pageSize === -1 ? 999999 : pageSize, // Use large number for "All"
+      page: 1 // Reset to first page when changing page size
+    }))
   }, [])
 
   const refresh = useCallback(async () => {
@@ -151,6 +160,7 @@ export function useAttendants(options: UseAttendantsOptions = {}): UseAttendants
     filters,
     setFilters,
     setPage,
+    setPageSize,
     refresh,
     createAttendant,
     updateAttendant,
