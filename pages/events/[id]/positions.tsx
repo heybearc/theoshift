@@ -6,19 +6,35 @@ import Link from 'next/link'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
-// Using basic alerts for notifications
+import BulkPositionCreator from '../../../components/positions/BulkPositionCreator'
+
+// APEX GUARDIAN: Event Positions Management Page
+// Manages positions for specific events with bulk creation capabilities
 
 interface Position {
   id: string
   positionNumber: number
-  positionName: string
-  department: string
+  name: string
   description?: string
-  requirements?: string
+  area?: string
+  sequence: number
   isActive: boolean
-  _count?: {
-    assignments: number
-  }
+  shifts?: Array<{
+    id: string
+    name: string
+    startTime?: string
+    endTime?: string
+    isAllDay: boolean
+  }>
+  assignments?: Array<{
+    id: string
+    role: string
+    attendant: {
+      id: string
+      firstName: string
+      lastName: string
+    }
+  }>
 }
 
 interface Event {
