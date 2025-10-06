@@ -68,9 +68,6 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
     // For now, return all attendants since we don't have event associations
     // TODO: Restore event_attendant_associations table
     const attendants = await prisma.attendants.findMany({
-      where: { 
-        isActive: true
-      },
       skip: offset,
       take: limit,
       orderBy: [
@@ -79,11 +76,7 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
       ]
     })
 
-    const total = await prisma.attendants.count({
-      where: { 
-        isActive: true
-      }
-    })
+    const total = await prisma.attendants.count()
 
     const pages = Math.ceil(total / limit)
 
