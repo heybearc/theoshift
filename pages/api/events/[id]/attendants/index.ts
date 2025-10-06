@@ -135,23 +135,19 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
   }
 
   try {
-    // Build SQL query dynamically
+    // Use simple template literals for now to avoid parameter binding issues
     let whereClause = `WHERE event_id = '${eventId}'`
-    const params: any[] = []
     
     if (search) {
-      whereClause += ` AND (first_name ILIKE $${params.length + 1} OR last_name ILIKE $${params.length + 1} OR email ILIKE $${params.length + 1} OR congregation ILIKE $${params.length + 1})`
-      params.push(`%${search}%`)
+      whereClause += ` AND (first_name ILIKE '%${search}%' OR last_name ILIKE '%${search}%' OR email ILIKE '%${search}%' OR congregation ILIKE '%${search}%')`
     }
     
     if (congregation) {
-      whereClause += ` AND congregation ILIKE $${params.length + 1}`
-      params.push(`%${congregation}%`)
+      whereClause += ` AND congregation ILIKE '%${congregation}%'`
     }
     
     if (isActive !== '') {
-      whereClause += ` AND is_active = $${params.length + 1}`
-      params.push(isActive === 'true')
+      whereClause += ` AND is_active = ${isActive === 'true'}`
     }
 
     const [attendants, totalResult] = await Promise.all([
@@ -160,11 +156,11 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
         ${whereClause}
         ORDER BY last_name ASC, first_name ASC
         LIMIT ${limitNum} OFFSET ${skip}
-      `, ...params) as Promise<any[]>,
+      `) as Promise<any[]>,
       prisma.$queryRawUnsafe(`
         SELECT COUNT(*) as count FROM event_attendants 
         ${whereClause}
-      `, ...params) as Promise<any[]>
+      `) as Promise<any[]>
     ])
     
     const total = parseInt(totalResult[0]?.count || '0')
