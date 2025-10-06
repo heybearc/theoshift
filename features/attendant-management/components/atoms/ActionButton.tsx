@@ -1,7 +1,7 @@
 import React from 'react'
 
 interface ActionButtonProps {
-  onClick: () => void
+  onClick: (e?: React.MouseEvent<HTMLButtonElement>) => void
   variant?: 'primary' | 'secondary' | 'danger' | 'success'
   size?: 'sm' | 'md' | 'lg'
   disabled?: boolean
@@ -37,7 +37,10 @@ export default function ActionButton({
   return (
     <button
       type={type}
-      onClick={onClick}
+      onClick={(e) => {
+        e.preventDefault()
+        onClick(e)
+      }}
       disabled={disabled || loading}
       className={`
         inline-flex items-center justify-center
