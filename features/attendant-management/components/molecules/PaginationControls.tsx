@@ -19,7 +19,7 @@ const PAGE_SIZE_OPTIONS = [
   { value: -1, label: 'All' }
 ]
 
-export default function PaginationControls({
+function PaginationControls({
   currentPage,
   totalPages,
   totalItems,
@@ -144,3 +144,5 @@ export default function PaginationControls({
     </div>
   )
 }
+
+export default PaginationControls
