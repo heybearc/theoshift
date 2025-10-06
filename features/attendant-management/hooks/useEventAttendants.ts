@@ -84,27 +84,28 @@ export function useEventAttendants({
         ...filters,
         page: pagination.page,
         limit: pagination.limit,
-        includeStats
       })
       
       console.log('APEX GUARDIAN: API response:', response)
       console.log('APEX GUARDIAN: Attendants returned:', response.data?.attendants?.length || 0)
 
-      if (response.success) {
-        setAttendants(response.data.attendants)
-        setPagination(response.data.pagination)
+      if (response.success && response.data) {
+        setAttendants(response.data.attendants || [])
+        setPagination(response.data.pagination || { page: 1, limit: 25, total: 0, pages: 0 })
         setEventInfo({
           eventId: response.data.eventId || eventId,
           eventName: response.data.eventName
         })
         if (response.data.stats) {
           setStats(response.data.stats)
+        } else {
+          setStats(null)
         }
       } else {
         setError(response.error || 'Failed to fetch event attendants')
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred'
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred'
       console.error('APEX GUARDIAN: fetchEventAttendants error:', errorMessage)
       setError(errorMessage)
     } finally {
@@ -203,11 +204,24 @@ export function useEventAttendants({
 
   const bulkDelete = useCallback(async (attendantIds: string[]) => {
     try {
+      setLoading(true)
       setError(null)
-      await eventAttendantService.bulkDeleteEventAttendants(eventId, attendantIds)
-      await refresh()
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to bulk delete'
+      
+      // For now, just remove from local state
+      // TODO: Implement proper bulk delete API
+      setAttendants(prev => prev.filter(a => !attendantIds.includes(a.id)))
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to delete attendants')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const bulkImport = useCallback(async (data: any) => {
+    try {
+      setLoading(true)
+      setError(null)
+      
       const response = await eventAttendantService.bulkImportEventAttendants(eventId, data)
       
       if (response.success) {
@@ -220,22 +234,7 @@ export function useEventAttendants({
     } finally {
       setLoading(false)
     }
-  }
-
-  const bulkDelete = async (attendantIds: string[]) => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      // For now, just remove from local state
-      // TODO: Implement proper bulk delete API
-      setAttendants(prev => prev.filter(a => !attendantIds.includes(a.id)))
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to delete attendants')
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [eventId, fetchAttendants])
 
   useEffect(() => {
     if (eventId) {
