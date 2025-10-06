@@ -5,8 +5,8 @@
   "devFiles": [],
   "ampDevFiles": [],
   "lowPriorityFiles": [
-    "static/p0ZShmB4_limbUNoUuaaf/_buildManifest.js",
-    "static/p0ZShmB4_limbUNoUuaaf/_ssgManifest.js"
+    "static/GmVXe0BRd5d8MwMW7_iqV/_buildManifest.js",
+    "static/GmVXe0BRd5d8MwMW7_iqV/_ssgManifest.js"
   ],
   "rootMainFiles": [],
   "pages": {
@@ -140,8 +140,8 @@
       "static/chunks/framework-64ad27b21261a9ce.js",
       "static/chunks/main-a2464d6d00b134e7.js",
       "static/chunks/424-ca7471161a310844.js",
-      "static/chunks/255-c8bdffe2bfc9ad54.js",
-      "static/chunks/pages/attendants-c74648c2353a28d5.js"
+      "static/chunks/860-e3007c920483bb57.js",
+      "static/chunks/pages/attendants-b9c29f740b693b56.js"
     ],
     "/auth/accept-invitation": [
       "static/chunks/webpack-ee7e63bc15b31913.js",
@@ -203,8 +203,8 @@
       "static/chunks/framework-64ad27b21261a9ce.js",
       "static/chunks/main-a2464d6d00b134e7.js",
       "static/chunks/424-ca7471161a310844.js",
-      "static/chunks/255-c8bdffe2bfc9ad54.js",
-      "static/chunks/pages/events/[id]/attendants-79f3239145e924e1.js"
+      "static/chunks/860-e3007c920483bb57.js",
+      "static/chunks/pages/events/[id]/attendants-bc49ccf4f7a526a3.js"
     ],
     "/events/[id]/attendants-old-backup": [
       "static/chunks/webpack-ee7e63bc15b31913.js",
