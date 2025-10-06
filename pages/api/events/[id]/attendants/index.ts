@@ -35,6 +35,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return await handleCreateEventAttendant(req, res, eventId, event)
     }
 
+    if (req.method === 'PUT') {
+      return await handleBulkImportEventAttendants(req, res, eventId, event)
+    }
+
     return res.status(405).json({ success: false, error: 'Method not allowed' })
   } catch (error) {
     console.error('Event attendants API error:', error)
@@ -149,5 +153,113 @@ async function handleCreateEventAttendant(req: NextApiRequest, res: NextApiRespo
   } catch (error) {
     console.error('Create event attendant error:', error)
     return res.status(500).json({ success: false, error: 'Failed to create attendant' })
+  }
+}
+
+async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApiResponse, eventId: string, event: any) {
+  try {
+    const { attendants } = req.body
+
+    if (!attendants || !Array.isArray(attendants)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Attendants array is required' 
+      })
+    }
+
+    let created = 0
+    let updated = 0
+    const errors = []
+
+    for (let i = 0; i < attendants.length; i++) {
+      const attendantData = attendants[i]
+      
+      try {
+        // Check if attendant already exists by email
+        const existingAttendant = await prisma.attendants.findFirst({
+          where: { email: attendantData.email }
+        })
+
+        if (existingAttendant) {
+          // Update existing attendant
+          await prisma.attendants.update({
+            where: { id: existingAttendant.id },
+            data: {
+              firstName: attendantData.firstName,
+              lastName: attendantData.lastName,
+              phone: attendantData.phone || null,
+              notes: attendantData.notes || null,
+              congregation: attendantData.congregation || '',
+              isAvailable: attendantData.isActive !== false
+            }
+          })
+
+          // Create association if it doesn't exist
+          const existingAssociation = await prisma.event_attendant_associations.findFirst({
+            where: {
+              eventId,
+              attendantId: existingAttendant.id
+            }
+          })
+
+          if (!existingAssociation) {
+            await prisma.event_attendant_associations.create({
+              data: {
+                id: require('crypto').randomUUID(),
+                eventId,
+                attendantId: existingAttendant.id
+              }
+            })
+          }
+
+          updated++
+        } else {
+          // Create new attendant
+          const newAttendant = await prisma.attendants.create({
+            data: {
+              id: require('crypto').randomUUID(),
+              firstName: attendantData.firstName,
+              lastName: attendantData.lastName,
+              email: attendantData.email,
+              phone: attendantData.phone || null,
+              notes: attendantData.notes || null,
+              congregation: attendantData.congregation || '',
+              isAvailable: attendantData.isActive !== false,
+              isActive: attendantData.isActive !== false
+            }
+          })
+
+          // Create association with the event
+          await prisma.event_attendant_associations.create({
+            data: {
+              id: require('crypto').randomUUID(),
+              eventId,
+              attendantId: newAttendant.id
+            }
+          })
+
+          created++
+        }
+      } catch (error) {
+        console.error(`Error processing attendant ${i + 1}:`, error)
+        errors.push({
+          row: i + 1,
+          email: attendantData.email || 'Unknown',
+          error: error.message || 'Unknown error'
+        })
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        created,
+        updated,
+        errors
+      }
+    })
+  } catch (error) {
+    console.error('Bulk import event attendants error:', error)
+    return res.status(500).json({ success: false, error: 'Failed to import attendants' })
   }
 }
