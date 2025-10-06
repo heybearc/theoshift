@@ -349,12 +349,6 @@ export default function EventDetailsPage() {
                 📊 Count Times
               </Link>
               <Link
-                href={`/events/${event.id}/attendants`}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors"
-              >
-                👥 Attendants
-              </Link>
-              <Link
                 href={`/events/${event.id}/positions`}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
               >
