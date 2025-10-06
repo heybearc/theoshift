@@ -141,7 +141,7 @@ async function handleCreateEventAttendant(req: NextApiRequest, res: NextApiRespo
         formsOfService: validatedData.formsOfService,
         isActive: validatedData.isActive,
         notes: validatedData.notes,
-        userId: validatedData.userId
+        ...(validatedData.userId && { userId: validatedData.userId })
       }
     })
     
