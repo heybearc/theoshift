@@ -59,7 +59,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   let event: Event | null = null
   try {
     // Fetch real event data from the API
-    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/events/${id}`)
+    const response = await fetch(`http://localhost:3001/api/events/${id}`)
     if (response.ok) {
       const eventData = await response.json()
       if (eventData.success) {
