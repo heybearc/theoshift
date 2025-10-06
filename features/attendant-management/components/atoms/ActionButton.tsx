@@ -38,7 +38,9 @@ export default function ActionButton({
     <button
       type={type}
       onClick={(e) => {
-        e.preventDefault()
+        if (type === 'button') {
+          e.preventDefault()
+        }
         onClick(e)
       }}
       disabled={disabled || loading}
