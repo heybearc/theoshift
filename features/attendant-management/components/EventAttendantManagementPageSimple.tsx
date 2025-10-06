@@ -19,6 +19,28 @@ export default function EventAttendantManagementPageSimple({
   const [attendants, setAttendants] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [renderError, setRenderError] = useState<string | null>(null)
+
+  // Error boundary effect
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      console.error('APEX GUARDIAN: Global error caught:', event.error)
+      setRenderError(`Global error: ${event.error?.message || 'Unknown error'}`)
+    }
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error('APEX GUARDIAN: Unhandled promise rejection:', event.reason)
+      setRenderError(`Promise rejection: ${event.reason?.message || 'Unknown rejection'}`)
+    }
+
+    window.addEventListener('error', handleError)
+    window.addEventListener('unhandledrejection', handleUnhandledRejection)
+
+    return () => {
+      window.removeEventListener('error', handleError)
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection)
+    }
+  }, [])
 
   // Permission check
   const canManageAttendants = session?.user && ['ADMIN', 'OVERSEER'].includes((session.user as any).role)
@@ -72,6 +94,24 @@ export default function EventAttendantManagementPageSimple({
     fetchAttendants()
   }, [eventId, canManageAttendants])
 
+  // Render error display
+  if (renderError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-900 mb-4">Render Error Detected</h2>
+          <p className="text-red-600 mb-4">{renderError}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="text-blue-600 hover:text-blue-800"
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   if (!canManageAttendants) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -86,8 +126,9 @@ export default function EventAttendantManagementPageSimple({
     )
   }
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  try {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <Head>
         <title>{eventName || 'Event'} - Attendants | JW Attendant Scheduler</title>
       </Head>
@@ -220,6 +261,25 @@ export default function EventAttendantManagementPageSimple({
           </div>
         </div>
       )}
-    </div>
-  )
+      </div>
+    )
+  } catch (renderError) {
+    console.error('APEX GUARDIAN: Render error caught:', renderError)
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-900 mb-4">Component Render Error</h2>
+          <p className="text-red-600 mb-4">
+            {renderError instanceof Error ? renderError.message : 'Unknown render error'}
+          </p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+    )
+  }
 }

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import EventAttendantManagementPageSimple from '../../../features/attendant-management/components/EventAttendantManagementPageSimple'
 import EventLayout from '../../../components/EventLayout'
+import ErrorBoundary from '../../../components/ErrorBoundary'
 
 interface Event {
   id: string
@@ -33,10 +34,12 @@ export default function EventAttenданtsPage({ eventId, event }: EventAttenд�
         status: event?.status
       }}
     >
-      <EventAttendantManagementPageSimple 
-        eventId={eventId}
-        eventName={event?.name}
-      />
+      <ErrorBoundary>
+        <EventAttendantManagementPageSimple 
+          eventId={eventId}
+          eventName={event?.name}
+        />
+      </ErrorBoundary>
     </EventLayout>
   )
 }
