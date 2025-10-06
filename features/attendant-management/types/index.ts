@@ -9,6 +9,7 @@ export interface AttendantTableProps {
   onDelete?: (attendantId: string) => void
   onSelect?: (attendantIds: string[]) => void
   selectedIds?: string[]
+  onBulkStatusChange?: (attendantIds: string[], isActive: boolean) => Promise<void>
 }
 
 export interface AttendantFiltersProps {
