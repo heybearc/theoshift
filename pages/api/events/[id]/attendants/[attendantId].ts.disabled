@@ -1,9 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../../../../auth/[...nextauth]'
-import { prisma } from '../../../../../../src/lib/prisma'
+import { authOptions } from '../../../auth/[...nextauth]'
+import { prisma } from '../../../../../src/lib/prisma'
 import { z } from 'zod'
-import { FormOfService, FORMS_OF_SERVICE } from '../../../../../../src/types/attendant'
+import { FormOfService, FORMS_OF_SERVICE } from '../../../../../src/types/attendant'
 
 // APEX GUARDIAN Event-Specific Individual Attendant API
 // Industry best practice: Event-scoped CRUD operations
@@ -75,29 +75,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 async function handleGetEventAttendant(req: NextApiRequest, res: NextApiResponse, eventId: string, attendantId: string) {
   try {
-    const attendant = await prisma.event_attendants.findFirst({
-      where: { 
-        id: attendantId,
-        eventId: eventId // Ensure attendant belongs to this event
-      },
-      include: {
-        users: {
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
-            phone: true,
-            role: true,
-            isActive: true
-          }
-        }
-      }
-    })
+    const attendants = await prisma.$queryRaw`
+      SELECT * FROM event_attendants 
+      WHERE id = ${attendantId} AND event_id = ${eventId}
+    ` as any[]
 
-    if (!attendant) {
+    if (!attendants || attendants.length === 0) {
       return res.status(404).json({ success: false, error: 'Attendant not found in this event' })
     }
+
+    const attendant = attendants[0]
 
     return res.status(200).json({
       success: true,
