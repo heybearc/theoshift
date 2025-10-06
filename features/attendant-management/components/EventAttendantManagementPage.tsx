@@ -204,32 +204,10 @@ export default function EventAttendantManagementPage({
 
       {/* Stats Cards */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <AttendantStatsCard
-            title="Total Attendants"
-            value={stats.total}
-            icon="users"
-            color="blue"
-          />
-          <AttendantStatsCard
-            title="Active"
-            value={stats.active}
-            icon="check-circle"
-            color="green"
-          />
-          <AttendantStatsCard
-            title="Inactive"
-            value={stats.inactive}
-            icon="x-circle"
-            color="red"
-          />
-          <AttendantStatsCard
-            title="With Accounts"
-            value={stats.withUsers}
-            icon="user-check"
-            color="purple"
-          />
-        </div>
+        <AttendantStatsCard
+          stats={stats}
+          loading={loading}
+        />
       )}
 
       {/* Filters */}
