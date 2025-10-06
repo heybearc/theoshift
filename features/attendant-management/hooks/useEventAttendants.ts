@@ -42,6 +42,7 @@ interface UseEventAttendantsReturn {
   
   // Bulk operations
   bulkUpdateStatus: (attendantIds: string[], isActive: boolean) => Promise<void>
+  bulkDelete: (attendantIds: string[]) => Promise<void>
   bulkImport: (data: any) => Promise<void>
 }
 
@@ -207,27 +208,34 @@ export function useEventAttendants({
       await refresh()
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to bulk delete'
-      setError(errorMessage)
-      throw new Error(errorMessage)
-    }
-  }, [eventId, refresh])
-
-  const bulkImport = useCallback(async (data: any) => {
-    try {
-      setError(null)
       const response = await eventAttendantService.bulkImportEventAttendants(eventId, data)
       
       if (response.success) {
-        await refresh()
+        await fetchAttendants()
       } else {
-        throw new Error('Failed to import attendants')
+        setError(response.error || 'Failed to import attendants')
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to import attendants'
-      setError(errorMessage)
-      throw new Error(errorMessage)
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to import attendants')
+    } finally {
+      setLoading(false)
     }
-  }, [eventId, refresh])
+  }
+
+  const bulkDelete = async (attendantIds: string[]) => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      // For now, just remove from local state
+      // TODO: Implement proper bulk delete API
+      setAttendants(prev => prev.filter(a => !attendantIds.includes(a.id)))
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to delete attendants')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (eventId) {
