@@ -28,30 +28,27 @@ model assignments {
 }
 
 model attendants {
-  id                   String          @id
-  userId               String?         @unique
-  firstName            String
-  lastName             String
-  email                String
-  phone                String?
-  congregation         String
-  formsOfService       Json            @default("[]")
-  isActive             Boolean         @default(true)
-  notes                String?
-  
-  // Legacy fields - keeping for backward compatibility
-  availabilityStatus   String?         @default("AVAILABLE")
-  isAvailable          Boolean         @default(true)
-  servingAs            Json?           @default("[]")
-  skills               Json?
-  preferredDepartments Json?
-  unavailableDates     Json?
-  totalAssignments     Int             @default(0)
-  totalHours           Float           @default(0)
-  
-  createdAt            DateTime        @default(now())
-  updatedAt            DateTime
-  users                users?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                           String                         @id
+  userId                       String?                        @unique
+  firstName                    String
+  lastName                     String
+  email                        String
+  phone                        String?
+  availabilityStatus           String?                        @default("AVAILABLE")
+  isAvailable                  Boolean                        @default(true)
+  notes                        String?
+  servingAs                    Json?                          @default("[]")
+  skills                       Json?
+  preferredDepartments         Json?
+  unavailableDates             Json?
+  totalAssignments             Int                            @default(0)
+  totalHours                   Float                          @default(0)
+  createdAt                    DateTime                       @default(now())
+  updatedAt                    DateTime
+  congregation                 String
+  formsOfService               Json                           @default("[]")
+  isActive                     Boolean                        @default(true)
+  users                        users?                         @relation(fields: [userId], references: [id], onDelete: Cascade)
   event_attendant_associations event_attendant_associations[]
 }
 
@@ -129,21 +126,20 @@ model email_configurations {
 }
 
 model event_attendant_associations {
-  id                    String   @id
+  id                    String      @id
   eventId               String
-  userId                String?  // Made optional to support attendant-only associations
-  attendantId           String?  // Direct attendant association for non-user attendants
-  role                  UserRole @default(ATTENDANT)
-  isActive              Boolean  @default(true)
+  userId                String?
+  role                  UserRole    @default(ATTENDANT)
+  isActive              Boolean     @default(true)
   assignedDepartments   Json?
   assignedStationRanges Json?
-  createdAt             DateTime @default(now())
+  createdAt             DateTime    @default(now())
   updatedAt             DateTime
-  events                events   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  users                 users?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attendantId           String?
   attendants            attendants? @relation(fields: [attendantId], references: [id], onDelete: Cascade)
+  events                events      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  users                 users?      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Ensure either userId OR attendantId is provided, but not both
   @@unique([eventId, userId])
   @@unique([eventId, attendantId])
 }
@@ -177,12 +173,9 @@ model events {
   id                           String                         @id
   name                         String
   description                  String?
-  eventType                    EventType                      @default(CIRCUIT_ASSEMBLY)
   status                       EventStatus                    @default(UPCOMING)
   startDate                    DateTime                       @db.Date
   endDate                      DateTime                       @db.Date
-  startTime                    String?
-  endTime                      String?
   location                     String?
   venue                        String?
   isActive                     Boolean                        @default(true)
@@ -190,6 +183,9 @@ model events {
   createdAt                    DateTime                       @default(now())
   updatedAt                    DateTime
   createdBy                    String?
+  startTime                    String?
+  endTime                      String?
+  eventType                    EventType                      @default(CIRCUIT_ASSEMBLY)
   assignments                  assignments[]
   count_sessions               count_sessions[]
   departments                  departments[]
@@ -297,7 +293,6 @@ model users {
   firstName                    String
   lastName                     String
   phone                        String?
-  congregation                 String?
   isActive                     Boolean                        @default(true)
   role                         UserRole                       @default(ATTENDANT)
   passwordHash                 String?
@@ -307,39 +302,34 @@ model users {
   createdAt                    DateTime                       @default(now())
   updatedAt                    DateTime
   createdBy                    String?
-  
-  // NextAuth.js compatibility fields
   name                         String?
   image                        String?
   emailVerified                DateTime?
-  
-  // Relations
+  congregation                 String?
+  accounts                     Account[]
+  sessions                     Session[]
   assignments                  assignments[]
   attendants                   attendants?
   event_attendant_associations event_attendant_associations[]
   oversight_assignments        oversight_assignments[]
-  accounts                     Account[]
-  sessions                     Session[]
 
   @@map("users")
 }
 
-// NextAuth.js required models
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user users @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              users   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -358,6 +348,16 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model system_settings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  updatedBy String?
 }
 
 enum AssignmentStatus {
@@ -437,14 +437,4 @@ enum UserRole {
   ASSISTANT_OVERSEER
   KEYMAN
   ATTENDANT
-}
-
-model system_settings {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  value     String   @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  createdBy String?
-  updatedBy String?
 }

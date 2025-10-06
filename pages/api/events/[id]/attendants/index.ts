@@ -90,7 +90,7 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
           email: attendant.email,
           phone: attendant.phone,
           congregation: attendant.congregation,
-          formsOfService: attendant.formsOfService,
+          formsOfService: Array.isArray(attendant.formsOfService) ? attendant.formsOfService : [],
           isActive: attendant.isActive,
           notes: attendant.notes,
           userId: attendant.userId,
@@ -104,7 +104,7 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
           pages
         },
         eventId,
-        eventName: event.name
+        eventName: (event as any).name || 'Event'
       }
     })
   } catch (error) {
