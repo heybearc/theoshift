@@ -79,7 +79,9 @@ export default function EditEventPage() {
   const fetchEvent = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/events/${eventId}`)
+      const response = await fetch(`/api/events/${eventId}`, {
+        credentials: 'include'
+      })
       const data = await response.json()
 
       if (data.success) {
@@ -220,6 +222,7 @@ export default function EditEventPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(submitData),
       })
 

@@ -77,7 +77,9 @@ export default function EventDetailsPage() {
 
     try {
       setLoading(true)
-      const response = await fetch(`/api/events/${id}`)
+      const response = await fetch(`/api/events/${id}`, {
+        credentials: 'include'
+      })
       const data = await response.json()
 
       if (data.success) {
@@ -168,6 +170,7 @@ export default function EventDetailsPage() {
       const response = await fetch(`/api/events/${event.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ status: newStatus })
       })
 
@@ -201,6 +204,7 @@ export default function EventDetailsPage() {
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           name: eventName,
           description: event.description || '',
