@@ -21,23 +21,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const event = await prisma.events.findUnique({
         where: { id },
         include: {
-          positions: {
-            include: {
-              shifts: true,
-              assignments: {
-                include: {
-                  attendant: {
-                    select: {
-                      id: true,
-                      firstName: true,
-                      lastName: true,
-                      email: true
-                    }
-                  }
-                }
-              }
-            }
-          },
           event_attendant_associations: true,
           assignments: true,
           event_positions: true
@@ -48,27 +31,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(404).json({ error: "Event not found" })
       }
 
-      // Transform new positions to match old event_positions format for compatibility
+      // Transform event data for frontend compatibility
       const transformedEvent = {
         ...event,
-        event_positions: event.positions.map(position => ({
-          id: position.id,
-          positionNumber: position.positionNumber,
-          title: position.name,
-          department: position.area || "General",
-          description: position.description,
-          _count: {
-            assignments: position.assignments.length
-          }
-        })),
         _count: {
           event_attendant_associations: event.event_attendant_associations.length,
           assignments: event.assignments.length,
-          event_positions: event.positions.length
+          event_positions: event.event_positions.length
         }
       }
 
-      return res.status(200).json(transformedEvent)
+      return res.status(200).json({ success: true, data: transformedEvent })
     }
 
     if (req.method === "PUT") {
@@ -93,7 +66,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === "DELETE") {
       // Check if event has positions or other dependencies
-      const positionsCount = await prisma.positions.count({
+      const positionsCount = await prisma.event_positions.count({
         where: { eventId: id }
       })
 
