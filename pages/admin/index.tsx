@@ -14,7 +14,6 @@ interface AdminDashboardProps {
   stats: {
     totalUsers: number
     totalEvents: number
-    totalAttendants: number
   }
 }
 
@@ -120,8 +119,8 @@ export default function AdminDashboard({ user, stats }: AdminDashboardProps) {
               <span className="text-2xl">🎫</span>
             </div>
             <div className="ml-4">
-              <p className="text-2xl font-bold text-gray-900">{stats.totalAttendants}</p>
-              <p className="text-sm text-gray-600">Total Attendants</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.totalUsers + stats.totalEvents}</p>
+              <p className="text-sm text-gray-600">Total Records</p>
             </div>
           </div>
         </div>
@@ -172,10 +171,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { prisma } = require('../../src/lib/prisma')
   
   try {
-    const [totalUsers, totalEvents, totalAttendants] = await Promise.all([
+    const [totalUsers, totalEvents] = await Promise.all([
       prisma.users.count(),
       prisma.events.count(),
-      prisma.attendants.count(),
     ])
 
     return {
@@ -189,7 +187,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         stats: {
           totalUsers,
           totalEvents,
-          totalAttendants,
         },
       },
     }
@@ -208,7 +205,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         stats: {
           totalUsers: 0,
           totalEvents: 0,
-          totalAttendants: 0,
         },
       },
     }

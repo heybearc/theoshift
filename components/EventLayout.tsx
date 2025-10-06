@@ -42,15 +42,6 @@ export default function EventLayout({
     }
   ]
 
-  // Add attendant management for admin/overseer users
-  if (['ADMIN', 'OVERSEER'].includes(session?.user?.role || '')) {
-    navigationItems.push({
-      label: 'Attendants',
-      href: '/attendants',
-      icon: '👥',
-      roles: ['ADMIN', 'OVERSEER']
-    })
-  }
 
   // Add admin navigation for admin users
   if (session?.user?.role === 'ADMIN') {
