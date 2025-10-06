@@ -3,8 +3,8 @@
 
 -- Create event_attendants table with proper constraints and indexes
 CREATE TABLE event_attendants (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    event_id UUID NOT NULL,
+    id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    event_id TEXT NOT NULL,
     
     -- Personal Information
     first_name VARCHAR(100) NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE event_attendants (
     
     -- Administrative
     notes TEXT,
-    user_id UUID, -- Optional link to users table for account holders
+    user_id TEXT, -- Optional link to users table for account holders
     
     -- Timestamps
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
