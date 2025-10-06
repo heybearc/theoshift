@@ -5,14 +5,14 @@ import { useState, useEffect, useCallback } from 'react'
 import { eventAttendantService } from '../services/eventAttendantService'
 import { Attendant, AttendantSearchFilters, AttendantStats } from '../types'
 
-interface UseEventAttenданtsOptions {
+interface UseEventAttendantsOptions {
   eventId: string
   pageSize?: number
   includeStats?: boolean
   initialFilters?: AttendantSearchFilters
 }
 
-interface UseEventAttenданtsReturn {
+interface UseEventAttendantsReturn {
   attendants: Attendant[]
   loading: boolean
   error: string | null
@@ -42,21 +42,20 @@ interface UseEventAttenданtsReturn {
   
   // Bulk operations
   bulkUpdateStatus: (attendantIds: string[], isActive: boolean) => Promise<void>
-  bulkDelete: (attendantIds: string[]) => Promise<void>
   bulkImport: (data: any) => Promise<void>
 }
 
 export function useEventAttendants({
   eventId,
-  pageSize = 10,
-  includeStats = false,
+  pageSize = 25,
+  includeStats = true,
   initialFilters = {}
-}: UseEventAttenданtsOptions): UseEventAttenданtsReturn {
+}: UseEventAttendantsOptions): UseEventAttendantsReturn {
   const [attendants, setAttendants] = useState<Attendant[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [stats, setStats] = useState<AttendantStats | null>(null)
-  const [eventInfo, setEventInfo] = useState({ eventId, eventName: undefined as string | undefined })
+  const [eventInfo, setEventInfo] = useState({eventId, eventName: undefined as string | undefined })
   const [filters, setFilters] = useState<AttendantSearchFilters>(initialFilters)
   const [pagination, setPagination] = useState({
     page: 1,
