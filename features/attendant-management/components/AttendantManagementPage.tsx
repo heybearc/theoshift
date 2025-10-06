@@ -307,16 +307,67 @@ export default function AttendantManagementPage({
           />
         </div>
 
-        {/* Pagination */}
-        <PaginationControls
-          currentPage={pagination.page}
-          totalPages={pagination.pages}
-          totalItems={pagination.total}
-          pageSize={pagination.limit === 999999 ? -1 : pagination.limit}
-          onPageChange={setPage}
-          onPageSizeChange={setPageSize}
-          loading={loading}
-        />
+        {/* Enhanced Pagination */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-4 bg-white rounded-lg shadow px-4">
+          {/* Results info and page size selector */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="text-sm text-gray-700">
+              Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
+              {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
+              {pagination.total} results
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <label htmlFor="pageSize" className="text-sm text-gray-700">
+                Show:
+              </label>
+              <select
+                id="pageSize"
+                value={pagination.limit === 999999 ? -1 : pagination.limit}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                disabled={loading}
+                className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value={-1}>All</option>
+              </select>
+              <span className="text-sm text-gray-700">per page</span>
+            </div>
+          </div>
+
+          {/* Pagination controls - only show if not showing all */}
+          {pagination.limit !== 999999 && pagination.pages > 1 && (
+            <div className="flex items-center gap-2">
+              {/* Previous button */}
+              <ActionButton
+                onClick={() => setPage(pagination.page - 1)}
+                disabled={pagination.page <= 1 || loading}
+                variant="secondary"
+                size="sm"
+              >
+                Previous
+              </ActionButton>
+
+              {/* Page info */}
+              <span className="px-3 py-1 text-sm text-gray-700">
+                Page {pagination.page} of {pagination.pages}
+              </span>
+
+              {/* Next button */}
+              <ActionButton
+                onClick={() => setPage(pagination.page + 1)}
+                disabled={pagination.page >= pagination.pages || loading}
+                variant="secondary"
+                size="sm"
+              >
+                Next
+              </ActionButton>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Modals - Outside main container for proper z-index */}
