@@ -328,26 +328,12 @@ export default function EventAttendantManagementPage({
             <span className="text-sm text-gray-700">per page</span>
           </div>
           
-          {/* Debug button - always visible */}
-          <ActionButton
-            onClick={() => {
-              console.log('APEX GUARDIAN: Test button clicked!')
-              console.log('setPageSize type:', typeof setPageSize)
-              console.log('Current pagination:', pagination)
-              setPageSize(50)
-            }}
-            variant="primary"
-            size="sm"
-            type="button"
-          >
-            Test Button (Set to 50)
-          </ActionButton>
         </div>
 
         {/* Pagination controls - show if there are multiple pages */}
         {pagination.pages > 1 && (
           <div className="flex items-center gap-2">
-            {/* Previous button */}
+{{ ... }}
             <ActionButton
               onClick={() => {
                 console.log('APEX GUARDIAN: Previous button clicked, setPage function:', typeof setPage)

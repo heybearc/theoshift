@@ -5,9 +5,10 @@ import { prisma } from '../../../../../src/lib/prisma'
 import { z } from 'zod'
 import crypto from 'crypto'
 
-// APEX GUARDIAN Event-Specific Attendants API - SIMPLE VERSION
-// Using existing attendants table until event_attendant_associations is restored
+// APEX GUARDIAN Event-Specific Attendants API - FIXED VERSION
+// Using proper event_attendant_associations architecture
 
+// Validation schemas
 const eventAttendantCreateSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
@@ -65,45 +66,56 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
     const limit = parseInt(req.query.limit as string) || 25
     const offset = (page - 1) * limit
 
-    // For now, return all attendants since we don't have event associations
-    // TODO: Restore event_attendant_associations table
-    const attendants = await prisma.attendants.findMany({
+    // Get event attendants through associations
+    const associations = await prisma.event_attendant_associations.findMany({
       where: { 
+        eventId: eventId,
         isActive: true
+      },
+      include: {
+        attendants: true,
+        users: true
       },
       skip: offset,
       take: limit,
       orderBy: [
-        { lastName: 'asc' },
-        { firstName: 'asc' }
+        { attendants: { lastName: 'asc' } },
+        { attendants: { firstName: 'asc' } }
       ]
     })
 
-    const total = await prisma.attendants.count({
+    // Get total count
+    const total = await prisma.event_attendant_associations.count({
       where: { 
+        eventId: eventId,
         isActive: true
       }
     })
+
+    // Transform data to match expected format
+    const attendants = associations.map(assoc => ({
+      id: assoc.attendants?.id || assoc.id,
+      firstName: assoc.attendants?.firstName || '',
+      lastName: assoc.attendants?.lastName || '',
+      email: assoc.attendants?.email || '',
+      phone: assoc.attendants?.phone || '',
+      congregation: assoc.attendants?.congregation || '',
+      formsOfService: assoc.attendants?.formsOfService || [],
+      isActive: assoc.attendants?.isActive || false,
+      notes: assoc.attendants?.notes || '',
+      userId: assoc.userId,
+      associationId: assoc.id,
+      role: assoc.role,
+      createdAt: assoc.createdAt,
+      updatedAt: assoc.updatedAt
+    }))
 
     const pages = Math.ceil(total / limit)
 
     return res.status(200).json({
       success: true,
       data: {
-        attendants: attendants.map(attendant => ({
-          id: attendant.id,
-          firstName: attendant.firstName,
-          lastName: attendant.lastName,
-          email: attendant.email,
-          phone: attendant.phone,
-          congregation: attendant.congregation,
-          formsOfService: attendant.formsOfService,
-          isActive: attendant.isActive,
-          notes: attendant.notes,
-          userId: attendant.userId,
-          createdAt: attendant.createdAt,
-          updatedAt: attendant.updatedAt
-        })),
+        attendants,
         pagination: {
           page,
           limit,
@@ -111,7 +123,10 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
           pages
         },
         eventId,
-        eventName: event.name
+        eventName: (await prisma.events.findUnique({
+          where: { id: eventId },
+          select: { name: true }
+        }))?.name
       }
     })
   } catch (error) {
@@ -124,37 +139,74 @@ async function handleCreateEventAttendant(req: NextApiRequest, res: NextApiRespo
   try {
     const validatedData = eventAttendantCreateSchema.parse(req.body)
 
-    // Check if attendant with email already exists
-    const existingAttendant = await prisma.attendants.findFirst({
+    // First create or find the attendant
+    let attendant = await prisma.attendants.findFirst({
       where: { email: validatedData.email }
     })
-    
-    if (existingAttendant) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Attendant with this email already exists' 
+
+    if (!attendant) {
+      // Create new attendant
+      attendant = await prisma.attendants.create({
+        data: {
+          id: crypto.randomUUID(),
+          firstName: validatedData.firstName,
+          lastName: validatedData.lastName,
+          email: validatedData.email,
+          phone: validatedData.phone,
+          congregation: validatedData.congregation,
+          formsOfService: validatedData.formsOfService,
+          isActive: validatedData.isActive,
+          notes: validatedData.notes,
+          userId: validatedData.userId
+        }
       })
     }
 
-    // Create new attendant
-    const attendant = await prisma.attendants.create({
+    // Check if association already exists for this event
+    const existingAssociation = await prisma.event_attendant_associations.findFirst({
+      where: { 
+        eventId: eventId,
+        attendantId: attendant.id
+      }
+    })
+    
+    if (existingAssociation) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Attendant with this email already exists in this event' 
+      })
+    }
+
+    // Create the event-attendant association
+    const association = await prisma.event_attendant_associations.create({
       data: {
         id: crypto.randomUUID(),
-        firstName: validatedData.firstName,
-        lastName: validatedData.lastName,
-        email: validatedData.email,
-        phone: validatedData.phone,
-        congregation: validatedData.congregation,
-        formsOfService: validatedData.formsOfService,
-        isActive: validatedData.isActive,
-        notes: validatedData.notes,
-        userId: validatedData.userId
+        eventId: eventId,
+        attendantId: attendant.id,
+        userId: validatedData.userId,
+        role: 'ATTENDANT',
+        isActive: true
+      },
+      include: {
+        attendants: true
       }
     })
     
     return res.status(201).json({
       success: true,
-      data: attendant
+      data: {
+        id: attendant.id,
+        firstName: attendant.firstName,
+        lastName: attendant.lastName,
+        email: attendant.email,
+        phone: attendant.phone,
+        congregation: attendant.congregation,
+        formsOfService: attendant.formsOfService,
+        isActive: attendant.isActive,
+        notes: attendant.notes,
+        associationId: association.id,
+        role: association.role
+      }
     })
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -188,29 +240,13 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
           ? attendantData.formsOfService.split(',').map((s: string) => s.trim())
           : attendantData.formsOfService || []
 
-        // Check if attendant exists
-        const existingAttendant = await prisma.attendants.findFirst({
+        // Find or create attendant
+        let attendant = await prisma.attendants.findFirst({
           where: { email: attendantData.email }
         })
 
-        if (existingAttendant) {
-          // Update existing attendant
-          await prisma.attendants.update({
-            where: { id: existingAttendant.id },
-            data: {
-              firstName: attendantData.firstName,
-              lastName: attendantData.lastName,
-              phone: attendantData.phone,
-              congregation: attendantData.congregation,
-              formsOfService: formsOfService,
-              isActive: attendantData.isActive !== false,
-              notes: attendantData.notes
-            }
-          })
-          results.updated++
-        } else {
-          // Create new attendant
-          await prisma.attendants.create({
+        if (!attendant) {
+          attendant = await prisma.attendants.create({
             data: {
               id: crypto.randomUUID(),
               firstName: attendantData.firstName,
@@ -223,7 +259,44 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
               notes: attendantData.notes
             }
           })
+        } else {
+          // Update existing attendant
+          await prisma.attendants.update({
+            where: { id: attendant.id },
+            data: {
+              firstName: attendantData.firstName,
+              lastName: attendantData.lastName,
+              phone: attendantData.phone,
+              congregation: attendantData.congregation,
+              formsOfService: formsOfService,
+              isActive: attendantData.isActive !== false,
+              notes: attendantData.notes
+            }
+          })
+        }
+
+        // Check if association exists
+        const existingAssociation = await prisma.event_attendant_associations.findFirst({
+          where: { 
+            eventId: eventId,
+            attendantId: attendant.id
+          }
+        })
+
+        if (!existingAssociation) {
+          // Create association
+          await prisma.event_attendant_associations.create({
+            data: {
+              id: crypto.randomUUID(),
+              eventId: eventId,
+              attendantId: attendant.id,
+              role: 'ATTENDANT',
+              isActive: true
+            }
+          })
           results.created++
+        } else {
+          results.updated++
         }
 
       } catch (error) {
