@@ -158,6 +158,8 @@ export interface AttendantsResponse {
       pages: number
     }
     stats?: AttendantStats
+    eventId?: string
+    eventName?: string
   }
   error?: string
 }
