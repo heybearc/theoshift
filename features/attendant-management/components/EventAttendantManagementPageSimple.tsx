@@ -42,9 +42,19 @@ export default function EventAttendantManagementPageSimple({
         if (response.ok) {
           const data = await response.json()
           console.log('APEX GUARDIAN: Response data:', data)
+          console.log('APEX GUARDIAN: data.data:', data.data)
+          console.log('APEX GUARDIAN: data.data.attendants:', data.data?.attendants)
+          console.log('APEX GUARDIAN: Array.isArray check:', Array.isArray(data.data?.attendants))
           
-          if (data.success) {
-            setAttendants(data.data.attendants || [])
+          if (data.success && data.data) {
+            const attendantsArray = data.data.attendants
+            if (Array.isArray(attendantsArray)) {
+              console.log('APEX GUARDIAN: Setting attendants array with length:', attendantsArray.length)
+              setAttendants(attendantsArray)
+            } else {
+              console.log('APEX GUARDIAN: attendants is not an array:', typeof attendantsArray)
+              setAttendants([])
+            }
           } else {
             setError(data.error || 'Failed to fetch attendants')
           }
@@ -145,7 +155,7 @@ export default function EventAttendantManagementPageSimple({
             ) : (
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Attendants ({attendants.length})
+                  Attendants ({Array.isArray(attendants) ? attendants.length : 0})
                 </h3>
                 <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
                   <table className="min-w-full divide-y divide-gray-300">
@@ -166,33 +176,41 @@ export default function EventAttendantManagementPageSimple({
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {attendants.slice(0, 10).map((attendant, index) => (
-                        <tr key={attendant.id || index}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {attendant.first_name || attendant.firstName} {attendant.last_name || attendant.lastName}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {attendant.email}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {attendant.congregation}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              (attendant.is_active ?? attendant.isActive) 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                              {(attendant.is_active ?? attendant.isActive) ? 'Active' : 'Inactive'}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
+                      {Array.isArray(attendants) && attendants.slice(0, 10).map((attendant, index) => {
+                        // Safety check for attendant object
+                        if (!attendant || typeof attendant !== 'object') {
+                          console.log('APEX GUARDIAN: Invalid attendant at index:', index, attendant)
+                          return null
+                        }
+                        
+                        return (
+                          <tr key={attendant.id || `attendant-${index}`}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {(attendant.first_name || attendant.firstName || 'N/A')} {(attendant.last_name || attendant.lastName || '')}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {attendant.email || 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {attendant.congregation || 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                (attendant.is_active ?? attendant.isActive) 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-red-100 text-red-800'
+                              }`}>
+                                {(attendant.is_active ?? attendant.isActive) ? 'Active' : 'Inactive'}
+                              </span>
+                            </td>
+                          </tr>
+                        )
+                      })}
                     </tbody>
                   </table>
                 </div>
                 
-                {attendants.length > 10 && (
+                {Array.isArray(attendants) && attendants.length > 10 && (
                   <div className="mt-4 text-sm text-gray-500 text-center">
                     Showing first 10 of {attendants.length} attendants
                   </div>
