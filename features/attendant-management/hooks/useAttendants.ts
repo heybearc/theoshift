@@ -52,6 +52,7 @@ export function useAttendants(options: UseAttendantsOptions = {}): UseAttendants
 
   const fetchAttendants = useCallback(async () => {
     try {
+      console.log('fetchAttendants called with pagination:', pagination)
       setLoading(true)
       setError(null)
 
@@ -68,6 +69,8 @@ export function useAttendants(options: UseAttendantsOptions = {}): UseAttendants
             limit: pagination.limit,
             includeStats
           })
+      
+      console.log('API response:', response)
 
       if (response.success) {
         setAttendants(response.data.attendants)
@@ -86,15 +89,25 @@ export function useAttendants(options: UseAttendantsOptions = {}): UseAttendants
   }, [eventId, filters, pagination.page, pagination.limit, includeStats])
 
   const setPage = useCallback((page: number) => {
-    setPagination(prev => ({ ...prev, page }))
+    console.log('Setting page to:', page)
+    setPagination(prev => {
+      const newPagination = { ...prev, page }
+      console.log('New pagination state:', newPagination)
+      return newPagination
+    })
   }, [])
 
   const setPageSize = useCallback((pageSize: number) => {
-    setPagination(prev => ({ 
-      ...prev, 
-      limit: pageSize === -1 ? 999999 : pageSize, // Use large number for "All"
-      page: 1 // Reset to first page when changing page size
-    }))
+    console.log('Setting page size to:', pageSize)
+    setPagination(prev => {
+      const newPagination = { 
+        ...prev, 
+        limit: pageSize === -1 ? 999999 : pageSize, // Use large number for "All"
+        page: 1 // Reset to first page when changing page size
+      }
+      console.log('New pagination state:', newPagination)
+      return newPagination
+    })
   }, [])
 
   const refresh = useCallback(async () => {
