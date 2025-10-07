@@ -110,7 +110,7 @@ async function handleCreateEventAttendant(req: NextApiRequest, res: NextApiRespo
     }
 
     // Process forms of service
-    let processedFormsOfService = []
+    let processedFormsOfService: string[] = []
     if (formsOfService) {
       if (Array.isArray(formsOfService)) {
         processedFormsOfService = formsOfService
