@@ -58,15 +58,22 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const { id } = context.params!
   
-  // Fetch event data for context
+  // Fetch event data directly from database to avoid session issues
   let event: Event | null = null
   try {
-    // Fetch real event data from the API
-    const response = await fetch(`http://localhost:3001/api/events/${id}`)
-    if (response.ok) {
-      const eventData = await response.json()
-      if (eventData.success) {
-        event = eventData.data
+    const { prisma } = await import('../../../src/lib/prisma')
+    const eventData = await prisma.events.findUnique({
+      where: { id: id as string }
+    })
+    
+    if (eventData) {
+      event = {
+        id: eventData.id,
+        name: eventData.name,
+        eventType: eventData.eventType,
+        startDate: eventData.startDate.toISOString(),
+        endDate: eventData.endDate.toISOString(),
+        status: eventData.status
       }
     }
   } catch (error) {
