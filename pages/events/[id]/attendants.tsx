@@ -2,6 +2,8 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import EventLayout from '../../../components/EventLayout'
+import { useState } from 'react'
+import { useRouter } from 'next/router'
 
 interface Event {
   id: string
@@ -37,6 +39,100 @@ interface EventAttendantsPageProps {
 }
 
 export default function EventAttendantsPage({ eventId, event, attendants, stats }: EventAttendantsPageProps) {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [editingAttendant, setEditingAttendant] = useState<Attendant | null>(null)
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: ''
+  })
+
+  // Add Attendant Handler
+  const handleAddAttendant = () => {
+    setFormData({ firstName: '', lastName: '', email: '', phone: '' })
+    setEditingAttendant(null)
+    setShowAddModal(true)
+  }
+
+  // Edit Attendant Handler
+  const handleEditAttendant = (attendant: Attendant) => {
+    setFormData({
+      firstName: attendant.firstName,
+      lastName: attendant.lastName,
+      email: attendant.email,
+      phone: attendant.phone || ''
+    })
+    setEditingAttendant(attendant)
+    setShowAddModal(true)
+  }
+
+  // Save Attendant Handler
+  const handleSaveAttendant = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
+    try {
+      const url = editingAttendant 
+        ? `/api/events/${eventId}/attendants/${editingAttendant.associationId}`
+        : `/api/events/${eventId}/attendants`
+      
+      const method = editingAttendant ? 'PUT' : 'POST'
+      
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+
+      if (response.ok) {
+        setShowAddModal(false)
+        router.reload() // Refresh page to show updated data
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to save attendant')
+      }
+    } catch (error) {
+      console.error('Error saving attendant:', error)
+      alert('Failed to save attendant')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Remove Attendant Handler
+  const handleRemoveAttendant = async (attendant: Attendant) => {
+    if (!confirm(`Are you sure you want to remove ${attendant.firstName} ${attendant.lastName}?`)) {
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/events/${eventId}/attendants/${attendant.associationId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        router.reload() // Refresh page to show updated data
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to remove attendant')
+      }
+    } catch (error) {
+      console.error('Error removing attendant:', error)
+      alert('Failed to remove attendant')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Import Attendants Handler (placeholder)
+  const handleImportAttendants = () => {
+    alert('Import functionality coming soon!')
+  }
+
   return (
     <EventLayout 
       title={`${event.name} - Attendants | JW Attendant Scheduler`}
@@ -62,10 +158,18 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
               </p>
             </div>
             <div className="flex space-x-3">
-              <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors">
+              <button 
+                onClick={handleAddAttendant}
+                disabled={loading}
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold py-2 px-4 rounded transition-colors"
+              >
                 ➕ Add Attendant
               </button>
-              <button className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors">
+              <button 
+                onClick={handleImportAttendants}
+                disabled={loading}
+                className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-bold py-2 px-4 rounded transition-colors"
+              >
                 📥 Import Attendants
               </button>
             </div>
@@ -137,7 +241,11 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
             {attendants.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-500">No attendants found for this event</p>
-                <button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                <button 
+                  onClick={handleAddAttendant}
+                  disabled={loading}
+                  className="mt-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold py-2 px-4 rounded transition-colors"
+                >
                   Add First Attendant
                 </button>
               </div>
@@ -187,10 +295,18 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button className="text-blue-600 hover:text-blue-900 mr-3">
+                          <button 
+                            onClick={() => handleEditAttendant(attendant)}
+                            disabled={loading}
+                            className="text-blue-600 hover:text-blue-900 disabled:text-blue-400 mr-3"
+                          >
                             Edit
                           </button>
-                          <button className="text-red-600 hover:text-red-900">
+                          <button 
+                            onClick={() => handleRemoveAttendant(attendant)}
+                            disabled={loading}
+                            className="text-red-600 hover:text-red-900 disabled:text-red-400"
+                          >
                             Remove
                           </button>
                         </td>
@@ -202,6 +318,87 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
             )}
           </div>
         </div>
+
+        {/* Add/Edit Attendant Modal */}
+        {showAddModal && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="mt-3">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  {editingAttendant ? 'Edit Attendant' : 'Add New Attendant'}
+                </h3>
+                <form onSubmit={handleSaveAttendant}>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        First Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Last Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Email *
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Phone
+                      </label>
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end space-x-3 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddModal(false)}
+                      disabled={loading}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:bg-gray-100"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-md"
+                    >
+                      {loading ? 'Saving...' : (editingAttendant ? 'Update' : 'Add')} Attendant
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </EventLayout>
   )
