@@ -45,9 +45,33 @@ export default function BulkPositionCreator({ eventId, onSuccess, onCancel }: Bu
         if (allDayTemplate) {
           setShiftTemplateId(allDayTemplate.id)
         }
+      } else {
+        console.error('Failed to fetch shift templates:', data.error)
+        // Set a default template structure if API fails
+        setTemplates([
+          {
+            id: 'default',
+            name: 'All Day',
+            description: 'Single all-day shift',
+            shifts: [{ name: 'All Day', isAllDay: true }],
+            isSystemTemplate: true
+          }
+        ])
+        setShiftTemplateId('default')
       }
     } catch (error) {
       console.error('Failed to fetch shift templates:', error)
+      // Set a default template structure if API fails
+      setTemplates([
+        {
+          id: 'default',
+          name: 'All Day',
+          description: 'Single all-day shift',
+          shifts: [{ name: 'All Day', isAllDay: true }],
+          isSystemTemplate: true
+        }
+      ])
+      setShiftTemplateId('default')
     }
   }
 
@@ -79,7 +103,8 @@ export default function BulkPositionCreator({ eventId, onSuccess, onCancel }: Bu
         setError(data.error || 'Failed to create positions')
       }
     } catch (error) {
-      setError('Network error occurred')
+      console.error('Bulk create error:', error)
+      setError(`Network error occurred: ${error.message || 'Unknown error'}`)
     } finally {
       setLoading(false)
     }
