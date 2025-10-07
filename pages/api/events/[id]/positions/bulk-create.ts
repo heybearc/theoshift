@@ -119,7 +119,9 @@ async function handleBulkCreate(req: NextApiRequest, res: NextApiResponse, event
             positionNumber: num,
             name: `${validatedData.namePrefix} ${num}`,
             area: validatedData.area,
-            sequence: num
+            sequence: num,
+            createdAt: new Date(),
+            updatedAt: new Date()
           }
         })
         
@@ -134,7 +136,8 @@ async function handleBulkCreate(req: NextApiRequest, res: NextApiResponse, event
                 startTime: shift.startTime || null,
                 endTime: shift.endTime || null,
                 isAllDay: shift.isAllDay || false,
-                sequence: i + 1
+                sequence: i + 1,
+                createdAt: new Date()
               }
             })
           }
