@@ -35,7 +35,9 @@ export default function BulkPositionCreator({ eventId, onSuccess, onCancel }: Bu
 
   const fetchShiftTemplates = async () => {
     try {
-      const response = await fetch('/api/shift-templates')
+      const response = await fetch('/api/shift-templates', {
+        credentials: 'include'
+      })
       const data = await response.json()
       
       if (data.success) {
@@ -86,6 +88,7 @@ export default function BulkPositionCreator({ eventId, onSuccess, onCancel }: Bu
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           startNumber,
           endNumber,

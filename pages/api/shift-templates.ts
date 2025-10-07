@@ -10,10 +10,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const session = await getServerSession(req, res, authOptions)
     
-    // Temporary: Allow requests without session for testing
     if (!session) {
-      console.log('⚠️ TEMP: Allowing shift templates request without session for testing')
-      // return res.status(401).json({ success: false, error: 'Unauthorized' })
+      return res.status(401).json({ success: false, error: 'Unauthorized' })
     }
 
     if (req.method === 'GET') {
