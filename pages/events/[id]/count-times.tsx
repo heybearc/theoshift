@@ -36,49 +36,26 @@ interface Event {
   name: string
 }
 
-export default function EventCountTimesPage() {
+interface CountStats {
+  total: number
+  active: number
+  completed: number
+}
+
+interface EventCountTimesPageProps {
+  eventId: string
+  event: Event
+  countSessions: CountSession[]
+  stats: CountStats
+}
+
+export default function EventCountTimesPage({ eventId, event, countSessions, stats }: EventCountTimesPageProps) {
   const router = useRouter()
-  const { id: eventId } = router.query
-  const [event, setEvent] = useState<Event | null>(null)
-  const [countSessions, setCountSessions] = useState<CountSession[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
 
-  useEffect(() => {
-    if (eventId) {
-      fetchEventAndCountSessions()
-    }
-  }, [eventId])
-
-  const fetchEventAndCountSessions = async () => {
-    try {
-      setLoading(true)
-      
-      // Fetch event details
-      const eventResponse = await fetch(`/api/events/${eventId}`)
-      const eventData = await eventResponse.json()
-      
-      if (eventData.success) {
-        setEvent(eventData.data)
-        
-        // Fetch count sessions
-        const sessionsResponse = await fetch(`/api/events/${eventId}/count-sessions`)
-        const sessionsData = await sessionsResponse.json()
-        
-        if (sessionsData.success) {
-          setCountSessions(sessionsData.data)
-        }
-      } else {
-        setError('Event not found')
-      }
-    } catch (err) {
-      setError('Error loading count times')
-      console.error('Error:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  // APEX GUARDIAN: Client-side fetching removed - data now provided via SSR
 
   const createCountSession = async (data: { sessionName: string; countTime: string; notes?: string }) => {
     const response = await fetch(`/api/events/${eventId}/count-sessions`, {
@@ -92,7 +69,7 @@ export default function EventCountTimesPage() {
       throw new Error(errorData.error || 'Failed to create count session')
     }
     
-    await fetchEventAndCountSessions()
+    router.reload() // Refresh page to show updated data
   }
 
   if (loading) {
@@ -280,7 +257,90 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
-  return {
-    props: {},
+  // APEX GUARDIAN: Full SSR data fetching for count-times tab
+  const { id } = context.params!
+  
+  try {
+    const { prisma } = await import('../../../src/lib/prisma')
+    
+    // Fetch event with count sessions and position counts data
+    const eventData = await prisma.events.findUnique({
+      where: { id: id as string },
+      include: {
+        count_sessions: {
+          include: {
+            position_counts: {
+              include: {
+                event_positions: {
+                  select: {
+                    id: true,
+                    positionNumber: true,
+                    positionName: true,
+                    department: true
+                  }
+                }
+              },
+              orderBy: [
+                { event_positions: { positionNumber: 'asc' } }
+              ]
+            }
+          },
+          orderBy: [
+            { createdAt: 'desc' }
+          ]
+        }
+      }
+    })
+    
+    if (!eventData) {
+      return { notFound: true }
+    }
+
+    // Transform event data
+    const event = {
+      id: eventData.id,
+      name: eventData.name
+    }
+
+    // Transform count sessions data
+    const countSessions = eventData.count_sessions.map(session => ({
+      id: session.id,
+      sessionName: session.sessionName,
+      countTime: session.countTime?.toISOString() || null,
+      notes: session.notes,
+      status: session.status,
+      isActive: session.isActive,
+      createdAt: session.createdAt?.toISOString() || null,
+      position_counts: session.position_counts.map(count => ({
+        id: count.id,
+        positionId: count.positionId,
+        attendeeCount: count.attendeeCount,
+        notes: count.notes,
+        countedBy: count.countedBy,
+        countedAt: count.countedAt?.toISOString() || null,
+        event_positions: {
+          id: count.event_positions.id,
+          positionNumber: count.event_positions.positionNumber,
+          title: count.event_positions.positionName, // Map positionName to title
+          department: count.event_positions.department || ''
+        }
+      }))
+    }))
+
+    return {
+      props: {
+        eventId: id as string,
+        event,
+        countSessions,
+        stats: {
+          total: countSessions.length,
+          active: countSessions.filter(s => s.isActive).length,
+          completed: countSessions.filter(s => s.status === 'COMPLETED').length
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching count-times data:', error)
+    return { notFound: true }
   }
 }
