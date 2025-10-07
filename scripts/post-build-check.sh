@@ -9,9 +9,9 @@ echo "========================================"
 # Function to check server status
 check_server_status() {
     echo "1. Checking Next.js server process..."
-    if ps aux | grep -q "next-server" | grep -v grep; then
+    if ps aux | grep "next-server" | grep -v grep > /dev/null; then
         echo "   ✅ Next.js server process running"
-        ps aux | grep next-server | grep -v grep | head -1
+        ps aux | grep "next-server" | grep -v grep | head -1
     else
         echo "   ❌ Next.js server process NOT running"
         return 1
