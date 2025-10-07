@@ -42,13 +42,31 @@ interface Attendant {
   role?: string
 }
 
-export default function EventLanyardsPage() {
+interface LanyardSettings {
+  id: string
+  totalLanyards: number
+  availableLanyards: number
+  isActive: boolean
+}
+
+interface LanyardStats {
+  total: number
+  available: number
+  checkedOut: number
+}
+
+interface EventLanyardsPageProps {
+  eventId: string
+  event: Event
+  lanyards: Lanyard[]
+  attendants: Attendant[]
+  lanyardSettings: LanyardSettings | null
+  stats: LanyardStats
+}
+
+export default function EventLanyardsPage({ eventId, event, lanyards, attendants, lanyardSettings, stats }: EventLanyardsPageProps) {
   const router = useRouter()
-  const { id } = router.query
-  const [event, setEvent] = useState<Event | null>(null)
-  const [lanyards, setLanyards] = useState<Lanyard[]>([])
-  const [attendants, setAttendants] = useState<Attendant[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showCheckOutModal, setShowCheckOutModal] = useState(false)
   const [selectedLanyardId, setSelectedLanyardId] = useState<string>('')
@@ -79,79 +97,11 @@ export default function EventLanyardsPage() {
     notes: ''
   })
 
-  const fetchEventAndLanyards = async () => {
-    if (!id) return
-    
-    try {
-      setLoading(true)
-      setError('')
-      
-      // Fetch event details
-      const eventResponse = await fetch(`/api/events/${id}`)
-      
-      // Handle non-OK responses
-      if (!eventResponse.ok) {
-        if (eventResponse.status === 401) {
-          setError('Please sign in to view lanyards')
-        } else if (eventResponse.status === 403) {
-          setError('You do not have permission to view this event')
-        } else if (eventResponse.status === 404) {
-          setError('Event not found. Please check the event ID or select a different event.')
-        } else {
-          const errorData = await eventResponse.json().catch(() => ({ error: 'Unknown error' }))
-          setError(`Failed to load event: ${errorData.error || 'Unknown error'}`)
-        }
-        setLoading(false)
-        return
-      }
-      
-      // Parse successful response
-      const eventData = await eventResponse.json()
-      setEvent(eventData.data)
-      
-      // Fetch lanyards for this event
-      const lanyardsResponse = await fetch(`/api/event-lanyards/${id}`)
-      if (lanyardsResponse.ok) {
-        const lanyardsData = await lanyardsResponse.json()
-        // Sort lanyards numerically by badge number
-        const sortedLanyards = (lanyardsData.data || []).sort((a: any, b: any) => {
-          const numA = parseInt(a.badgeNumber) || 0
-          const numB = parseInt(b.badgeNumber) || 0
-          return numA - numB
-        })
-        setLanyards(sortedLanyards)
-      } else {
-        console.warn('Failed to load lanyards:', lanyardsResponse.status)
-        setLanyards([])
-      }
-      
-      // Fetch attendants for this event
-      const attendantsResponse = await fetch(`/api/event-attendants/${id}?limit=100`)
-      if (attendantsResponse.ok) {
-        const attendantsData = await attendantsResponse.json()
-        setAttendants(attendantsData.data?.associations || [])
-      } else {
-        console.warn('Failed to load attendants:', attendantsResponse.status)
-        setAttendants([])
-      }
-      
-    } catch (error) {
-      setError('Failed to load event and lanyards')
-      console.error('Error:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchEventAndLanyards()
-  }, [id])
-
   const handleCreateLanyard = async (e: React.FormEvent) => {
     e.preventDefault()
     
     try {
-      const response = await fetch(`/api/event-lanyards/${id}`, {
+      const response = await fetch(`/api/event-lanyards/${eventId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -162,7 +112,7 @@ export default function EventLanyardsPage() {
       if (response.ok) {
         setFormData({ badgeNumber: '', notes: '' })
         setShowCreateForm(false)
-        fetchEventAndLanyards()
+        router.reload() // Refresh page to show updated data
       } else {
         setError('Failed to create lanyard')
       }
@@ -186,7 +136,7 @@ export default function EventLanyardsPage() {
     if (!editingLanyard) return
     
     try {
-      const response = await fetch(`/api/event-lanyards/${id}/${editingLanyard.id}`, {
+      const response = await fetch(`/api/event-lanyards/${eventId}/${editingLanyard.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -198,7 +148,7 @@ export default function EventLanyardsPage() {
         setFormData({ badgeNumber: '', notes: '' })
         setShowCreateForm(false)
         setEditingLanyard(null)
-        fetchEventAndLanyards()
+        router.reload() // Refresh page to show updated data
       } else {
         setError('Failed to update lanyard')
       }
@@ -212,12 +162,12 @@ export default function EventLanyardsPage() {
     if (!confirm('Are you sure you want to delete this lanyard?')) return
     
     try {
-      const response = await fetch(`/api/event-lanyards/${id}/${lanyardId}`, {
+      const response = await fetch(`/api/event-lanyards/${eventId}/${lanyardId}`, {
         method: 'DELETE',
       })
 
       if (response.ok) {
-        fetchEventAndLanyards()
+        router.reload() // Refresh page to show updated data
       } else {
         setError('Failed to delete lanyard')
       }
@@ -239,7 +189,7 @@ export default function EventLanyardsPage() {
 
     try {
       const attendantName = `${selectedAttendant.users.firstName} ${selectedAttendant.users.lastName}`
-      const response = await fetch(`/api/event-lanyards/${id}/${selectedLanyardId}`, {
+      const response = await fetch(`/api/event-lanyards/${eventId}/${selectedLanyardId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -255,7 +205,7 @@ export default function EventLanyardsPage() {
 
       if (response.ok) {
         setShowCheckOutModal(false)
-        fetchEventAndLanyards()
+        router.reload() // Refresh page to show updated data
       } else {
         setError('Failed to check out lanyard')
       }
@@ -267,7 +217,7 @@ export default function EventLanyardsPage() {
 
   const handleCheckIn = async (lanyardId: string) => {
     try {
-      const response = await fetch(`/api/event-lanyards/${id}/${lanyardId}`, {
+      const response = await fetch(`/api/event-lanyards/${eventId}/${lanyardId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -283,7 +233,7 @@ export default function EventLanyardsPage() {
       })
 
       if (response.ok) {
-        fetchEventAndLanyards()
+        router.reload() // Refresh page to show updated data
       } else {
         setError('Failed to check in lanyard')
       }
@@ -303,7 +253,7 @@ export default function EventLanyardsPage() {
       for (let i = startNumber; i <= endNumber; i++) {
         const badgeNumber = prefix ? `${prefix}${i}` : i.toString()
         promises.push(
-          fetch(`/api/event-lanyards/${id}`, {
+          fetch(`/api/event-lanyards/${eventId}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -322,7 +272,7 @@ export default function EventLanyardsPage() {
       if (successCount > 0) {
         setBulkData({ startNumber: 1, endNumber: 10, prefix: '', notes: '' })
         setShowBulkForm(false)
-        fetchEventAndLanyards()
+        router.reload() // Refresh page to show updated data
         alert(`Successfully created ${successCount} lanyards`)
       } else {
         setError('Failed to create lanyards')
@@ -440,7 +390,7 @@ export default function EventLanyardsPage() {
         title={`Lanyards - ${event?.name || 'Event'}`}
         breadcrumbs={[
           { label: 'Events', href: '/events' },
-          { label: event?.name || 'Event', href: `/events/${id}` },
+          { label: event?.name || 'Event', href: `/events/${eventId}` },
           { label: 'Lanyards' }
         ]}
       >
@@ -554,7 +504,7 @@ export default function EventLanyardsPage() {
             </div>
             <div className="flex space-x-3">
               <Link
-                href={`/events/${id}`}
+                href={`/events/${eventId}`}
                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 ← Back to Event
@@ -915,7 +865,106 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
-  return {
-    props: {},
+  // APEX GUARDIAN: Full SSR data fetching for lanyards tab
+  const { id } = context.params!
+  
+  try {
+    const { prisma } = await import('../../../src/lib/prisma')
+    
+    // Fetch event with lanyards and attendants data
+    const eventData = await prisma.events.findUnique({
+      where: { id: id as string },
+      include: {
+        lanyard_settings: {
+          include: {
+            lanyards: {
+              orderBy: [
+                { badgeNumber: 'asc' }
+              ]
+            }
+          }
+        },
+        event_attendant_associations: {
+          include: {
+            users: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+                phone: true
+              }
+            }
+          }
+        }
+      }
+    })
+    
+    if (!eventData) {
+      return { notFound: true }
+    }
+
+    // Transform event data
+    const event = {
+      id: eventData.id,
+      name: eventData.name,
+      eventType: eventData.eventType,
+      startDate: eventData.startDate?.toISOString() || null,
+      endDate: eventData.endDate?.toISOString() || null,
+      status: eventData.status
+    }
+
+    // Transform lanyards data
+    const lanyards = eventData.lanyard_settings?.lanyards?.map(lanyard => ({
+      id: lanyard.id,
+      badgeNumber: lanyard.badgeNumber,
+      status: lanyard.isCheckedOut ? 'CHECKED_OUT' : 'AVAILABLE',
+      notes: lanyard.notes,
+      isCheckedOut: lanyard.isCheckedOut,
+      checkedOutTo: lanyard.checkedOutTo,
+      checkedOutAt: lanyard.checkedOutAt?.toISOString() || null,
+      checkedInAt: lanyard.checkedInAt?.toISOString() || null,
+      createdAt: lanyard.createdAt?.toISOString() || null,
+      updatedAt: lanyard.updatedAt?.toISOString() || null
+    })) || []
+
+    // Transform attendants data
+    const attendants = eventData.event_attendant_associations
+      .filter(association => association.users)
+      .map(association => ({
+        id: association.id,
+        users: {
+          id: association.users!.id,
+          firstName: association.users!.firstName,
+          lastName: association.users!.lastName,
+          email: association.users!.email,
+          role: 'ATTENDANT', // Default role since not in schema
+          phone: association.users!.phone
+        },
+        role: 'ATTENDANT'
+      }))
+
+    return {
+      props: {
+        eventId: id as string,
+        event,
+        lanyards,
+        attendants,
+        lanyardSettings: eventData.lanyard_settings ? {
+          id: eventData.lanyard_settings.id,
+          totalLanyards: eventData.lanyard_settings.totalLanyards,
+          availableLanyards: eventData.lanyard_settings.availableLanyards,
+          isActive: eventData.lanyard_settings.isActive
+        } : null,
+        stats: {
+          total: lanyards.length,
+          available: lanyards.filter(l => !l.isCheckedOut).length,
+          checkedOut: lanyards.filter(l => l.isCheckedOut).length
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching lanyards data:', error)
+    return { notFound: true }
   }
 }
