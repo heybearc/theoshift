@@ -53,18 +53,26 @@ interface Event {
   status: string
 }
 
-interface EventAssignmentsProps {
-  eventId: string
+interface AssignmentStats {
+  total: number
+  assigned: number
+  confirmed: number
+  completed: number
 }
 
-export default function EventAssignments({ eventId }: EventAssignmentsProps) {
+interface EventAssignmentsProps {
+  eventId: string
+  event: Event
+  assignments: Assignment[]
+  attendants: Attendant[]
+  positions: Position[]
+  stats: AssignmentStats
+}
+
+export default function EventAssignments({ eventId, event, assignments, attendants, positions, stats }: EventAssignmentsProps) {
   const router = useRouter()
-  const { data: session, status } = useSession()
-  const [event, setEvent] = useState<Event | null>(null)
-  const [assignments, setAssignments] = useState<Assignment[]>([])
-  const [attendants, setAttendants] = useState<Attendant[]>([])
-  const [positions, setPositions] = useState<Position[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data: session } = useSession()
+  const [loading, setLoading] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null)
   const [formData, setFormData] = useState({
@@ -75,66 +83,7 @@ export default function EventAssignments({ eventId }: EventAssignmentsProps) {
     notes: ''
   })
 
-  useEffect(() => {
-    if (eventId && session) {
-      fetchEventData()
-      fetchAssignments()
-      fetchAttendants()
-      fetchPositions()
-    }
-  }, [eventId, session])
-
-  const fetchEventData = async () => {
-    try {
-      const response = await fetch(`/api/events/${eventId}`)
-      if (response.ok) {
-        const data = await response.json()
-        setEvent(data.data)
-      }
-    } catch (error) {
-      console.error('Error fetching event:', error)
-      alert('Failed to load event data')
-    }
-  }
-
-  const fetchAssignments = async () => {
-    try {
-      const response = await fetch(`/api/event-assignments/${eventId}`)
-      if (response.ok) {
-        const data = await response.json()
-        setAssignments(data.data || [])
-      }
-    } catch (error) {
-      console.error('Error fetching assignments:', error)
-      alert('Failed to load assignments')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchAttendants = async () => {
-    try {
-      const response = await fetch(`/api/event-attendants/${eventId}`)
-      if (response.ok) {
-        const data = await response.json()
-        setAttendants(data.data || [])
-      }
-    } catch (error) {
-      console.error('Error fetching attendants:', error)
-    }
-  }
-
-  const fetchPositions = async () => {
-    try {
-      const response = await fetch(`/api/event-positions/${eventId}`)
-      if (response.ok) {
-        const data = await response.json()
-        setPositions(data.data || [])
-      }
-    } catch (error) {
-      console.error('Error fetching positions:', error)
-    }
-  }
+  // APEX GUARDIAN: Client-side fetching removed - data now provided via SSR
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -174,7 +123,7 @@ export default function EventAssignments({ eventId }: EventAssignmentsProps) {
       if (response.ok) {
         alert(editingAssignment ? 'Assignment updated successfully' : 'Assignment created successfully')
         closeModal()
-        fetchAssignments()
+        router.reload() // Refresh page to show updated data
       } else {
         const error = await response.json()
         alert(error.error || 'Failed to save assignment')
@@ -209,7 +158,7 @@ export default function EventAssignments({ eventId }: EventAssignmentsProps) {
 
       if (response.ok) {
         alert('Assignment deleted successfully')
-        fetchAssignments()
+        router.reload() // Refresh page to show updated data
       } else {
         const error = await response.json()
         alert(error.error || 'Failed to delete assignment')
@@ -232,7 +181,7 @@ export default function EventAssignments({ eventId }: EventAssignmentsProps) {
 
       if (response.ok) {
         alert('Assignment status updated')
-        fetchAssignments()
+        router.reload() // Refresh page to show updated data
       } else {
         const error = await response.json()
         alert(error.error || 'Failed to update status')
@@ -263,7 +212,7 @@ export default function EventAssignments({ eventId }: EventAssignmentsProps) {
     }
   }
 
-  if (status === 'loading' || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -631,11 +580,137 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
+  // APEX GUARDIAN: Full SSR data fetching for assignments tab
   const { id } = context.params!
   
-  return {
-    props: {
-      eventId: id as string
+  try {
+    const { prisma } = await import('../../../src/lib/prisma')
+    
+    // Fetch event with assignments, attendants, and positions data
+    const eventData = await prisma.events.findUnique({
+      where: { id: id as string },
+      include: {
+        assignments: {
+          include: {
+            users: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true
+              }
+            },
+            event_positions: {
+              select: {
+                id: true,
+                positionName: true,
+                department: true,
+                positionNumber: true
+              }
+            }
+          },
+          orderBy: [
+            { shiftStart: 'asc' }
+          ]
+        },
+        event_attendant_associations: {
+          include: {
+            users: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true
+              }
+            }
+          }
+        },
+        event_positions: {
+          select: {
+            id: true,
+            positionName: true,
+            department: true,
+            positionNumber: true
+          },
+          orderBy: [
+            { positionNumber: 'asc' }
+          ]
+        }
+      }
+    })
+    
+    if (!eventData) {
+      return { notFound: true }
     }
+
+    // Transform event data
+    const event = {
+      id: eventData.id,
+      name: eventData.name,
+      eventType: eventData.eventType,
+      startDate: eventData.startDate?.toISOString() || null,
+      endDate: eventData.endDate?.toISOString() || null,
+      status: eventData.status
+    }
+
+    // Transform assignments data
+    const assignments = eventData.assignments.map(assignment => ({
+      id: assignment.id,
+      userId: assignment.userId,
+      positionId: assignment.positionId,
+      shiftStart: assignment.shiftStart?.toISOString() || null,
+      shiftEnd: assignment.shiftEnd?.toISOString() || null,
+      status: assignment.status,
+      notes: assignment.notes,
+      users: assignment.users ? {
+        id: assignment.users.id,
+        firstName: assignment.users.firstName,
+        lastName: assignment.users.lastName,
+        email: assignment.users.email
+      } : null,
+      event_positions: assignment.event_positions ? {
+        id: assignment.event_positions.id,
+        positionName: assignment.event_positions.positionName,
+        department: assignment.event_positions.department || '',
+        positionNumber: assignment.event_positions.positionNumber
+      } : null
+    })).filter(assignment => assignment.users && assignment.event_positions)
+
+    // Transform attendants data
+    const attendants = eventData.event_attendant_associations
+      .filter(association => association.users)
+      .map(association => ({
+        id: association.users!.id,
+        firstName: association.users!.firstName,
+        lastName: association.users!.lastName,
+        email: association.users!.email
+      }))
+
+    // Transform positions data
+    const positions = eventData.event_positions.map(position => ({
+      id: position.id,
+      positionName: position.positionName,
+      department: position.department || '',
+      positionNumber: position.positionNumber
+    }))
+
+    return {
+      props: {
+        eventId: id as string,
+        event,
+        assignments,
+        attendants,
+        positions,
+        stats: {
+          total: assignments.length,
+          assigned: assignments.filter(a => a.status === 'ASSIGNED').length,
+          confirmed: assignments.filter(a => a.status === 'CONFIRMED').length,
+          completed: assignments.filter(a => a.status === 'COMPLETED').length
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching assignments data:', error)
+    return { notFound: true }
   }
 }
