@@ -41,7 +41,7 @@ interface Event {
     event_positions: {
       id: string
       positionNumber: number
-      title: string
+      positionName: string
       department: string
     }
     shiftStart: string
@@ -51,7 +51,7 @@ interface Event {
   event_positions: Array<{
     id: string
     positionNumber: number
-    title: string
+    positionName: string
     department: string
     description?: string
     _count: {
@@ -465,7 +465,7 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
                               <div className="text-sm font-medium text-gray-900">
-                                #{position.positionNumber} - {position.title}
+                                #{position.positionNumber} - {position.positionName}
                               </div>
                               {position.description && (
                                 <div className="text-sm text-gray-500">{position.description}</div>
@@ -551,7 +551,7 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">
-                              #{assignment.event_positions.positionNumber} - {assignment.event_positions.title}
+                              #{assignment.event_positions.positionNumber} - {assignment.event_positions.positionName}
                             </div>
                             <div className="text-sm text-gray-500">{assignment.event_positions.department}</div>
                           </td>
