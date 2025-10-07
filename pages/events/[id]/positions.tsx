@@ -46,16 +46,24 @@ interface Event {
   status: string
 }
 
-interface EventPositionsProps {
-  eventId: string
+interface PositionStats {
+  total: number
+  active: number
+  assigned: number
 }
 
-export default function EventPositions({ eventId }: EventPositionsProps) {
+interface EventPositionsProps {
+  eventId: string
+  event: Event
+  positions: Position[]
+  stats: PositionStats
+}
+
+export default function EventPositionsPage({eventId, event, positions, stats }: EventPositionsProps) {
   const router = useRouter()
-  const { data: session, status } = useSession()
-  const [event, setEvent] = useState<Event | null>(null)
-  const [positions, setPositions] = useState<Position[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data: session } = useSession()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showBulkCreator, setShowBulkCreator] = useState(false)
   const [editingPosition, setEditingPosition] = useState<Position | null>(null)
@@ -66,40 +74,7 @@ export default function EventPositions({ eventId }: EventPositionsProps) {
     description: ''
   })
 
-  useEffect(() => {
-    if (eventId && session) {
-      fetchEventData()
-      fetchPositions()
-    }
-  }, [eventId, session])
-
-  const fetchEventData = async () => {
-    try {
-      const response = await fetch(`/api/events/${eventId}`)
-      if (response.ok) {
-        const data = await response.json()
-        setEvent(data.data)
-      }
-    } catch (error) {
-      console.error('Error fetching event:', error)
-      alert('Failed to load event data')
-    }
-  }
-
-  const fetchPositions = async () => {
-    try {
-      const response = await fetch(`/api/events/${eventId}/positions?includeShifts=true&includeAssignments=true`)
-      if (response.ok) {
-        const data = await response.json()
-        setPositions(data.data?.positions || [])
-      }
-    } catch (error) {
-      console.error('Error fetching positions:', error)
-      alert('Failed to load positions')
-    } finally {
-      setLoading(false)
-    }
-  }
+  // APEX GUARDIAN: Client-side fetching removed - data now provided via SSR
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -129,7 +104,7 @@ export default function EventPositions({ eventId }: EventPositionsProps) {
         setShowCreateModal(false)
         setEditingPosition(null)
         setFormData({ positionNumber: 1, name: '', area: '', description: '' })
-        fetchPositions()
+        router.reload() // Refresh page to show updated data
       } else {
         const error = await response.json()
         alert(error.error || 'Failed to save position')
@@ -163,7 +138,7 @@ export default function EventPositions({ eventId }: EventPositionsProps) {
 
       if (response.ok) {
         alert('Position deleted successfully')
-        fetchPositions()
+        router.reload() // Refresh page to show updated data
       } else {
         const error = await response.json()
         alert(error.error || 'Failed to delete position')
@@ -183,10 +158,10 @@ export default function EventPositions({ eventId }: EventPositionsProps) {
   const handleBulkCreateSuccess = (result: any) => {
     alert(`Successfully created ${result.created} positions`)
     setShowBulkCreator(false)
-    fetchPositions()
+    router.reload() // Refresh page to show updated data
   }
 
-  if (status === 'loading' || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -533,11 +508,85 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
+  // APEX GUARDIAN: Full SSR data fetching for positions tab
   const { id } = context.params!
   
-  return {
-    props: {
-      eventId: id as string
+  try {
+    const { prisma } = await import('../../../src/lib/prisma')
+    
+    // Fetch event with positions data
+    const eventData = await prisma.events.findUnique({
+      where: { id: id as string },
+      include: {
+        event_positions: {
+          include: {
+            assignments: {
+              include: {
+                users: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true
+                  }
+                }
+              }
+            }
+          },
+          orderBy: [
+            { positionNumber: 'asc' }
+          ]
+        }
+      }
+    })
+    
+    if (!eventData) {
+      return { notFound: true }
     }
+
+    // Transform event data
+    const event = {
+      id: eventData.id,
+      name: eventData.name,
+      eventType: eventData.eventType,
+      startDate: eventData.startDate?.toISOString() || null,
+      endDate: eventData.endDate?.toISOString() || null,
+      status: eventData.status
+    }
+
+    // Transform positions data
+    const positions = eventData.event_positions.map(position => ({
+      id: position.id,
+      positionNumber: position.positionNumber,
+      name: position.positionName,
+      description: position.description,
+      area: position.department || null,
+      sequence: position.positionNumber, // Use positionNumber as sequence
+      isActive: position.isActive,
+      assignments: position.assignments.map(assignment => ({
+        id: assignment.id,
+        role: 'Attendant', // Default role since assignments table doesn't have role field
+        attendant: assignment.users ? {
+          id: assignment.users.id,
+          firstName: assignment.users.firstName,
+          lastName: assignment.users.lastName
+        } : null
+      })).filter(assignment => assignment.attendant !== null)
+    }))
+
+    return {
+      props: {
+        eventId: id as string,
+        event,
+        positions,
+        stats: {
+          total: positions.length,
+          active: positions.filter(p => p.isActive).length,
+          assigned: positions.filter(p => p.assignments.length > 0).length
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching positions data:', error)
+    return { notFound: true }
   }
 }
