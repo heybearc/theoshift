@@ -120,7 +120,9 @@ async function handleCreateEventAttendant(req: NextApiRequest, res: NextApiRespo
         notes: notes || null,
         congregation: congregation || '',
         isAvailable: true,
-        isActive: true
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     })
 
@@ -190,7 +192,8 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
               phone: attendantData.phone || null,
               notes: attendantData.notes || null,
               congregation: attendantData.congregation || '',
-              isAvailable: attendantData.isActive !== false
+              isAvailable: attendantData.isActive !== false,
+              updatedAt: new Date()
             }
           })
 
@@ -225,7 +228,9 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
               notes: attendantData.notes || null,
               congregation: attendantData.congregation || '',
               isAvailable: attendantData.isActive !== false,
-              isActive: attendantData.isActive !== false
+              isActive: attendantData.isActive !== false,
+              createdAt: new Date(),
+              updatedAt: new Date()
             }
           })
 
