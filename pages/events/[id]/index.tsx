@@ -450,7 +450,7 @@ export default function EventDetailsPage() {
                   Positions ({event._count.event_positions})
                 </h3>
                 <Link
-                  href={`/admin/events/${event.id}/positions`}
+                  href={`/events/${event.id}/positions`}
                   className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm transition-colors"
                 >
                   ➕ Manage Positions
@@ -460,7 +460,7 @@ export default function EventDetailsPage() {
                 <div className="text-center py-8">
                   <p className="text-gray-500">No positions created yet</p>
                   <Link
-                    href={`/admin/events/${event.id}/positions`}
+                    href={`/events/${event.id}/positions`}
                     className="mt-2 inline-block text-blue-600 hover:text-blue-800"
                   >
                     Create first position →
@@ -510,7 +510,7 @@ export default function EventDetailsPage() {
                   {event.event_positions.length > 5 && (
                     <div className="mt-3 text-center">
                       <Link
-                        href={`/admin/events/${event.id}/positions`}
+                        href={`/events/${event.id}/positions`}
                         className="text-blue-600 hover:text-blue-800 text-sm"
                       >
                         View all {event.event_positions.length} positions →
@@ -528,7 +528,7 @@ export default function EventDetailsPage() {
                   Recent Assignments ({event._count.assignments})
                 </h3>
                 <Link
-                  href={`/admin/events/${event.id}/assignments`}
+                  href={`/events/${event.id}/assignments`}
                   className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded text-sm transition-colors"
                 >
                   📋 Manage Assignments
@@ -538,7 +538,7 @@ export default function EventDetailsPage() {
                 <div className="text-center py-8">
                   <p className="text-gray-500">No assignments yet</p>
                   <Link
-                    href={`/admin/events/${event.id}/assignments`}
+                    href={`/events/${event.id}/assignments`}
                     className="mt-2 inline-block text-blue-600 hover:text-blue-800"
                   >
                     Create first assignment →
@@ -593,7 +593,7 @@ export default function EventDetailsPage() {
                   {event.assignments.length > 5 && (
                     <div className="mt-3 text-center">
                       <Link
-                        href={`/admin/events/${event.id}/assignments`}
+                        href={`/events/${event.id}/assignments`}
                         className="text-blue-600 hover:text-blue-800 text-sm"
                       >
                         View all {event.assignments.length} assignments →
