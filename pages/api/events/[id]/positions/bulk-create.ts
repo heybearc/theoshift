@@ -23,42 +23,55 @@ const bulkCreateSchema = z.object({
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log('🔍 BULK CREATE API CALLED')
   try {
+    console.log('1. Checking session...')
     const session = await getServerSession(req, res, authOptions)
     
     if (!session) {
+      console.log('❌ No session found')
       return res.status(401).json({ success: false, error: 'Unauthorized' })
     }
+    console.log('✅ Session valid')
 
     const { id: eventId } = req.query
+    console.log('2. Event ID:', eventId)
 
     if (!eventId || typeof eventId !== 'string') {
+      console.log('❌ Invalid event ID')
       return res.status(400).json({ success: false, error: 'Event ID is required' })
     }
 
-    // Verify event exists
+    console.log('3. Verifying event exists...')
     const event = await prisma.events.findUnique({
       where: { id: eventId }
     })
 
     if (!event) {
+      console.log('❌ Event not found')
       return res.status(404).json({ success: false, error: 'Event not found' })
     }
+    console.log('✅ Event found:', event.name)
 
     if (req.method === 'POST') {
+      console.log('4. Calling handleBulkCreate...')
       return await handleBulkCreate(req, res, eventId)
     }
 
     return res.status(405).json({ success: false, error: 'Method not allowed' })
-  } catch (error) {
-    console.error('Bulk create positions error:', error)
+  } catch (error: any) {
+    console.error('❌ BULK CREATE API ERROR:', error.message)
+    console.error('Stack:', error.stack)
     return res.status(500).json({ success: false, error: 'Internal server error' })
   }
 }
 
 async function handleBulkCreate(req: NextApiRequest, res: NextApiResponse, eventId: string) {
+  console.log('📝 handleBulkCreate started')
   try {
+    console.log('5. Parsing request body...')
     const validatedData = bulkCreateSchema.parse(req.body)
+    console.log('✅ Validated data:', validatedData)
     
     if (validatedData.endNumber < validatedData.startNumber) {
       return res.status(400).json({ 
@@ -110,10 +123,13 @@ async function handleBulkCreate(req: NextApiRequest, res: NextApiResponse, event
     }
 
     // Create positions in transaction
+    console.log('6. Starting transaction...')
     const result = await prisma.$transaction(async (tx) => {
       const createdPositions = []
+      console.log(`7. Creating ${validatedData.endNumber - validatedData.startNumber + 1} positions...`)
       
       for (let num = validatedData.startNumber; num <= validatedData.endNumber; num++) {
+        console.log(`   Creating position ${num}...`)
         const position = await tx.positions.create({
           data: {
             id: randomUUID(),
@@ -125,9 +141,11 @@ async function handleBulkCreate(req: NextApiRequest, res: NextApiResponse, event
             updatedAt: new Date()
           }
         })
+        console.log(`   ✅ Position ${num} created`)
         
         // Create shifts for this position
         if (shiftsToCreate.length > 0) {
+          console.log(`   Creating ${shiftsToCreate.length} shifts for position ${num}...`)
           for (let i = 0; i < shiftsToCreate.length; i++) {
             const shift = shiftsToCreate[i]
             await tx.position_shifts.create({
@@ -142,6 +160,7 @@ async function handleBulkCreate(req: NextApiRequest, res: NextApiResponse, event
               }
             })
           }
+          console.log(`   ✅ Shifts created for position ${num}`)
         }
         
         createdPositions.push(position)
