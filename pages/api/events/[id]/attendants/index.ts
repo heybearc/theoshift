@@ -52,17 +52,30 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
     const limit = parseInt(req.query.limit as string) || 25
     const offset = (page - 1) * limit
 
-    // Get all attendants - simplified approach
-    const attendants = await prisma.attendants.findMany({
+    // Get only attendants associated with THIS event
+    const associations = await prisma.event_attendant_associations.findMany({
+      where: { eventId },
       skip: offset,
       take: limit,
-      orderBy: [
-        { lastName: 'asc' },
-        { firstName: 'asc' }
-      ]
+      include: {
+        attendants: true
+      },
+      orderBy: {
+        attendants: {
+          lastName: 'asc'
+        }
+      }
     })
 
-    const total = await prisma.attendants.count()
+    // Extract attendants from associations
+    const attendants = associations
+      .filter(a => a.attendants) // Filter out any null attendants
+      .map(a => a.attendants)
+
+    // Get total count for THIS event only
+    const total = await prisma.event_attendant_associations.count({
+      where: { eventId }
+    })
     const pages = Math.ceil(total / limit)
 
     return res.status(200).json({
