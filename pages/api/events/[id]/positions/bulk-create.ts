@@ -24,11 +24,11 @@ const bulkCreateSchema = z.object({
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    // TEMPORARY: Skip all authentication for debugging
-    console.log('🔍 BULK CREATE API CALLED:', { method: req.method, eventId: req.query.id })
+    const session = await getServerSession(req, res, authOptions)
     
-    // Skip session check entirely for now
-    // const session = await getServerSession(req, res, authOptions)
+    if (!session) {
+      return res.status(401).json({ success: false, error: 'Unauthorized' })
+    }
 
     const { id: eventId } = req.query
 
