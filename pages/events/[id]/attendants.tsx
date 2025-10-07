@@ -14,12 +14,12 @@ interface Event {
   status: string
 }
 
-interface EventAttenданtsPageProps {
+interface EventAttendantsPageProps {
   eventId: string
   event: Event | null
 }
 
-export default function EventAttenданtsPage({ eventId, event }: EventAttenданtsPageProps) {
+export default function EventAttendantsPage({ eventId, event }: EventAttendantsPageProps) {
   return (
     <EventLayout 
       title={`${event?.name || 'Event'} - Attendants | JW Attendant Scheduler`}
