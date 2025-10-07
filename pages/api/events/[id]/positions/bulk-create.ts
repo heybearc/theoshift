@@ -121,7 +121,8 @@ async function handleBulkCreate(req: NextApiRequest, res: NextApiResponse, event
             positionNumber: num,
             name: `${validatedData.namePrefix} ${num}`,
             area: validatedData.area,
-            sequence: num
+            sequence: num,
+            updatedAt: new Date()
           }
         })
         
