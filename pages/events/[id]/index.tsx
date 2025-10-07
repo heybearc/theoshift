@@ -65,39 +65,16 @@ interface Event {
   }
 }
 
-export default function EventDetailsPage() {
+interface EventDetailsPageProps {
+  event: Event
+}
+
+export default function EventDetailsPage({ event }: EventDetailsPageProps) {
   const router = useRouter()
-  const { id } = router.query
-  const [event, setEvent] = useState<Event | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  const fetchEvent = async () => {
-    if (!id) return
-
-    try {
-      setLoading(true)
-      const response = await fetch(`/api/events/${id}`, {
-        credentials: 'include'
-      })
-      const data = await response.json()
-
-      if (data.success) {
-        setEvent(data.data)
-      } else {
-        setError(data.error || 'Failed to fetch event')
-      }
-    } catch (error) {
-      setError('Error fetching event')
-      console.error('Error:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchEvent()
-  }, [id])
+  
+  // APEX GUARDIAN: Remove client-side fetching, use server-side props
+  const [loading] = useState(false)
+  const [error] = useState('')
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'No date'
@@ -175,7 +152,7 @@ export default function EventDetailsPage() {
       })
 
       if (response.ok) {
-        fetchEvent() // Refresh event data
+        router.reload() // Refresh page data
         alert(`Event status updated to ${newStatus}`)
       } else {
         alert('Failed to update event status')
@@ -734,8 +711,67 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
-  // Don't pass session through props - use client-side session instead
-  return {
-    props: {},
+  // APEX GUARDIAN: Fetch event data server-side to eliminate client-side API issues
+  const { id } = context.params!
+  
+  try {
+    const { prisma } = await import('../../../src/lib/prisma')
+    
+    const event = await prisma.events.findUnique({
+      where: { id: id as string },
+      include: {
+        event_attendant_associations: {
+          include: {
+            users: true
+          }
+        },
+        assignments: {
+          include: {
+            users: true,
+            event_positions: true
+          }
+        },
+        event_positions: {
+          include: {
+            _count: {
+              select: {
+                assignments: true
+              }
+            }
+          }
+        }
+      }
+    })
+
+    if (!event) {
+      return {
+        notFound: true,
+      }
+    }
+
+    // Transform event data for frontend compatibility
+    const transformedEvent = {
+      ...event,
+      startDate: event.startDate?.toISOString() || null,
+      endDate: event.endDate?.toISOString() || null,
+      createdAt: event.createdAt?.toISOString() || null,
+      updatedAt: event.updatedAt?.toISOString() || null,
+      _count: {
+        event_attendant_associations: event.event_attendant_associations.length,
+        assignments: event.assignments.length,
+        event_positions: event.event_positions.length
+      }
+    }
+
+    return {
+      props: {
+        event: transformedEvent,
+      },
+    }
+  } catch (error) {
+    console.error('Error fetching event:', error)
+    return {
+      notFound: true,
+    }
   }
 }
