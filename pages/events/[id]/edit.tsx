@@ -38,80 +38,38 @@ interface Event {
   startTime?: string
   endTime?: string
   location?: string
-  capacity?: number
-  attendantsNeeded?: number
   status: string
   createdAt: string
   updatedAt: string
 }
 
-export default function EditEventPage() {
+interface EditEventPageProps {
+  event: Event
+}
+
+export default function EditEventPage({ event }: EditEventPageProps) {
   const router = useRouter()
-  const { id: eventId } = router.query
-  const [event, setEvent] = useState<Event | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
+  const eventId = event.id
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
   const [formData, setFormData] = useState<EventFormData>({
-    name: '',
-    description: '',
-    eventType: 'CIRCUIT_ASSEMBLY',
-    startDate: '',
-    endDate: '',
-    startTime: '09:30',
-    endTime: '16:00',
-    location: '',
+    name: event.name || '',
+    description: event.description || '',
+    eventType: event.eventType || 'CIRCUIT_ASSEMBLY',
+    startDate: formatDateForInput(event.startDate),
+    endDate: formatDateForInput(event.endDate),
+    startTime: event.startTime || '09:30',
+    endTime: event.endTime || '16:00',
+    location: event.location || '',
     capacity: '',
     attendantsNeeded: '',
-    status: 'UPCOMING'
+    status: event.status || 'UPCOMING'
   })
 
   const [errors, setErrors] = useState<Partial<EventFormData>>({})
-
-  useEffect(() => {
-    if (eventId) {
-      fetchEvent()
-    }
-  }, [eventId])
-
-  const fetchEvent = async () => {
-    try {
-      setLoading(true)
-      const response = await fetch(`/api/events/${eventId}`, {
-        credentials: 'include'
-      })
-      const data = await response.json()
-
-      if (data.success) {
-        const eventData = data.data
-        setEvent(eventData)
-        
-        // Populate form with existing data
-        setFormData({
-          name: eventData.name || '',
-          description: eventData.description || '',
-          eventType: eventData.eventType || 'CIRCUIT_ASSEMBLY',
-          startDate: formatDateForInput(eventData.startDate),
-          endDate: formatDateForInput(eventData.endDate),
-          startTime: eventData.startTime || '09:30',
-          endTime: eventData.endTime || '16:00',
-          location: eventData.location || '',
-          capacity: eventData.capacity ? eventData.capacity.toString() : '',
-          attendantsNeeded: eventData.attendantsNeeded ? eventData.attendantsNeeded.toString() : '',
-          status: eventData.status || 'UPCOMING'
-        })
-      } else {
-        setError('Event not found')
-      }
-    } catch (err) {
-      setError('Error loading event')
-      console.error('Error:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [submitting, setSubmitting] = useState(false)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
@@ -614,7 +572,43 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
-  return {
-    props: {},
+  // APEX GUARDIAN: Fetch event data server-side to eliminate client-side API issues
+  const { id } = context.params!
+  
+  try {
+    const { prisma } = await import('../../../src/lib/prisma')
+    
+    const event = await prisma.events.findUnique({
+      where: { id: id as string }
+    })
+
+    if (!event) {
+      return { notFound: true }
+    }
+
+    // Transform event data for frontend compatibility
+    const transformedEvent = {
+      id: event.id,
+      name: event.name,
+      description: event.description || '',
+      eventType: event.eventType,
+      startDate: event.startDate?.toISOString() || null,
+      endDate: event.endDate?.toISOString() || null,
+      startTime: event.startTime || '',
+      endTime: event.endTime || '',
+      location: event.location || '',
+      status: event.status,
+      createdAt: event.createdAt?.toISOString() || null,
+      updatedAt: event.updatedAt?.toISOString() || null
+    }
+
+    return {
+      props: {
+        event: transformedEvent,
+      },
+    }
+  } catch (error) {
+    console.error('Error fetching event for edit:', error)
+    return { notFound: true }
   }
 }
