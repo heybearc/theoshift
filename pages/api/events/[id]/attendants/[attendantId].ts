@@ -106,18 +106,20 @@ async function handleUpdateAttendant(req: NextApiRequest, res: NextApiResponse, 
     const existingAttendant = await prisma.attendants.findUnique({
       where: { id: attendantId }
     })
-
     if (!existingAttendant) {
       return res.status(404).json({ error: 'Attendant not found' })
     }
 
     // Process forms of service
-    let processedFormsOfService = []
+    let processedFormsOfService: string[] = []
     if (formsOfService) {
       if (Array.isArray(formsOfService)) {
         processedFormsOfService = formsOfService
       } else if (typeof formsOfService === 'string') {
-        processedFormsOfService = formsOfService.split(',').map(f => f.trim())
+        processedFormsOfService = formsOfService
+          .split(',')
+          .map(f => f.trim())
+          .filter(f => f !== '')
       }
     }
 
