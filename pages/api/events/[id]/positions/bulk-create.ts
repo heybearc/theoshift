@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../../auth/[...nextauth]'
 import { prisma } from '../../../../../src/lib/prisma'
 import { z } from 'zod'
+import { randomUUID } from 'crypto'
 
 // APEX GUARDIAN: Bulk Position Creation API
 // Creates numbered positions with optional shift templates
@@ -115,6 +116,7 @@ async function handleBulkCreate(req: NextApiRequest, res: NextApiResponse, event
       for (let num = validatedData.startNumber; num <= validatedData.endNumber; num++) {
         const position = await tx.positions.create({
           data: {
+            id: randomUUID(),
             eventId,
             positionNumber: num,
             name: `${validatedData.namePrefix} ${num}`,
@@ -129,6 +131,7 @@ async function handleBulkCreate(req: NextApiRequest, res: NextApiResponse, event
             const shift = shiftsToCreate[i]
             await tx.position_shifts.create({
               data: {
+                id: randomUUID(),
                 positionId: position.id,
                 name: shift.name,
                 startTime: shift.startTime || null,
