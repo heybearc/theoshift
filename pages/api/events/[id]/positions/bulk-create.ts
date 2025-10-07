@@ -100,7 +100,7 @@ async function handleBulkCreate(req: NextApiRequest, res: NextApiResponse, event
     let shiftsToCreate = validatedData.customShifts || []
     
     if (validatedData.shiftTemplateId && !validatedData.customShifts) {
-      const template = await prisma.shiftTemplates.findUnique({
+      const template = await prisma.shift_templates.findUnique({
         where: { id: validatedData.shiftTemplateId }
       })
       
