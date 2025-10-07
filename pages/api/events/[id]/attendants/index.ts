@@ -100,13 +100,23 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
 
 async function handleCreateEventAttendant(req: NextApiRequest, res: NextApiResponse, eventId: string, event: any) {
   try {
-    const { firstName, lastName, email, phone, congregation, notes } = req.body
+    const { firstName, lastName, email, phone, congregation, notes, formsOfService } = req.body
 
     if (!firstName || !lastName || !email) {
       return res.status(400).json({ 
         success: false, 
         error: 'First name, last name, and email are required' 
       })
+    }
+
+    // Process forms of service
+    let processedFormsOfService = []
+    if (formsOfService) {
+      if (Array.isArray(formsOfService)) {
+        processedFormsOfService = formsOfService
+      } else if (typeof formsOfService === 'string') {
+        processedFormsOfService = formsOfService.split(',').map(f => f.trim())
+      }
     }
 
     // Create new attendant
@@ -119,6 +129,7 @@ async function handleCreateEventAttendant(req: NextApiRequest, res: NextApiRespo
         phone: phone || null,
         notes: notes || null,
         congregation: congregation || '',
+        formsOfService: processedFormsOfService,
         isAvailable: true,
         isActive: true,
         createdAt: new Date(),
@@ -183,6 +194,16 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
         })
 
         if (existingAttendant) {
+          // Process forms of service for update
+          let formsOfService = []
+          if (attendantData.formsOfService) {
+            if (Array.isArray(attendantData.formsOfService)) {
+              formsOfService = attendantData.formsOfService
+            } else if (typeof attendantData.formsOfService === 'string') {
+              formsOfService = attendantData.formsOfService.split(',').map(f => f.trim())
+            }
+          }
+
           // Update existing attendant
           await prisma.attendants.update({
             where: { id: existingAttendant.id },
@@ -192,6 +213,7 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
               phone: attendantData.phone || null,
               notes: attendantData.notes || null,
               congregation: attendantData.congregation || '',
+              formsOfService: formsOfService,
               isAvailable: attendantData.isActive !== false,
               updatedAt: new Date()
             }
@@ -217,6 +239,16 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
 
           updated++
         } else {
+          // Process forms of service
+          let formsOfService = []
+          if (attendantData.formsOfService) {
+            if (Array.isArray(attendantData.formsOfService)) {
+              formsOfService = attendantData.formsOfService
+            } else if (typeof attendantData.formsOfService === 'string') {
+              formsOfService = attendantData.formsOfService.split(',').map(f => f.trim())
+            }
+          }
+
           // Create new attendant
           const newAttendant = await prisma.attendants.create({
             data: {
@@ -227,6 +259,7 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
               phone: attendantData.phone || null,
               notes: attendantData.notes || null,
               congregation: attendantData.congregation || '',
+              formsOfService: formsOfService,
               isAvailable: attendantData.isActive !== false,
               isActive: attendantData.isActive !== false,
               createdAt: new Date(),
