@@ -38,6 +38,8 @@ interface Event {
   startTime?: string
   endTime?: string
   location?: string
+  capacity?: number
+  attendantsNeeded?: number
   status: string
   createdAt: string
   updatedAt: string
@@ -63,8 +65,8 @@ export default function EditEventPage({ event }: EditEventPageProps) {
     startTime: event.startTime || '09:30',
     endTime: event.endTime || '16:00',
     location: event.location || '',
-    capacity: '',
-    attendantsNeeded: '',
+    capacity: event.capacity ? event.capacity.toString() : '',
+    attendantsNeeded: event.attendantsNeeded ? event.attendantsNeeded.toString() : '',
     status: event.status || 'UPCOMING'
   })
 
