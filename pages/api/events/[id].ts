@@ -19,25 +19,80 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     if (req.method === "GET") {
       const event = await prisma.events.findUnique({
-        where: { id },
-        include: {
-          event_attendant_associations: true,
-          assignments: true,
-          event_positions: true
-        }
+        where: { id }
       })
 
       if (!event) {
         return res.status(404).json({ error: "Event not found" })
       }
 
-      // Transform event data for frontend compatibility
+      // Fetch positions with assignment counts
+      const positions = await prisma.positions.findMany({
+        where: { eventId: id, isActive: true },
+        include: {
+          shifts: true,
+          _count: {
+            select: { assignments: true }
+          }
+        }
+      })
+
+      // Fetch attendants for this event
+      const attendants = await prisma.event_attendant_associations.findMany({
+        where: { eventId: id },
+        include: {
+          attendants: true
+        }
+      })
+
+      // Fetch all assignments for this event
+      const assignments = await prisma.assignments.findMany({
+        where: { eventId: id }
+      })
+
+      // Calculate statistics
+      const totalPositions = positions.length
+      const positionsWithAssignments = positions.filter(p => p._count.assignments > 0).length
+      const totalShifts = positions.reduce((sum, p) => sum + p.shifts.length, 0)
+      const filledShifts = assignments.length
+      const unfilledShifts = totalShifts - filledShifts
+
+      const totalAttendants = attendants.length
+      const assignedAttendantIds = new Set(assignments.map(a => a.userId))
+      const assignedAttendants = assignedAttendantIds.size
+      const availableAttendants = totalAttendants - assignedAttendants
+
+      // Transform event data with comprehensive statistics
       const transformedEvent = {
         ...event,
+        statistics: {
+          positions: {
+            total: totalPositions,
+            filled: positionsWithAssignments,
+            unfilled: totalPositions - positionsWithAssignments,
+            fillRate: totalPositions > 0 ? Math.round((positionsWithAssignments / totalPositions) * 100) : 0
+          },
+          shifts: {
+            total: totalShifts,
+            filled: filledShifts,
+            unfilled: unfilledShifts,
+            fillRate: totalShifts > 0 ? Math.round((filledShifts / totalShifts) * 100) : 0
+          },
+          attendants: {
+            total: totalAttendants,
+            assigned: assignedAttendants,
+            available: availableAttendants,
+            utilizationRate: totalAttendants > 0 ? Math.round((assignedAttendants / totalAttendants) * 100) : 0
+          },
+          assignments: {
+            total: assignments.length,
+            averagePerAttendant: assignedAttendants > 0 ? (assignments.length / assignedAttendants).toFixed(1) : 0
+          }
+        },
         _count: {
-          event_attendant_associations: event.event_attendant_associations.length,
-          assignments: event.assignments.length,
-          event_positions: event.event_positions.length
+          positions: totalPositions,
+          attendants: totalAttendants,
+          assignments: assignments.length
         }
       }
 
