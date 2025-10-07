@@ -7,15 +7,8 @@ async function fixExistingFormsOfService() {
   console.log('=================================================')
   
   try {
-    // Get all attendants with empty or null formsOfService
+    // Get all attendants
     const attendants = await prisma.attendants.findMany({
-      where: {
-        OR: [
-          { formsOfService: null },
-          { formsOfService: { equals: [] } },
-          { formsOfService: { equals: '[]' } }
-        ]
-      },
       select: {
         id: true,
         firstName: true,
@@ -25,7 +18,7 @@ async function fixExistingFormsOfService() {
       }
     })
     
-    console.log(`\n✅ Found ${attendants.length} attendants with missing forms of service:`)
+    console.log(`\n✅ Found ${attendants.length} attendants to check:`)
     
     let updated = 0
     
@@ -33,20 +26,29 @@ async function fixExistingFormsOfService() {
       console.log(`\nProcessing: ${attendant.firstName} ${attendant.lastName} (${attendant.email})`)
       console.log(`Current formsOfService: ${JSON.stringify(attendant.formsOfService)}`)
       
-      // Set default forms of service based on the pattern we saw in your CSV
-      // Most attendants had "Ministerial Servant"
-      const defaultFormsOfService = ["Ministerial Servant"]
+      // Check if formsOfService is empty or null
+      const needsUpdate = !attendant.formsOfService || 
+                         (Array.isArray(attendant.formsOfService) && attendant.formsOfService.length === 0) ||
+                         attendant.formsOfService === '[]'
       
-      await prisma.attendants.update({
-        where: { id: attendant.id },
-        data: {
-          formsOfService: defaultFormsOfService,
-          updatedAt: new Date()
-        }
-      })
-      
-      console.log(`✅ Updated to: ${JSON.stringify(defaultFormsOfService)}`)
-      updated++
+      if (needsUpdate) {
+        // Set default forms of service based on the pattern we saw in your CSV
+        // Most attendants had "Ministerial Servant"
+        const defaultFormsOfService = ["Ministerial Servant"]
+        
+        await prisma.attendants.update({
+          where: { id: attendant.id },
+          data: {
+            formsOfService: defaultFormsOfService,
+            updatedAt: new Date()
+          }
+        })
+        
+        console.log(`✅ Updated to: ${JSON.stringify(defaultFormsOfService)}`)
+        updated++
+      } else {
+        console.log(`✅ Already has forms of service: ${JSON.stringify(attendant.formsOfService)}`)
+      }
     }
     
     console.log(`\n🛡️ FORMS OF SERVICE FIX COMPLETE`)
