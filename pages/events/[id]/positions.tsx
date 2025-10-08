@@ -57,6 +57,9 @@ interface Attendant {
   firstName: string
   lastName: string
   role: string
+  formsOfService: string[] | string
+  congregation?: string
+  isActive: boolean
 }
 
 interface EventPositionsProps {
@@ -710,9 +713,15 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                         required
                       >
                         <option value="">Select an overseer...</option>
-                        {attendants?.filter(att => 
-                          att.role === 'ELDER' || att.role === 'elder' || att.role === 'ADMIN' || att.role === 'admin'
-                        ).map(attendant => (
+                        {attendants?.filter(att => {
+                          const formsOfService = Array.isArray(att.formsOfService) ? att.formsOfService : 
+                            (typeof att.formsOfService === 'string' ? att.formsOfService.split(',').map(s => s.trim()) : [])
+                          return formsOfService.some(form => 
+                            form.toLowerCase().includes('overseer') || 
+                            form.toLowerCase().includes('elder') ||
+                            form.toLowerCase().includes('coordinator')
+                          )
+                        }).map(attendant => (
                           <option key={attendant.id} value={attendant.id}>
                             {attendant.firstName} {attendant.lastName} (Elder)
                           </option>
@@ -730,7 +739,15 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">Select a keyman...</option>
-                        {attendants.filter(att => att.role === 'MINISTERIAL_SERVANT' || att.role === 'ministerial_servant').map(attendant => (
+                        {attendants?.filter(att => {
+                          const formsOfService = Array.isArray(att.formsOfService) ? att.formsOfService : 
+                            (typeof att.formsOfService === 'string' ? att.formsOfService.split(',').map(s => s.trim()) : [])
+                          return formsOfService.some(form => 
+                            form.toLowerCase().includes('keyman') || 
+                            form.toLowerCase().includes('ministerial') ||
+                            form.toLowerCase().includes('servant')
+                          )
+                        }).map(attendant => (
                           <option key={attendant.id} value={attendant.id}>
                             {attendant.firstName} {attendant.lastName} (MS)
                           </option>
@@ -811,8 +828,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     })
 
-    // Fetch attendants for overseer assignment
-    const attendantsData = await prisma.users.findMany({
+    // Fetch attendants for overseer assignment from attendants table
+    const attendantsData = await prisma.attendants.findMany({
       where: {
         isActive: true
       },
@@ -820,7 +837,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         id: true,
         firstName: true,
         lastName: true,
-        role: true
+        formsOfService: true,
+        congregation: true,
+        isActive: true
       },
       orderBy: [
         { firstName: 'asc' },
