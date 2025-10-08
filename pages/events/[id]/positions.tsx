@@ -717,9 +717,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                           const formsOfService = Array.isArray(att.formsOfService) ? att.formsOfService : 
                             (typeof att.formsOfService === 'string' ? att.formsOfService.split(',').map(s => s.trim()) : [])
                           return formsOfService.some(form => 
-                            form.toLowerCase().includes('overseer') || 
-                            form.toLowerCase().includes('elder') ||
-                            form.toLowerCase().includes('coordinator')
+                            form.toLowerCase() === 'overseer'
                           )
                         }).map(attendant => (
                           <option key={attendant.id} value={attendant.id}>
@@ -743,9 +741,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                           const formsOfService = Array.isArray(att.formsOfService) ? att.formsOfService : 
                             (typeof att.formsOfService === 'string' ? att.formsOfService.split(',').map(s => s.trim()) : [])
                           return formsOfService.some(form => 
-                            form.toLowerCase().includes('keyman') || 
-                            form.toLowerCase().includes('ministerial') ||
-                            form.toLowerCase().includes('servant')
+                            form.toLowerCase() === 'keyman'
                           )
                         }).map(attendant => (
                           <option key={attendant.id} value={attendant.id}>
