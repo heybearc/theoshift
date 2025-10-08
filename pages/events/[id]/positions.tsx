@@ -59,6 +59,13 @@ interface Position {
       firstName: string
       lastName: string
     }
+    shift?: {
+      id: string
+      name: string
+      startTime?: string
+      endTime?: string
+      isAllDay: boolean
+    } | null
   }>
 }
 
@@ -450,13 +457,56 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
         }
       }
       
-      // Enhanced success message with hierarchy statistics
+      // PHASE 3: BALANCED SHIFT ASSIGNMENT
+      console.log('📅 Phase 3: Ensuring balanced shift coverage...')
+      
+      let shiftAssignments = 0
+      
+      // Get all positions with shifts that need coverage
+      const positionsWithShifts = positions.filter(pos => pos.shifts && pos.shifts.length > 0)
+      
+      for (const position of positionsWithShifts) {
+        if (!position.shifts) continue
+        
+        for (const shift of position.shifts) {
+          // Check current assignments for this shift
+          const currentShiftAssignments = position.assignments?.filter(a => a.shift?.id === shift.id).length || 0
+          
+          if (currentShiftAssignments === 0 && availableAttendants.length > 0) {
+            // This shift has no attendants - assign at least one
+            const attendant = availableAttendants.shift()
+            if (attendant) {
+              const response = await fetch(`/api/events/${eventId}/assignments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  positionId: position.id,
+                  attendantId: attendant.id,
+                  shiftId: shift.id,
+                  role: 'ATTENDANT'
+                })
+              })
+              
+              if (response.ok) {
+                shiftAssignments++
+                console.log(`📅 Shift coverage: ${attendant.firstName} ${attendant.lastName} → ${position.name} (${shift.name})`)
+              }
+            }
+          }
+        }
+      }
+
+      // Enhanced success message with all statistics
       const hierarchySuccessRate = assignmentCount > 0 ? Math.round((hierarchyMatches / assignmentCount) * 100) : 0
-      alert(`🎯 Hierarchy-Based Auto-Assign Complete!\n\n` +
-            `✅ Total Assignments: ${assignmentCount}\n` +
+      const totalFinalAssignments = assignmentCount + shiftAssignments
+      
+      alert(`🎯 Advanced Auto-Assign Complete!\n\n` +
+            `✅ Position Assignments: ${assignmentCount}\n` +
             `🎯 Hierarchy Matches: ${hierarchyMatches} (${hierarchySuccessRate}%)\n` +
-            `⚡ Fallback Assignments: ${fallbackAssignments}\n\n` +
-            `Leadership-based assignment prioritizes attendants working under their assigned overseer/keyman.`)
+            `⚡ Fallback Assignments: ${fallbackAssignments}\n` +
+            `📅 Shift Coverage: ${shiftAssignments}\n` +
+            `🎉 Total Assignments: ${totalFinalAssignments}\n\n` +
+            `System ensures every shift has at least one attendant with leadership-based prioritization.`)
       router.reload()
     } catch (error) {
       console.error('Auto-assign error:', error)
