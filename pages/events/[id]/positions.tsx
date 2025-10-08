@@ -348,6 +348,34 @@ export default function EventPositionsPage({eventId, event, positions, stats }: 
                       <span>{position.assignments?.length || 0} assignments</span>
                     </div>
 
+                    {/* Position Management Actions */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <button
+                        onClick={() => {
+                          setSelectedPosition(position)
+                          setShowShiftModal(true)
+                        }}
+                        className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 px-2 py-1 rounded transition-colors"
+                      >
+                        ⏰ Add Shifts
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedPosition(position)
+                          setShowOverseerModal(true)
+                        }}
+                        className="text-xs bg-green-100 hover:bg-green-200 text-green-800 px-2 py-1 rounded transition-colors"
+                      >
+                        👥 Assign Overseer
+                      </button>
+                      <button
+                        onClick={() => setEditingPosition(position)}
+                        className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 px-2 py-1 rounded transition-colors"
+                      >
+                        ✏️ Edit
+                      </button>
+                    </div>
+
                     {position.shifts && position.shifts.length > 0 && (
                       <div className="mb-4">
                         <p className="text-xs font-medium text-gray-500 mb-2">Shifts:</p>
@@ -493,6 +521,136 @@ export default function EventPositionsPage({eventId, event, positions, stats }: 
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Shift Creation Modal */}
+        {showShiftModal && selectedPosition && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="mt-3">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Add Shifts to {selectedPosition.name}
+                </h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Shift Name
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g., Morning Shift, Afternoon Shift"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Start Time
+                      </label>
+                      <input
+                        type="time"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        End Time
+                      </label>
+                      <input
+                        type="time"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="flex items-center">
+                      <input type="checkbox" className="mr-2" />
+                      <span className="text-sm text-gray-700">All Day Shift</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    onClick={() => setShowShiftModal(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+                  >
+                    Add Shift
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Overseer Assignment Modal */}
+        {showOverseerModal && selectedPosition && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="mt-3">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Assign Overseer to {selectedPosition.name}
+                </h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Overseer
+                    </label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option value="">Select an overseer...</option>
+                      <option value="elder1">Brother Smith (Elder)</option>
+                      <option value="elder2">Brother Johnson (Elder)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Keyman (Optional)
+                    </label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option value="">Select a keyman...</option>
+                      <option value="ms1">Brother Davis (MS)</option>
+                      <option value="ms2">Brother Wilson (MS)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Responsibilities
+                    </label>
+                    <textarea
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Special instructions or responsibilities..."
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    onClick={() => setShowOverseerModal(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md"
+                  >
+                    Assign Overseer
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

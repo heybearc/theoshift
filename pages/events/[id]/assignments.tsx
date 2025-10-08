@@ -471,11 +471,15 @@ export default function EventAssignments({ eventId, event, assignments, attendan
                       required
                     >
                       <option value="">Select an attendant</option>
-                      {attendants.map((attendant) => (
-                        <option key={attendant.id} value={attendant.id}>
-                          {attendant.firstName} {attendant.lastName}
-                        </option>
-                      ))}
+                      {attendants && attendants.length > 0 ? (
+                        attendants.map((attendant) => (
+                          <option key={attendant.id} value={attendant.id}>
+                            {attendant.firstName} {attendant.lastName}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>No attendants available</option>
+                      )}
                     </select>
                   </div>
 
@@ -491,11 +495,15 @@ export default function EventAssignments({ eventId, event, assignments, attendan
                       required
                     >
                       <option value="">Select a position</option>
-                      {positions.map((position) => (
-                        <option key={position.id} value={position.id}>
-                          {position.positionName} ({position.department})
-                        </option>
-                      ))}
+                      {positions && positions.length > 0 ? (
+                        positions.map((position) => (
+                          <option key={position.id} value={position.id}>
+                            {position.positionName} ({position.department || 'No Area'})
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>No positions available</option>
+                      )}
                     </select>
                   </div>
 
