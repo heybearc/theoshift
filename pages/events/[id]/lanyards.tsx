@@ -248,12 +248,14 @@ export default function EventLanyardsPage({ eventId, event, lanyards, attendants
     
     try {
       const { startNumber, endNumber, prefix, notes } = bulkData
-      const promises: Promise<Response>[] = []
+      const results: { success: boolean; badgeNumber: string; error?: string }[] = []
       
+      // Create lanyards sequentially to maintain order and avoid race conditions
       for (let i = startNumber; i <= endNumber; i++) {
         const badgeNumber = prefix ? `${prefix}${i}` : i.toString()
-        promises.push(
-          fetch(`/api/event-lanyards/${eventId}`, {
+        
+        try {
+          const response = await fetch(`/api/event-lanyards/${eventId}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -263,19 +265,45 @@ export default function EventLanyardsPage({ eventId, event, lanyards, attendants
               notes
             }),
           })
-        )
+
+          if (response.ok) {
+            results.push({ success: true, badgeNumber })
+          } else {
+            const errorData = await response.json()
+            results.push({ 
+              success: false, 
+              badgeNumber, 
+              error: errorData.error || 'Unknown error' 
+            })
+          }
+        } catch (error) {
+          results.push({ 
+            success: false, 
+            badgeNumber, 
+            error: error instanceof Error ? error.message : 'Network error' 
+          })
+        }
       }
 
-      const results = await Promise.all(promises)
-      const successCount = results.filter(r => r.ok).length
+      const successCount = results.filter(r => r.success).length
+      const failedResults = results.filter(r => !r.success)
       
       if (successCount > 0) {
         setBulkData({ startNumber: 1, endNumber: 10, prefix: '', notes: '' })
         setShowBulkForm(false)
         router.reload() // Refresh page to show updated data
-        alert(`Successfully created ${successCount} lanyards`)
+        
+        let message = `Successfully created ${successCount} lanyards`
+        if (failedResults.length > 0) {
+          message += `\n\nFailed to create ${failedResults.length} lanyards:`
+          failedResults.forEach(result => {
+            message += `\n- ${result.badgeNumber}: ${result.error}`
+          })
+        }
+        alert(message)
       } else {
-        setError('Failed to create lanyards')
+        setError('Failed to create any lanyards')
+        console.error('All lanyard creation failed:', results)
       }
     } catch (error) {
       setError('Error creating bulk lanyards')

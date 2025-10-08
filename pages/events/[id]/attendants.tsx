@@ -44,7 +44,10 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
   const [editingAttendant, setEditingAttendant] = useState<Attendant | null>(null)
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [importResults, setImportResults] = useState<any>(null)
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -149,9 +152,70 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
     }
   }
 
-  // Import Attendants Handler (placeholder)
+  // Import Attendants Handler
   const handleImportAttendants = () => {
-    alert('Import functionality coming soon!')
+    setShowImportModal(true)
+    setImportFile(null)
+    setImportResults(null)
+  }
+
+  // Handle CSV file upload
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file && file.type === 'text/csv') {
+      setImportFile(file)
+    } else {
+      alert('Please select a valid CSV file')
+    }
+  }
+
+  // Process CSV import
+  const handleProcessImport = async () => {
+    if (!importFile) return
+
+    setLoading(true)
+    const formData = new FormData()
+    formData.append('file', importFile)
+
+    try {
+      const response = await fetch(`/api/events/${eventId}/attendants`, {
+        method: 'POST',
+        body: formData
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setImportResults(result.data)
+        // Refresh the page to show new attendants
+        router.reload()
+      } else {
+        alert(`Import failed: ${result.error}`)
+      }
+    } catch (error) {
+      console.error('Import error:', error)
+      alert('Import failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Download CSV template
+  const downloadTemplate = () => {
+    const csvContent = `firstName,lastName,email,phone,congregation,formsOfService,notes,isActive
+John,Doe,john.doe@example.com,555-1234,Central Congregation,"Elder, Overseer",,true
+Jane,Smith,jane.smith@example.com,555-5678,North Congregation,"Ministerial Servant, Keyman",,true
+Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
+
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'attendants-import-template.csv'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
   }
 
   return (
@@ -179,6 +243,12 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
               </p>
             </div>
             <div className="flex space-x-3">
+              <button 
+                onClick={() => router.push(`/events/${eventId}`)}
+                className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors"
+              >
+                ← Back to Event
+              </button>
               <button 
                 onClick={handleAddAttendant}
                 disabled={loading}
@@ -512,6 +582,67 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Import Attendants Modal */}
+        {showImportModal && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="mt-3">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Import Attendants</h3>
+                
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 mb-2">
+                    Upload a CSV file with attendant information. 
+                  </p>
+                  <button
+                    onClick={downloadTemplate}
+                    className="text-blue-600 hover:text-blue-800 text-sm underline"
+                  >
+                    📥 Download CSV Template
+                  </button>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select CSV File
+                  </label>
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleFileUpload}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                </div>
+
+                {importFile && (
+                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded">
+                    <p className="text-sm text-green-800">
+                      ✅ File selected: {importFile.name}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowImportModal(false)}
+                    disabled={loading}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleProcessImport}
+                    disabled={loading || !importFile}
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-md"
+                  >
+                    {loading ? 'Importing...' : 'Import Attendants'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
