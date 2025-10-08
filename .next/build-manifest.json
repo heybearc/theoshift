@@ -5,8 +5,8 @@
   "devFiles": [],
   "ampDevFiles": [],
   "lowPriorityFiles": [
-    "static/vXqdRz5W5AZA7xfMN-ojO/_buildManifest.js",
-    "static/vXqdRz5W5AZA7xfMN-ojO/_ssgManifest.js"
+    "static/CFbRv62eQy8cqqX3Tee-m/_buildManifest.js",
+    "static/CFbRv62eQy8cqqX3Tee-m/_ssgManifest.js"
   ],
   "rootMainFiles": [],
   "pages": {
@@ -181,7 +181,7 @@
       "static/chunks/framework-64ad27b21261a9ce.js",
       "static/chunks/main-6cf8209804096634.js",
       "static/chunks/424-ca7471161a310844.js",
-      "static/chunks/pages/events/[id]/attendants-c7cb83f630016460.js"
+      "static/chunks/pages/events/[id]/attendants-46d57a852c07de57.js"
     ],
     "/events/[id]/count-times": [
       "static/chunks/webpack-ee7e63bc15b31913.js",

@@ -56,18 +56,24 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
   const router = useRouter()
   const [showAddModal, setShowAddModal] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
-  const [showBulkEditModal, setShowBulkEditModal] = useState(false)
   const [editingAttendant, setEditingAttendant] = useState<Attendant | null>(null)
   const [importFile, setImportFile] = useState<File | null>(null)
   const [selectedAttendants, setSelectedAttendants] = useState<Set<string>>(new Set())
   const [bulkEditData, setBulkEditData] = useState({
     isActive: '',
-    congregation: '',
     formsOfService: '',
+    congregation: '',
     overseerId: null as string | null,
     keymanId: null as string | null
   })
-  const [filters, setFilters] = useState({
+  const [sortField, setSortField] = useState<string>('lastName')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+  const [showBulkEditModal, setShowBulkEditModal] = useState(false)
+  const [filters, setFilters] = useState<{
+    search: string
+    congregation: string
+    isActive: 'all' | 'true' | 'false'
+  }>({
     search: '',
     congregation: '',
     isActive: 'all'
@@ -183,7 +189,9 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
 
     setLoading(true)
     try {
-      const response = await fetch(`/api/events/${eventId}/attendants/${attendant.associationId}`, {
+      console.log(`🗑️ Removing attendant: ${attendant.firstName} ${attendant.lastName} (ID: ${attendant.id})`)
+      
+      const response = await fetch(`/api/events/${eventId}/attendants/${attendant.id}`, {
         method: 'DELETE'
       })
 
