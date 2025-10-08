@@ -38,15 +38,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     switch (req.method) {
       case 'POST':
         console.log('Overseer assignment request body:', req.body)
+        console.log('Position ID received:', positionId)
         const validatedData = overseerSchema.parse(req.body)
         console.log('Validated overseer data:', validatedData)
         
-        // Verify position exists
-        const position = await prisma.event_positions.findUnique({
+        // Verify position exists in positions table
+        const position = await prisma.positions.findUnique({
           where: { id: positionId }
         })
-
+        
+        console.log('Position lookup result:', position ? 'Found' : 'Not found')
+        
         if (!position) {
+          // Also check event_positions table for debugging
+          const eventPosition = await prisma.event_positions.findUnique({
+            where: { id: positionId }
+          })
+          console.log('Event position lookup result:', eventPosition ? 'Found' : 'Not found')
           return res.status(404).json({ error: 'Position not found' })
         }
 
