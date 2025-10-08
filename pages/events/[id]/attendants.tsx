@@ -1251,20 +1251,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 isActive: true,
                 createdAt: true
               }
-            },
-            overseer: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true
-              }
-            },
-            keyman: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true
-              }
             }
           }
         }
@@ -1298,10 +1284,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         isActive: association.attendants!.isActive,
         createdAt: association.attendants!.createdAt?.toISOString() || null,
         associationId: association.id,
-        overseerId: association.overseerId,
-        keymanId: association.keymanId,
-        overseer: association.overseer,
-        keyman: association.keyman
+        overseerId: association.overseerId || null,
+        keymanId: association.keymanId || null,
+        overseer: null, // Will be populated by separate query if needed
+        keyman: null    // Will be populated by separate query if needed
       }))
 
     return {
