@@ -1,12 +1,24 @@
-import { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/router'
 import { useSession } from 'next-auth/react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { GetServerSideProps } from 'next'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../../api/auth/[...nextauth]'
-import BulkPositionCreator from '../../../components/positions/BulkPositionCreator'
+import crypto from 'crypto'
+
+// Utility function to convert 24-hour time to 12-hour format
+function formatTime12Hour(time24: string): string {
+  if (!time24) return ''
+  
+  const [hours, minutes] = time24.split(':')
+  const hour = parseInt(hours, 10)
+  const ampm = hour >= 12 ? 'PM' : 'AM'
+  const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+  
+  return `${hour12}:${minutes} ${ampm}`
+}
 
 // APEX GUARDIAN: Modern Event Positions Management Page
 // Updated to use the new positions API with bulk creation capabilities
@@ -528,7 +540,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                               ) : (
                                 shift.startTime && shift.endTime && (
                                   <span className="ml-2 text-gray-600">
-                                    {shift.startTime} - {shift.endTime}
+                                    {formatTime12Hour(shift.startTime)} - {formatTime12Hour(shift.endTime)}
                                   </span>
                                 )
                               )}
@@ -565,14 +577,20 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
         </div>
 
         {/* Bulk Position Creator Modal */}
+        {/* TODO: Implement BulkPositionCreator component for Phase 2 */}
         {showBulkCreator && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-              <BulkPositionCreator
-                eventId={eventId}
-                onSuccess={handleBulkCreateSuccess}
-                onCancel={() => setShowBulkCreator(false)}
-              />
+              <div className="text-center p-8">
+                <h3 className="text-lg font-medium mb-4">Bulk Position Creator</h3>
+                <p className="text-gray-600 mb-4">Coming in Phase 2 - Bulk position operations</p>
+                <button
+                  onClick={() => setShowBulkCreator(false)}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         )}
