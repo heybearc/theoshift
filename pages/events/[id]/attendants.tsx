@@ -25,6 +25,18 @@ interface Attendant {
   isActive: boolean
   createdAt: string | null
   associationId: string
+  overseerId?: string | null
+  keymanId?: string | null
+  overseer?: {
+    id: string
+    firstName: string
+    lastName: string
+  } | null
+  keyman?: {
+    id: string
+    firstName: string
+    lastName: string
+  } | null
 }
 
 interface AttendantStats {
@@ -583,6 +595,12 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                         Forms of Service
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Overseer
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Keyman
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -632,6 +650,76 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                               </span>
                             ))}
                           </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <select
+                            value={attendant.overseerId || ''}
+                            onChange={async (e) => {
+                              const overseerId = e.target.value || null
+                              try {
+                                const response = await fetch(`/api/events/${eventId}/attendants/${attendant.id}/leadership`, {
+                                  method: 'PUT',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ overseerId })
+                                })
+                                if (response.ok) {
+                                  router.reload()
+                                } else {
+                                  alert('Failed to update overseer')
+                                }
+                              } catch (error) {
+                                console.error('Error updating overseer:', error)
+                                alert('Failed to update overseer')
+                              }
+                            }}
+                            className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">No Overseer</option>
+                            {attendants.filter(att => 
+                              att.isActive && 
+                              Array.isArray(att.formsOfService) && 
+                              att.formsOfService.some(form => form.toLowerCase().includes('overseer'))
+                            ).map(overseer => (
+                              <option key={overseer.id} value={overseer.id}>
+                                {overseer.firstName} {overseer.lastName}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <select
+                            value={attendant.keymanId || ''}
+                            onChange={async (e) => {
+                              const keymanId = e.target.value || null
+                              try {
+                                const response = await fetch(`/api/events/${eventId}/attendants/${attendant.id}/leadership`, {
+                                  method: 'PUT',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ keymanId })
+                                })
+                                if (response.ok) {
+                                  router.reload()
+                                } else {
+                                  alert('Failed to update keyman')
+                                }
+                              } catch (error) {
+                                console.error('Error updating keyman:', error)
+                                alert('Failed to update keyman')
+                              }
+                            }}
+                            className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">No Keyman</option>
+                            {attendants.filter(att => 
+                              att.isActive && 
+                              Array.isArray(att.formsOfService) && 
+                              att.formsOfService.some(form => form.toLowerCase().includes('keyman'))
+                            ).map(keyman => (
+                              <option key={keyman.id} value={keyman.id}>
+                                {keyman.firstName} {keyman.lastName}
+                              </option>
+                            ))}
+                          </select>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs rounded-full ${
@@ -1057,6 +1145,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 isActive: true,
                 createdAt: true
               }
+            },
+            overseer: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true
+              }
+            },
+            keyman: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true
+              }
             }
           }
         }
@@ -1089,7 +1191,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         formsOfService: association.attendants!.formsOfService,
         isActive: association.attendants!.isActive,
         createdAt: association.attendants!.createdAt?.toISOString() || null,
-        associationId: association.id
+        associationId: association.id,
+        overseerId: association.overseerId,
+        keymanId: association.keymanId,
+        overseer: association.overseer,
+        keyman: association.keyman
       }))
 
     return {

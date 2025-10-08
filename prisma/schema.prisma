@@ -52,6 +52,8 @@ model attendants {
   position_assignments         position_assignments[]
   overseer_assignments         position_assignments[]         @relation("OverseerRelation")
   keyman_assignments           position_assignments[]         @relation("KeymanRelation")
+  event_overseer_assignments   event_attendant_associations[] @relation("EventOverseerRelation")
+  event_keyman_assignments     event_attendant_associations[] @relation("EventKeymanRelation")
 }
 
 model count_sessions {
@@ -98,10 +100,14 @@ model event_attendant_associations {
   isActive              Boolean     @default(true)
   assignedDepartments   Json?
   assignedStationRanges Json?
+  overseerId            String?     // Event-specific overseer assignment
+  keymanId              String?     // Event-specific keyman assignment
   createdAt             DateTime    @default(now())
   updatedAt             DateTime
   attendantId           String?
   attendants            attendants? @relation(fields: [attendantId], references: [id], onDelete: Cascade)
+  overseer              attendants? @relation("EventOverseerRelation", fields: [overseerId], references: [id], onDelete: SetNull)
+  keyman                attendants? @relation("EventKeymanRelation", fields: [keymanId], references: [id], onDelete: SetNull)
   events                events      @relation(fields: [eventId], references: [id], onDelete: Cascade)
   users                 users?      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
