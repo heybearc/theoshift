@@ -305,6 +305,84 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
     }
   }
 
+  // Auto-assign algorithm
+  const handleAutoAssign = async () => {
+    if (!confirm('Auto-assign available attendants to unfilled positions?')) return
+    
+    try {
+      setIsSubmitting(true)
+      
+      // Get all assigned attendant IDs to avoid double assignments
+      const assignedAttendantIds = new Set()
+      positions.forEach(position => {
+        position.assignments?.forEach(assignment => {
+          if (assignment.attendant?.id) {
+            assignedAttendantIds.add(assignment.attendant.id)
+          }
+        })
+      })
+      
+      // Find available attendants (not already assigned)
+      const availableAttendants = attendants.filter(att => 
+        att.isActive && !assignedAttendantIds.has(att.id)
+      )
+      
+      // Find positions that need more attendants (simple algorithm: positions with < 2 assignments)
+      const positionsNeedingAttendants = positions.filter(pos => 
+        pos.isActive && (pos.assignments?.length || 0) < 2
+      )
+      
+      let assignmentCount = 0
+      
+      for (const position of positionsNeedingAttendants) {
+        if (availableAttendants.length === 0) break
+        
+        // Assign one attendant to this position
+        const attendant = availableAttendants.shift()
+        if (!attendant) continue
+        
+        const response = await fetch(`/api/events/${eventId}/assignments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            positionId: position.id,
+            attendantId: attendant.id,
+            role: 'ATTENDANT'
+          })
+        })
+        
+        if (response.ok) {
+          assignmentCount++
+          assignedAttendantIds.add(attendant.id)
+        }
+      }
+      
+      alert(`Auto-assigned ${assignmentCount} attendants successfully!`)
+      router.reload()
+    } catch (error) {
+      console.error('Auto-assign error:', error)
+      alert('Failed to auto-assign attendants')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Get unassigned attendants count
+  const getUnassignedCount = () => {
+    const assignedAttendantIds = new Set()
+    positions.forEach(position => {
+      position.assignments?.forEach(assignment => {
+        if (assignment.attendant?.id) {
+          assignedAttendantIds.add(assignment.attendant.id)
+        }
+      })
+    })
+    
+    return attendants.filter(att => 
+      att.isActive && !assignedAttendantIds.has(att.id)
+    ).length
+  }
+
   // Get session data
   const { data: session } = useSession()
 
@@ -388,6 +466,15 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                     </button>
                   </div>
                 )}
+                
+                <button
+                  onClick={handleAutoAssign}
+                  disabled={isSubmitting || getUnassignedCount() === 0}
+                  className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  title={`Auto-assign ${getUnassignedCount()} available attendants`}
+                >
+                  🤖 Auto-Assign ({getUnassignedCount()})
+                </button>
                 
                 <button
                   onClick={() => setShowBulkCreator(true)}
