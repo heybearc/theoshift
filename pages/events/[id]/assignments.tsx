@@ -114,6 +114,7 @@ export default function EventAssignments({ eventId, event, assignments, attendan
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           userId: formData.userId,
           positionId: formData.positionId,

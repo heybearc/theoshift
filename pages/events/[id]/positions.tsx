@@ -46,20 +46,28 @@ interface Event {
   status: string
 }
 
-interface PositionStats {
+interface Stats {
   total: number
   active: number
   assigned: number
+}
+
+interface Attendant {
+  id: string
+  firstName: string
+  lastName: string
+  role: string
 }
 
 interface EventPositionsProps {
   eventId: string
   event: Event
   positions: Position[]
-  stats: PositionStats
+  attendants: Attendant[]
+  stats: Stats
 }
 
-export default function EventPositionsPage({eventId, event, positions, stats }: EventPositionsProps) {
+export default function EventPositionsPage({ eventId, event, positions, attendants, stats }: EventPositionsProps) {
   const router = useRouter()
   const { data: session } = useSession()
   const [loading, setLoading] = useState(false)
@@ -72,6 +80,17 @@ export default function EventPositionsPage({eventId, event, positions, stats }: 
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set())
   const [showBulkEditModal, setShowBulkEditModal] = useState(false)
+  const [shiftFormData, setShiftFormData] = useState({
+    name: '',
+    startTime: '',
+    endTime: '',
+    isAllDay: false
+  })
+  const [overseerFormData, setOverseerFormData] = useState({
+    overseerId: '',
+    keymanId: '',
+    responsibilities: ''
+  })
   const [formData, setFormData] = useState({
     positionNumber: 1,
     name: '',
@@ -132,7 +151,7 @@ export default function EventPositionsPage({eventId, event, positions, stats }: 
   }
 
   const handleDelete = async (positionId: string) => {
-    if (!confirm('Are you sure you want to delete this position? This action cannot be undone.')) {
+    if (!confirm(`Are you sure you want to delete position #${positionId}? This action cannot be undone.`)) {
       return
     }
 
@@ -158,6 +177,77 @@ export default function EventPositionsPage({eventId, event, positions, stats }: 
     setShowCreateModal(false)
     setEditingPosition(null)
     setFormData({ positionNumber: 1, name: '', area: '', description: '' })
+  }
+
+  const handleShiftSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!selectedPosition) return
+    
+    try {
+      const response = await fetch(`/api/events/${eventId}/positions/${selectedPosition.id}/shifts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          name: shiftFormData.name,
+          startTime: shiftFormData.startTime,
+          endTime: shiftFormData.endTime,
+          isAllDay: shiftFormData.isAllDay,
+          positionId: selectedPosition.id
+        }),
+      })
+
+      if (response.ok) {
+        alert('Shift added successfully')
+        setShowShiftModal(false)
+        setShiftFormData({ name: '', startTime: '', endTime: '', isAllDay: false })
+        router.reload()
+      } else {
+        const error = await response.json()
+        alert(`Failed to add shift: ${error.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Error adding shift:', error)
+      alert('Failed to add shift')
+    }
+  }
+
+  const handleOverseerSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!selectedPosition) return
+    
+    try {
+      const response = await fetch(`/api/events/${eventId}/positions/${selectedPosition.id}/overseer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          overseerId: overseerFormData.overseerId,
+          keymanId: overseerFormData.keymanId || null,
+          responsibilities: overseerFormData.responsibilities,
+          positionId: selectedPosition.id
+        }),
+      })
+
+      if (response.ok) {
+        alert('Overseer assigned successfully')
+        setShowOverseerModal(false)
+        setOverseerFormData({ overseerId: '', keymanId: '', responsibilities: '' })
+        router.reload()
+      } else {
+        const error = await response.json()
+        alert(`Failed to assign overseer: ${error.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Error assigning overseer:', error)
+      alert('Failed to assign overseer')
+    }
   }
 
   const handleBulkCreateSuccess = (result: any) => {
@@ -369,7 +459,7 @@ export default function EventPositionsPage({eventId, event, positions, stats }: 
                         👥 Assign Overseer
                       </button>
                       <button
-                        onClick={() => setEditingPosition(position)}
+                        onClick={() => handleEdit(position)}
                         className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 px-2 py-1 rounded transition-colors"
                       >
                         ✏️ Edit
@@ -534,60 +624,78 @@ export default function EventPositionsPage({eventId, event, positions, stats }: 
                   Add Shifts to {selectedPosition.name}
                 </h3>
                 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Shift Name
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="e.g., Morning Shift, Afternoon Shift"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleShiftSubmit}>
+                  <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Start Time
+                        Shift Name
                       </label>
                       <input
-                        type="time"
+                        type="text"
+                        value={shiftFormData.name}
+                        onChange={(e) => setShiftFormData({ ...shiftFormData, name: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="e.g., Morning Shift, Afternoon Shift"
+                        required
                       />
                     </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Start Time
+                        </label>
+                        <input
+                          type="time"
+                          value={shiftFormData.startTime}
+                          onChange={(e) => setShiftFormData({ ...shiftFormData, startTime: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          disabled={shiftFormData.isAllDay}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          End Time
+                        </label>
+                        <input
+                          type="time"
+                          value={shiftFormData.endTime}
+                          onChange={(e) => setShiftFormData({ ...shiftFormData, endTime: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          disabled={shiftFormData.isAllDay}
+                        />
+                      </div>
+                    </div>
+
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        End Time
+                      <label className="flex items-center">
+                        <input 
+                          type="checkbox" 
+                          checked={shiftFormData.isAllDay}
+                          onChange={(e) => setShiftFormData({ ...shiftFormData, isAllDay: e.target.checked })}
+                          className="mr-2" 
+                        />
+                        <span className="text-sm text-gray-700">All Day Shift</span>
                       </label>
-                      <input
-                        type="time"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
                     </div>
                   </div>
 
-                  <div>
-                    <label className="flex items-center">
-                      <input type="checkbox" className="mr-2" />
-                      <span className="text-sm text-gray-700">All Day Shift</span>
-                    </label>
+                  <div className="flex justify-end space-x-3 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setShowShiftModal(false)}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+                    >
+                      Add Shift
+                    </button>
                   </div>
-                </div>
-
-                <div className="flex justify-end space-x-3 mt-6">
-                  <button
-                    onClick={() => setShowShiftModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
-                  >
-                    Add Shift
-                  </button>
-                </div>
+                </form>
               </div>
             </div>
           </div>
@@ -602,54 +710,75 @@ export default function EventPositionsPage({eventId, event, positions, stats }: 
                   Assign Overseer to {selectedPosition.name}
                 </h3>
                 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Select Overseer
-                    </label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                      <option value="">Select an overseer...</option>
-                      <option value="elder1">Brother Smith (Elder)</option>
-                      <option value="elder2">Brother Johnson (Elder)</option>
-                    </select>
+                <form onSubmit={handleOverseerSubmit}>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Select Overseer
+                      </label>
+                      <select 
+                        value={overseerFormData.overseerId}
+                        onChange={(e) => setOverseerFormData({ ...overseerFormData, overseerId: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      >
+                        <option value="">Select an overseer...</option>
+                        {attendants.filter(att => att.role === 'ELDER' || att.role === 'elder').map(attendant => (
+                          <option key={attendant.id} value={attendant.id}>
+                            {attendant.firstName} {attendant.lastName} (Elder)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Select Keyman (Optional)
+                      </label>
+                      <select 
+                        value={overseerFormData.keymanId}
+                        onChange={(e) => setOverseerFormData({ ...overseerFormData, keymanId: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Select a keyman...</option>
+                        {attendants.filter(att => att.role === 'MINISTERIAL_SERVANT' || att.role === 'ministerial_servant').map(attendant => (
+                          <option key={attendant.id} value={attendant.id}>
+                            {attendant.firstName} {attendant.lastName} (MS)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Responsibilities
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={overseerFormData.responsibilities}
+                        onChange={(e) => setOverseerFormData({ ...overseerFormData, responsibilities: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Special instructions or responsibilities..."
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Select Keyman (Optional)
-                    </label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                      <option value="">Select a keyman...</option>
-                      <option value="ms1">Brother Davis (MS)</option>
-                      <option value="ms2">Brother Wilson (MS)</option>
-                    </select>
+                  <div className="flex justify-end space-x-3 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setShowOverseerModal(false)}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md"
+                    >
+                      Assign Overseer
+                    </button>
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Responsibilities
-                    </label>
-                    <textarea
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Special instructions or responsibilities..."
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end space-x-3 mt-6">
-                  <button
-                    onClick={() => setShowOverseerModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md"
-                  >
-                    Assign Overseer
-                  </button>
-                </div>
+                </form>
               </div>
             </div>
           </div>
@@ -692,6 +821,23 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         }
       }
     })
+
+    // Fetch attendants for overseer assignment
+    const attendantsData = await prisma.users.findMany({
+      where: {
+        isActive: true
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        role: true
+      },
+      orderBy: [
+        { firstName: 'asc' },
+        { lastName: 'asc' }
+      ]
+    })
     
     if (!eventData) {
       return { notFound: true }
@@ -733,6 +879,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         eventId: id as string,
         event,
         positions,
+        attendants: attendantsData,
         stats: {
           total: positions.length,
           active: positions.filter(p => p.isActive).length,
