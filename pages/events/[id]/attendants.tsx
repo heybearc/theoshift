@@ -63,7 +63,9 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
   const [bulkEditData, setBulkEditData] = useState({
     isActive: '',
     congregation: '',
-    formsOfService: ''
+    formsOfService: '',
+    overseerId: null as string | null,
+    keymanId: null as string | null
   })
   const [filters, setFilters] = useState({
     search: '',
@@ -357,7 +359,10 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
     setLoading(true)
     try {
       const updates: Promise<Response>[] = []
+      const leadershipUpdates: Promise<Response>[] = []
+      
       for (const associationId of selectedAttendants) {
+        // Handle basic attendant data updates
         const updateData: any = {}
         
         if (bulkEditData.isActive !== '') {
@@ -379,12 +384,36 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
             })
           )
         }
+
+        // Handle leadership assignments separately
+        const leadershipData: any = {}
+        if (bulkEditData.overseerId !== null) {
+          leadershipData.overseerId = bulkEditData.overseerId === 'REMOVE' ? null : bulkEditData.overseerId
+        }
+        if (bulkEditData.keymanId !== null) {
+          leadershipData.keymanId = bulkEditData.keymanId === 'REMOVE' ? null : bulkEditData.keymanId
+        }
+
+        if (Object.keys(leadershipData).length > 0) {
+          // Find the attendant ID from the association
+          const attendant = attendants.find(att => att.associationId === associationId)
+          if (attendant) {
+            leadershipUpdates.push(
+              fetch(`/api/events/${eventId}/attendants/${attendant.id}/leadership`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(leadershipData)
+              })
+            )
+          }
+        }
       }
 
-      await Promise.all(updates)
+      // Execute all updates in parallel
+      await Promise.all([...updates, ...leadershipUpdates])
       setShowBulkEditModal(false)
       setSelectedAttendants(new Set())
-      setBulkEditData({ isActive: '', formsOfService: '', congregation: '' })
+      setBulkEditData({ isActive: '', formsOfService: '', congregation: '', overseerId: null, keymanId: null })
       router.reload()
     } catch (error) {
       console.error('Bulk edit error:', error)
@@ -1080,6 +1109,59 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="e.g., Elder, Overseer (leave empty for no change)"
                     />
+                  </div>
+
+                  {/* Leadership Assignment Section */}
+                  <div className="border-t pt-4">
+                    <h4 className="text-md font-medium text-gray-900 mb-3">Leadership Assignment</h4>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Assign Overseer
+                        </label>
+                        <select
+                          value={bulkEditData.overseerId || ''}
+                          onChange={(e) => setBulkEditData({ ...bulkEditData, overseerId: e.target.value || null })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
+                          <option value="">No change</option>
+                          <option value="REMOVE">Remove overseer</option>
+                          {attendants.filter(att => 
+                            att.isActive && 
+                            Array.isArray(att.formsOfService) && 
+                            att.formsOfService.some(form => form.toLowerCase().includes('overseer'))
+                          ).map(overseer => (
+                            <option key={overseer.id} value={overseer.id}>
+                              {overseer.firstName} {overseer.lastName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Assign Keyman
+                        </label>
+                        <select
+                          value={bulkEditData.keymanId || ''}
+                          onChange={(e) => setBulkEditData({ ...bulkEditData, keymanId: e.target.value || null })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
+                          <option value="">No change</option>
+                          <option value="REMOVE">Remove keyman</option>
+                          {attendants.filter(att => 
+                            att.isActive && 
+                            Array.isArray(att.formsOfService) && 
+                            att.formsOfService.some(form => form.toLowerCase().includes('keyman'))
+                          ).map(keyman => (
+                            <option key={keyman.id} value={keyman.id}>
+                              {keyman.firstName} {keyman.lastName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
