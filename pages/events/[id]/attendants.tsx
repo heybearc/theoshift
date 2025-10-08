@@ -181,27 +181,86 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
     if (!importFile) return
 
     setLoading(true)
-    const formData = new FormData()
-    formData.append('file', importFile)
 
     try {
+      // Read and parse CSV file
+      const text = await importFile.text()
+      const lines = text.split('\n').filter(line => line.trim())
+      
+      if (lines.length < 2) {
+        alert('CSV file must have at least a header row and one data row')
+        return
+      }
+
+      // Parse CSV header
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''))
+      
+      // Parse CSV data
+      const attendants: any[] = []
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''))
+        const attendant: any = {}
+        
+        headers.forEach((header, index) => {
+          const value = values[index] || ''
+          switch (header.toLowerCase()) {
+            case 'firstname':
+              attendant.firstName = value
+              break
+            case 'lastname':
+              attendant.lastName = value
+              break
+            case 'email':
+              attendant.email = value
+              break
+            case 'phone':
+              attendant.phone = value
+              break
+            case 'congregation':
+              attendant.congregation = value
+              break
+            case 'formsofservice':
+              attendant.formsOfService = value
+              break
+            case 'notes':
+              attendant.notes = value
+              break
+            case 'isactive':
+              attendant.isActive = value.toLowerCase() === 'true'
+              break
+          }
+        })
+        
+        if (attendant.firstName && attendant.lastName && attendant.email) {
+          attendants.push(attendant)
+        }
+      }
+
+      if (attendants.length === 0) {
+        alert('No valid attendant records found in CSV')
+        return
+      }
+
+      // Send to bulk import API
       const response = await fetch(`/api/events/${eventId}/attendants`, {
-        method: 'POST',
-        body: formData
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ attendants })
       })
 
       const result = await response.json()
 
       if (result.success) {
         setImportResults(result.data)
-        // Refresh the page to show new attendants
+        setShowImportModal(false)
         router.reload()
+        alert(`Successfully imported ${attendants.length} attendants`)
       } else {
         alert(`Import failed: ${result.error}`)
       }
     } catch (error) {
       console.error('Import error:', error)
-      alert('Import failed. Please try again.')
+      alert('Failed to parse CSV file. Please check the format.')
     } finally {
       setLoading(false)
     }
