@@ -142,6 +142,8 @@ model events {
   endDate                      DateTime                       @db.Date
   location                     String?
   venue                        String?
+  capacity                     Int?
+  attendantsNeeded             Int?
   isActive                     Boolean                        @default(true)
   settings                     Json?
   createdAt                    DateTime                       @default(now())
