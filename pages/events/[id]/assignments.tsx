@@ -104,8 +104,8 @@ export default function EventAssignments({ eventId, event, assignments, attendan
 
     try {
       const url = editingAssignment 
-        ? `/api/event-assignments/${eventId}/${editingAssignment.id}`
-        : `/api/event-assignments/${eventId}`
+        ? `/api/events/${eventId}/assignments/${editingAssignment.id}`
+        : `/api/events/${eventId}/assignments`
       
       const method = editingAssignment ? 'PUT' : 'POST'
       

@@ -81,7 +81,6 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set())
   const [showBulkEditModal, setShowBulkEditModal] = useState(false)
   const [shiftFormData, setShiftFormData] = useState({
-    name: '',
     startTime: '',
     endTime: '',
     isAllDay: false
@@ -192,7 +191,6 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
         },
         credentials: 'include',
         body: JSON.stringify({
-          name: shiftFormData.name,
           startTime: shiftFormData.startTime,
           endTime: shiftFormData.endTime,
           isAllDay: shiftFormData.isAllDay,
@@ -203,7 +201,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       if (response.ok) {
         alert('Shift added successfully')
         setShowShiftModal(false)
-        setShiftFormData({ name: '', startTime: '', endTime: '', isAllDay: false })
+        setShiftFormData({ startTime: '', endTime: '', isAllDay: false })
         router.reload()
       } else {
         const error = await response.json()
@@ -626,19 +624,6 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 
                 <form onSubmit={handleShiftSubmit}>
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Shift Name
-                      </label>
-                      <input
-                        type="text"
-                        value={shiftFormData.name}
-                        onChange={(e) => setShiftFormData({ ...shiftFormData, name: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="e.g., Morning Shift, Afternoon Shift"
-                        required
-                      />
-                    </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
