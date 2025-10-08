@@ -73,8 +73,49 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           message: 'Shift created successfully'
         })
 
+      case 'DELETE':
+        const { shiftId } = req.body
+        
+        if (!shiftId) {
+          return res.status(400).json({ error: 'Shift ID is required' })
+        }
+
+        // Verify shift exists and belongs to this position
+        const shift = await prisma.position_shifts.findUnique({
+          where: { id: shiftId }
+        })
+
+        if (!shift) {
+          return res.status(404).json({ error: 'Shift not found' })
+        }
+
+        if (shift.positionId !== positionId) {
+          return res.status(400).json({ error: 'Shift does not belong to this position' })
+        }
+
+        // Check if shift has any assignments
+        const assignments = await prisma.position_assignments.findMany({
+          where: { shiftId: shiftId }
+        })
+
+        if (assignments.length > 0) {
+          return res.status(400).json({ 
+            error: `Cannot delete shift: ${assignments.length} attendant(s) are assigned to this shift. Please remove assignments first.` 
+          })
+        }
+
+        // Delete the shift
+        await prisma.position_shifts.delete({
+          where: { id: shiftId }
+        })
+
+        return res.status(200).json({
+          success: true,
+          message: 'Shift deleted successfully'
+        })
+
       default:
-        res.setHeader('Allow', ['POST'])
+        res.setHeader('Allow', ['POST', 'DELETE'])
         return res.status(405).json({ error: 'Method not allowed' })
     }
   } catch (error) {

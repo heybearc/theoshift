@@ -890,21 +890,50 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                         <p className="text-xs font-medium text-gray-500 mb-2">⏰ Shifts:</p>
                         <div className="space-y-2">
                           {position.shifts.map((shift, index) => (
-                            <div key={index} className={`inline-flex items-center px-3 py-2 rounded-lg text-xs border ${
+                            <div key={index} className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs border ${
                               shift.isAllDay 
                                 ? 'bg-green-50 border-green-200 text-green-800' 
                                 : 'bg-gray-50 border-gray-200 text-gray-700'
                             }`}>
-                              <span className="font-medium">{shift.name}</span>
-                              {shift.isAllDay ? (
-                                <span className="ml-2 text-green-600">(24 hours)</span>
-                              ) : (
-                                shift.startTime && shift.endTime && (
-                                  <span className="ml-2 text-gray-600">
-                                    {formatTime12Hour(shift.startTime)} - {formatTime12Hour(shift.endTime)}
-                                  </span>
-                                )
-                              )}
+                              <div className="flex items-center">
+                                <span className="font-medium">{shift.name}</span>
+                                {shift.isAllDay ? (
+                                  <span className="ml-2 text-green-600">(24 hours)</span>
+                                ) : (
+                                  shift.startTime && shift.endTime && (
+                                    <span className="ml-2 text-gray-600">
+                                      {formatTime12Hour(shift.startTime)} - {formatTime12Hour(shift.endTime)}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                              <button
+                                onClick={async () => {
+                                  if (confirm(`Delete shift "${shift.name}"? This cannot be undone.`)) {
+                                    try {
+                                      const response = await fetch(`/api/events/${eventId}/positions/${position.id}/shifts`, {
+                                        method: 'DELETE',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ shiftId: shift.id })
+                                      })
+                                      
+                                      if (response.ok) {
+                                        router.reload()
+                                      } else {
+                                        const error = await response.json()
+                                        alert(`Failed to delete shift: ${error.error}`)
+                                      }
+                                    } catch (error) {
+                                      console.error('Error deleting shift:', error)
+                                      alert('Failed to delete shift')
+                                    }
+                                  }
+                                }}
+                                className="ml-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded p-1 transition-colors"
+                                title="Delete shift"
+                              >
+                                🗑️
+                              </button>
                             </div>
                           ))}
                           {position.shifts.some(s => s.isAllDay) && (

@@ -398,19 +398,43 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
           // Find the attendant ID from the association
           const attendant = attendants.find(att => att.associationId === associationId)
           if (attendant) {
+            console.log(`🔧 Bulk leadership update for attendant ${attendant.firstName} ${attendant.lastName}:`, leadershipData)
             leadershipUpdates.push(
               fetch(`/api/events/${eventId}/attendants/${attendant.id}/leadership`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(leadershipData)
+              }).then(response => {
+                if (!response.ok) {
+                  console.error(`Leadership update failed for ${attendant.firstName} ${attendant.lastName}:`, response.status)
+                  return response.json().then(err => {
+                    console.error('Error details:', err)
+                    throw new Error(`Leadership update failed: ${err.error}`)
+                  })
+                }
+                console.log(`✅ Leadership updated for ${attendant.firstName} ${attendant.lastName}`)
+                return response
               })
             )
+          } else {
+            console.error(`❌ Could not find attendant for association ID: ${associationId}`)
           }
         }
       }
 
       // Execute all updates in parallel
-      await Promise.all([...updates, ...leadershipUpdates])
+      const results = await Promise.allSettled([...updates, ...leadershipUpdates])
+      
+      const failed = results.filter(result => result.status === 'rejected')
+      const successful = results.filter(result => result.status === 'fulfilled')
+      
+      if (failed.length > 0) {
+        console.error('Some updates failed:', failed)
+        alert(`Bulk edit completed with ${successful.length} successful and ${failed.length} failed updates. Check console for details.`)
+      } else {
+        console.log(`✅ All ${successful.length} updates completed successfully`)
+      }
+      
       setShowBulkEditModal(false)
       setSelectedAttendants(new Set())
       setBulkEditData({ isActive: '', formsOfService: '', congregation: '', overseerId: null, keymanId: null })
