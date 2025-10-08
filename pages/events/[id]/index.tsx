@@ -38,30 +38,28 @@ interface Event {
       lastName: string
       email: string
     }
-    event_positions: {
+    positions: {
       id: string
       positionNumber: number
-      positionName: string
-      department: string
+      name: string
+      area: string
     }
     shiftStart: string
     shiftEnd: string
     status: string
   }>
-  event_positions: Array<{
+  positions: Array<{
     id: string
     positionNumber: number
-    positionName: string
+    name: string
+    area: string
+    isActive: boolean
     department: string
-    description?: string
-    _count: {
-      assignments: number
-    }
   }>
   _count: {
     event_attendant_associations: number
     assignments: number
-    event_positions: number
+    positions: number
   }
 }
 
@@ -225,7 +223,7 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
       ['Location', event.location || 'Not specified'],
       [''],
       ['Statistics'],
-      ['Total Positions', event._count.event_positions.toString()],
+      ['Total Positions', event._count.positions.toString()],
       ['Total Assignments', event._count.assignments.toString()],
       ['Attendants Linked', event._count.event_attendant_associations.toString()]
     ]
@@ -424,7 +422,7 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
             <div className="bg-white shadow rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Positions ({event._count.event_positions})
+                  Positions ({event._count.positions})
                 </h3>
                 <Link
                   href={`/events/${event.id}/positions`}
@@ -433,7 +431,7 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                   ➕ Manage Positions
                 </Link>
               </div>
-              {event.event_positions.length === 0 ? (
+              {event.positions.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-500">No positions created yet</p>
                   <Link
@@ -460,20 +458,20 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {event.event_positions.slice(0, 5).map((position) => (
+                      {event.positions.slice(0, 5).map((position) => (
                         <tr key={position.id}>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
                               <div className="text-sm font-medium text-gray-900">
-                                #{position.positionNumber} - {position.positionName}
+                                #{position.positionNumber} - {position.name}
                               </div>
                               {position.description && (
-                                <div className="text-sm text-gray-500">{position.description}</div>
+                                <div className="text-sm text-gray-500">{position.area || 'No area'}</div>
                               )}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {position.department}
+                            {position.department || 'No department'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
@@ -484,13 +482,13 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                       ))}
                     </tbody>
                   </table>
-                  {event.event_positions.length > 5 && (
+                  {event.positions.length > 5 && (
                     <div className="mt-3 text-center">
                       <Link
                         href={`/admin/events/${event.id}/positions`}
                         className="text-blue-600 hover:text-blue-800 text-sm"
                       >
-                        View all {event.event_positions.length} positions →
+                        View all {event.positions.length} positions →
                       </Link>
                     </div>
                   )}
@@ -551,9 +549,9 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">
-                              #{assignment.event_positions.positionNumber} - {assignment.event_positions.positionName}
+                              #{assignment.positions.positionNumber} - {assignment.positions.name}
                             </div>
-                            <div className="text-sm text-gray-500">{assignment.event_positions.department}</div>
+                            <div className="text-sm text-gray-500">{assignment.positions.area}</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {formatTime(assignment.shiftStart)} - {formatTime(assignment.shiftEnd)}
@@ -590,7 +588,7 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500">Total Positions</span>
-                  <span className="text-sm font-medium text-gray-900">{event._count.event_positions}</span>
+                  <span className="text-sm font-medium text-gray-900">{event._count.positions}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-500">Total Assignments</span>
@@ -727,11 +725,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         },
         assignments: {
           include: {
-            users: true,
-            event_positions: true
+            users: true
           }
         },
-        event_positions: {
+        positions: {
           include: {
             _count: {
               select: {
@@ -759,7 +756,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       _count: {
         event_attendant_associations: event.event_attendant_associations.length,
         assignments: event.assignments.length,
-        event_positions: event.event_positions.length
+        positions: event.positions.length
       }
     }
 
