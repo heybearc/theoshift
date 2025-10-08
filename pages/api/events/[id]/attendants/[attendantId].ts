@@ -91,7 +91,7 @@ async function handleGetAttendant(req: NextApiRequest, res: NextApiResponse, eve
   }
 }
 
-async function handleUpdateAttendant(req: NextApiRequest, res: NextApiResponse, eventId: string, attendantId: string) {
+async function handleUpdateAttendant(req: NextApiRequest, res: NextApiResponse, eventId: string, associationId: string) {
   try {
     const { firstName, lastName, email, phone, congregation, notes, formsOfService, isActive } = req.body
 
@@ -102,13 +102,17 @@ async function handleUpdateAttendant(req: NextApiRequest, res: NextApiResponse, 
       })
     }
 
-    // Check if attendant exists
-    const existingAttendant = await prisma.attendants.findUnique({
-      where: { id: attendantId }
+    // Find the association to get the actual attendant ID
+    const association = await prisma.event_attendant_associations.findUnique({
+      where: { id: associationId },
+      include: { attendants: true }
     })
-    if (!existingAttendant) {
-      return res.status(404).json({ error: 'Attendant not found' })
+    
+    if (!association || !association.attendants) {
+      return res.status(404).json({ error: 'Attendant association not found' })
     }
+
+    const actualAttendantId = association.attendants.id
 
     // Process forms of service
     let processedFormsOfService: string[] = []
@@ -125,7 +129,7 @@ async function handleUpdateAttendant(req: NextApiRequest, res: NextApiResponse, 
 
     // Update attendant
     const updatedAttendant = await prisma.attendants.update({
-      where: { id: attendantId },
+      where: { id: actualAttendantId },
       data: {
         firstName,
         lastName,
