@@ -336,12 +336,6 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                 📋 Positions
               </Link>
               <Link
-                href={`/events/${event.id}/assignments`}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors"
-              >
-                📋 Assignments
-              </Link>
-              <Link
                 href={`/events/${event.id}/lanyards`}
                 className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded transition-colors"
               >

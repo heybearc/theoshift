@@ -312,19 +312,30 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
     try {
       setIsSubmitting(true)
       
-      // Get all assigned attendant IDs to avoid double assignments
+      // Get all assigned attendant IDs and leadership IDs to avoid double assignments
       const assignedAttendantIds = new Set()
+      const leadershipAttendantIds = new Set()
+      
       positions.forEach(position => {
         position.assignments?.forEach(assignment => {
           if (assignment.attendant?.id) {
             assignedAttendantIds.add(assignment.attendant.id)
           }
+          // Track overseers and keymen separately
+          if (assignment.overseer?.id) {
+            leadershipAttendantIds.add(assignment.overseer.id)
+          }
+          if (assignment.keyman?.id) {
+            leadershipAttendantIds.add(assignment.keyman.id)
+          }
         })
       })
       
-      // Find available attendants (not already assigned)
+      // Find available attendants (not already assigned and not in leadership roles)
       const availableAttendants = attendants.filter(att => 
-        att.isActive && !assignedAttendantIds.has(att.id)
+        att.isActive && 
+        !assignedAttendantIds.has(att.id) && 
+        !leadershipAttendantIds.has(att.id)
       )
       
       // Find positions that need more attendants (simple algorithm: positions with < 2 assignments)
@@ -367,19 +378,30 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
     }
   }
 
-  // Get unassigned attendants count
+  // Get unassigned attendants count (excluding leadership roles)
   const getUnassignedCount = () => {
     const assignedAttendantIds = new Set()
+    const leadershipAttendantIds = new Set()
+    
     positions.forEach(position => {
       position.assignments?.forEach(assignment => {
         if (assignment.attendant?.id) {
           assignedAttendantIds.add(assignment.attendant.id)
         }
+        // Track overseers and keymen separately
+        if (assignment.overseer?.id) {
+          leadershipAttendantIds.add(assignment.overseer.id)
+        }
+        if (assignment.keyman?.id) {
+          leadershipAttendantIds.add(assignment.keyman.id)
+        }
       })
     })
     
     return attendants.filter(att => 
-      att.isActive && !assignedAttendantIds.has(att.id)
+      att.isActive && 
+      !assignedAttendantIds.has(att.id) && 
+      !leadershipAttendantIds.has(att.id)
     ).length
   }
 
