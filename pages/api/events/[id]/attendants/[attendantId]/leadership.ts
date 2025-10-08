@@ -30,13 +30,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Validate request body
       const validatedData = leadershipSchema.parse(req.body)
 
-      // Find the association first
+      // Find the association first - attendantId parameter is the actual attendant ID
       const association = await prisma.event_attendant_associations.findFirst({
         where: {
           eventId: eventId,
           attendantId: attendantId
         }
       })
+      
+      console.log(`🔍 Looking for association: eventId=${eventId}, attendantId=${attendantId}`)
+      console.log(`🔍 Found association:`, association ? association.id : 'NOT FOUND')
 
       if (!association) {
         return res.status(404).json({ error: 'Attendant association not found' })

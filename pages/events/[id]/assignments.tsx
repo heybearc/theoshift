@@ -428,7 +428,14 @@ export default function EventAssignments({ eventId, event, assignments, attendan
                             Edit
                           </button>
                           <button
-                            onClick={() => handleDelete(assignment.id)}
+                            onClick={() => {
+                              if (!assignment?.id) {
+                                alert('Cannot delete: Assignment ID not found')
+                                console.error('Assignment missing ID:', assignment)
+                                return
+                              }
+                              handleDelete(assignment.id)
+                            }}
                             className="text-red-600 hover:text-red-900 transition-colors"
                           >
                             Delete
