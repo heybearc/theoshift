@@ -115,7 +115,11 @@ export default function EventAssignments({ eventId, event, assignments, attendan
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
+          userId: formData.userId,
+          positionId: formData.positionId,
+          shiftStart: new Date(formData.shiftStart).toISOString(),
+          shiftEnd: new Date(formData.shiftEnd).toISOString(),
+          notes: formData.notes || '',
           eventId
         }),
       })
@@ -126,7 +130,8 @@ export default function EventAssignments({ eventId, event, assignments, attendan
         router.reload() // Refresh page to show updated data
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to save assignment')
+        console.error('Assignment creation error:', error)
+        alert(`Failed to save assignment: ${error.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error saving assignment:', error)

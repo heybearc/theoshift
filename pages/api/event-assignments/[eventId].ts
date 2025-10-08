@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]'
 import { prisma } from '../../../src/lib/prisma'
 import { z } from 'zod'
+import crypto from 'crypto'
 
 // Validation schema for assignment creation
 const assignmentSchema = z.object({
@@ -10,7 +11,8 @@ const assignmentSchema = z.object({
   positionId: z.string().min(1, 'Position ID is required'),
   shiftStart: z.string().min(1, 'Shift start is required'),
   shiftEnd: z.string().min(1, 'Shift end is required'),
-  notes: z.string().optional()
+  notes: z.string().optional(),
+  eventId: z.string().optional() // Allow eventId in body
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -49,7 +51,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })
 
       case 'POST':
+        console.log('Assignment creation request body:', req.body)
         const validatedData = assignmentSchema.parse(req.body)
+        console.log('Validated assignment data:', validatedData)
         
         const newAssignment = await prisma.assignments.create({
           data: {
