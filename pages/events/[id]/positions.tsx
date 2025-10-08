@@ -27,10 +27,13 @@ interface Position {
   id: string
   positionNumber: number
   name: string
+  positionName: string
   description?: string
   area?: string
   sequence: number
   isActive: boolean
+  overseerId?: string | null
+  keymanId?: string | null
   shifts?: Array<{
     id: string
     name: string
@@ -82,6 +85,8 @@ interface Attendant {
   formsOfService: string[] | string
   congregation?: string
   isActive: boolean
+  overseerId?: string | null
+  keymanId?: string | null
 }
 
 interface EventPositionsProps {
@@ -312,6 +317,9 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
     try {
       setIsSubmitting(true)
       
+      // HIERARCHY-BASED AUTO-ASSIGN ALGORITHM
+      console.log('🎯 Starting Hierarchy-Based Auto-Assign...')
+      
       // Get all assigned attendant IDs and leadership IDs to avoid double assignments
       const assignedAttendantIds = new Set()
       const leadershipAttendantIds = new Set()
@@ -338,18 +346,91 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
         !leadershipAttendantIds.has(att.id)
       )
       
-      // Find positions that need more attendants (simple algorithm: positions with < 2 assignments)
+      // Group attendants by their leadership (overseer/keyman)
+      const attendantsByLeadership = new Map()
+      availableAttendants.forEach(attendant => {
+        const leadershipKey = `${attendant.overseerId || 'none'}-${attendant.keymanId || 'none'}`
+        if (!attendantsByLeadership.has(leadershipKey)) {
+          attendantsByLeadership.set(leadershipKey, [])
+        }
+        attendantsByLeadership.get(leadershipKey).push(attendant)
+      })
+      
+      // Group positions by their leadership (overseer/keyman) 
+      const positionsByLeadership = new Map()
       const positionsNeedingAttendants = positions.filter(pos => 
         pos.isActive && (pos.assignments?.length || 0) < 2
       )
       
-      let assignmentCount = 0
+      positionsNeedingAttendants.forEach(position => {
+        const leadershipKey = `${position.overseerId || 'none'}-${position.keymanId || 'none'}`
+        if (!positionsByLeadership.has(leadershipKey)) {
+          positionsByLeadership.set(leadershipKey, [])
+        }
+        positionsByLeadership.get(leadershipKey).push(position)
+      })
       
-      for (const position of positionsNeedingAttendants) {
-        if (availableAttendants.length === 0) break
+      let assignmentCount = 0
+      let hierarchyMatches = 0
+      let fallbackAssignments = 0
+      
+      console.log(`📊 Leadership Groups: ${attendantsByLeadership.size} attendant groups, ${positionsByLeadership.size} position groups`)
+      
+      // Phase 1: Hierarchy-based assignments (perfect matches)
+      for (const [leadershipKey, positionsInGroup] of positionsByLeadership) {
+        const attendantsInGroup = attendantsByLeadership.get(leadershipKey) || []
         
-        // Assign one attendant to this position
-        const attendant = availableAttendants.shift()
+        if (attendantsInGroup.length > 0) {
+          console.log(`🎯 Matching leadership group: ${leadershipKey} (${attendantsInGroup.length} attendants → ${positionsInGroup.length} positions)`)
+          
+          for (const position of positionsInGroup) {
+            if (attendantsInGroup.length === 0) break
+            
+            const attendant = attendantsInGroup.shift()
+            if (!attendant) continue
+            
+            const response = await fetch(`/api/events/${eventId}/assignments`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                positionId: position.id,
+                attendantId: attendant.id,
+                role: 'ATTENDANT'
+              })
+            })
+            
+            if (response.ok) {
+              assignmentCount++
+              hierarchyMatches++
+              assignedAttendantIds.add(attendant.id)
+              console.log(`✅ Hierarchy match: ${attendant.firstName} ${attendant.lastName} → ${position.positionName}`)
+            }
+          }
+          
+          // Remove assigned attendants from the main pool
+          attendantsByLeadership.set(leadershipKey, attendantsInGroup)
+        }
+      }
+      
+      // Phase 2: Fallback assignments for unmatched positions
+      const remainingAttendants: Attendant[] = []
+      for (const attendantsGroup of attendantsByLeadership.values()) {
+        remainingAttendants.push(...attendantsGroup)
+      }
+      
+      const unassignedPositions: Position[] = []
+      for (const positionsGroup of positionsByLeadership.values()) {
+        unassignedPositions.push(...positionsGroup.filter(pos => 
+          (pos.assignments?.length || 0) < 2 && !assignedAttendantIds.has(pos.id)
+        ))
+      }
+      
+      console.log(`🔄 Fallback phase: ${remainingAttendants.length} attendants → ${unassignedPositions.length} positions`)
+      
+      for (const position of unassignedPositions) {
+        if (remainingAttendants.length === 0) break
+        
+        const attendant = remainingAttendants.shift()
         if (!attendant) continue
         
         const response = await fetch(`/api/events/${eventId}/assignments`, {
@@ -364,11 +445,18 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
         
         if (response.ok) {
           assignmentCount++
-          assignedAttendantIds.add(attendant.id)
+          fallbackAssignments++
+          console.log(`⚡ Fallback assignment: ${attendant.firstName} ${attendant.lastName} → ${position.positionName}`)
         }
       }
       
-      alert(`Auto-assigned ${assignmentCount} attendants successfully!`)
+      // Enhanced success message with hierarchy statistics
+      const hierarchySuccessRate = assignmentCount > 0 ? Math.round((hierarchyMatches / assignmentCount) * 100) : 0
+      alert(`🎯 Hierarchy-Based Auto-Assign Complete!\n\n` +
+            `✅ Total Assignments: ${assignmentCount}\n` +
+            `🎯 Hierarchy Matches: ${hierarchyMatches} (${hierarchySuccessRate}%)\n` +
+            `⚡ Fallback Assignments: ${fallbackAssignments}\n\n` +
+            `Leadership-based assignment prioritizes attendants working under their assigned overseer/keyman.`)
       router.reload()
     } catch (error) {
       console.error('Auto-assign error:', error)
