@@ -34,6 +34,16 @@ interface Position {
       firstName: string
       lastName: string
     }
+    overseer?: {
+      id: string
+      firstName: string
+      lastName: string
+    }
+    keyman?: {
+      id: string
+      firstName: string
+      lastName: string
+    }
   }>
 }
 
@@ -436,6 +446,29 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                       <p className="text-sm text-gray-600 mb-3">{position.description}</p>
                     )}
 
+                    {/* Leadership Information */}
+                    {position.assignments && position.assignments.length > 0 && (
+                      <div className="mb-3">
+                        {position.assignments.some(a => a.overseer || a.keyman) && (
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                            <p className="text-xs font-medium text-blue-800 mb-2">👥 Leadership</p>
+                            <div className="space-y-1">
+                              {position.assignments.filter(a => a.overseer).map(assignment => (
+                                <div key={assignment.id} className="text-xs text-blue-700">
+                                  <span className="font-medium">Overseer:</span> {assignment.overseer?.firstName} {assignment.overseer?.lastName}
+                                </div>
+                              ))}
+                              {position.assignments.filter(a => a.keyman).map(assignment => (
+                                <div key={assignment.id} className="text-xs text-blue-700">
+                                  <span className="font-medium">Keyman:</span> {assignment.keyman?.firstName} {assignment.keyman?.lastName}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                       <span>Position #{position.positionNumber}</span>
                       <span>{position.assignments?.length || 0} assignments</span>
@@ -445,10 +478,20 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                     <div className="flex flex-wrap gap-2 mb-4">
                       <button
                         onClick={() => {
+                          const hasAllDayShift = position.shifts?.some(s => s.isAllDay)
+                          if (hasAllDayShift) {
+                            alert('Cannot add shifts: This position has an All-Day shift which covers the entire 24-hour period.')
+                            return
+                          }
                           setSelectedPosition(position)
                           setShowShiftModal(true)
                         }}
-                        className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 px-2 py-1 rounded transition-colors"
+                        className={`text-xs px-2 py-1 rounded transition-colors ${
+                          position.shifts?.some(s => s.isAllDay)
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'bg-blue-100 hover:bg-blue-200 text-blue-800'
+                        }`}
+                        disabled={position.shifts?.some(s => s.isAllDay)}
                       >
                         ⏰ Add Shifts
                       </button>
@@ -471,13 +514,31 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
 
                     {position.shifts && position.shifts.length > 0 && (
                       <div className="mb-4">
-                        <p className="text-xs font-medium text-gray-500 mb-2">Shifts:</p>
-                        <div className="flex flex-wrap gap-1">
+                        <p className="text-xs font-medium text-gray-500 mb-2">⏰ Shifts:</p>
+                        <div className="space-y-2">
                           {position.shifts.map((shift, index) => (
-                            <span key={index} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700">
-                              {shift.name}
-                            </span>
+                            <div key={index} className={`inline-flex items-center px-3 py-2 rounded-lg text-xs border ${
+                              shift.isAllDay 
+                                ? 'bg-green-50 border-green-200 text-green-800' 
+                                : 'bg-gray-50 border-gray-200 text-gray-700'
+                            }`}>
+                              <span className="font-medium">{shift.name}</span>
+                              {shift.isAllDay ? (
+                                <span className="ml-2 text-green-600">(24 hours)</span>
+                              ) : (
+                                shift.startTime && shift.endTime && (
+                                  <span className="ml-2 text-gray-600">
+                                    {shift.startTime} - {shift.endTime}
+                                  </span>
+                                )
+                              )}
+                            </div>
                           ))}
+                          {position.shifts.some(s => s.isAllDay) && (
+                            <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                              ⚠️ All-day shift active - no additional shifts allowed
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -814,7 +875,31 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       include: {
         positions: {
           include: {
-            assignments: true,
+            assignments: {
+              include: {
+                attendant: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true
+                  }
+                },
+                overseer: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true
+                  }
+                },
+                keyman: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true
+                  }
+                }
+              }
+            },
             shifts: true
           },
           orderBy: [
@@ -869,10 +954,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       assignments: position.assignments.map(assignment => ({
         id: assignment.id,
         role: assignment.role || 'ATTENDANT',
-        attendant: assignment.attendantId ? {
-          id: assignment.attendantId,
-          firstName: 'Attendant', // Placeholder - would need to join with attendants table
-          lastName: assignment.attendantId.substring(0, 8) // Show partial ID as placeholder
+        attendant: assignment.attendant ? {
+          id: assignment.attendant.id,
+          firstName: assignment.attendant.firstName,
+          lastName: assignment.attendant.lastName
+        } : null,
+        overseer: assignment.overseer ? {
+          id: assignment.overseer.id,
+          firstName: assignment.overseer.firstName,
+          lastName: assignment.overseer.lastName
+        } : null,
+        keyman: assignment.keyman ? {
+          id: assignment.keyman.id,
+          firstName: assignment.keyman.firstName,
+          lastName: assignment.keyman.lastName
         } : null
       })).filter(assignment => assignment.attendant !== null),
       shifts: position.shifts || []
