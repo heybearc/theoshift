@@ -1169,87 +1169,227 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
           </div>
         )}
 
-        {/* Bulk Edit Modal */}
+        {/* Enhanced Bulk Edit Modal */}
         {showBulkEditModal && selectedPositions.size > 0 && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
               <div className="mt-3">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Bulk Edit {selectedPositions.size} Positions
+                  Bulk Operations - {selectedPositions.size} Positions Selected
                 </h3>
-                <form onSubmit={async (e) => {
-                  e.preventDefault()
-                  const formData = new FormData(e.currentTarget)
-                  const area = formData.get('area') as string
-                  const isActive = formData.get('isActive') as string
-                  
-                  try {
-                    let successCount = 0
-                    for (const positionId of selectedPositions) {
-                      const updateData: any = {}
-                      if (area) updateData.area = area
-                      if (isActive !== '') updateData.isActive = isActive === 'true'
-                      
-                      const response = await fetch(`/api/events/${eventId}/positions/${positionId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(updateData)
-                      })
-                      
-                      if (response.ok) successCount++
-                    }
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Basic Properties */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-gray-900">Basic Properties</h4>
                     
-                    alert(`Successfully updated ${successCount} of ${selectedPositions.size} positions`)
-                    setShowBulkEditModal(false)
-                    setSelectedPositions(new Set())
-                    router.reload()
-                  } catch (error) {
-                    console.error('Error bulk editing positions:', error)
-                    alert('Failed to update positions')
-                  }
-                }}>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Area (leave blank to keep current)
-                    </label>
-                    <input
-                      name="area"
-                      type="text"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="e.g., Main Hall, Parking, etc."
-                    />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Area (leave blank to keep current)
+                      </label>
+                      <input
+                        id="bulk-area"
+                        type="text"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="e.g., Main Hall, Parking, etc."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Status
+                      </label>
+                      <select 
+                        id="bulk-status"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Keep current status</option>
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                      </select>
+                    </div>
                   </div>
 
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Status
-                    </label>
-                    <select 
-                      name="isActive"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Keep current status</option>
-                      <option value="true">Active</option>
-                      <option value="false">Inactive</option>
-                    </select>
+                  {/* Leadership Assignment */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-gray-900">Leadership Assignment</h4>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Assign Overseer to All
+                      </label>
+                      <select 
+                        id="bulk-overseer"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      >
+                        <option value="">No change</option>
+                        {attendants?.filter(att => att.isActive && Array.isArray(att.formsOfService) && att.formsOfService.some(form => form.toLowerCase() === 'overseer')).map(attendant => (
+                          <option key={attendant.id} value={attendant.id}>
+                            {attendant.firstName} {attendant.lastName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Assign Keyman to All
+                      </label>
+                      <select 
+                        id="bulk-keyman"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      >
+                        <option value="">No change</option>
+                        {attendants?.filter(att => att.isActive && Array.isArray(att.formsOfService) && att.formsOfService.some(form => form.toLowerCase() === 'keyman')).map(attendant => (
+                          <option key={attendant.id} value={attendant.id}>
+                            {attendant.firstName} {attendant.lastName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
-                  <div className="flex justify-end space-x-3 mt-6">
-                    <button
-                      type="button"
-                      onClick={() => setShowBulkEditModal(false)}
-                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
-                    >
-                      Update {selectedPositions.size} Positions
-                    </button>
+                  {/* Shift Creation */}
+                  <div className="md:col-span-2 space-y-4">
+                    <h4 className="font-medium text-gray-900">Add Shift to All Positions</h4>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Shift Name
+                        </label>
+                        <input
+                          id="bulk-shift-name"
+                          type="text"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          placeholder="e.g., Morning Shift"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Start Time
+                        </label>
+                        <input
+                          id="bulk-shift-start"
+                          type="time"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          End Time
+                        </label>
+                        <input
+                          id="bulk-shift-end"
+                          type="time"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <input
+                        id="bulk-shift-allday"
+                        type="checkbox"
+                        className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="bulk-shift-allday" className="ml-2 block text-sm text-gray-900">
+                        All Day Shift (24 hours)
+                      </label>
+                    </div>
                   </div>
-                </form>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-8 pt-6 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setShowBulkEditModal(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => {
+                      try {
+                        setIsSubmitting(true)
+                        let successCount = 0
+                        
+                        const area = (document.getElementById('bulk-area') as HTMLInputElement)?.value
+                        const isActive = (document.getElementById('bulk-status') as HTMLSelectElement)?.value
+                        const overseerId = (document.getElementById('bulk-overseer') as HTMLSelectElement)?.value
+                        const keymanId = (document.getElementById('bulk-keyman') as HTMLSelectElement)?.value
+                        const shiftName = (document.getElementById('bulk-shift-name') as HTMLInputElement)?.value
+                        const shiftStart = (document.getElementById('bulk-shift-start') as HTMLInputElement)?.value
+                        const shiftEnd = (document.getElementById('bulk-shift-end') as HTMLInputElement)?.value
+                        const isAllDay = (document.getElementById('bulk-shift-allday') as HTMLInputElement)?.checked
+
+                        for (const positionId of selectedPositions) {
+                          // Update position properties
+                          if (area || isActive !== '') {
+                            const updateData: any = {}
+                            if (area) updateData.area = area
+                            if (isActive !== '') updateData.isActive = isActive === 'true'
+                            
+                            await fetch(`/api/events/${eventId}/positions/${positionId}`, {
+                              method: 'PUT',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify(updateData)
+                            })
+                          }
+
+                          // Assign overseer
+                          if (overseerId) {
+                            await fetch(`/api/events/${eventId}/positions/${positionId}/overseer`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ overseerId })
+                            })
+                          }
+
+                          // Assign keyman  
+                          if (keymanId) {
+                            await fetch(`/api/events/${eventId}/positions/${positionId}/overseer`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ keymanId })
+                            })
+                          }
+
+                          // Create shift
+                          if (shiftName && (shiftStart || isAllDay)) {
+                            await fetch(`/api/events/${eventId}/positions/${positionId}/shifts`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                startTime: isAllDay ? null : shiftStart,
+                                endTime: isAllDay ? null : shiftEnd,
+                                isAllDay: isAllDay
+                              })
+                            })
+                          }
+
+                          successCount++
+                        }
+                        
+                        alert(`Successfully processed ${successCount} of ${selectedPositions.size} positions`)
+                        setShowBulkEditModal(false)
+                        setSelectedPositions(new Set())
+                        router.reload()
+                      } catch (error) {
+                        console.error('Error in bulk operations:', error)
+                        alert('Failed to complete bulk operations')
+                      } finally {
+                        setIsSubmitting(false)
+                      }
+                    }}
+                    disabled={isSubmitting}
+                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-md font-medium"
+                  >
+                    {isSubmitting ? 'Processing...' : `Apply to ${selectedPositions.size} Positions`}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
