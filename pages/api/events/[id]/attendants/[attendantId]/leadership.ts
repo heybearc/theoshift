@@ -30,11 +30,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Validate request body
       const validatedData = leadershipSchema.parse(req.body)
 
-      // Find and update the event attendant association with leadership assignments
-      const updatedAssociation = await prisma.event_attendant_associations.updateMany({
+      // Find the association first
+      const association = await prisma.event_attendant_associations.findFirst({
         where: {
           eventId: eventId,
           attendantId: attendantId
+        }
+      })
+
+      if (!association) {
+        return res.status(404).json({ error: 'Attendant association not found' })
+      }
+
+      // Update the event attendant association with leadership assignments
+      const updatedAssociation = await prisma.event_attendant_associations.update({
+        where: {
+          id: association.id
         },
         data: {
           overseerId: validatedData.overseerId,
