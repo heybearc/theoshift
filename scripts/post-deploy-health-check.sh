@@ -148,6 +148,53 @@ check_database() {
     fi
 }
 
+# Function to check admin user exists
+check_admin_user() {
+    echo "7. Checking admin user exists..."
+    
+    local admin_check=$(ssh -i $SSH_KEY root@$SSH_HOST 'cd /opt/jw-attendant-scheduler && node -e "
+        const { PrismaClient } = require(\"@prisma/client\");
+        const prisma = new PrismaClient();
+        prisma.users.findFirst({ where: { role: \"ADMIN\" } })
+          .then(user => { 
+            if (user) { 
+              console.log(\"ADMIN_EXISTS:\", user.email); 
+            } else { 
+              console.log(\"NO_ADMIN_FOUND\"); 
+            } 
+          })
+          .catch(err => console.log(\"ERROR:\", err.message))
+          .finally(() => prisma.\$disconnect());
+    " 2>/dev/null' || echo "ERROR")
+    
+    if echo "$admin_check" | grep -q "ADMIN_EXISTS:"; then
+        local admin_email=$(echo "$admin_check" | grep "ADMIN_EXISTS:" | cut -d' ' -f2)
+        echo "   ✅ Admin user found: $admin_email"
+        return 0
+    elif echo "$admin_check" | grep -q "NO_ADMIN_FOUND"; then
+        echo "   ⚠️  No admin user found - creating default admin..."
+        
+        # Create admin user
+        local create_result=$(ssh -i $SSH_KEY root@$SSH_HOST 'cd /opt/jw-attendant-scheduler && node scripts/seed-admin.js 2>&1' || echo "ERROR")
+        
+        if echo "$create_result" | grep -q "Admin user created successfully"; then
+            echo "   ✅ Admin user created successfully"
+            echo "   📧 Email: admin@jwscheduler.local"
+            echo "   🔑 Password: AdminPass123!"
+            echo "   ⚠️  Please change default password after first login"
+            return 0
+        else
+            echo "   ❌ Failed to create admin user"
+            echo "   $create_result"
+            return 1
+        fi
+    else
+        echo "   ❌ Database query failed"
+        echo "   $admin_check"
+        return 1
+    fi
+}
+
 # Function to attempt server restart
 restart_server() {
     echo ""
@@ -184,6 +231,7 @@ main() {
     check_api_endpoints || failed_checks=$((failed_checks + 1))
     check_static_assets || failed_checks=$((failed_checks + 1))
     check_database || failed_checks=$((failed_checks + 1))
+    check_admin_user || failed_checks=$((failed_checks + 1))
     
     echo ""
     
