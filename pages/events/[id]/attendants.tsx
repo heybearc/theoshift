@@ -20,6 +20,8 @@ interface Attendant {
   lastName: string
   email: string
   phone: string | null
+  congregation: string
+  formsOfService: any // JSON field for forms of service
   isActive: boolean
   createdAt: string | null
   associationId: string
@@ -47,12 +49,25 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
     firstName: '',
     lastName: '',
     email: '',
-    phone: ''
+    phone: '',
+    congregation: '',
+    formsOfService: '',
+    notes: '',
+    isActive: true
   })
 
   // Add Attendant Handler
   const handleAddAttendant = () => {
-    setFormData({ firstName: '', lastName: '', email: '', phone: '' })
+    setFormData({ 
+      firstName: '', 
+      lastName: '', 
+      email: '', 
+      phone: '', 
+      congregation: '', 
+      formsOfService: '', 
+      notes: '',
+      isActive: true
+    })
     setEditingAttendant(null)
     setShowAddModal(true)
   }
@@ -63,7 +78,13 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
       firstName: attendant.firstName,
       lastName: attendant.lastName,
       email: attendant.email,
-      phone: attendant.phone || ''
+      phone: attendant.phone || '',
+      congregation: attendant.congregation || '',
+      formsOfService: Array.isArray(attendant.formsOfService) 
+        ? attendant.formsOfService.join(', ') 
+        : attendant.formsOfService || '',
+      notes: '',
+      isActive: attendant.isActive
     })
     setEditingAttendant(attendant)
     setShowAddModal(true)
@@ -261,7 +282,10 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
                         Email
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Phone
+                        Congregation
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Forms of Service
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
@@ -283,7 +307,28 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
                           <div className="text-sm text-gray-900">{attendant.email}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{attendant.phone || 'N/A'}</div>
+                          <div className="text-sm text-gray-900">{attendant.congregation || 'N/A'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-wrap gap-1">
+                            {(Array.isArray(attendant.formsOfService) 
+                              ? attendant.formsOfService 
+                              : (attendant.formsOfService || '').toString().split(', ').filter(s => s.trim())
+                            ).map((service, index) => (
+                              <span 
+                                key={index}
+                                className={`px-2 py-1 text-xs rounded-full ${
+                                  service === 'Overseer' ? 'bg-purple-100 text-purple-800' :
+                                  service === 'Keyman' ? 'bg-blue-100 text-blue-800' :
+                                  service === 'Elder' ? 'bg-yellow-100 text-yellow-800' :
+                                  service === 'Ministerial Servant' ? 'bg-green-100 text-green-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}
+                              >
+                                {service}
+                              </span>
+                            ))}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs rounded-full ${
@@ -376,6 +421,78 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Congregation
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.congregation}
+                        onChange={(e) => setFormData({ ...formData, congregation: e.target.value })}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter congregation name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Forms of Service *
+                      </label>
+                      <div className="mt-2 space-y-2">
+                        {['Elder', 'Ministerial Servant', 'Regular Pioneer', 'Overseer', 'Keyman', 'Other Dept.'].map((service) => (
+                          <label key={service} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={formData.formsOfService.split(', ').filter(s => s.trim()).includes(service)}
+                              onChange={(e) => {
+                                const currentServices = formData.formsOfService.split(', ').filter(s => s.trim())
+                                if (e.target.checked) {
+                                  setFormData({ 
+                                    ...formData, 
+                                    formsOfService: [...currentServices, service].join(', ')
+                                  })
+                                } else {
+                                  setFormData({ 
+                                    ...formData, 
+                                    formsOfService: currentServices.filter(s => s !== service).join(', ')
+                                  })
+                                }
+                              }}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <span className="ml-2 text-sm text-gray-700">{service}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Select all applicable forms of service. Overseers manage Keymen and Attendants. Keymen manage groups of Attendants.
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Notes
+                      </label>
+                      <textarea
+                        value={formData.notes}
+                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                        rows={3}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Additional notes or comments"
+                      />
+                    </div>
+                    <div>
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={formData.isActive !== false}
+                          onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <span className="ml-2 text-sm font-medium text-gray-700">Active Attendant</span>
+                      </label>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Inactive attendants will not be available for new assignments
+                      </p>
+                    </div>
                   </div>
                   <div className="flex justify-end space-x-3 mt-6">
                     <button
@@ -428,13 +545,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       include: {
         event_attendant_associations: {
           include: {
-            users: {
+            attendants: {
               select: {
                 id: true,
                 firstName: true,
                 lastName: true,
                 email: true,
                 phone: true,
+                congregation: true,
+                formsOfService: true,
                 isActive: true,
                 createdAt: true
               }
@@ -459,15 +578,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     const attendants = eventData.event_attendant_associations
-      .filter(association => association.users) // Filter out null users
+      .filter(association => association.attendants) // Filter out null attendants
       .map(association => ({
-        id: association.users!.id,
-        firstName: association.users!.firstName,
-        lastName: association.users!.lastName,
-        email: association.users!.email,
-        phone: association.users!.phone,
-        isActive: association.users!.isActive,
-        createdAt: association.users!.createdAt?.toISOString() || null,
+        id: association.attendants!.id,
+        firstName: association.attendants!.firstName,
+        lastName: association.attendants!.lastName,
+        email: association.attendants!.email,
+        phone: association.attendants!.phone,
+        congregation: association.attendants!.congregation,
+        formsOfService: association.attendants!.formsOfService,
+        isActive: association.attendants!.isActive,
+        createdAt: association.attendants!.createdAt?.toISOString() || null,
         associationId: association.id
       }))
 

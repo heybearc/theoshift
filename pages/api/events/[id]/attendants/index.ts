@@ -119,7 +119,7 @@ async function handleCreateEventAttendant(req: NextApiRequest, res: NextApiRespo
       }
     }
 
-    // Create new attendant
+    // Create new attendant (independent of users)
     const attendant = await prisma.attendants.create({
       data: {
         id: require('crypto').randomUUID(),
@@ -127,22 +127,25 @@ async function handleCreateEventAttendant(req: NextApiRequest, res: NextApiRespo
         lastName,
         email,
         phone: phone || null,
-        notes: notes || null,
         congregation: congregation || '',
+        notes: notes || null,
         formsOfService: processedFormsOfService,
         isAvailable: true,
         isActive: true,
+        userId: null, // Optional linking to users - not required
         createdAt: new Date(),
         updatedAt: new Date()
       }
     })
 
     // Create association with the event
-    await prisma.event_attendant_associations.create({
+    const association = await prisma.event_attendant_associations.create({
       data: {
         id: require('crypto').randomUUID(),
         eventId,
-        attendantId: attendant.id
+        attendantId: attendant.id,
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     })
 
@@ -154,13 +157,10 @@ async function handleCreateEventAttendant(req: NextApiRequest, res: NextApiRespo
         lastName: attendant.lastName,
         email: attendant.email,
         phone: attendant.phone,
-        congregation: congregation || '',
-        formsOfService: [],
-        isActive: true,
-        notes: attendant.notes,
-        userId: attendant.userId,
+        isActive: attendant.isActive,
         createdAt: attendant.createdAt,
-        updatedAt: attendant.updatedAt
+        updatedAt: attendant.updatedAt,
+        associationId: association.id
       }
     })
   } catch (error) {
@@ -182,7 +182,7 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
 
     let created = 0
     let updated = 0
-    const errors = []
+    const errors: Array<{row: number, email: string, error: string}> = []
 
     for (let i = 0; i < attendants.length; i++) {
       const attendantData = attendants[i]
@@ -211,15 +211,15 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
               firstName: attendantData.firstName,
               lastName: attendantData.lastName,
               phone: attendantData.phone || null,
-              notes: attendantData.notes || null,
               congregation: attendantData.congregation || '',
+              notes: attendantData.notes || null,
               formsOfService: formsOfService,
-              isAvailable: attendantData.isActive !== false,
+              isActive: attendantData.isActive !== false,
               updatedAt: new Date()
             }
           })
 
-          // Create association if it doesn't exist
+          // Check if association already exists
           const existingAssociation = await prisma.event_attendant_associations.findFirst({
             where: {
               eventId,
@@ -232,7 +232,9 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
               data: {
                 id: require('crypto').randomUUID(),
                 eventId,
-                attendantId: existingAttendant.id
+                attendantId: existingAttendant.id,
+                createdAt: new Date(),
+                updatedAt: new Date()
               }
             })
           }
@@ -257,11 +259,12 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
               lastName: attendantData.lastName,
               email: attendantData.email,
               phone: attendantData.phone || null,
-              notes: attendantData.notes || null,
               congregation: attendantData.congregation || '',
+              notes: attendantData.notes || null,
               formsOfService: formsOfService,
               isAvailable: attendantData.isActive !== false,
               isActive: attendantData.isActive !== false,
+              userId: null, // Optional linking - not required
               createdAt: new Date(),
               updatedAt: new Date()
             }
@@ -272,7 +275,9 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
             data: {
               id: require('crypto').randomUUID(),
               eventId,
-              attendantId: newAttendant.id
+              attendantId: newAttendant.id,
+              createdAt: new Date(),
+              updatedAt: new Date()
             }
           })
 
