@@ -62,6 +62,27 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
   const itemsPerPage = 20
   const [loading, setLoading] = useState(false)
   const [importResults, setImportResults] = useState<any>(null)
+
+  // Filter and paginate attendants
+  const filteredAttendants = attendants.filter(attendant => {
+    const matchesSearch = filters.search === '' || 
+      attendant.firstName.toLowerCase().includes(filters.search.toLowerCase()) ||
+      attendant.lastName.toLowerCase().includes(filters.search.toLowerCase()) ||
+      attendant.email.toLowerCase().includes(filters.search.toLowerCase())
+    
+    const matchesCongregation = filters.congregation === '' ||
+      (attendant.congregation && attendant.congregation.toLowerCase().includes(filters.congregation.toLowerCase()))
+    
+    const matchesStatus = filters.isActive === 'all' ||
+      (filters.isActive === 'true' && attendant.isActive) ||
+      (filters.isActive === 'false' && !attendant.isActive)
+    
+    return matchesSearch && matchesCongregation && matchesStatus
+  })
+
+  const totalPages = Math.ceil(filteredAttendants.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const paginatedAttendants = filteredAttendants.slice(startIndex, startIndex + itemsPerPage)
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -378,12 +399,10 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center justify-between">
+          <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Event Attendants</h1>
-              <p className="mt-2 text-sm text-gray-600">
-                Manage attendants for {event.name}
-              </p>
+              <p className="text-gray-600">Manage attendants for {event.name}</p>
             </div>
             <div className="flex space-x-3">
               <button 
@@ -415,6 +434,52 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                   ✏️ Bulk Edit ({selectedAttendants.size})
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="bg-white shadow rounded-lg p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+              <input
+                type="text"
+                placeholder="Search by name or email..."
+                value={filters.search}
+                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Congregation</label>
+              <input
+                type="text"
+                placeholder="Filter by congregation..."
+                value={filters.congregation}
+                onChange={(e) => setFilters({ ...filters, congregation: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              <select
+                value={filters.isActive}
+                onChange={(e) => setFilters({ ...filters, isActive: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={() => setFilters({ search: '', congregation: '', isActive: 'all' })}
+                className="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors"
+              >
+                Clear Filters
+              </button>
             </div>
           </div>
         </div>
@@ -526,7 +591,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {attendants.map((attendant) => (
+                    {paginatedAttendants.map((attendant) => (
                       <tr key={attendant.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <input
@@ -600,6 +665,68 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
               </div>
             )}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+              <div className="flex-1 flex justify-between sm:hidden">
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+                >
+                  Next
+                </button>
+              </div>
+              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-gray-700">
+                    Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
+                    <span className="font-medium">{Math.min(startIndex + itemsPerPage, filteredAttendants.length)}</span> of{' '}
+                    <span className="font-medium">{filteredAttendants.length}</span> results
+                  </p>
+                </div>
+                <div>
+                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                    <button
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+                    >
+                      Previous
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                          page === currentPage
+                            ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+                    >
+                      Next
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Add/Edit Attendant Modal */}

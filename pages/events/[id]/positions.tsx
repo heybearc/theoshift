@@ -71,9 +71,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   const router = useRouter()
   const { data: session } = useSession()
   
-  // Debug attendants data
-  console.log('Attendants data:', attendants)
-  console.log('Attendants length:', attendants?.length)
+  // Attendants data loaded via SSR
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -712,10 +710,9 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                         required
                       >
                         <option value="">Select an overseer...</option>
-                        {attendants?.filter(att => {
-                          console.log('Filtering attendant:', att.firstName, att.lastName, 'Role:', att.role)
-                          return att.role === 'ELDER' || att.role === 'elder' || att.role === 'ADMIN' || att.role === 'admin'
-                        }).map(attendant => (
+                        {attendants?.filter(att => 
+                          att.role === 'ELDER' || att.role === 'elder' || att.role === 'ADMIN' || att.role === 'admin'
+                        ).map(attendant => (
                           <option key={attendant.id} value={attendant.id}>
                             {attendant.firstName} {attendant.lastName} (Elder)
                           </option>
