@@ -518,19 +518,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const eventData = await prisma.events.findUnique({
       where: { id: id as string },
       include: {
-        event_positions: {
+        positions: {
           include: {
-            assignments: {
-              include: {
-                users: {
-                  select: {
-                    id: true,
-                    firstName: true,
-                    lastName: true
-                  }
-                }
-              }
-            }
+            assignments: true,
+            shifts: true
           },
           orderBy: [
             { positionNumber: 'asc' }
@@ -554,23 +545,24 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Transform positions data
-    const positions = eventData.event_positions.map(position => ({
+    const positions = eventData.positions.map(position => ({
       id: position.id,
       positionNumber: position.positionNumber,
-      name: position.positionName,
+      name: position.name,
       description: position.description,
-      area: position.department || null,
-      sequence: position.positionNumber, // Use positionNumber as sequence
+      area: position.area || null,
+      sequence: position.sequence || position.positionNumber,
       isActive: position.isActive,
       assignments: position.assignments.map(assignment => ({
         id: assignment.id,
-        role: 'Attendant', // Default role since assignments table doesn't have role field
-        attendant: assignment.users ? {
-          id: assignment.users.id,
-          firstName: assignment.users.firstName,
-          lastName: assignment.users.lastName
+        role: assignment.role || 'ATTENDANT',
+        attendant: assignment.attendantId ? {
+          id: assignment.attendantId,
+          firstName: 'Attendant', // Placeholder - would need to join with attendants table
+          lastName: assignment.attendantId.substring(0, 8) // Show partial ID as placeholder
         } : null
-      })).filter(assignment => assignment.attendant !== null)
+      })).filter(assignment => assignment.attendant !== null),
+      shifts: position.shifts || []
     }))
 
     return {

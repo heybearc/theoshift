@@ -45,9 +45,16 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
   const [loading, setLoading] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
+  const [showBulkEditModal, setShowBulkEditModal] = useState(false)
   const [editingAttendant, setEditingAttendant] = useState<Attendant | null>(null)
   const [importFile, setImportFile] = useState<File | null>(null)
   const [importResults, setImportResults] = useState<any>(null)
+  const [selectedAttendants, setSelectedAttendants] = useState<Set<string>>(new Set())
+  const [bulkEditData, setBulkEditData] = useState({
+    isActive: '',
+    formsOfService: '',
+    congregation: ''
+  })
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -218,6 +225,76 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
     window.URL.revokeObjectURL(url)
   }
 
+  // Bulk Edit Functions
+  const handleSelectAttendant = (attendantId: string) => {
+    const newSelected = new Set(selectedAttendants)
+    if (newSelected.has(attendantId)) {
+      newSelected.delete(attendantId)
+    } else {
+      newSelected.add(attendantId)
+    }
+    setSelectedAttendants(newSelected)
+  }
+
+  const handleSelectAll = () => {
+    if (selectedAttendants.size === attendants.length) {
+      setSelectedAttendants(new Set())
+    } else {
+      setSelectedAttendants(new Set(attendants.map(a => a.id)))
+    }
+  }
+
+  const handleBulkEdit = () => {
+    if (selectedAttendants.size === 0) {
+      alert('Please select attendants to edit')
+      return
+    }
+    setShowBulkEditModal(true)
+  }
+
+  const handleBulkEditSave = async () => {
+    if (selectedAttendants.size === 0) return
+
+    setLoading(true)
+    try {
+      const updates: Promise<Response>[] = []
+      for (const attendantId of selectedAttendants) {
+        const updateData: any = {}
+        
+        if (bulkEditData.isActive !== '') {
+          updateData.isActive = bulkEditData.isActive === 'true'
+        }
+        if (bulkEditData.congregation !== '') {
+          updateData.congregation = bulkEditData.congregation
+        }
+        if (bulkEditData.formsOfService !== '') {
+          updateData.formsOfService = bulkEditData.formsOfService
+        }
+
+        if (Object.keys(updateData).length > 0) {
+          updates.push(
+            fetch(`/api/events/${eventId}/attendants/${attendantId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(updateData)
+            })
+          )
+        }
+      }
+
+      await Promise.all(updates)
+      setShowBulkEditModal(false)
+      setSelectedAttendants(new Set())
+      setBulkEditData({ isActive: '', formsOfService: '', congregation: '' })
+      router.reload()
+    } catch (error) {
+      console.error('Bulk edit error:', error)
+      alert('Failed to update attendants')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <EventLayout 
       title={`${event.name} - Attendants | JW Attendant Scheduler`}
@@ -263,6 +340,15 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
               >
                 📥 Import Attendants
               </button>
+              {selectedAttendants.size > 0 && (
+                <button 
+                  onClick={handleBulkEdit}
+                  disabled={loading}
+                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white font-bold py-2 px-4 rounded transition-colors"
+                >
+                  ✏️ Bulk Edit ({selectedAttendants.size})
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -346,6 +432,14 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <input
+                          type="checkbox"
+                          checked={selectedAttendants.size === attendants.length && attendants.length > 0}
+                          onChange={handleSelectAll}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Name
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -368,6 +462,14 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                   <tbody className="bg-white divide-y divide-gray-200">
                     {attendants.map((attendant) => (
                       <tr key={attendant.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <input
+                            type="checkbox"
+                            checked={selectedAttendants.has(attendant.id)}
+                            onChange={() => handleSelectAttendant(attendant.id)}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
                             {attendant.firstName} {attendant.lastName}
@@ -641,6 +743,80 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                     className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-md"
                   >
                     {loading ? 'Importing...' : 'Import Attendants'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Bulk Edit Modal */}
+        {showBulkEditModal && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="mt-3">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Bulk Edit {selectedAttendants.size} Attendants
+                </h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Status
+                    </label>
+                    <select
+                      value={bulkEditData.isActive}
+                      onChange={(e) => setBulkEditData({ ...bulkEditData, isActive: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">No Change</option>
+                      <option value="true">Active</option>
+                      <option value="false">Inactive</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Congregation
+                    </label>
+                    <input
+                      type="text"
+                      value={bulkEditData.congregation}
+                      onChange={(e) => setBulkEditData({ ...bulkEditData, congregation: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Leave empty for no change"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Forms of Service (comma-separated)
+                    </label>
+                    <input
+                      type="text"
+                      value={bulkEditData.formsOfService}
+                      onChange={(e) => setBulkEditData({ ...bulkEditData, formsOfService: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g., Elder, Overseer (leave empty for no change)"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowBulkEditModal(false)}
+                    disabled={loading}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleBulkEditSave}
+                    disabled={loading}
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white rounded-md"
+                  >
+                    {loading ? 'Updating...' : 'Update Attendants'}
                   </button>
                 </div>
               </div>
