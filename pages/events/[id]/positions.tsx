@@ -66,7 +66,12 @@ export default function EventPositionsPage({eventId, event, positions, stats }: 
   const [error, setError] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showBulkCreator, setShowBulkCreator] = useState(false)
+  const [showShiftModal, setShowShiftModal] = useState(false)
+  const [showOverseerModal, setShowOverseerModal] = useState(false)
   const [editingPosition, setEditingPosition] = useState<Position | null>(null)
+  const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
+  const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set())
+  const [showBulkEditModal, setShowBulkEditModal] = useState(false)
   const [formData, setFormData] = useState({
     positionNumber: 1,
     name: '',

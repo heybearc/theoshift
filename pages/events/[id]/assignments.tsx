@@ -599,14 +599,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 lastName: true,
                 email: true
               }
-            },
-            event_positions: {
-              select: {
-                id: true,
-                positionName: true,
-                department: true,
-                positionNumber: true
-              }
             }
           },
           orderBy: [
@@ -615,7 +607,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         },
         event_attendant_associations: {
           include: {
-            users: {
+            attendants: {
               select: {
                 id: true,
                 firstName: true,
@@ -625,11 +617,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             }
           }
         },
-        event_positions: {
+        positions: {
           select: {
             id: true,
-            positionName: true,
-            department: true,
+            name: true,
+            area: true,
             positionNumber: true
           },
           orderBy: [
@@ -653,44 +645,49 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       status: eventData.status
     }
 
-    // Transform assignments data
-    const assignments = eventData.assignments.map(assignment => ({
-      id: assignment.id,
-      userId: assignment.userId,
-      positionId: assignment.positionId,
-      shiftStart: assignment.shiftStart?.toISOString() || null,
-      shiftEnd: assignment.shiftEnd?.toISOString() || null,
-      status: assignment.status,
-      notes: assignment.notes,
-      users: assignment.users ? {
-        id: assignment.users.id,
-        firstName: assignment.users.firstName,
-        lastName: assignment.users.lastName,
-        email: assignment.users.email
-      } : null,
-      event_positions: assignment.event_positions ? {
-        id: assignment.event_positions.id,
-        positionName: assignment.event_positions.positionName,
-        department: assignment.event_positions.department || '',
-        positionNumber: assignment.event_positions.positionNumber
-      } : null
-    })).filter(assignment => assignment.users && assignment.event_positions)
+    // Transform assignments data - assignments table references positions by positionId
+    const assignments = eventData.assignments.map(assignment => {
+      // Find the position for this assignment
+      const position = eventData.positions.find(p => p.id === assignment.positionId)
+      
+      return {
+        id: assignment.id,
+        userId: assignment.userId,
+        positionId: assignment.positionId,
+        shiftStart: assignment.shiftStart?.toISOString() || null,
+        shiftEnd: assignment.shiftEnd?.toISOString() || null,
+        status: assignment.status,
+        notes: assignment.notes,
+        users: assignment.users ? {
+          id: assignment.users.id,
+          firstName: assignment.users.firstName,
+          lastName: assignment.users.lastName,
+          email: assignment.users.email
+        } : null,
+        event_positions: position ? {
+          id: position.id,
+          positionName: position.name,
+          department: position.area || '',
+          positionNumber: position.positionNumber
+        } : null
+      }
+    }).filter(assignment => assignment.users && assignment.event_positions)
 
-    // Transform attendants data
+    // Transform attendants data from event_attendant_associations
     const attendants = eventData.event_attendant_associations
-      .filter(association => association.users)
+      .filter(association => association.attendants)
       .map(association => ({
-        id: association.users!.id,
-        firstName: association.users!.firstName,
-        lastName: association.users!.lastName,
-        email: association.users!.email
+        id: association.attendants!.id,
+        firstName: association.attendants!.firstName,
+        lastName: association.attendants!.lastName,
+        email: association.attendants!.email
       }))
 
     // Transform positions data
-    const positions = eventData.event_positions.map(position => ({
+    const positions = eventData.positions.map(position => ({
       id: position.id,
-      positionName: position.positionName,
-      department: position.department || '',
+      positionName: position.name,
+      department: position.area || '',
       positionNumber: position.positionNumber
     }))
 
