@@ -42,19 +42,26 @@ interface EventAttendantsPageProps {
 
 export default function EventAttendantsPage({ eventId, event, attendants, stats }: EventAttendantsPageProps) {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
   const [showBulkEditModal, setShowBulkEditModal] = useState(false)
   const [editingAttendant, setEditingAttendant] = useState<Attendant | null>(null)
   const [importFile, setImportFile] = useState<File | null>(null)
-  const [importResults, setImportResults] = useState<any>(null)
   const [selectedAttendants, setSelectedAttendants] = useState<Set<string>>(new Set())
   const [bulkEditData, setBulkEditData] = useState({
     isActive: '',
-    formsOfService: '',
-    congregation: ''
+    congregation: '',
+    formsOfService: ''
   })
+  const [filters, setFilters] = useState({
+    search: '',
+    congregation: '',
+    isActive: 'all'
+  })
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 20
+  const [loading, setLoading] = useState(false)
+  const [importResults, setImportResults] = useState<any>(null)
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -285,12 +292,12 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
   }
 
   // Bulk Edit Functions
-  const handleSelectAttendant = (attendantId: string) => {
+  const handleSelectAttendant = (associationId: string) => {
     const newSelected = new Set(selectedAttendants)
-    if (newSelected.has(attendantId)) {
-      newSelected.delete(attendantId)
+    if (newSelected.has(associationId)) {
+      newSelected.delete(associationId)
     } else {
-      newSelected.add(attendantId)
+      newSelected.add(associationId)
     }
     setSelectedAttendants(newSelected)
   }
@@ -299,7 +306,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
     if (selectedAttendants.size === attendants.length) {
       setSelectedAttendants(new Set())
     } else {
-      setSelectedAttendants(new Set(attendants.map(a => a.id)))
+      setSelectedAttendants(new Set(attendants.map(a => a.associationId)))
     }
   }
 
@@ -317,7 +324,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
     setLoading(true)
     try {
       const updates: Promise<Response>[] = []
-      for (const attendantId of selectedAttendants) {
+      for (const associationId of selectedAttendants) {
         const updateData: any = {}
         
         if (bulkEditData.isActive !== '') {
@@ -332,7 +339,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
 
         if (Object.keys(updateData).length > 0) {
           updates.push(
-            fetch(`/api/events/${eventId}/attendants/${attendantId}`, {
+            fetch(`/api/events/${eventId}/attendants/${associationId}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(updateData)
@@ -524,8 +531,8 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                         <td className="px-6 py-4 whitespace-nowrap">
                           <input
                             type="checkbox"
-                            checked={selectedAttendants.has(attendant.id)}
-                            onChange={() => handleSelectAttendant(attendant.id)}
+                            checked={selectedAttendants.has(attendant.associationId)}
+                            onChange={() => handleSelectAttendant(attendant.associationId)}
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                           />
                         </td>
