@@ -3,10 +3,11 @@
 # APEX GUARDIAN Post-Build Verification Script
 # Ensures system is operational after every build
 
-echo "🛡️ APEX GUARDIAN POST-BUILD VERIFICATION"
-echo "========================================"
+echo "🛡️ APEX GUARDIAN POST-BUILD VERIFICATION
+========================================
+Starting post-build verification...
+⚠️  DEPRECATED: Use ./scripts/post-deploy-health-check.sh instead to check server status
 
-# Function to check server status
 check_server_status() {
     echo "1. Checking Next.js server process..."
     if ps aux | grep "next-server" | grep -v grep > /dev/null; then
