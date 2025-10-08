@@ -7,12 +7,11 @@ import crypto from 'crypto'
 
 // Validation schema for assignment creation
 const assignmentSchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
+  attendantId: z.string().min(1, 'Attendant ID is required'),
   positionId: z.string().min(1, 'Position ID is required'),
-  shiftStart: z.string().min(1, 'Shift start is required'),
-  shiftEnd: z.string().min(1, 'Shift end is required'),
-  notes: z.string().optional(),
-  eventId: z.string().optional() // Allow eventId in body
+  role: z.enum(['ATTENDANT', 'OVERSEER', 'KEYMAN']).optional().default('ATTENDANT'),
+  shiftId: z.string().optional(),
+  notes: z.string().optional()
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -39,9 +38,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     switch (req.method) {
       case 'GET':
-        const assignments = await prisma.assignments.findMany({
-          where: { eventId: eventId },
-          orderBy: { createdAt: 'desc' }
+        const assignments = await prisma.position_assignments.findMany({
+          where: { 
+            position: { 
+              eventId: eventId 
+            } 
+          },
+          include: {
+            attendant: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true
+              }
+            },
+            position: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
+          },
+          orderBy: { assignedAt: 'desc' }
         })
 
         return res.status(200).json({
@@ -55,18 +73,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const validatedData = assignmentSchema.parse(req.body)
         console.log('Validated assignment data:', validatedData)
         
-        const newAssignment = await prisma.assignments.create({
+        const newAssignment = await prisma.position_assignments.create({
           data: {
             id: crypto.randomUUID(),
-            eventId: eventId,
-            userId: validatedData.userId,
             positionId: validatedData.positionId,
-            shiftStart: validatedData.shiftStart,
-            shiftEnd: validatedData.shiftEnd,
-            status: 'ASSIGNED',
-            notes: validatedData.notes,
-            createdAt: new Date(),
-            updatedAt: new Date()
+            attendantId: validatedData.attendantId,
+            role: validatedData.role,
+            shiftId: validatedData.shiftId || null,
+            assignedAt: new Date(),
+            assignedBy: session.user?.id || null
           }
         })
 
