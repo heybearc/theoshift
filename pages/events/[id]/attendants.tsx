@@ -635,7 +635,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <input
                           type="checkbox"
                           checked={selectedAttendants.size === attendants.length && attendants.length > 0}
@@ -643,28 +643,28 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Name
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                         Email
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                         Congregation
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                         Forms of Service
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                         Overseer
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                         Keyman
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
@@ -672,7 +672,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                   <tbody className="bg-white divide-y divide-gray-200">
                     {paginatedAttendants.map((attendant) => (
                       <tr key={attendant.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-2 py-3 whitespace-nowrap">
                           <input
                             type="checkbox"
                             checked={selectedAttendants.has(attendant.associationId)}
@@ -680,18 +680,21 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                           />
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-3 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
                             {attendant.firstName} {attendant.lastName}
                           </div>
+                          <div className="text-xs text-gray-500 sm:hidden">
+                            {attendant.email}
+                          </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-3 whitespace-nowrap hidden sm:table-cell">
                           <div className="text-sm text-gray-900">{attendant.email}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-3 whitespace-nowrap hidden md:table-cell">
                           <div className="text-sm text-gray-900">{attendant.congregation || 'N/A'}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-3 whitespace-nowrap hidden lg:table-cell">
                           <div className="flex flex-wrap gap-1">
                             {(Array.isArray(attendant.formsOfService) 
                               ? attendant.formsOfService 
@@ -712,7 +715,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             ))}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-3 whitespace-nowrap hidden md:table-cell">
                           <select
                             value={attendant.overseerId || ''}
                             onChange={async (e) => {
@@ -733,7 +736,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                 alert('Failed to update overseer')
                               }
                             }}
-                            className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="text-xs border border-gray-300 rounded px-1 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                           >
                             <option value="">No Overseer</option>
                             {attendants.filter(att => 
@@ -747,7 +750,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             ))}
                           </select>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-3 whitespace-nowrap hidden md:table-cell">
                           <select
                             value={attendant.keymanId || ''}
                             onChange={async (e) => {
@@ -768,7 +771,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                 alert('Failed to update keyman')
                               }
                             }}
-                            className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="text-xs border border-gray-300 rounded px-1 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                           >
                             <option value="">No Keyman</option>
                             {attendants.filter(att => 
@@ -782,7 +785,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             ))}
                           </select>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-3 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs rounded-full ${
                             attendant.isActive 
                               ? 'bg-green-100 text-green-800' 
@@ -791,21 +794,23 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             {attendant.isActive ? 'Active' : 'Inactive'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button 
-                            onClick={() => handleEditAttendant(attendant)}
-                            disabled={loading}
-                            className="text-blue-600 hover:text-blue-900 disabled:text-blue-400 mr-3"
-                          >
-                            Edit
-                          </button>
-                          <button 
-                            onClick={() => handleRemoveAttendant(attendant)}
-                            disabled={loading}
-                            className="text-red-600 hover:text-red-900 disabled:text-red-400"
-                          >
-                            Remove
-                          </button>
+                        <td className="px-3 py-3 whitespace-nowrap text-xs font-medium">
+                          <div className="flex flex-col sm:flex-row gap-1">
+                            <button 
+                              onClick={() => handleEditAttendant(attendant)}
+                              disabled={loading}
+                              className="text-blue-600 hover:text-blue-900 disabled:text-blue-400 text-xs"
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              onClick={() => handleRemoveAttendant(attendant)}
+                              disabled={loading}
+                              className="text-red-600 hover:text-red-900 disabled:text-red-400 text-xs"
+                            >
+                              Remove
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
