@@ -50,15 +50,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(404).json({ error: 'Position not found' })
         }
 
-        const newShift = await prisma.shifts.create({
+        // Get the next sequence number for this position
+        const existingShifts = await prisma.position_shifts.count({
+          where: { positionId: positionId }
+        })
+
+        const newShift = await prisma.position_shifts.create({
           data: {
             id: crypto.randomUUID(),
             positionId: positionId,
+            name: validatedData.isAllDay ? 'All Day' : `Shift ${existingShifts + 1}`,
             startTime: validatedData.isAllDay ? null : validatedData.startTime,
             endTime: validatedData.isAllDay ? null : validatedData.endTime,
             isAllDay: validatedData.isAllDay,
-            createdAt: new Date(),
-            updatedAt: new Date()
+            sequence: existingShifts + 1
           }
         })
 

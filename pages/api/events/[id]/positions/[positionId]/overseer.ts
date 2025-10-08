@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log('Validated overseer data:', validatedData)
         
         // Verify position exists
-        const position = await prisma.positions.findUnique({
+        const position = await prisma.event_positions.findUnique({
           where: { id: positionId }
         })
 
@@ -50,8 +50,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(404).json({ error: 'Position not found' })
         }
 
-        // Verify overseer exists
-        const overseer = await prisma.users.findUnique({
+        // Verify overseer exists in attendants table
+        const overseer = await prisma.attendants.findUnique({
           where: { id: validatedData.overseerId }
         })
 
@@ -59,20 +59,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(404).json({ error: 'Overseer not found' })
         }
 
-        // Update position with overseer assignment
-        const updatedPosition = await prisma.positions.update({
-          where: { id: positionId },
+        // Create overseer assignment in position_assignments table
+        const overseerAssignment = await prisma.position_assignments.create({
           data: {
+            id: crypto.randomUUID(),
+            positionId: positionId,
+            attendantId: validatedData.overseerId, // The overseer is also an attendant
+            role: 'OVERSEER',
             overseerId: validatedData.overseerId,
             keymanId: validatedData.keymanId || null,
-            responsibilities: validatedData.responsibilities || null,
-            updatedAt: new Date()
+            assignedAt: new Date(),
+            assignedBy: session.user.id
           }
         })
 
-        return res.status(200).json({
+        return res.status(201).json({
           success: true,
-          data: updatedPosition,
+          data: overseerAssignment,
           message: 'Overseer assigned successfully'
         })
 
