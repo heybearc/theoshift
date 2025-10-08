@@ -94,19 +94,22 @@ interface EventPositionsProps {
 
 export default function EventPositionsPage({ eventId, event, positions, attendants, stats }: EventPositionsProps) {
   const router = useRouter()
-  const { data: session } = useSession()
   
   // Attendants data loaded via SSR
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [showBulkCreator, setShowBulkCreator] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
   const [showShiftModal, setShowShiftModal] = useState(false)
   const [showOverseerModal, setShowOverseerModal] = useState(false)
-  const [editingPosition, setEditingPosition] = useState<Position | null>(null)
+  const [showBulkCreator, setShowBulkCreator] = useState(false)
+  const [showAssignAttendantModal, setShowAssignAttendantModal] = useState(false)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
+  const [editingPosition, setEditingPosition] = useState<Position | null>(null)
+  const [bulkCreateResults, setBulkCreateResults] = useState<any>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [message, setMessage] = useState('')
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set())
-  const [showBulkEditModal, setShowBulkEditModal] = useState(false)
   const [shiftFormData, setShiftFormData] = useState({
     startTime: '',
     endTime: '',
@@ -281,6 +284,29 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
     router.reload() // Refresh page to show updated data
   }
 
+  // Handle removing an assignment
+  const handleRemoveAssignment = async (assignmentId: string) => {
+    if (!confirm('Are you sure you want to remove this assignment?')) return
+    
+    try {
+      const response = await fetch(`/api/events/${eventId}/assignments/${assignmentId}`, {
+        method: 'DELETE'
+      })
+      
+      if (response.ok) {
+        router.reload() // Refresh to show updated assignments
+      } else {
+        alert('Failed to remove assignment')
+      }
+    } catch (error) {
+      console.error('Error removing assignment:', error)
+      alert('Failed to remove assignment')
+    }
+  }
+
+  // Get session data
+  const { data: session } = useSession()
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -330,6 +356,38 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 >
                   ← Back to Event
                 </Link>
+                
+                {/* Bulk Operations */}
+                {selectedPositions.size > 0 && (
+                  <div className="flex items-center space-x-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                    <span className="text-sm text-blue-700 font-medium">
+                      {selectedPositions.size} selected
+                    </span>
+                    <button
+                      onClick={() => {
+                        if (confirm(`Delete ${selectedPositions.size} selected positions?`)) {
+                          alert('Bulk delete coming soon!')
+                        }
+                      }}
+                      className="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded"
+                    >
+                      Delete
+                    </button>
+                    <button
+                      onClick={() => alert('Bulk edit coming soon!')}
+                      className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => setSelectedPositions(new Set())}
+                      className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                )}
+                
                 <button
                   onClick={() => setShowBulkCreator(true)}
                   className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
@@ -435,15 +493,31 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 <div key={position.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                          {position.name}
-                        </h3>
-                        {position.area && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {position.area}
-                          </span>
-                        )}
+                      <div className="flex items-start space-x-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedPositions.has(position.id)}
+                          onChange={(e) => {
+                            const newSelected = new Set(selectedPositions)
+                            if (e.target.checked) {
+                              newSelected.add(position.id)
+                            } else {
+                              newSelected.delete(position.id)
+                            }
+                            setSelectedPositions(newSelected)
+                          }}
+                          className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                            {position.name}
+                          </h3>
+                          {position.area && (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {position.area}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         position.isActive 
@@ -485,6 +559,45 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                       <span>Position #{position.positionNumber}</span>
                       <span>{position.assignments?.length || 0} assignments</span>
                     </div>
+
+                    {/* Detailed Assignment Display */}
+                    {position.assignments && position.assignments.length > 0 && (
+                      <div className="mb-4">
+                        <p className="text-xs font-medium text-gray-500 mb-2">👤 Assigned Attendants</p>
+                        <div className="space-y-1">
+                          {position.assignments
+                            .filter(assignment => assignment.role !== 'OVERSEER') // Don't duplicate overseer info
+                            .map(assignment => (
+                            <div key={assignment.id} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded px-2 py-1">
+                              <div className="flex items-center">
+                                <span className="text-xs font-medium text-gray-700">
+                                  {assignment.attendant?.firstName} {assignment.attendant?.lastName}
+                                </span>
+                                <span className="ml-2 text-xs text-gray-500">
+                                  ({assignment.role || 'Attendant'})
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => handleRemoveAssignment(assignment.id)}
+                                className="text-xs text-red-600 hover:text-red-800 px-1"
+                                title="Remove assignment"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            onClick={() => {
+                              setSelectedPosition(position)
+                              setShowAssignAttendantModal(true)
+                            }}
+                            className="w-full text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded px-2 py-1 transition-colors"
+                          >
+                            + Assign Attendant
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Position Management Actions */}
                     <div className="flex flex-wrap gap-2 mb-4">
@@ -857,6 +970,87 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                       className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md"
                     >
                       Assign Overseer
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Assign Attendant Modal */}
+        {showAssignAttendantModal && selectedPosition && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="mt-3">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Assign Attendant to {selectedPosition.name}
+                </h3>
+                <form onSubmit={async (e) => {
+                  e.preventDefault()
+                  const formData = new FormData(e.currentTarget)
+                  const attendantId = formData.get('attendantId') as string
+                  
+                  if (!attendantId) {
+                    alert('Please select an attendant')
+                    return
+                  }
+
+                  try {
+                    const response = await fetch(`/api/events/${eventId}/assignments`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        positionId: selectedPosition.id,
+                        attendantId: attendantId,
+                        role: 'ATTENDANT'
+                      })
+                    })
+
+                    if (response.ok) {
+                      alert('Attendant assigned successfully')
+                      setShowAssignAttendantModal(false)
+                      router.reload()
+                    } else {
+                      alert('Failed to assign attendant')
+                    }
+                  } catch (error) {
+                    console.error('Error assigning attendant:', error)
+                    alert('Failed to assign attendant')
+                  }
+                }}>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Attendant
+                    </label>
+                    <select 
+                      name="attendantId"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="">Select an attendant...</option>
+                      {attendants?.filter(att => att.isActive).map(attendant => (
+                        <option key={attendant.id} value={attendant.id}>
+                          {attendant.firstName} {attendant.lastName}
+                          {attendant.congregation && ` (${attendant.congregation})`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex justify-end space-x-3 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setShowAssignAttendantModal(false)}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+                    >
+                      Assign Attendant
                     </button>
                   </div>
                 </form>
