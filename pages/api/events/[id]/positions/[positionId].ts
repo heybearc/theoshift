@@ -12,6 +12,7 @@ const positionUpdateSchema = z.object({
   description: z.string().optional(),
   area: z.string().optional(),
   sequence: z.number().optional(),
+  positionNumber: z.number().min(1, 'Position number must be at least 1').optional(),
   isActive: z.boolean().optional()
 })
 
@@ -108,6 +109,27 @@ async function handleGetPosition(req: NextApiRequest, res: NextApiResponse, posi
 async function handleUpdatePosition(req: NextApiRequest, res: NextApiResponse, position: any) {
   try {
     const validatedData = positionUpdateSchema.parse(req.body)
+
+    // Check for position number conflicts if positionNumber is being updated
+    if (validatedData.positionNumber && validatedData.positionNumber !== position.positionNumber) {
+      const existingPosition = await prisma.positions.findUnique({
+        where: {
+          eventId_positionNumber: {
+            eventId: position.eventId,
+            positionNumber: validatedData.positionNumber
+          }
+        }
+      })
+
+      if (existingPosition && existingPosition.id !== position.id) {
+        return res.status(400).json({
+          success: false,
+          error: `Position number ${validatedData.positionNumber} is already in use by another position`
+        })
+      }
+    }
+
+    console.log(`Updating position ${position.id} with data:`, validatedData)
 
     const updatedPosition = await prisma.positions.update({
       where: { id: position.id },
