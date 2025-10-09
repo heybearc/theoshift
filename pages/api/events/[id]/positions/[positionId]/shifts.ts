@@ -93,15 +93,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(400).json({ error: 'Shift does not belong to this position' })
         }
 
-        // Check if shift has any assignments
+        // Check if shift has any assignments and remove them first
         const assignments = await prisma.position_assignments.findMany({
           where: { shiftId: shiftId }
         })
 
+        console.log(`🗑️ Deleting shift ${shiftId} with ${assignments.length} assignments`)
+
         if (assignments.length > 0) {
-          return res.status(400).json({ 
-            error: `Cannot delete shift: ${assignments.length} attendant(s) are assigned to this shift. Please remove assignments first.` 
+          console.log(`📋 Removing ${assignments.length} attendant assignments from shift`)
+          // Delete all assignments for this shift first
+          await prisma.position_assignments.deleteMany({
+            where: { shiftId: shiftId }
           })
+          console.log(`✅ Removed ${assignments.length} assignments`)
         }
 
         // Delete the shift
@@ -109,9 +114,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           where: { id: shiftId }
         })
 
+        console.log(`✅ Successfully deleted shift ${shiftId}`)
+
         return res.status(200).json({
           success: true,
-          message: 'Shift deleted successfully'
+          message: assignments.length > 0 
+            ? `Shift deleted successfully (${assignments.length} attendant assignments removed)`
+            : 'Shift deleted successfully'
         })
 
       default:
