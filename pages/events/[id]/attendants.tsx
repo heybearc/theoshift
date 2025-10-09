@@ -370,25 +370,46 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
       const leadershipUpdates: Promise<Response>[] = []
       
       for (const associationId of selectedAttendants) {
+        // Find the attendant by association ID first
+        const attendant = attendants.find(att => att.associationId === associationId)
+        if (!attendant) {
+          console.error(`❌ Could not find attendant for association ID: ${associationId}`)
+          continue
+        }
+
         // Handle basic attendant data updates
         const updateData: any = {}
         
         if (bulkEditData.isActive !== '') {
           updateData.isActive = bulkEditData.isActive === 'true'
+          console.log(`🔧 Bulk status update for ${attendant.firstName} ${attendant.lastName}: ${bulkEditData.isActive} → ${updateData.isActive}`)
         }
         if (bulkEditData.congregation !== '') {
           updateData.congregation = bulkEditData.congregation
+          console.log(`🔧 Bulk congregation update for ${attendant.firstName} ${attendant.lastName}: ${updateData.congregation}`)
         }
         if (bulkEditData.formsOfService !== '') {
           updateData.formsOfService = bulkEditData.formsOfService
+          console.log(`🔧 Bulk forms of service update for ${attendant.firstName} ${attendant.lastName}: ${updateData.formsOfService}`)
         }
 
         if (Object.keys(updateData).length > 0) {
+          console.log(`📡 Making bulk update API call for attendant ID: ${attendant.id}`)
           updates.push(
-            fetch(`/api/events/${eventId}/attendants/${associationId}`, {
+            fetch(`/api/events/${eventId}/attendants/${attendant.id}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(updateData)
+            }).then(response => {
+              if (!response.ok) {
+                console.error(`Basic update failed for ${attendant.firstName} ${attendant.lastName}:`, response.status)
+                return response.json().then(err => {
+                  console.error('Error details:', err)
+                  throw new Error(`Basic update failed: ${err.error}`)
+                })
+              }
+              console.log(`✅ Basic data updated for ${attendant.firstName} ${attendant.lastName}`)
+              return response
             })
           )
         }
@@ -403,30 +424,24 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
         }
 
         if (Object.keys(leadershipData).length > 0) {
-          // Find the attendant ID from the association
-          const attendant = attendants.find(att => att.associationId === associationId)
-          if (attendant) {
-            console.log(`🔧 Bulk leadership update for attendant ${attendant.firstName} ${attendant.lastName}:`, leadershipData)
-            leadershipUpdates.push(
-              fetch(`/api/events/${eventId}/attendants/${attendant.id}/leadership`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(leadershipData)
-              }).then(response => {
-                if (!response.ok) {
-                  console.error(`Leadership update failed for ${attendant.firstName} ${attendant.lastName}:`, response.status)
-                  return response.json().then(err => {
-                    console.error('Error details:', err)
-                    throw new Error(`Leadership update failed: ${err.error}`)
-                  })
-                }
-                console.log(`✅ Leadership updated for ${attendant.firstName} ${attendant.lastName}`)
-                return response
-              })
-            )
-          } else {
-            console.error(`❌ Could not find attendant for association ID: ${associationId}`)
-          }
+          console.log(`🔧 Bulk leadership update for attendant ${attendant.firstName} ${attendant.lastName}:`, leadershipData)
+          leadershipUpdates.push(
+            fetch(`/api/events/${eventId}/attendants/${attendant.id}/leadership`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(leadershipData)
+            }).then(response => {
+              if (!response.ok) {
+                console.error(`Leadership update failed for ${attendant.firstName} ${attendant.lastName}:`, response.status)
+                return response.json().then(err => {
+                  console.error('Error details:', err)
+                  throw new Error(`Leadership update failed: ${err.error}`)
+                })
+              }
+              console.log(`✅ Leadership updated for ${attendant.firstName} ${attendant.lastName}`)
+              return response
+            })
+          )
         }
       }
 
