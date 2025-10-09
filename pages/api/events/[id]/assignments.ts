@@ -10,7 +10,7 @@ const assignmentSchema = z.object({
   attendantId: z.string().min(1, 'Attendant ID is required'),
   positionId: z.string().min(1, 'Position ID is required'),
   role: z.enum(['ATTENDANT', 'OVERSEER', 'KEYMAN']).optional().default('ATTENDANT'),
-  shiftId: z.string().optional(),
+  shiftId: z.string().min(1, 'Shift ID is required for all assignments'),
   notes: z.string().optional()
 })
 
@@ -73,13 +73,96 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const validatedData = assignmentSchema.parse(req.body)
         console.log('Validated assignment data:', validatedData)
         
+        // SHIFT-SPECIFIC CONFLICT DETECTION
+        console.log('🔍 Checking for shift conflicts...')
+        
+        // Get the shift details for time conflict checking
+        const targetShift = await prisma.position_shifts.findUnique({
+          where: { id: validatedData.shiftId },
+          include: { position: true }
+        })
+        
+        if (!targetShift) {
+          return res.status(404).json({ error: 'Shift not found' })
+        }
+        
+        // Check if attendant is already assigned to this specific shift
+        const existingShiftAssignment = await prisma.position_assignments.findFirst({
+          where: {
+            attendantId: validatedData.attendantId,
+            shiftId: validatedData.shiftId
+          }
+        })
+        
+        if (existingShiftAssignment) {
+          return res.status(409).json({ 
+            error: 'Attendant is already assigned to this shift',
+            conflictType: 'DUPLICATE_SHIFT_ASSIGNMENT'
+          })
+        }
+        
+        // Check for time conflicts with other shifts (if not all-day)
+        if (!targetShift.isAllDay && targetShift.startTime && targetShift.endTime) {
+          const conflictingAssignments = await prisma.position_assignments.findMany({
+            where: {
+              attendantId: validatedData.attendantId,
+              shift: {
+                isAllDay: false,
+                NOT: { id: validatedData.shiftId },
+                OR: [
+                  // Overlapping start time
+                  {
+                    startTime: { lte: targetShift.endTime },
+                    endTime: { gt: targetShift.startTime }
+                  }
+                ]
+              }
+            },
+            include: {
+              shift: { include: { position: true } },
+              position: true
+            }
+          })
+          
+          if (conflictingAssignments.length > 0) {
+            const conflicts = conflictingAssignments.map(assignment => ({
+              positionName: assignment.position?.name || assignment.shift?.position?.name,
+              shiftName: assignment.shift?.name,
+              startTime: assignment.shift?.startTime,
+              endTime: assignment.shift?.endTime
+            }))
+            
+            return res.status(409).json({
+              error: 'Time conflict detected with existing assignments',
+              conflictType: 'TIME_OVERLAP',
+              conflicts: conflicts,
+              message: `Attendant has conflicting assignments during this time period`
+            })
+          }
+        }
+        
+        // Check if shift already has maximum attendants (1 per your requirements)
+        const existingShiftAttendants = await prisma.position_assignments.count({
+          where: { shiftId: validatedData.shiftId }
+        })
+        
+        if (existingShiftAttendants >= 1) {
+          return res.status(409).json({
+            error: 'Shift already has maximum attendants assigned',
+            conflictType: 'SHIFT_FULL',
+            message: 'Each shift can only have one attendant assigned'
+          })
+        }
+        
+        console.log('✅ No conflicts detected, creating assignment...')
+        
         const newAssignment = await prisma.position_assignments.create({
           data: {
             id: crypto.randomUUID(),
             positionId: validatedData.positionId,
             attendantId: validatedData.attendantId,
             role: validatedData.role,
-            shiftId: validatedData.shiftId || null,
+            shiftId: validatedData.shiftId,
             assignedAt: new Date(),
             assignedBy: session.user?.id || null
           }
