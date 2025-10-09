@@ -1669,42 +1669,56 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                             if (area) updateData.area = area
                             if (isActive !== '') updateData.isActive = isActive === 'true'
                             
-                            await fetch(`/api/events/${eventId}/positions/${positionId}`, {
+                            const updateResponse = await fetch(`/api/events/${eventId}/positions/${positionId}`, {
                               method: 'PUT',
                               headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify(updateData)
                             })
+                            
+                            if (!updateResponse.ok) {
+                              const error = await updateResponse.json()
+                              console.error(`Failed to update position ${positionId}:`, error)
+                              throw new Error(`Position update failed: ${error.error}`)
+                            }
                           }
 
-                          // Assign overseer
-                          if (overseerId) {
-                            await fetch(`/api/events/${eventId}/positions/${positionId}/overseer`, {
+                          // Assign overseer and/or keyman
+                          if (overseerId || keymanId) {
+                            const overseerData: any = { positionId }
+                            if (overseerId) overseerData.overseerId = overseerId
+                            if (keymanId) overseerData.keymanId = keymanId
+                            
+                            const overseerResponse = await fetch(`/api/events/${eventId}/positions/${positionId}/overseer`, {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ overseerId })
+                              body: JSON.stringify(overseerData)
                             })
-                          }
-
-                          // Assign keyman  
-                          if (keymanId) {
-                            await fetch(`/api/events/${eventId}/positions/${positionId}/overseer`, {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ keymanId })
-                            })
+                            
+                            if (!overseerResponse.ok) {
+                              const error = await overseerResponse.json()
+                              console.error(`Failed to assign overseer/keyman to position ${positionId}:`, error)
+                              throw new Error(`Overseer assignment failed: ${error.error}`)
+                            }
                           }
 
                           // Create shift
                           if (shiftName && (shiftStart || isAllDay)) {
-                            await fetch(`/api/events/${eventId}/positions/${positionId}/shifts`, {
+                            const shiftResponse = await fetch(`/api/events/${eventId}/positions/${positionId}/shifts`, {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify({
+                                positionId: positionId,
                                 startTime: isAllDay ? null : shiftStart,
                                 endTime: isAllDay ? null : shiftEnd,
                                 isAllDay: isAllDay
                               })
                             })
+                            
+                            if (!shiftResponse.ok) {
+                              const error = await shiftResponse.json()
+                              console.error(`Failed to create shift for position ${positionId}:`, error)
+                              throw new Error(`Shift creation failed: ${error.error}`)
+                            }
                           }
 
                           successCount++
