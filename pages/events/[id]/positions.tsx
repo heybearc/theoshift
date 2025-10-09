@@ -118,6 +118,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   const [showBulkCreator, setShowBulkCreator] = useState(false)
   const [showAssignAttendantModal, setShowAssignAttendantModal] = useState(false)
   const [showBulkEditModal, setShowBulkEditModal] = useState(false)
+  const [showTemplateModal, setShowTemplateModal] = useState(false)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
   const [selectedShift, setSelectedShift] = useState<any | null>(null)
   const [editingPosition, setEditingPosition] = useState<Position | null>(null)
@@ -678,6 +679,14 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                     <span className="text-sm text-blue-700 font-medium">
                       {selectedPositions.size} selected
                     </span>
+                    <button
+                      onClick={() => setShowTemplateModal(true)}
+                      disabled={selectedPositions.size === 0}
+                      className="text-xs bg-green-100 hover:bg-green-200 text-green-700 px-2 py-1 rounded"
+                      title="Apply shift template to selected positions"
+                    >
+                      📅 Apply Template
+                    </button>
                     <button
                       onClick={handleBulkDelete}
                       disabled={selectedPositions.size === 0}
@@ -1912,6 +1921,107 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                     {isSubmitting ? 'Processing...' : `Apply to ${selectedPositions.size} Positions`}
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Shift Template Application Modal */}
+        {showTemplateModal && selectedPositions.size > 0 && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="mt-3">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Apply Shift Template to {selectedPositions.size} Position(s)
+                </h3>
+                
+                <form onSubmit={async (e) => {
+                  e.preventDefault()
+                  const formData = new FormData(e.currentTarget)
+                  const templateType = formData.get('templateType') as string
+                  
+                  if (!templateType) {
+                    alert('Please select a template')
+                    return
+                  }
+
+                  try {
+                    setIsSubmitting(true)
+                    
+                    const response = await fetch(`/api/events/${eventId}/positions/apply-shift-template`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        positionIds: Array.from(selectedPositions),
+                        templateType: templateType
+                      })
+                    })
+
+                    if (response.ok) {
+                      const result = await response.json()
+                      alert(`✅ Template Applied Successfully!\n\n` +
+                            `• Positions: ${result.data.positionsProcessed}\n` +
+                            `• Shifts Created: ${result.data.totalShiftsCreated}\n` +
+                            `• Template: ${result.data.templateType}`)
+                      setShowTemplateModal(false)
+                      setSelectedPositions(new Set())
+                      router.reload()
+                    } else {
+                      const error = await response.json()
+                      alert(`Failed to apply template: ${error.error || 'Unknown error'}`)
+                    }
+                  } catch (error) {
+                    console.error('Error applying template:', error)
+                    alert('Failed to apply template')
+                  } finally {
+                    setIsSubmitting(false)
+                  }
+                }}>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Shift Template
+                    </label>
+                    <select 
+                      name="templateType"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="">Choose a template...</option>
+                      <option value="standard">
+                        Standard Day (7:50-10, 10-12, 12-2, 2-5)
+                      </option>
+                      <option value="extended">
+                        Extended Day (6:30-8:30, 8:30-10:30, 10:30-12:45, 12:45-3, 3-Close)
+                      </option>
+                    </select>
+                  </div>
+
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                    <p className="text-xs text-blue-800">
+                      <strong>Note:</strong> This will create shifts for all selected positions. 
+                      Existing shifts will not be affected.
+                    </p>
+                  </div>
+
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowTemplateModal(false)
+                      }}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-md"
+                    >
+                      {isSubmitting ? 'Applying...' : 'Apply Template'}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
