@@ -2153,6 +2153,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           id: assignment.keyman.id,
           firstName: assignment.keyman.firstName,
           lastName: assignment.keyman.lastName
+        } : null,
+        shift: assignment.shift ? {
+          id: assignment.shift.id,
+          name: assignment.shift.name,
+          startTime: assignment.shift.startTime,
+          endTime: assignment.shift.endTime,
+          isAllDay: assignment.shift.isAllDay
         } : null
       })).filter(assignment => assignment.attendant !== null),
       shifts: position.shifts || []
