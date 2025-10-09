@@ -35,9 +35,24 @@ export default function BulkPositionCreator({ eventId, onClose, onSuccess }: Bul
 
       console.log(`🚀 Creating ${positionNames.length} positions for event ${eventId}`)
 
-      // For now, create positions one by one since the bulk API expects numbered positions
+      // Create positions one by one using the positions API
       let successCount = 0
       let errorCount = 0
+
+      // Get the next available position number
+      let startingPositionNumber = 1
+      try {
+        const existingResponse = await fetch(`/api/events/${eventId}/positions`)
+        if (existingResponse.ok) {
+          const existingData = await existingResponse.json()
+          const existingPositions = existingData.data?.positions || []
+          const maxPositionNumber = existingPositions.reduce((max: number, pos: any) => 
+            Math.max(max, pos.positionNumber || 0), 0)
+          startingPositionNumber = maxPositionNumber + 1
+        }
+      } catch (error) {
+        console.warn('Could not fetch existing positions, starting from 1')
+      }
 
       for (let i = 0; i < positionNames.length; i++) {
         try {
@@ -47,9 +62,10 @@ export default function BulkPositionCreator({ eventId, onClose, onSuccess }: Bul
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+              positionNumber: startingPositionNumber + i,
               name: positionNames[i],
               area: defaultArea || undefined,
-              sequence: i + 1
+              sequence: startingPositionNumber + i
             }),
           })
 
