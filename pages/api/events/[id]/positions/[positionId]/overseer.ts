@@ -82,13 +82,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         }
 
+        // Get the All Day shift for this position (required for assignments)
+        const allDayShift = await prisma.position_shifts.findFirst({
+          where: {
+            positionId: positionId,
+            name: 'All Day'
+          }
+        })
+
+        if (!allDayShift) {
+          return res.status(400).json({ error: 'All Day shift not found for this position' })
+        }
+
         // Create overseer assignment in position_assignments table
         console.log('Creating overseer assignment with data:', {
           positionId,
           attendantId: validatedData.overseerId,
           role: 'OVERSEER',
           overseerId: validatedData.overseerId,
-          keymanId: validatedData.keymanId || null,
+          shiftId: allDayShift.id,
           assignedBy: user.id
         })
 
@@ -97,9 +109,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             id: crypto.randomUUID(),
             positionId: positionId,
             attendantId: validatedData.overseerId, // The overseer is also an attendant
+            shiftId: allDayShift.id,
             role: 'OVERSEER',
             overseerId: validatedData.overseerId,
-            keymanId: validatedData.keymanId || null,
             assignedAt: new Date(),
             assignedBy: user.id // Use the user ID from the database lookup
           }
@@ -107,10 +119,43 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         console.log('Successfully created overseer assignment:', overseerAssignment.id)
 
+        // Create separate keyman assignment if keyman is provided
+        let keymanAssignment: any = null
+        if (validatedData.keymanId) {
+          console.log('Creating keyman assignment with data:', {
+            positionId,
+            attendantId: validatedData.keymanId,
+            role: 'KEYMAN',
+            keymanId: validatedData.keymanId,
+            shiftId: allDayShift.id,
+            assignedBy: user.id
+          })
+
+          keymanAssignment = await prisma.position_assignments.create({
+            data: {
+              id: crypto.randomUUID(),
+              positionId: positionId,
+              attendantId: validatedData.keymanId, // The keyman is also an attendant
+              shiftId: allDayShift.id,
+              role: 'KEYMAN',
+              keymanId: validatedData.keymanId,
+              assignedAt: new Date(),
+              assignedBy: user.id
+            }
+          })
+
+          console.log('Successfully created keyman assignment:', keymanAssignment?.id)
+        }
+
         return res.status(201).json({
           success: true,
-          data: overseerAssignment,
-          message: 'Overseer assigned successfully'
+          data: {
+            overseerAssignment,
+            keymanAssignment
+          },
+          message: keymanAssignment ? 
+            'Overseer and keyman assigned successfully' : 
+            'Overseer assigned successfully'
         })
 
       default:
