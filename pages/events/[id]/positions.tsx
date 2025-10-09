@@ -1712,7 +1712,6 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify({
-                                positionId: positionId,
                                 startTime: isAllDay ? null : shiftStart,
                                 endTime: isAllDay ? null : shiftEnd,
                                 isAllDay: isAllDay

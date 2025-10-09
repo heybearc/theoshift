@@ -9,8 +9,7 @@ import crypto from 'crypto'
 const shiftSchema = z.object({
   startTime: z.string().optional(),
   endTime: z.string().optional(),
-  isAllDay: z.boolean().default(false),
-  positionId: z.string().min(1, 'Position ID is required')
+  isAllDay: z.boolean().default(false)
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
