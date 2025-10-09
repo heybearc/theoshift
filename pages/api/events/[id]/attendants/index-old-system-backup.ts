@@ -3,10 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../../auth/[...nextauth]'
 import { prisma } from '../../../../../src/lib/prisma'
 
-// APEX GUARDIAN - NEW SYSTEM IMPORT API
-// This API imports attendants but doesn't create position assignments
-// Attendants will be available for assignment but won't show in displays until assigned to positions
-
+// MINIMAL WORKING API - Just return existing attendants
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const session = await getServerSession(req, res, authOptions)
@@ -51,51 +48,49 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 async function handleGetEventAttendants(req: NextApiRequest, res: NextApiResponse, eventId: string, event: any) {
   try {
-    // NEW SYSTEM: Get attendants who have position assignments
-    const attendantsWithAssignments = await prisma.attendants.findMany({
-      where: {
-        position_assignments: {
-          some: {
-            position: {
-              eventId: eventId
-            }
-          }
-        }
-      },
-      include: {
-        position_assignments: {
-          where: {
-            position: {
-              eventId: eventId
-            }
-          },
-          include: {
-            position: {
-              select: {
-                name: true
-              }
-            }
-          }
-        }
-      }
+    const page = parseInt(req.query.page as string) || 1
+    const limit = parseInt(req.query.limit as string) || 25
+    const offset = (page - 1) * limit
+
+    // Get all attendants - simplified approach
+    const attendants = await prisma.attendants.findMany({
+      skip: offset,
+      take: limit,
+      orderBy: [
+        { lastName: 'asc' },
+        { firstName: 'asc' }
+      ]
     })
+
+    const total = await prisma.attendants.count()
+    const pages = Math.ceil(total / limit)
 
     return res.status(200).json({
       success: true,
-      data: attendantsWithAssignments.map(attendant => ({
-        id: attendant.id,
-        firstName: attendant.firstName,
-        lastName: attendant.lastName,
-        email: attendant.email,
-        phone: attendant.phone,
-        congregation: attendant.congregation,
-        formsOfService: attendant.formsOfService,
-        isActive: attendant.isActive,
-        assignments: attendant.position_assignments.map(assignment => ({
-          positionName: assignment.position.name,
-          role: assignment.role
-        }))
-      }))
+      data: {
+        attendants: attendants.map(attendant => ({
+          id: attendant.id,
+          firstName: attendant.firstName,
+          lastName: attendant.lastName,
+          email: attendant.email,
+          phone: attendant.phone,
+          congregation: (attendant as any).congregation || '',
+          formsOfService: (attendant as any).formsOfService || [],
+          isActive: (attendant as any).isActive !== false,
+          notes: attendant.notes,
+          userId: attendant.userId,
+          createdAt: attendant.createdAt,
+          updatedAt: attendant.updatedAt
+        })),
+        pagination: {
+          page,
+          limit,
+          total,
+          pages
+        },
+        eventId,
+        eventName: (event as any).name || 'Event'
+      }
     })
   } catch (error) {
     console.error('Get event attendants error:', error)
@@ -124,7 +119,7 @@ async function handleCreateEventAttendant(req: NextApiRequest, res: NextApiRespo
       }
     }
 
-    // Create new attendant (no automatic position assignment)
+    // Create new attendant (independent of users)
     const attendant = await prisma.attendants.create({
       data: {
         id: require('crypto').randomUUID(),
@@ -137,14 +132,22 @@ async function handleCreateEventAttendant(req: NextApiRequest, res: NextApiRespo
         formsOfService: processedFormsOfService,
         isAvailable: true,
         isActive: true,
-        userId: null,
+        userId: null, // Optional linking to users - not required
         createdAt: new Date(),
         updatedAt: new Date()
       }
     })
 
-    // NOTE: No position assignment created - attendant is available for assignment
-    console.log(`✅ Created attendant ${firstName} ${lastName} - available for position assignment`)
+    // Create association with the event
+    const association = await prisma.event_attendant_associations.create({
+      data: {
+        id: require('crypto').randomUUID(),
+        eventId,
+        attendantId: attendant.id,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    })
 
     return res.status(201).json({
       success: true,
@@ -154,10 +157,10 @@ async function handleCreateEventAttendant(req: NextApiRequest, res: NextApiRespo
         lastName: attendant.lastName,
         email: attendant.email,
         phone: attendant.phone,
-        congregation: attendant.congregation,
-        formsOfService: attendant.formsOfService,
         isActive: attendant.isActive,
-        message: 'Attendant created and available for position assignment'
+        createdAt: attendant.createdAt,
+        updatedAt: attendant.updatedAt,
+        associationId: association.id
       }
     })
   } catch (error) {
@@ -170,39 +173,28 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
   try {
     const { attendants } = req.body
 
-    if (!Array.isArray(attendants) || attendants.length === 0) {
+    if (!attendants || !Array.isArray(attendants)) {
       return res.status(400).json({ 
         success: false, 
-        error: 'Attendants array is required and must not be empty' 
+        error: 'Attendants array is required' 
       })
     }
 
-    console.log(`🔄 APEX GUARDIAN: Bulk importing ${attendants.length} attendants to NEW system`)
-
     let created = 0
     let updated = 0
-    const errors: any[] = []
+    const errors: Array<{row: number, email: string, error: string}> = []
 
     for (let i = 0; i < attendants.length; i++) {
+      const attendantData = attendants[i]
+      
       try {
-        const attendantData = attendants[i]
-
-        if (!attendantData.firstName || !attendantData.lastName || !attendantData.email) {
-          errors.push({
-            row: i + 1,
-            email: attendantData.email || 'Unknown',
-            error: 'First name, last name, and email are required'
-          })
-          continue
-        }
-
         // Check if attendant already exists by email
         const existingAttendant = await prisma.attendants.findFirst({
           where: { email: attendantData.email }
         })
 
         if (existingAttendant) {
-          // Process forms of service
+          // Process forms of service for update
           let formsOfService = []
           if (attendantData.formsOfService) {
             if (Array.isArray(attendantData.formsOfService)) {
@@ -227,8 +219,27 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
             }
           })
 
+          // Check if association already exists
+          const existingAssociation = await prisma.event_attendant_associations.findFirst({
+            where: {
+              eventId,
+              attendantId: existingAttendant.id
+            }
+          })
+
+          if (!existingAssociation) {
+            await prisma.event_attendant_associations.create({
+              data: {
+                id: require('crypto').randomUUID(),
+                eventId,
+                attendantId: existingAttendant.id,
+                createdAt: new Date(),
+                updatedAt: new Date()
+              }
+            })
+          }
+
           updated++
-          console.log(`✅ Updated attendant: ${attendantData.firstName} ${attendantData.lastName}`)
         } else {
           // Process forms of service
           let formsOfService = []
@@ -240,8 +251,8 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
             }
           }
 
-          // Create new attendant (no position assignment)
-          await prisma.attendants.create({
+          // Create new attendant
+          const newAttendant = await prisma.attendants.create({
             data: {
               id: require('crypto').randomUUID(),
               firstName: attendantData.firstName,
@@ -253,14 +264,24 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
               formsOfService: formsOfService,
               isAvailable: attendantData.isActive !== false,
               isActive: attendantData.isActive !== false,
-              userId: null,
+              userId: null, // Optional linking - not required
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }
+          })
+
+          // Create association with the event
+          await prisma.event_attendant_associations.create({
+            data: {
+              id: require('crypto').randomUUID(),
+              eventId,
+              attendantId: newAttendant.id,
               createdAt: new Date(),
               updatedAt: new Date()
             }
           })
 
           created++
-          console.log(`✅ Created attendant: ${attendantData.firstName} ${attendantData.lastName}`)
         }
       } catch (error) {
         console.error(`Error processing attendant ${i + 1}:`, error)
@@ -272,16 +293,12 @@ async function handleBulkImportEventAttendants(req: NextApiRequest, res: NextApi
       }
     }
 
-    console.log(`🎯 APEX GUARDIAN Import Complete: ${created} created, ${updated} updated, ${errors.length} errors`)
-    console.log(`📝 NOTE: Attendants are available for position assignment but won't appear in displays until assigned`)
-
     return res.status(200).json({
       success: true,
       data: {
         created,
         updated,
-        errors,
-        message: `Import complete. ${created + updated} attendants are now available for position assignment.`
+        errors
       }
     })
   } catch (error) {
