@@ -814,9 +814,9 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                   </div>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Total Assignments</p>
+                  <p className="text-sm font-medium text-gray-500">Total Attendants</p>
                   <p className="text-2xl font-semibold text-gray-900">
-                    {positions.filter(p => p.isActive).reduce((sum, p) => sum + (p.assignments?.length || 0), 0)}
+                    {positions.filter(p => p.isActive).reduce((sum, p) => sum + (p.assignments?.filter(a => a.role === 'ATTENDANT').length || 0), 0)}
                   </p>
                 </div>
               </div>
@@ -925,7 +925,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
 
                     <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                       <span>Position #{position.positionNumber}</span>
-                      <span>{position.shifts?.length || 0} shifts • {position.assignments?.length || 0} assignments</span>
+                      <span>{position.shifts?.length || 0} shifts • {position.assignments?.filter(a => a.role === 'ATTENDANT').length || 0} attendants</span>
                     </div>
 
                     {/* SHIFT-SPECIFIC ASSIGNMENT DISPLAY */}
@@ -934,10 +934,18 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                         <p className="text-xs font-medium text-gray-500 mb-2">🕐 Shift Assignments</p>
                         <div className="space-y-2">
                           {position.shifts.map(shift => {
-                            // Find assignments for this specific shift (include all roles)
-                            const shiftAssignments = position.assignments?.filter(assignment => 
+                            // Find assignments for this specific shift
+                            const allShiftAssignments = position.assignments?.filter(assignment => 
                               assignment.shift?.id === shift.id
                             ) || []
+                            
+                            // Separate regular attendants from leadership
+                            const attendantAssignments = allShiftAssignments.filter(assignment => 
+                              assignment.role === 'ATTENDANT'
+                            )
+                            const leadershipAssignments = allShiftAssignments.filter(assignment => 
+                              assignment.role === 'OVERSEER' || assignment.role === 'KEYMAN'
+                            )
                             
                             return (
                               <div key={shift.id} className="bg-gray-50 border border-gray-200 rounded-lg p-2">
@@ -958,18 +966,51 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                                     )}
                                   </div>
                                   <span className="text-xs text-gray-400">
-                                    {shiftAssignments.length} assigned
+                                    {attendantAssignments.length} attendant{attendantAssignments.length !== 1 ? 's' : ''}
+                                    {leadershipAssignments.length > 0 && ` + ${leadershipAssignments.length} leadership`}
                                   </span>
                                 </div>
                                 
-                                {/* Shift Assignment */}
-                                {shiftAssignments.length > 0 ? (
+                                {/* Leadership Assignments */}
+                                {leadershipAssignments.length > 0 && (
+                                  <div className="mb-2">
+                                    <p className="text-xs font-medium text-gray-600 mb-1">Leadership:</p>
+                                    <div className="space-y-1">
+                                      {leadershipAssignments.map(assignment => {
+                                        const roleColor = assignment.role === 'OVERSEER' ? 'text-blue-700' : 'text-purple-700'
+                                        const bgColor = assignment.role === 'OVERSEER' ? 'bg-blue-50 border-blue-100' : 'bg-purple-50 border-purple-100'
+                                        
+                                        return (
+                                          <div key={assignment.id} className={`flex items-center justify-between ${bgColor} border rounded px-2 py-1`}>
+                                            <div className="flex items-center">
+                                              <span className={`text-xs font-medium ${roleColor}`}>
+                                                {assignment.attendant?.firstName} {assignment.attendant?.lastName}
+                                              </span>
+                                              <span className="ml-2 text-xs text-gray-500">
+                                                ({assignment.role})
+                                              </span>
+                                            </div>
+                                            <button
+                                              onClick={() => handleRemoveAssignment(assignment.id)}
+                                              className="text-xs text-red-600 hover:text-red-800 px-1"
+                                              title="Remove assignment"
+                                            >
+                                              ✕
+                                            </button>
+                                          </div>
+                                        )
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Attendant Assignments */}
+                                {attendantAssignments.length > 0 ? (
                                   <div className="space-y-1">
-                                    {shiftAssignments.map(assignment => {
-                                      const roleColor = assignment.role === 'OVERSEER' ? 'text-blue-700' : 
-                                                       assignment.role === 'KEYMAN' ? 'text-purple-700' : 'text-green-700'
-                                      const bgColor = assignment.role === 'OVERSEER' ? 'bg-blue-50 border-blue-100' : 
-                                                     assignment.role === 'KEYMAN' ? 'bg-purple-50 border-purple-100' : 'bg-white border-gray-100'
+                                    {attendantAssignments.map(assignment => {
+                                      // Attendant assignments should be green
+                                      const roleColor = 'text-green-700'
+                                      const bgColor = 'bg-green-50 border-green-100'
                                       
                                       return (
                                         <div key={assignment.id} className={`flex items-center justify-between ${bgColor} border rounded px-2 py-1`}>
@@ -1616,6 +1657,21 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Select Attendant
+                      {(() => {
+                        const positionOverseer = selectedPosition.assignments?.find(a => a.role === 'OVERSEER')?.attendant
+                        const positionKeyman = selectedPosition.assignments?.find(a => a.role === 'KEYMAN')?.attendant
+                        
+                        if (positionOverseer || positionKeyman) {
+                          return (
+                            <span className="text-xs text-blue-600 font-normal block mt-1">
+                              Filtered to attendants under {positionOverseer ? `${positionOverseer.firstName} ${positionOverseer.lastName} (Overseer)` : ''}
+                              {positionOverseer && positionKeyman ? ' and ' : ''}
+                              {positionKeyman ? `${positionKeyman.firstName} ${positionKeyman.lastName} (Keyman)` : ''}
+                            </span>
+                          )
+                        }
+                        return null
+                      })()}
                     </label>
                     <select 
                       name="attendantId"
@@ -1623,12 +1679,31 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                       required
                     >
                       <option value="">Select an attendant...</option>
-                      {attendants?.filter(att => att.isActive).map(attendant => (
-                        <option key={attendant.id} value={attendant.id}>
-                          {attendant.firstName} {attendant.lastName}
-                          {attendant.congregation && ` (${attendant.congregation})`}
-                        </option>
-                      ))}
+                      {(() => {
+                        // Get the overseer and keyman for this position
+                        const positionOverseer = selectedPosition.assignments?.find(a => a.role === 'OVERSEER')?.attendant
+                        const positionKeyman = selectedPosition.assignments?.find(a => a.role === 'KEYMAN')?.attendant
+                        
+                        // Filter attendants based on position leadership
+                        let filteredAttendants = attendants?.filter(att => att.isActive) || []
+                        
+                        if (positionOverseer || positionKeyman) {
+                          filteredAttendants = filteredAttendants.filter(attendant => {
+                            // Show attendants that match the position's overseer or keyman
+                            return (positionOverseer && attendant.overseerId === positionOverseer.id) ||
+                                   (positionKeyman && attendant.keymanId === positionKeyman.id)
+                          })
+                        }
+                        
+                        return filteredAttendants.map(attendant => (
+                          <option key={attendant.id} value={attendant.id}>
+                            {attendant.firstName} {attendant.lastName}
+                            {attendant.congregation && ` (${attendant.congregation})`}
+                            {positionOverseer && attendant.overseerId === positionOverseer.id && ' - Under Overseer'}
+                            {positionKeyman && attendant.keymanId === positionKeyman.id && ' - Under Keyman'}
+                          </option>
+                        ))
+                      })()}
                     </select>
                   </div>
 
