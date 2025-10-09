@@ -705,7 +705,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">Total Positions</p>
-                  <p className="text-2xl font-semibold text-gray-900">{positions.length}</p>
+                  <p className="text-2xl font-semibold text-gray-900">{positions.filter(p => p.isActive).length}</p>
                 </div>
               </div>
             </div>
@@ -734,7 +734,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">Areas</p>
                   <p className="text-2xl font-semibold text-gray-900">
-                    {new Set(positions.map(p => p.area).filter(Boolean)).size}
+                    {new Set(positions.filter(p => p.isActive).map(p => p.area).filter(Boolean)).size}
                   </p>
                 </div>
               </div>
@@ -749,7 +749,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">Total Assignments</p>
                   <p className="text-2xl font-semibold text-gray-900">
-                    {positions.reduce((sum, p) => sum + (p.assignments?.length || 0), 0)}
+                    {positions.filter(p => p.isActive).reduce((sum, p) => sum + (p.assignments?.length || 0), 0)}
                   </p>
                 </div>
               </div>
@@ -758,7 +758,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
 
           {/* Positions Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {positions.length === 0 ? (
+            {positions.filter(p => p.isActive).length === 0 ? (
               <div className="col-span-full bg-white rounded-lg shadow p-12 text-center">
                 <span className="text-6xl mb-4 block">📋</span>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No positions created</h3>
