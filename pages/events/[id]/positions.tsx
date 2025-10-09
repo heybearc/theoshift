@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { useSession } from 'next-auth/react'
 import Head from 'next/head'
 import Link from 'next/link'
+import BulkPositionCreator from '../../../components/BulkPositionCreator'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../../api/auth/[...nextauth]'
@@ -295,6 +296,50 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
     alert(`Successfully created ${result.created} positions`)
     setShowBulkCreator(false)
     router.reload() // Refresh page to show updated data
+  }
+
+  // Handle bulk delete
+  const handleBulkDelete = async () => {
+    if (!confirm(`Delete ${selectedPositions.size} selected positions? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+      let successCount = 0
+      let errorCount = 0
+
+      for (const positionId of selectedPositions) {
+        try {
+          const response = await fetch(`/api/events/${eventId}/positions/${positionId}`, {
+            method: 'DELETE',
+          })
+
+          if (response.ok) {
+            successCount++
+          } else {
+            errorCount++
+            console.error(`Failed to delete position ${positionId}`)
+          }
+        } catch (error) {
+          errorCount++
+          console.error(`Error deleting position ${positionId}:`, error)
+        }
+      }
+
+      if (successCount > 0) {
+        alert(`Successfully deleted ${successCount} position(s)${errorCount > 0 ? `. ${errorCount} failed.` : ''}`)
+        setSelectedPositions(new Set())
+        router.reload()
+      } else {
+        alert('Failed to delete positions')
+      }
+    } catch (error) {
+      console.error('Bulk delete error:', error)
+      alert('Failed to delete positions')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Handle removing an assignment
@@ -603,11 +648,8 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                       {selectedPositions.size} selected
                     </span>
                     <button
-                      onClick={() => {
-                        if (confirm(`Delete ${selectedPositions.size} selected positions?`)) {
-                          alert('Bulk delete coming soon!')
-                        }
-                      }}
+                      onClick={handleBulkDelete}
+                      disabled={selectedPositions.size === 0}
                       className="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded"
                     >
                       Delete
@@ -737,7 +779,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 </div>
               </div>
             ) : (
-              positions.map((position) => (
+              positions.filter(p => p.isActive).map((position) => (
                 <div key={position.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -967,22 +1009,12 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
         </div>
 
         {/* Bulk Position Creator Modal */}
-        {/* TODO: Implement BulkPositionCreator component for Phase 2 */}
         {showBulkCreator && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-              <div className="text-center p-8">
-                <h3 className="text-lg font-medium mb-4">Bulk Position Creator</h3>
-                <p className="text-gray-600 mb-4">Coming in Phase 2 - Bulk position operations</p>
-                <button
-                  onClick={() => setShowBulkCreator(false)}
-                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
+          <BulkPositionCreator
+            eventId={eventId}
+            onClose={() => setShowBulkCreator(false)}
+            onSuccess={handleBulkCreateSuccess}
+          />
         )}
 
         {/* Create/Edit Position Modal */}
