@@ -900,28 +900,6 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                       <p className="text-sm text-gray-600 mb-3">{position.description}</p>
                     )}
 
-                    {/* Leadership Information */}
-                    {position.assignments && position.assignments.length > 0 && (
-                      <div className="mb-3">
-                        {position.assignments.some(a => a.overseer || a.keyman) && (
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
-                            <p className="text-xs font-medium text-blue-800 mb-2">👥 Leadership</p>
-                            <div className="space-y-1">
-                              {position.assignments.filter(a => a.overseer).map(assignment => (
-                                <div key={assignment.id} className="text-xs text-blue-700">
-                                  <span className="font-medium">Overseer:</span> {assignment.overseer?.firstName} {assignment.overseer?.lastName}
-                                </div>
-                              ))}
-                              {position.assignments.filter(a => a.keyman).map(assignment => (
-                                <div key={assignment.id} className="text-xs text-blue-700">
-                                  <span className="font-medium">Keyman:</span> {assignment.keyman?.firstName} {assignment.keyman?.lastName}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
 
                     <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                       <span>Position #{position.positionNumber}</span>
@@ -938,7 +916,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                       if (positionLeadership.length > 0) {
                         return (
                           <div className="mb-4">
-                            <p className="text-xs font-medium text-gray-500 mb-2">👥 Position Leadership</p>
+                            <p className="text-xs font-medium text-gray-500 mb-2">👥 Position Oversight</p>
                             <div className="space-y-1">
                               {positionLeadership.map(assignment => {
                                 const roleColor = assignment.role === 'OVERSEER' ? 'text-blue-700' : 'text-purple-700'
@@ -1016,14 +994,13 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                                   </div>
                                   <span className="text-xs text-gray-400">
                                     {attendantAssignments.length} attendant{attendantAssignments.length !== 1 ? 's' : ''}
-                                    {positionLeadership.length > 0 && ` + ${positionLeadership.length} leadership`}
                                   </span>
                                 </div>
                                 
                                 {/* Position Leadership Assignments */}
                                 {positionLeadership.length > 0 && (
                                   <div className="mb-2">
-                                    <p className="text-xs font-medium text-gray-600 mb-1">Leadership:</p>
+                                    <p className="text-xs font-medium text-gray-600 mb-1">Oversight:</p>
                                     <div className="space-y-1">
                                       {positionLeadership.map(assignment => {
                                         const roleColor = assignment.role === 'OVERSEER' ? 'text-blue-700' : 'text-purple-700'
@@ -1192,7 +1169,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                         }}
                         className="text-xs bg-green-100 hover:bg-green-200 text-green-800 px-2 py-1 rounded transition-colors"
                       >
-                        👥 Assign Overseer
+                        👥 Assign Oversight
                       </button>
                       <button
                         onClick={() => handleEdit(position)}
@@ -1202,65 +1179,6 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                       </button>
                     </div>
 
-                    {position.shifts && position.shifts.length > 0 && (
-                      <div className="mb-4">
-                        <p className="text-xs font-medium text-gray-500 mb-2">⏰ Shifts:</p>
-                        <div className="space-y-2">
-                          {position.shifts.map((shift, index) => (
-                            <div key={index} className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs border ${
-                              shift.isAllDay 
-                                ? 'bg-green-50 border-green-200 text-green-800' 
-                                : 'bg-gray-50 border-gray-200 text-gray-700'
-                            }`}>
-                              <div className="flex items-center">
-                                <span className="font-medium">{shift.name}</span>
-                                {shift.isAllDay ? (
-                                  <span className="ml-2 text-green-600">(24 hours)</span>
-                                ) : (
-                                  shift.startTime && shift.endTime && (
-                                    <span className="ml-2 text-gray-600">
-                                      {formatTime12Hour(shift.startTime)} - {formatTime12Hour(shift.endTime)}
-                                    </span>
-                                  )
-                                )}
-                              </div>
-                              <button
-                                onClick={async () => {
-                                  if (confirm(`Delete shift "${shift.name}"? This cannot be undone.`)) {
-                                    try {
-                                      const response = await fetch(`/api/events/${eventId}/positions/${position.id}/shifts`, {
-                                        method: 'DELETE',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ shiftId: shift.id })
-                                      })
-                                      
-                                      if (response.ok) {
-                                        router.reload()
-                                      } else {
-                                        const error = await response.json()
-                                        alert(`Failed to delete shift: ${error.error}`)
-                                      }
-                                    } catch (error) {
-                                      console.error('Error deleting shift:', error)
-                                      alert('Failed to delete shift')
-                                    }
-                                  }
-                                }}
-                                className="ml-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded p-1 transition-colors"
-                                title="Delete shift"
-                              >
-                                🗑️
-                              </button>
-                            </div>
-                          ))}
-                          {position.shifts.some(s => s.isAllDay) && (
-                            <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-2 py-1">
-                              ⚠️ All-day shift active - no additional shifts allowed
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
 
                     <div className="flex space-x-2">
                       {!position.isActive ? (
