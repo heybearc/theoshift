@@ -2073,6 +2073,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                     firstName: true,
                     lastName: true
                   }
+                },
+                shift: {
+                  select: {
+                    id: true,
+                    name: true,
+                    startTime: true,
+                    endTime: true,
+                    isAllDay: true
+                  }
                 }
               }
             },
