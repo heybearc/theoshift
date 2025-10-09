@@ -33,66 +33,151 @@ export default function BulkPositionCreator({ eventId, onClose, onSuccess }: Bul
         return
       }
 
-      console.log(`🚀 Creating ${positionNames.length} positions for event ${eventId}`)
+      console.log(`🚀 Processing ${positionNames.length} positions for event ${eventId}`)
 
-      // Create positions one by one using the positions API
+      // Smart position management: reuse existing, reactivate inactive, create new
       let successCount = 0
       let errorCount = 0
+      let reactivatedCount = 0
+      let updatedCount = 0
 
-      // Get the next available position number (including inactive positions)
-      let startingPositionNumber = 1
+      // Get ALL existing positions (including inactive) for smart matching
+      let existingPositions: any[] = []
       try {
-        // Fetch ALL positions (including inactive) to find true max position number
         const existingResponse = await fetch(`/api/events/${eventId}/positions?includeInactive=true&limit=1000`)
         if (existingResponse.ok) {
           const existingData = await existingResponse.json()
-          const existingPositions = existingData.data?.positions || []
-          const maxPositionNumber = existingPositions.reduce((max: number, pos: any) => 
-            Math.max(max, pos.positionNumber || 0), 0)
-          startingPositionNumber = maxPositionNumber + 1
-          console.log(`📊 Found ${existingPositions.length} existing positions, max number: ${maxPositionNumber}, starting from: ${startingPositionNumber}`)
+          existingPositions = existingData.data?.positions || []
+          console.log(`📊 Found ${existingPositions.length} existing positions (active + inactive)`)
         }
       } catch (error) {
-        console.warn('Could not fetch existing positions, starting from 1')
+        console.warn('Could not fetch existing positions, proceeding with creation only')
+      }
+
+      // Extract position numbers from names (e.g., "Station 1" -> 1)
+      const extractPositionNumber = (name: string): number | null => {
+        const match = name.match(/(?:Station|Position)\s+(\d+)/i)
+        return match ? parseInt(match[1], 10) : null
       }
 
       for (let i = 0; i < positionNames.length; i++) {
+        const positionName = positionNames[i]
+        const desiredNumber = extractPositionNumber(positionName)
+        
         try {
-          const response = await fetch(`/api/events/${eventId}/positions`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              positionNumber: startingPositionNumber + i,
-              name: positionNames[i],
-              area: defaultArea || undefined,
-              sequence: startingPositionNumber + i
-            }),
-          })
+          // Check if position with this name already exists
+          const existingByName = existingPositions.find(pos => 
+            pos.name.toLowerCase().trim() === positionName.toLowerCase().trim()
+          )
+          
+          // Check if position with desired number exists
+          const existingByNumber = desiredNumber ? existingPositions.find(pos => 
+            pos.positionNumber === desiredNumber
+          ) : null
 
-          if (response.ok) {
-            successCount++
+          if (existingByName) {
+            // Position with same name exists - reactivate if inactive, update if needed
+            if (!existingByName.isActive) {
+              console.log(`🔄 Reactivating existing position: ${positionName}`)
+              const response = await fetch(`/api/events/${eventId}/positions/${existingByName.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  name: positionName,
+                  area: defaultArea || existingByName.area,
+                  isActive: true
+                }),
+              })
+              if (response.ok) {
+                reactivatedCount++
+              } else {
+                errorCount++
+              }
+            } else {
+              console.log(`✅ Position already exists and active: ${positionName}`)
+              updatedCount++
+            }
+          } else if (existingByNumber && !existingByNumber.isActive) {
+            // Desired number exists but inactive - reuse it
+            console.log(`♻️ Reusing inactive position number ${desiredNumber} for: ${positionName}`)
+            const response = await fetch(`/api/events/${eventId}/positions/${existingByNumber.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: positionName,
+                area: defaultArea || undefined,
+                isActive: true
+              }),
+            })
+            if (response.ok) {
+              reactivatedCount++
+            } else {
+              errorCount++
+            }
+          } else if (desiredNumber && !existingByNumber) {
+            // Create new position with desired number
+            console.log(`🆕 Creating new position ${desiredNumber}: ${positionName}`)
+            const response = await fetch(`/api/events/${eventId}/positions`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                positionNumber: desiredNumber,
+                name: positionName,
+                area: defaultArea || undefined,
+                sequence: desiredNumber
+              }),
+            })
+            if (response.ok) {
+              successCount++
+            } else {
+              errorCount++
+              console.error(`Failed to create position: ${positionName}`)
+            }
           } else {
-            errorCount++
-            console.error(`Failed to create position: ${positionNames[i]}`)
+            // Fallback: create with next available number
+            const maxNumber = existingPositions.reduce((max, pos) => Math.max(max, pos.positionNumber || 0), 0)
+            const nextNumber = maxNumber + 1 + i
+            console.log(`📝 Creating position with next available number ${nextNumber}: ${positionName}`)
+            const response = await fetch(`/api/events/${eventId}/positions`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                positionNumber: nextNumber,
+                name: positionName,
+                area: defaultArea || undefined,
+                sequence: nextNumber
+              }),
+            })
+            if (response.ok) {
+              successCount++
+            } else {
+              errorCount++
+              console.error(`Failed to create position: ${positionName}`)
+            }
           }
         } catch (error) {
           errorCount++
-          console.error(`Error creating position ${positionNames[i]}:`, error)
+          console.error(`Error processing position ${positionName}:`, error)
         }
       }
 
-      if (successCount > 0) {
+      const totalProcessed = successCount + reactivatedCount + updatedCount
+      if (totalProcessed > 0) {
+        const parts: string[] = []
+        if (successCount > 0) parts.push(`${successCount} created`)
+        if (reactivatedCount > 0) parts.push(`${reactivatedCount} reactivated`)
+        if (updatedCount > 0) parts.push(`${updatedCount} already active`)
+        if (errorCount > 0) parts.push(`${errorCount} failed`)
+        
         const result = { 
-          created: successCount, 
+          created: totalProcessed, 
           failed: errorCount,
-          message: `Created ${successCount} positions${errorCount > 0 ? `, ${errorCount} failed` : ''}`
+          message: `Processed ${totalProcessed} positions: ${parts.join(', ')}`
         }
-        console.log(`✅ Successfully created ${successCount} positions`)
+        console.log(`✅ Successfully processed ${totalProcessed} positions`)
         onSuccess(result)
       } else {
-        alert('Failed to create positions')
+        alert('Failed to process positions')
       }
     } catch (error) {
       console.error('Bulk create error:', error)
