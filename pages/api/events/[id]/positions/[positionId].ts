@@ -157,31 +157,79 @@ async function handleUpdatePosition(req: NextApiRequest, res: NextApiResponse, p
 
 async function handleDeletePosition(req: NextApiRequest, res: NextApiResponse, position: any) {
   try {
-    // Check if position has assignments
+    const session = await getServerSession(req, res, authOptions)
+    const isHardDelete = req.query.hardDelete === 'true'
+    
+    // Hard delete requires admin role
+    if (isHardDelete && session?.user?.role !== 'ADMIN') {
+      return res.status(403).json({
+        success: false,
+        error: 'Hard delete requires admin privileges'
+      })
+    }
+
+    // Check dependencies for both soft and hard delete
     const assignmentCount = await prisma.position_assignments.count({
       where: { positionId: position.id }
     })
 
-    if (assignmentCount > 0) {
-      return res.status(400).json({
-        success: false,
-        error: `Cannot delete position with ${assignmentCount} assignment(s). Remove assignments first.`
+    const shiftCount = await prisma.position_shifts.count({
+      where: { positionId: position.id }
+    })
+
+    if (isHardDelete) {
+      // Hard delete: Check for ANY dependencies (active or inactive)
+      if (assignmentCount > 0 || shiftCount > 0) {
+        return res.status(400).json({
+          success: false,
+          error: `Cannot permanently delete position with ${assignmentCount} assignment(s) and ${shiftCount} shift(s). Remove all dependencies first.`,
+          dependencies: {
+            assignments: assignmentCount,
+            shifts: shiftCount
+          }
+        })
+      }
+
+      // Perform hard delete
+      await prisma.positions.delete({
+        where: { id: position.id }
+      })
+
+      return res.status(200).json({
+        success: true,
+        message: 'Position permanently deleted successfully'
+      })
+    } else {
+      // Soft delete: Only check active assignments
+      const activeAssignmentCount = await prisma.position_assignments.count({
+        where: { 
+          positionId: position.id,
+          attendant: {
+            isActive: true
+          }
+        }
+      })
+
+      if (activeAssignmentCount > 0) {
+        return res.status(400).json({
+          success: false,
+          error: `Cannot deactivate position with ${activeAssignmentCount} active assignment(s). Remove active assignments first.`
+        })
+      }
+
+      // Soft delete by setting isActive to false
+      await prisma.positions.update({
+        where: { id: position.id },
+        data: {
+          isActive: false
+        }
+      })
+
+      return res.status(200).json({
+        success: true,
+        message: 'Position deactivated successfully'
       })
     }
-
-    // Soft delete by setting isActive to false
-    await prisma.positions.update({
-      where: { id: position.id },
-      data: {
-        isActive: false,
-        updatedAt: new Date()
-      }
-    })
-
-    return res.status(200).json({
-      success: true,
-      message: 'Position deleted successfully'
-    })
   } catch (error) {
     console.error('Delete position error:', error)
     return res.status(500).json({

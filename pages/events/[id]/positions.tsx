@@ -195,25 +195,26 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   }
 
   const handleDelete = async (positionId: string) => {
-    if (!confirm(`Are you sure you want to delete position #${positionId}? This action cannot be undone.`)) {
+    if (!confirm(`Are you sure you want to deactivate this position? It can be reactivated later.`)) {
       return
     }
 
     try {
+      setIsSubmitting(true)
       const response = await fetch(`/api/events/${eventId}/positions/${positionId}`, {
-        method: 'DELETE',
+        method: 'DELETE'
       })
 
       if (response.ok) {
-        alert('Position deleted successfully')
-        router.reload() // Refresh page to show updated data
+        router.reload()
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to delete position')
+        alert(`Failed to deactivate position: ${error.error}`)
       }
     } catch (error) {
-      console.error('Error deleting position:', error)
-      alert('Failed to delete position')
+      alert('Failed to deactivate position')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -591,6 +592,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
 
   // Get session data
   const { data: session } = useSession()
+  const isAdmin = session?.user?.role === 'ADMIN'
 
   if (loading) {
     return (
@@ -1013,27 +1015,71 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
 
                     <div className="flex space-x-2">
                       {!position.isActive ? (
-                        <button
-                          onClick={async () => {
-                            try {
-                              const response = await fetch(`/api/events/${eventId}/positions/${position.id}`, {
-                                method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ isActive: true }),
-                              })
-                              if (response.ok) {
-                                router.reload()
-                              } else {
+                        <>
+                          <button
+                            onClick={async () => {
+                              try {
+                                const response = await fetch(`/api/events/${eventId}/positions/${position.id}`, {
+                                  method: 'PUT',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ isActive: true }),
+                                })
+                                if (response.ok) {
+                                  router.reload()
+                                } else {
+                                  alert('Failed to activate position')
+                                }
+                              } catch (error) {
                                 alert('Failed to activate position')
                               }
-                            } catch (error) {
-                              alert('Failed to activate position')
-                            }
-                          }}
-                          className="flex-1 bg-green-100 hover:bg-green-200 text-green-700 px-3 py-2 rounded text-sm font-medium transition-colors"
-                        >
-                          ✅ Activate
-                        </button>
+                            }}
+                            className="flex-1 bg-green-100 hover:bg-green-200 text-green-700 px-3 py-2 rounded text-sm font-medium transition-colors"
+                          >
+                            ✅ Activate
+                          </button>
+                          {isAdmin && (
+                            <button
+                              onClick={async () => {
+                                const confirmed = confirm(
+                                  `⚠️ PERMANENT DELETION ⚠️\n\n` +
+                                  `This will permanently delete "${position.name}" from the database.\n` +
+                                  `This action CANNOT be undone.\n\n` +
+                                  `Are you absolutely sure?`
+                                )
+                                if (!confirmed) return
+
+                                try {
+                                  const response = await fetch(`/api/events/${eventId}/positions/${position.id}?hardDelete=true`, {
+                                    method: 'DELETE'
+                                  })
+                                  const result = await response.json()
+                                  
+                                  if (response.ok) {
+                                    alert(`Position "${position.name}" permanently deleted.`)
+                                    router.reload()
+                                  } else {
+                                    if (result.dependencies) {
+                                      alert(
+                                        `Cannot delete - has dependencies:\n` +
+                                        `• ${result.dependencies.assignments} assignments\n` +
+                                        `• ${result.dependencies.shifts} shifts\n\n` +
+                                        `Remove dependencies first.`
+                                      )
+                                    } else {
+                                      alert(`Failed: ${result.error}`)
+                                    }
+                                  }
+                                } catch (error) {
+                                  alert('Failed to permanently delete position')
+                                }
+                              }}
+                              className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
+                              title="Permanently delete position (Admin only)"
+                            >
+                              🗑️ Delete Forever
+                            </button>
+                          )}
+                        </>
                       ) : (
                         <>
                           <button
