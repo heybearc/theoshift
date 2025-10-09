@@ -125,6 +125,22 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   const [message, setMessage] = useState('')
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set())
   const [showInactive, setShowInactive] = useState(false)
+
+  // Initialize showInactive state from URL or localStorage on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const showInactiveParam = urlParams.get('showInactive')
+    
+    if (showInactiveParam === 'true') {
+      setShowInactive(true)
+    } else {
+      // Check localStorage as fallback
+      const savedState = localStorage.getItem(`showInactive-event-${eventId}`)
+      if (savedState === 'true') {
+        setShowInactive(true)
+      }
+    }
+  }, [eventId])
   const [shiftFormData, setShiftFormData] = useState({
     startTime: '',
     endTime: '',
@@ -172,7 +188,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
         setShowCreateModal(false)
         setEditingPosition(null)
         setFormData({ positionNumber: 1, name: '', area: '', description: '' })
-        router.reload() // Refresh page to show updated data
+        reloadWithState() // Refresh page to show updated data
       } else {
         const error = await response.json()
         alert(error.error || 'Failed to save position')
@@ -206,7 +222,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       })
 
       if (response.ok) {
-        router.reload()
+        reloadWithState()
       } else {
         const error = await response.json()
         alert(`Failed to deactivate position: ${error.error}`)
@@ -297,7 +313,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   const handleBulkCreateSuccess = (result: any) => {
     alert(`Successfully created ${result.created} positions`)
     setShowBulkCreator(false)
-    router.reload() // Refresh page to show updated data
+    reloadWithState() // Refresh page to show updated data
   }
 
   // Handle bulk delete
@@ -332,7 +348,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       if (successCount > 0) {
         alert(`Successfully deleted ${successCount} position(s)${errorCount > 0 ? `. ${errorCount} failed.` : ''}`)
         setSelectedPositions(new Set())
-        router.reload()
+        reloadWithState()
       } else {
         alert('Failed to delete positions')
       }
@@ -594,6 +610,17 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   const { data: session } = useSession()
   const isAdmin = session?.user?.role === 'ADMIN'
 
+  // Helper function to reload page while preserving showInactive state
+  const reloadWithState = () => {
+    const url = new URL(window.location.href)
+    if (showInactive) {
+      url.searchParams.set('showInactive', 'true')
+    } else {
+      url.searchParams.delete('showInactive')
+    }
+    window.location.href = url.toString()
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -682,7 +709,22 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 </button>
                 
                 <button
-                  onClick={() => setShowInactive(!showInactive)}
+                  onClick={() => {
+                    const newState = !showInactive
+                    setShowInactive(newState)
+                    
+                    // Save to localStorage
+                    localStorage.setItem(`showInactive-event-${eventId}`, newState.toString())
+                    
+                    // Update URL without page reload
+                    const url = new URL(window.location.href)
+                    if (newState) {
+                      url.searchParams.set('showInactive', 'true')
+                    } else {
+                      url.searchParams.delete('showInactive')
+                    }
+                    window.history.replaceState({}, '', url.toString())
+                  }}
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                     showInactive 
                       ? 'bg-purple-600 hover:bg-purple-700 text-white' 
@@ -1025,7 +1067,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                                   body: JSON.stringify({ isActive: true }),
                                 })
                                 if (response.ok) {
-                                  router.reload()
+                                  reloadWithState()
                                 } else {
                                   alert('Failed to activate position')
                                 }
@@ -1056,7 +1098,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                                   
                                   if (response.ok) {
                                     alert(`Position "${position.name}" permanently deleted.`)
-                                    router.reload()
+                                    reloadWithState()
                                   } else {
                                     if (result.dependencies) {
                                       alert(
