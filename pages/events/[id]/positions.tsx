@@ -925,9 +925,9 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                         <p className="text-xs font-medium text-gray-500 mb-2">🕐 Shift Assignments</p>
                         <div className="space-y-2">
                           {position.shifts.map(shift => {
-                            // Find assignments for this specific shift
+                            // Find assignments for this specific shift (include all roles)
                             const shiftAssignments = position.assignments?.filter(assignment => 
-                              assignment.shift?.id === shift.id && assignment.role !== 'OVERSEER'
+                              assignment.shift?.id === shift.id
                             ) || []
                             
                             return (
@@ -949,28 +949,39 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                                     )}
                                   </div>
                                   <span className="text-xs text-gray-400">
-                                    {shiftAssignments.length}/1
+                                    {shiftAssignments.length} assigned
                                   </span>
                                 </div>
                                 
                                 {/* Shift Assignment */}
                                 {shiftAssignments.length > 0 ? (
-                                  <div className="flex items-center justify-between bg-white border border-gray-100 rounded px-2 py-1">
-                                    <div className="flex items-center">
-                                      <span className="text-xs font-medium text-green-700">
-                                        {shiftAssignments[0].attendant?.firstName} {shiftAssignments[0].attendant?.lastName}
-                                      </span>
-                                      <span className="ml-2 text-xs text-gray-500">
-                                        ({shiftAssignments[0].role || 'Attendant'})
-                                      </span>
-                                    </div>
-                                    <button
-                                      onClick={() => handleRemoveAssignment(shiftAssignments[0].id)}
-                                      className="text-xs text-red-600 hover:text-red-800 px-1"
-                                      title="Remove assignment"
-                                    >
-                                      ✕
-                                    </button>
+                                  <div className="space-y-1">
+                                    {shiftAssignments.map(assignment => {
+                                      const roleColor = assignment.role === 'OVERSEER' ? 'text-blue-700' : 
+                                                       assignment.role === 'KEYMAN' ? 'text-purple-700' : 'text-green-700'
+                                      const bgColor = assignment.role === 'OVERSEER' ? 'bg-blue-50 border-blue-100' : 
+                                                     assignment.role === 'KEYMAN' ? 'bg-purple-50 border-purple-100' : 'bg-white border-gray-100'
+                                      
+                                      return (
+                                        <div key={assignment.id} className={`flex items-center justify-between ${bgColor} border rounded px-2 py-1`}>
+                                          <div className="flex items-center">
+                                            <span className={`text-xs font-medium ${roleColor}`}>
+                                              {assignment.attendant?.firstName} {assignment.attendant?.lastName}
+                                            </span>
+                                            <span className="ml-2 text-xs text-gray-500">
+                                              ({assignment.role || 'Attendant'})
+                                            </span>
+                                          </div>
+                                          <button
+                                            onClick={() => handleRemoveAssignment(assignment.id)}
+                                            className="text-xs text-red-600 hover:text-red-800 px-1"
+                                            title="Remove assignment"
+                                          >
+                                            ✕
+                                          </button>
+                                        </div>
+                                      )
+                                    })}
                                   </div>
                                 ) : (
                                   <button
@@ -1021,7 +1032,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                         <p className="text-xs font-medium text-gray-500 mb-2">👤 Legacy Assignments</p>
                         <div className="space-y-1">
                           {position.assignments
-                            .filter(assignment => assignment.role !== 'OVERSEER')
+                            .filter(assignment => !assignment.shift)
                             .map(assignment => (
                             <div key={assignment.id} className="flex items-center justify-between bg-yellow-50 border border-yellow-200 rounded px-2 py-1">
                               <div className="flex items-center">
@@ -1579,6 +1590,8 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                           alert(`⚠️ Time Conflict: This attendant has conflicting assignments:\n\n${errorData.conflicts?.map(c => `• ${c.positionName} - ${c.shiftName}`).join('\n')}\n\nPlease choose a different attendant or shift.`)
                         } else if (errorData.conflictType === 'SHIFT_FULL') {
                           alert('⚠️ Shift Full: This shift already has the maximum number of attendants assigned (1).')
+                        } else if (errorData.conflictType === 'ROLE_OCCUPIED') {
+                          alert(`⚠️ Role Occupied: ${errorData.message}`)
                         } else {
                           alert(`⚠️ Assignment Conflict: ${errorData.message || 'Unable to assign attendant to this shift.'}`)
                         }

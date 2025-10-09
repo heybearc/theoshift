@@ -141,17 +141,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         }
         
-        // Check if shift already has maximum attendants (1 per your requirements)
-        const existingShiftAttendants = await prisma.position_assignments.count({
-          where: { shiftId: validatedData.shiftId }
+        // Check if shift already has someone in this specific role
+        const existingRoleAssignment = await prisma.position_assignments.findFirst({
+          where: { 
+            shiftId: validatedData.shiftId,
+            role: validatedData.role
+          }
         })
         
-        if (existingShiftAttendants >= 1) {
+        if (existingRoleAssignment) {
           return res.status(409).json({
-            error: 'Shift already has maximum attendants assigned',
-            conflictType: 'SHIFT_FULL',
-            message: 'Each shift can only have one attendant assigned'
+            error: `Shift already has a ${validatedData.role.toLowerCase()} assigned`,
+            conflictType: 'ROLE_OCCUPIED',
+            message: `Each shift can only have one ${validatedData.role.toLowerCase()}`
           })
+        }
+        
+        // For regular attendants, limit to 1 per shift
+        if (validatedData.role === 'ATTENDANT') {
+          const existingAttendants = await prisma.position_assignments.count({
+            where: { 
+              shiftId: validatedData.shiftId,
+              role: 'ATTENDANT'
+            }
+          })
+          
+          if (existingAttendants >= 1) {
+            return res.status(409).json({
+              error: 'Shift already has maximum attendants assigned',
+              conflictType: 'SHIFT_FULL',
+              message: 'Each shift can only have one attendant assigned'
+            })
+          }
         }
         
         console.log('✅ No conflicts detected, creating assignment...')
