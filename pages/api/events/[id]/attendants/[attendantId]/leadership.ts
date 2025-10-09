@@ -30,30 +30,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Validate request body
       const validatedData = leadershipSchema.parse(req.body)
 
-      // Find the association first - attendantId parameter is the actual attendant ID
-      const association = await prisma.event_attendant_associations.findFirst({
+      // Find the position assignment first (NEW SYSTEM)
+      const positionAssignment = await prisma.position_assignments.findFirst({
         where: {
-          eventId: eventId,
-          attendantId: attendantId
+          attendantId: attendantId,
+          position: {
+            eventId: eventId
+          }
         }
       })
       
-      console.log(`🔍 Looking for association: eventId=${eventId}, attendantId=${attendantId}`)
-      console.log(`🔍 Found association:`, association ? association.id : 'NOT FOUND')
+      console.log(`🔍 Looking for position assignment: eventId=${eventId}, attendantId=${attendantId}`)
+      console.log(`🔍 Found position assignment:`, positionAssignment ? positionAssignment.id : 'NOT FOUND')
 
-      if (!association) {
-        return res.status(404).json({ error: 'Attendant association not found' })
+      if (!positionAssignment) {
+        return res.status(404).json({ error: 'Attendant position assignment not found' })
       }
 
-      // Update the event attendant association with leadership assignments
-      const updatedAssociation = await prisma.event_attendant_associations.update({
+      // Update the position assignment with leadership assignments (NEW SYSTEM)
+      const updatedAssignment = await prisma.position_assignments.update({
         where: {
-          id: association.id
+          id: positionAssignment.id
         },
         data: {
           overseerId: validatedData.overseerId,
-          keymanId: validatedData.keymanId,
-          updatedAt: new Date()
+          keymanId: validatedData.keymanId
         },
         include: {
           overseer: {
@@ -75,7 +76,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       return res.status(200).json({
         success: true,
-        association: updatedAssociation
+        assignment: updatedAssignment
       })
 
     } catch (error) {

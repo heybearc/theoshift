@@ -56,15 +56,17 @@ async function handleGetAttendant(req: NextApiRequest, res: NextApiResponse, eve
       return res.status(404).json({ error: 'Attendant not found' })
     }
 
-    // Check if attendant is associated with the event
-    const association = await prisma.event_attendant_associations.findFirst({
+    // Check if attendant is associated with the event (NEW SYSTEM - position assignments)
+    const positionAssignment = await prisma.position_assignments.findFirst({
       where: {
-        eventId,
-        attendantId
+        attendantId,
+        position: {
+          eventId
+        }
       }
     })
 
-    if (!association) {
+    if (!positionAssignment) {
       return res.status(404).json({ error: 'Attendant not associated with this event' })
     }
 
@@ -107,15 +109,17 @@ async function handleUpdateAttendant(req: NextApiRequest, res: NextApiResponse, 
       return res.status(404).json({ error: 'Attendant not found' })
     }
 
-    // Verify attendant is associated with this event
-    const association = await prisma.event_attendant_associations.findFirst({
+    // Verify attendant is associated with this event (NEW SYSTEM - position assignments)
+    const positionAssignment = await prisma.position_assignments.findFirst({
       where: {
-        eventId,
-        attendantId
+        attendantId,
+        position: {
+          eventId
+        }
       }
     })
     
-    if (!association) {
+    if (!positionAssignment) {
       console.error(`❌ Attendant ${attendantId} not associated with event ${eventId}`)
       return res.status(404).json({ error: 'Attendant not associated with this event' })
     }
@@ -199,20 +203,22 @@ async function handleDeleteAttendant(req: NextApiRequest, res: NextApiResponse, 
       return res.status(404).json({ error: 'Attendant not found' })
     }
 
-    // Delete the association first
-    await prisma.event_attendant_associations.deleteMany({
+    // Delete the position assignments first (NEW SYSTEM)
+    await prisma.position_assignments.deleteMany({
       where: {
-        eventId,
-        attendantId
+        attendantId,
+        position: {
+          eventId
+        }
       }
     })
 
     // Optionally delete the attendant if not associated with other events
-    const otherAssociations = await prisma.event_attendant_associations.findMany({
+    const otherAssignments = await prisma.position_assignments.findMany({
       where: { attendantId }
     })
 
-    if (otherAssociations.length === 0) {
+    if (otherAssignments.length === 0) {
       await prisma.attendants.delete({
         where: { id: attendantId }
       })
