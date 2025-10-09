@@ -1701,8 +1701,13 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                             }
                           }
 
-                          // Create shift
-                          if (shiftName && (shiftStart || isAllDay)) {
+                          // Create shift - debug form values
+                          console.log('Shift form values:', { shiftName, shiftStart, shiftEnd, isAllDay })
+                          
+                          // Create shift if either all-day is checked OR specific times are provided
+                          if (isAllDay || (shiftStart && shiftEnd)) {
+                            console.log(`Creating shift for position ${positionId}`)
+                            
                             const shiftResponse = await fetch(`/api/events/${eventId}/positions/${positionId}/shifts`, {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
@@ -1714,11 +1719,18 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                               })
                             })
                             
+                            console.log(`Shift API response status: ${shiftResponse.status}`)
+                            
                             if (!shiftResponse.ok) {
                               const error = await shiftResponse.json()
                               console.error(`Failed to create shift for position ${positionId}:`, error)
                               throw new Error(`Shift creation failed: ${error.error}`)
+                            } else {
+                              const result = await shiftResponse.json()
+                              console.log(`Successfully created shift for position ${positionId}:`, result)
                             }
+                          } else {
+                            console.log('Skipping shift creation - no valid shift data provided')
                           }
 
                           successCount++
