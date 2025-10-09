@@ -67,6 +67,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         console.log('Creating shift with data:', shiftData)
+        console.log('Data types:', {
+          id: typeof shiftData.id,
+          positionId: typeof shiftData.positionId,
+          name: typeof shiftData.name,
+          startTime: typeof shiftData.startTime,
+          endTime: typeof shiftData.endTime,
+          isAllDay: typeof shiftData.isAllDay,
+          sequence: typeof shiftData.sequence
+        })
 
         const newShift = await prisma.position_shifts.create({
           data: shiftData
@@ -136,6 +145,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } catch (error) {
     console.error('Shift creation API error:', error)
-    return res.status(500).json({ error: 'Internal server error' })
+    
+    // Enhanced error logging
+    if (error instanceof Error) {
+      console.error('Error name:', error.name)
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+    }
+    
+    // Check for specific Prisma errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      console.error('Prisma error code:', (error as any).code)
+      console.error('Prisma error meta:', (error as any).meta)
+    }
+    
+    // Return more specific error message
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error'
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      details: errorMessage,
+      timestamp: new Date().toISOString()
+    })
   }
 }
