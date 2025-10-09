@@ -1390,34 +1390,59 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       status: eventData.status
     }
 
-    // Extract unique attendants from position assignments (NEW SYSTEM)
+    // Get ALL active attendants (not just those with assignments)
+    const allAttendants = await prisma.attendants.findMany({
+      where: {
+        isActive: true
+      },
+      orderBy: [
+        { firstName: 'asc' },
+        { lastName: 'asc' }
+      ]
+    });
+
+    // Create attendant map with assignment info
     const attendantMap = new Map();
     
+    // First, add all active attendants
+    allAttendants.forEach(attendant => {
+      attendantMap.set(attendant.id, {
+        id: attendant.id,
+        firstName: attendant.firstName,
+        lastName: attendant.lastName,
+        email: attendant.email,
+        phone: attendant.phone,
+        congregation: attendant.congregation,
+        formsOfService: attendant.formsOfService,
+        isActive: attendant.isActive,
+        createdAt: attendant.createdAt?.toISOString() || null,
+        associationId: attendant.id, // Use attendant ID for compatibility
+        overseerId: null,
+        keymanId: null,
+        overseer: null,
+        keyman: null,
+        assignments: []
+      });
+    });
+    
+    // Then, add assignment info for those who have assignments
     eventData.positions.forEach(position => {
       position.assignments.forEach(assignment => {
-        if (assignment.attendant) {
-          const attendantId = assignment.attendant.id;
-          if (!attendantMap.has(attendantId)) {
-            attendantMap.set(attendantId, {
-              id: assignment.attendant.id,
-              firstName: assignment.attendant.firstName,
-              lastName: assignment.attendant.lastName,
-              email: assignment.attendant.email,
-              phone: assignment.attendant.phone,
-              congregation: assignment.attendant.congregation,
-              formsOfService: assignment.attendant.formsOfService,
-              isActive: assignment.attendant.isActive,
-              createdAt: assignment.attendant.createdAt?.toISOString() || null,
-              associationId: assignment.id, // Use assignment ID for compatibility
-              overseerId: assignment.overseer?.id || null,
-              keymanId: assignment.keyman?.id || null,
-              overseer: assignment.overseer || null,
-              keyman: assignment.keyman || null,
-              assignments: []
-            });
+        if (assignment.attendant && attendantMap.has(assignment.attendant.id)) {
+          const attendant = attendantMap.get(assignment.attendant.id);
+          
+          // Update oversight info if this is an oversight assignment
+          if (assignment.role === 'OVERSEER' && assignment.overseer) {
+            attendant.overseerId = assignment.overseer.id;
+            attendant.overseer = assignment.overseer;
           }
-          // Add assignment info to attendant
-          attendantMap.get(attendantId).assignments.push({
+          if (assignment.role === 'KEYMAN' && assignment.keyman) {
+            attendant.keymanId = assignment.keyman.id;
+            attendant.keyman = assignment.keyman;
+          }
+          
+          // Add assignment info
+          attendant.assignments.push({
             positionName: position.name,
             role: assignment.role
           });
