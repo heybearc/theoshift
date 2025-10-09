@@ -913,6 +913,22 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                         <p className="text-xs font-medium text-gray-500 mb-2">🕐 Shift Assignments</p>
                         <div className="space-y-2">
                           {position.shifts.map(shift => {
+                            // DEBUG: Log data for Station 2
+                            if (position.name.includes('Station 2')) {
+                              console.log('🔍 Station 2 Debug:', {
+                                positionName: position.name,
+                                shiftId: shift.id,
+                                shiftName: shift.name,
+                                totalAssignments: position.assignments?.length || 0,
+                                assignments: position.assignments?.map(a => ({
+                                  role: a.role,
+                                  attendant: a.attendant ? `${a.attendant.firstName} ${a.attendant.lastName}` : 'null',
+                                  shiftId: a.shift?.id || 'null',
+                                  hasShift: !!a.shift
+                                }))
+                              });
+                            }
+                            
                             // Find assignments for this specific shift
                             const shiftSpecificAssignments = position.assignments?.filter(assignment => 
                               assignment.shift?.id === shift.id
