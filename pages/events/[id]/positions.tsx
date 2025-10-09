@@ -928,6 +928,49 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                       <span>{position.shifts?.length || 0} shifts • {position.assignments?.filter(a => a.role === 'ATTENDANT').length || 0} attendants</span>
                     </div>
 
+                    {/* POSITION LEADERSHIP DISPLAY */}
+                    {(() => {
+                      const positionLeadership = position.assignments?.filter(assignment => 
+                        (assignment.role === 'OVERSEER' || assignment.role === 'KEYMAN') && 
+                        !assignment.shift
+                      ) || []
+                      
+                      if (positionLeadership.length > 0) {
+                        return (
+                          <div className="mb-4">
+                            <p className="text-xs font-medium text-gray-500 mb-2">👥 Position Leadership</p>
+                            <div className="space-y-1">
+                              {positionLeadership.map(assignment => {
+                                const roleColor = assignment.role === 'OVERSEER' ? 'text-blue-700' : 'text-purple-700'
+                                const bgColor = assignment.role === 'OVERSEER' ? 'bg-blue-50 border-blue-100' : 'bg-purple-50 border-purple-100'
+                                
+                                return (
+                                  <div key={assignment.id} className={`flex items-center justify-between ${bgColor} border rounded px-2 py-1`}>
+                                    <div className="flex items-center">
+                                      <span className={`text-xs font-medium ${roleColor}`}>
+                                        {assignment.attendant?.firstName} {assignment.attendant?.lastName}
+                                      </span>
+                                      <span className="ml-2 text-xs text-gray-500">
+                                        ({assignment.role})
+                                      </span>
+                                    </div>
+                                    <button
+                                      onClick={() => handleRemoveAssignment(assignment.id)}
+                                      className="text-xs text-red-600 hover:text-red-800 px-1"
+                                      title="Remove assignment"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )
+                      }
+                      return null
+                    })()}
+
                     {/* SHIFT-SPECIFIC ASSIGNMENT DISPLAY */}
                     {position.shifts && position.shifts.length > 0 ? (
                       <div className="mb-4">
@@ -935,15 +978,21 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                         <div className="space-y-2">
                           {position.shifts.map(shift => {
                             // Find assignments for this specific shift
-                            const allShiftAssignments = position.assignments?.filter(assignment => 
+                            const shiftSpecificAssignments = position.assignments?.filter(assignment => 
                               assignment.shift?.id === shift.id
                             ) || []
                             
-                            // Separate regular attendants from leadership
-                            const attendantAssignments = allShiftAssignments.filter(assignment => 
+                            // Get position-level leadership (not shift-specific)
+                            const positionLeadership = position.assignments?.filter(assignment => 
+                              (assignment.role === 'OVERSEER' || assignment.role === 'KEYMAN') && 
+                              !assignment.shift
+                            ) || []
+                            
+                            // Separate regular attendants from leadership for this shift
+                            const attendantAssignments = shiftSpecificAssignments.filter(assignment => 
                               assignment.role === 'ATTENDANT'
                             )
-                            const leadershipAssignments = allShiftAssignments.filter(assignment => 
+                            const shiftLeadershipAssignments = shiftSpecificAssignments.filter(assignment => 
                               assignment.role === 'OVERSEER' || assignment.role === 'KEYMAN'
                             )
                             
@@ -967,16 +1016,16 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                                   </div>
                                   <span className="text-xs text-gray-400">
                                     {attendantAssignments.length} attendant{attendantAssignments.length !== 1 ? 's' : ''}
-                                    {leadershipAssignments.length > 0 && ` + ${leadershipAssignments.length} leadership`}
+                                    {positionLeadership.length > 0 && ` + ${positionLeadership.length} leadership`}
                                   </span>
                                 </div>
                                 
-                                {/* Leadership Assignments */}
-                                {leadershipAssignments.length > 0 && (
+                                {/* Position Leadership Assignments */}
+                                {positionLeadership.length > 0 && (
                                   <div className="mb-2">
                                     <p className="text-xs font-medium text-gray-600 mb-1">Leadership:</p>
                                     <div className="space-y-1">
-                                      {leadershipAssignments.map(assignment => {
+                                      {positionLeadership.map(assignment => {
                                         const roleColor = assignment.role === 'OVERSEER' ? 'text-blue-700' : 'text-purple-700'
                                         const bgColor = assignment.role === 'OVERSEER' ? 'bg-blue-50 border-blue-100' : 'bg-purple-50 border-purple-100'
                                         
