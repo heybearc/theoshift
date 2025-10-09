@@ -124,6 +124,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [message, setMessage] = useState('')
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set())
+  const [showInactive, setShowInactive] = useState(false)
   const [shiftFormData, setShiftFormData] = useState({
     startTime: '',
     endTime: '',
@@ -679,6 +680,18 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 </button>
                 
                 <button
+                  onClick={() => setShowInactive(!showInactive)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    showInactive 
+                      ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                      : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                  }`}
+                  title={showInactive ? 'Hide inactive positions' : 'Show inactive positions'}
+                >
+                  👁️ {showInactive ? 'Hide Inactive' : 'Show Inactive'}
+                </button>
+                
+                <button
                   onClick={() => setShowBulkCreator(true)}
                   className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                 >
@@ -779,8 +792,10 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 </div>
               </div>
             ) : (
-              positions.filter(p => p.isActive).map((position) => (
-                <div key={position.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+              positions.filter(p => showInactive ? true : p.isActive).map((position) => (
+                <div key={position.id} className={`rounded-lg shadow hover:shadow-md transition-shadow ${
+                  position.isActive ? 'bg-white' : 'bg-gray-50 border-2 border-dashed border-gray-300'
+                }`}>
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-start space-x-3">
@@ -799,9 +814,18 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                           className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                            {position.name}
-                          </h3>
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h3 className={`text-lg font-semibold mb-0 ${
+                              position.isActive ? 'text-gray-900' : 'text-gray-500'
+                            }`}>
+                              {position.name}
+                            </h3>
+                            {!position.isActive && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                Inactive
+                              </span>
+                            )}
+                          </div>
                           {position.area && (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                               {position.area}
@@ -988,18 +1012,44 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                     )}
 
                     <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEdit(position)}
-                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded text-sm font-medium transition-colors"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(position.id)}
-                        className="flex-1 bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded text-sm font-medium transition-colors"
-                      >
-                        Delete
-                      </button>
+                      {!position.isActive ? (
+                        <button
+                          onClick={async () => {
+                            try {
+                              const response = await fetch(`/api/events/${eventId}/positions/${position.id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ isActive: true }),
+                              })
+                              if (response.ok) {
+                                router.reload()
+                              } else {
+                                alert('Failed to activate position')
+                              }
+                            } catch (error) {
+                              alert('Failed to activate position')
+                            }
+                          }}
+                          className="flex-1 bg-green-100 hover:bg-green-200 text-green-700 px-3 py-2 rounded text-sm font-medium transition-colors"
+                        >
+                          ✅ Activate
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleEdit(position)}
+                            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded text-sm font-medium transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(position.id)}
+                            className="flex-1 bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded text-sm font-medium transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
