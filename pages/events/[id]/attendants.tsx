@@ -594,7 +594,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
               <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
               <select
                 value={filters.isActive}
-                onChange={(e) => setFilters({ ...filters, isActive: e.target.value })}
+                onChange={(e) => setFilters({ ...filters, isActive: e.target.value as 'all' | 'true' | 'false' })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All</option>
@@ -1334,37 +1334,41 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const { prisma } = await import('../../../src/lib/prisma')
     
-    // Fetch event with attendant associations
+    // Fetch event with position assignments (NEW SYSTEM - same as positions page)
     const eventData = await prisma.events.findUnique({
       where: { id: id as string },
       include: {
-        event_attendant_associations: {
+        positions: {
           include: {
-            attendants: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                email: true,
-                phone: true,
-                congregation: true,
-                formsOfService: true,
-                isActive: true,
-                createdAt: true
-              }
-            },
-            overseer: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true
-              }
-            },
-            keyman: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true
+            assignments: {
+              include: {
+                attendant: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                    phone: true,
+                    congregation: true,
+                    formsOfService: true,
+                    isActive: true,
+                    createdAt: true
+                  }
+                },
+                overseer: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true
+                  }
+                },
+                keyman: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true
+                  }
+                }
               }
             }
           }
@@ -1386,24 +1390,42 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       status: eventData.status
     }
 
-    const attendants = eventData.event_attendant_associations
-      .filter(association => association.attendants) // Filter out null attendants
-      .map(association => ({
-        id: association.attendants!.id,
-        firstName: association.attendants!.firstName,
-        lastName: association.attendants!.lastName,
-        email: association.attendants!.email,
-        phone: association.attendants!.phone,
-        congregation: association.attendants!.congregation,
-        formsOfService: association.attendants!.formsOfService,
-        isActive: association.attendants!.isActive,
-        createdAt: association.attendants!.createdAt?.toISOString() || null,
-        associationId: association.id,
-        overseerId: association.overseerId || null,
-        keymanId: association.keymanId || null,
-        overseer: association.overseer || null,
-        keyman: association.keyman || null
-      }))
+    // Extract unique attendants from position assignments (NEW SYSTEM)
+    const attendantMap = new Map();
+    
+    eventData.positions.forEach(position => {
+      position.assignments.forEach(assignment => {
+        if (assignment.attendant) {
+          const attendantId = assignment.attendant.id;
+          if (!attendantMap.has(attendantId)) {
+            attendantMap.set(attendantId, {
+              id: assignment.attendant.id,
+              firstName: assignment.attendant.firstName,
+              lastName: assignment.attendant.lastName,
+              email: assignment.attendant.email,
+              phone: assignment.attendant.phone,
+              congregation: assignment.attendant.congregation,
+              formsOfService: assignment.attendant.formsOfService,
+              isActive: assignment.attendant.isActive,
+              createdAt: assignment.attendant.createdAt?.toISOString() || null,
+              associationId: assignment.id, // Use assignment ID for compatibility
+              overseerId: assignment.overseer?.id || null,
+              keymanId: assignment.keyman?.id || null,
+              overseer: assignment.overseer || null,
+              keyman: assignment.keyman || null,
+              assignments: []
+            });
+          }
+          // Add assignment info to attendant
+          attendantMap.get(attendantId).assignments.push({
+            positionName: position.name,
+            role: assignment.role
+          });
+        }
+      });
+    });
+    
+    const attendants = Array.from(attendantMap.values())
 
     return {
       props: {
