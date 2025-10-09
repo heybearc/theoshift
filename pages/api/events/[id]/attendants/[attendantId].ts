@@ -91,28 +91,34 @@ async function handleGetAttendant(req: NextApiRequest, res: NextApiResponse, eve
   }
 }
 
-async function handleUpdateAttendant(req: NextApiRequest, res: NextApiResponse, eventId: string, associationId: string) {
+async function handleUpdateAttendant(req: NextApiRequest, res: NextApiResponse, eventId: string, attendantId: string) {
   try {
     const { firstName, lastName, email, phone, congregation, notes, formsOfService, isActive } = req.body
 
-    if (!firstName || !lastName || !email) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'First name, last name, and email are required' 
-      })
-    }
+    console.log(`🔧 API Update attendant ${attendantId}:`, { firstName, lastName, isActive, congregation, formsOfService })
 
-    // Find the association to get the actual attendant ID
-    const association = await prisma.event_attendant_associations.findUnique({
-      where: { id: associationId },
-      include: { attendants: true }
+    // Check if attendant exists
+    const existingAttendant = await prisma.attendants.findUnique({
+      where: { id: attendantId }
     })
     
-    if (!association || !association.attendants) {
-      return res.status(404).json({ error: 'Attendant association not found' })
+    if (!existingAttendant) {
+      console.error(`❌ Attendant not found: ${attendantId}`)
+      return res.status(404).json({ error: 'Attendant not found' })
     }
 
-    const actualAttendantId = association.attendants.id
+    // Verify attendant is associated with this event
+    const association = await prisma.event_attendant_associations.findFirst({
+      where: {
+        eventId,
+        attendantId
+      }
+    })
+    
+    if (!association) {
+      console.error(`❌ Attendant ${attendantId} not associated with event ${eventId}`)
+      return res.status(404).json({ error: 'Attendant not associated with this event' })
+    }
 
     // Process forms of service
     let processedFormsOfService: string[] = []
@@ -127,20 +133,36 @@ async function handleUpdateAttendant(req: NextApiRequest, res: NextApiResponse, 
       }
     }
 
+    // Prepare update data - only include fields that are provided
+    const updateData: any = {}
+    
+    if (firstName !== undefined) updateData.firstName = firstName
+    if (lastName !== undefined) updateData.lastName = lastName
+    if (email !== undefined) updateData.email = email
+    if (phone !== undefined) updateData.phone = phone || null
+    if (notes !== undefined) updateData.notes = notes || null
+    if (congregation !== undefined) updateData.congregation = congregation || ''
+    if (processedFormsOfService.length > 0) updateData.formsOfService = processedFormsOfService
+    
+    // CRITICAL FIX: Handle isActive properly
+    if (isActive !== undefined) {
+      updateData.isActive = isActive
+      console.log(`🔧 Setting isActive to: ${isActive} (type: ${typeof isActive})`)
+    }
+    
+    updateData.updatedAt = new Date()
+
+    console.log(`📡 Updating attendant ${attendantId} with data:`, updateData)
+
     // Update attendant
     const updatedAttendant = await prisma.attendants.update({
-      where: { id: actualAttendantId },
-      data: {
-        firstName,
-        lastName,
-        email,
-        phone: phone || null,
-        notes: notes || null,
-        congregation: congregation || '',
-        formsOfService: processedFormsOfService,
-        isActive: isActive !== false,
-        updatedAt: new Date()
-      }
+      where: { id: attendantId },
+      data: updateData
+    })
+
+    console.log(`✅ Successfully updated attendant ${attendantId}:`, {
+      isActive: (updatedAttendant as any).isActive,
+      congregation: (updatedAttendant as any).congregation
     })
 
     return res.status(200).json({
