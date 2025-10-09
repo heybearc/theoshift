@@ -119,6 +119,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   const [showAssignAttendantModal, setShowAssignAttendantModal] = useState(false)
   const [showBulkEditModal, setShowBulkEditModal] = useState(false)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
+  const [selectedShift, setSelectedShift] = useState<any | null>(null)
   const [editingPosition, setEditingPosition] = useState<Position | null>(null)
   const [bulkCreateResults, setBulkCreateResults] = useState<any>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -915,24 +916,120 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
 
                     <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                       <span>Position #{position.positionNumber}</span>
-                      <span>{position.assignments?.length || 0} assignments</span>
+                      <span>{position.shifts?.length || 0} shifts • {position.assignments?.length || 0} assignments</span>
                     </div>
 
-                    {/* Detailed Assignment Display */}
-                    {position.assignments && position.assignments.length > 0 && (
+                    {/* SHIFT-SPECIFIC ASSIGNMENT DISPLAY */}
+                    {position.shifts && position.shifts.length > 0 ? (
                       <div className="mb-4">
-                        <p className="text-xs font-medium text-gray-500 mb-2">👤 Assigned Attendants</p>
+                        <p className="text-xs font-medium text-gray-500 mb-2">🕐 Shift Assignments</p>
+                        <div className="space-y-2">
+                          {position.shifts.map(shift => {
+                            // Find assignments for this specific shift
+                            const shiftAssignments = position.assignments?.filter(assignment => 
+                              assignment.shift?.id === shift.id && assignment.role !== 'OVERSEER'
+                            ) || []
+                            
+                            return (
+                              <div key={shift.id} className="bg-gray-50 border border-gray-200 rounded-lg p-2">
+                                <div className="flex items-center justify-between mb-1">
+                                  <div className="flex items-center space-x-2">
+                                    <span className="text-xs font-medium text-gray-700">
+                                      {shift.name}
+                                    </span>
+                                    {!shift.isAllDay && (
+                                      <span className="text-xs text-gray-500">
+                                        {shift.startTime} - {shift.endTime}
+                                      </span>
+                                    )}
+                                    {shift.isAllDay && (
+                                      <span className="text-xs text-blue-600 bg-blue-100 px-1 rounded">
+                                        All Day
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="text-xs text-gray-400">
+                                    {shiftAssignments.length}/1
+                                  </span>
+                                </div>
+                                
+                                {/* Shift Assignment */}
+                                {shiftAssignments.length > 0 ? (
+                                  <div className="flex items-center justify-between bg-white border border-gray-100 rounded px-2 py-1">
+                                    <div className="flex items-center">
+                                      <span className="text-xs font-medium text-green-700">
+                                        {shiftAssignments[0].attendant?.firstName} {shiftAssignments[0].attendant?.lastName}
+                                      </span>
+                                      <span className="ml-2 text-xs text-gray-500">
+                                        ({shiftAssignments[0].role || 'Attendant'})
+                                      </span>
+                                    </div>
+                                    <button
+                                      onClick={() => handleRemoveAssignment(shiftAssignments[0].id)}
+                                      className="text-xs text-red-600 hover:text-red-800 px-1"
+                                      title="Remove assignment"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => {
+                                      setSelectedPosition(position)
+                                      setSelectedShift(shift)
+                                      setShowAssignAttendantModal(true)
+                                    }}
+                                    className="w-full text-xs text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded px-2 py-1 transition-colors"
+                                  >
+                                    + Assign Attendant
+                                  </button>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                        
+                        {/* Add Shift Button */}
+                        <button
+                          onClick={() => {
+                            setSelectedPosition(position)
+                            setShowShiftModal(true)
+                          }}
+                          className="w-full mt-2 text-xs text-green-600 hover:text-green-800 bg-green-50 hover:bg-green-100 border border-green-200 rounded px-2 py-1 transition-colors"
+                        >
+                          + Add Shift
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mb-4">
+                        <p className="text-xs font-medium text-gray-500 mb-2">🕐 No Shifts Created</p>
+                        <button
+                          onClick={() => {
+                            setSelectedPosition(position)
+                            setShowShiftModal(true)
+                          }}
+                          className="w-full text-xs text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded px-2 py-1 transition-colors"
+                        >
+                          + Create First Shift
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Legacy Assignment Display (for positions without shifts) */}
+                    {(!position.shifts || position.shifts.length === 0) && position.assignments && position.assignments.length > 0 && (
+                      <div className="mb-4">
+                        <p className="text-xs font-medium text-gray-500 mb-2">👤 Legacy Assignments</p>
                         <div className="space-y-1">
                           {position.assignments
-                            .filter(assignment => assignment.role !== 'OVERSEER') // Don't duplicate overseer info
+                            .filter(assignment => assignment.role !== 'OVERSEER')
                             .map(assignment => (
-                            <div key={assignment.id} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded px-2 py-1">
+                            <div key={assignment.id} className="flex items-center justify-between bg-yellow-50 border border-yellow-200 rounded px-2 py-1">
                               <div className="flex items-center">
-                                <span className="text-xs font-medium text-gray-700">
+                                <span className="text-xs font-medium text-yellow-700">
                                   {assignment.attendant?.firstName} {assignment.attendant?.lastName}
                                 </span>
-                                <span className="ml-2 text-xs text-gray-500">
-                                  ({assignment.role || 'Attendant'})
+                                <span className="ml-2 text-xs text-yellow-600">
+                                  (Needs Shift Assignment)
                                 </span>
                               </div>
                               <button
@@ -1432,14 +1529,25 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
               <div className="mt-3">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
                   Assign Attendant to {selectedPosition.name}
+                  {selectedShift && (
+                    <div className="text-sm text-gray-600 mt-1">
+                      Shift: {selectedShift.name} {!selectedShift.isAllDay && `(${selectedShift.startTime} - ${selectedShift.endTime})`}
+                    </div>
+                  )}
                 </h3>
                 <form onSubmit={async (e) => {
                   e.preventDefault()
                   const formData = new FormData(e.currentTarget)
                   const attendantId = formData.get('attendantId') as string
+                  const shiftId = formData.get('shiftId') as string
                   
                   if (!attendantId) {
                     alert('Please select an attendant')
+                    return
+                  }
+                  
+                  if (!shiftId) {
+                    alert('Please select a shift')
                     return
                   }
 
@@ -1450,6 +1558,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                       body: JSON.stringify({
                         positionId: selectedPosition.id,
                         attendantId: attendantId,
+                        shiftId: shiftId,
                         role: 'ATTENDANT'
                       })
                     })
@@ -1457,9 +1566,25 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                     if (response.ok) {
                       alert('Attendant assigned successfully')
                       setShowAssignAttendantModal(false)
+                      setSelectedShift(null)
                       router.reload()
                     } else {
-                      alert('Failed to assign attendant')
+                      const errorData = await response.json()
+                      
+                      // Handle specific conflict types
+                      if (response.status === 409) {
+                        if (errorData.conflictType === 'DUPLICATE_SHIFT_ASSIGNMENT') {
+                          alert('⚠️ Conflict: This attendant is already assigned to this shift.')
+                        } else if (errorData.conflictType === 'TIME_OVERLAP') {
+                          alert(`⚠️ Time Conflict: This attendant has conflicting assignments:\n\n${errorData.conflicts?.map(c => `• ${c.positionName} - ${c.shiftName}`).join('\n')}\n\nPlease choose a different attendant or shift.`)
+                        } else if (errorData.conflictType === 'SHIFT_FULL') {
+                          alert('⚠️ Shift Full: This shift already has the maximum number of attendants assigned (1).')
+                        } else {
+                          alert(`⚠️ Assignment Conflict: ${errorData.message || 'Unable to assign attendant to this shift.'}`)
+                        }
+                      } else {
+                        alert(`Failed to assign attendant: ${errorData.error || 'Unknown error'}`)
+                      }
                     }
                   } catch (error) {
                     console.error('Error assigning attendant:', error)
@@ -1485,10 +1610,32 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                     </select>
                   </div>
 
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Shift
+                    </label>
+                    <select 
+                      name="shiftId"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                      defaultValue={selectedShift?.id || ''}
+                    >
+                      <option value="">Select a shift...</option>
+                      {selectedPosition.shifts?.map(shift => (
+                        <option key={shift.id} value={shift.id}>
+                          {shift.name} {!shift.isAllDay && `(${shift.startTime} - ${shift.endTime})`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
                   <div className="flex justify-end space-x-3 mt-6">
                     <button
                       type="button"
-                      onClick={() => setShowAssignAttendantModal(false)}
+                      onClick={() => {
+                        setShowAssignAttendantModal(false)
+                        setSelectedShift(null)
+                      }}
                       className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                     >
                       Cancel
