@@ -67,12 +67,13 @@ async function handleGetPositions(req: NextApiRequest, res: NextApiResponse, eve
     const area = req.query.area as string
     const includeShifts = req.query.includeShifts === 'true'
     const includeAssignments = req.query.includeAssignments === 'true'
+    const includeInactive = req.query.includeInactive === 'true'
     
     const offset = (page - 1) * limit
 
     const where = {
       eventId,
-      isActive: true,
+      ...(includeInactive ? {} : { isActive: true }),
       ...(area && { area })
     }
 
@@ -113,7 +114,7 @@ async function handleGetPositions(req: NextApiRequest, res: NextApiResponse, eve
 
     // Get areas for filtering
     const areas = await prisma.positions.findMany({
-      where: { eventId, isActive: true },
+      where: { eventId, ...(includeInactive ? {} : { isActive: true }) },
       select: { area: true },
       distinct: ['area']
     })

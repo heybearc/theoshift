@@ -39,16 +39,18 @@ export default function BulkPositionCreator({ eventId, onClose, onSuccess }: Bul
       let successCount = 0
       let errorCount = 0
 
-      // Get the next available position number
+      // Get the next available position number (including inactive positions)
       let startingPositionNumber = 1
       try {
-        const existingResponse = await fetch(`/api/events/${eventId}/positions`)
+        // Fetch ALL positions (including inactive) to find true max position number
+        const existingResponse = await fetch(`/api/events/${eventId}/positions?includeInactive=true&limit=1000`)
         if (existingResponse.ok) {
           const existingData = await existingResponse.json()
           const existingPositions = existingData.data?.positions || []
           const maxPositionNumber = existingPositions.reduce((max: number, pos: any) => 
             Math.max(max, pos.positionNumber || 0), 0)
           startingPositionNumber = maxPositionNumber + 1
+          console.log(`📊 Found ${existingPositions.length} existing positions, max number: ${maxPositionNumber}, starting from: ${startingPositionNumber}`)
         }
       } catch (error) {
         console.warn('Could not fetch existing positions, starting from 1')
