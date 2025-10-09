@@ -2,7 +2,7 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import EventLayout from '../../../components/EventLayout'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/router'
 
 interface Event {
@@ -68,6 +68,46 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
   })
   const [sortField, setSortField] = useState<string>('lastName')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+
+  // Sort attendants based on current sort field and direction
+  const sortedAttendants = React.useMemo(() => {
+    return [...attendants].sort((a, b) => {
+      let aValue: any = a[sortField as keyof typeof a]
+      let bValue: any = b[sortField as keyof typeof b]
+
+      // Handle nested objects (overseer, keyman)
+      if (sortField === 'overseer') {
+        aValue = a.overseer ? `${a.overseer.firstName} ${a.overseer.lastName}` : ''
+        bValue = b.overseer ? `${b.overseer.firstName} ${b.overseer.lastName}` : ''
+      } else if (sortField === 'keyman') {
+        aValue = a.keyman ? `${a.keyman.firstName} ${a.keyman.lastName}` : ''
+        bValue = b.keyman ? `${b.keyman.firstName} ${b.keyman.lastName}` : ''
+      } else if (sortField === 'formsOfService') {
+        aValue = Array.isArray(a.formsOfService) ? a.formsOfService.join(', ') : ''
+        bValue = Array.isArray(b.formsOfService) ? b.formsOfService.join(', ') : ''
+      }
+
+      // Convert to strings for comparison
+      aValue = String(aValue || '').toLowerCase()
+      bValue = String(bValue || '').toLowerCase()
+
+      if (sortDirection === 'asc') {
+        return aValue.localeCompare(bValue)
+      } else {
+        return bValue.localeCompare(aValue)
+      }
+    })
+  }, [attendants, sortField, sortDirection])
+
+  // Handle column header clicks for sorting
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
+    }
+  }
   const [showBulkEditModal, setShowBulkEditModal] = useState(false)
   const [filters, setFilters] = useState<{
     search: string
@@ -83,8 +123,8 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
   const [loading, setLoading] = useState(false)
   const [importResults, setImportResults] = useState<any>(null)
 
-  // Filter and paginate attendants
-  const filteredAttendants = attendants.filter(attendant => {
+  // Filter and paginate attendants (using sorted data)
+  const filteredAttendants = sortedAttendants.filter(attendant => {
     const matchesSearch = filters.search === '' || 
       attendant.firstName.toLowerCase().includes(filters.search.toLowerCase()) ||
       attendant.lastName.toLowerCase().includes(filters.search.toLowerCase()) ||
@@ -168,7 +208,8 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
 
       if (response.ok) {
         setShowAddModal(false)
-        router.reload() // Refresh page to show updated data
+        // TODO: Update local state instead of page reload to preserve pagination
+        router.reload()
       } else {
         const error = await response.json()
         alert(error.error || 'Failed to save attendant')
@@ -659,13 +700,37 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                         />
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Name
+                        <button 
+                          onClick={() => handleSort('lastName')}
+                          className="flex items-center space-x-1 hover:text-gray-700"
+                        >
+                          <span>Name</span>
+                          {sortField === 'lastName' && (
+                            <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </button>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                        Email
+                        <button 
+                          onClick={() => handleSort('email')}
+                          className="flex items-center space-x-1 hover:text-gray-700"
+                        >
+                          <span>Email</span>
+                          {sortField === 'email' && (
+                            <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </button>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                        Congregation
+                        <button 
+                          onClick={() => handleSort('congregation')}
+                          className="flex items-center space-x-1 hover:text-gray-700"
+                        >
+                          <span>Congregation</span>
+                          {sortField === 'congregation' && (
+                            <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </button>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                         Forms of Service
@@ -677,7 +742,15 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                         Keyman
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
+                        <button 
+                          onClick={() => handleSort('isActive')}
+                          className="flex items-center space-x-1 hover:text-gray-700"
+                        >
+                          <span>Status</span>
+                          {sortField === 'isActive' && (
+                            <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </button>
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
