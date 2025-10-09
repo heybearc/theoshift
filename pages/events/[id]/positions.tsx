@@ -1663,10 +1663,8 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                         
                         if (positionOverseer || positionKeyman) {
                           return (
-                            <span className="text-xs text-blue-600 font-normal block mt-1">
-                              Filtered to attendants under {positionOverseer ? `${positionOverseer.firstName} ${positionOverseer.lastName} (Overseer)` : ''}
-                              {positionOverseer && positionKeyman ? ' and ' : ''}
-                              {positionKeyman ? `${positionKeyman.firstName} ${positionKeyman.lastName} (Keyman)` : ''}
+                            <span className="text-xs text-orange-600 font-normal block mt-1">
+                              Showing all attendants (hierarchy filtering temporarily disabled)
                             </span>
                           )
                         }
@@ -1684,23 +1682,22 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                         const positionOverseer = selectedPosition.assignments?.find(a => a.role === 'OVERSEER')?.attendant
                         const positionKeyman = selectedPosition.assignments?.find(a => a.role === 'KEYMAN')?.attendant
                         
-                        // Filter attendants based on position leadership
+                        // For now, show all active attendants since the overseer/keyman relationships 
+                        // are not properly set up in the database yet
                         let filteredAttendants = attendants?.filter(att => att.isActive) || []
                         
-                        if (positionOverseer || positionKeyman) {
-                          filteredAttendants = filteredAttendants.filter(attendant => {
-                            // Show attendants that match the position's overseer or keyman
-                            return (positionOverseer && attendant.overseerId === positionOverseer.id) ||
-                                   (positionKeyman && attendant.keymanId === positionKeyman.id)
-                          })
-                        }
+                        // TODO: Implement proper filtering once overseer/keyman relationships are established
+                        // if (positionOverseer || positionKeyman) {
+                        //   filteredAttendants = filteredAttendants.filter(attendant => {
+                        //     return (positionOverseer && attendant.overseerId === positionOverseer.id) ||
+                        //            (positionKeyman && attendant.keymanId === positionKeyman.id)
+                        //   })
+                        // }
                         
                         return filteredAttendants.map(attendant => (
                           <option key={attendant.id} value={attendant.id}>
                             {attendant.firstName} {attendant.lastName}
                             {attendant.congregation && ` (${attendant.congregation})`}
-                            {positionOverseer && attendant.overseerId === positionOverseer.id && ' - Under Overseer'}
-                            {positionKeyman && attendant.keymanId === positionKeyman.id && ' - Under Keyman'}
                           </option>
                         ))
                       })()}
