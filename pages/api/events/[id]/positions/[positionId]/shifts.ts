@@ -55,17 +55,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           where: { positionId: positionId }
         })
 
+        console.log(`Creating shift for position ${positionId}, existing shifts: ${existingShifts}`)
+
+        const shiftData = {
+          id: crypto.randomUUID(),
+          positionId: positionId,
+          name: validatedData.isAllDay ? 'All Day' : `Shift ${existingShifts + 1}`,
+          startTime: validatedData.isAllDay ? null : validatedData.startTime,
+          endTime: validatedData.isAllDay ? null : validatedData.endTime,
+          isAllDay: validatedData.isAllDay,
+          sequence: existingShifts + 1
+        }
+
+        console.log('Creating shift with data:', shiftData)
+
         const newShift = await prisma.position_shifts.create({
-          data: {
-            id: crypto.randomUUID(),
-            positionId: positionId,
-            name: validatedData.isAllDay ? 'All Day' : `Shift ${existingShifts + 1}`,
-            startTime: validatedData.isAllDay ? null : validatedData.startTime,
-            endTime: validatedData.isAllDay ? null : validatedData.endTime,
-            isAllDay: validatedData.isAllDay,
-            sequence: existingShifts + 1
-          }
+          data: shiftData
         })
+
+        console.log('Successfully created shift:', newShift.id)
 
         return res.status(201).json({
           success: true,

@@ -63,11 +63,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           where: { id: validatedData.overseerId }
         })
 
+        console.log('Overseer lookup result:', overseer ? 'Found' : 'Not found')
+
         if (!overseer) {
           return res.status(404).json({ error: 'Overseer not found' })
         }
 
+        // Verify keyman exists if provided
+        if (validatedData.keymanId) {
+          const keyman = await prisma.attendants.findUnique({
+            where: { id: validatedData.keymanId }
+          })
+          
+          console.log('Keyman lookup result:', keyman ? 'Found' : 'Not found')
+          
+          if (!keyman) {
+            return res.status(404).json({ error: 'Keyman not found' })
+          }
+        }
+
         // Create overseer assignment in position_assignments table
+        console.log('Creating overseer assignment with data:', {
+          positionId,
+          attendantId: validatedData.overseerId,
+          role: 'OVERSEER',
+          overseerId: validatedData.overseerId,
+          keymanId: validatedData.keymanId || null,
+          assignedBy: user.id
+        })
+
         const overseerAssignment = await prisma.position_assignments.create({
           data: {
             id: crypto.randomUUID(),
@@ -77,9 +101,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             overseerId: validatedData.overseerId,
             keymanId: validatedData.keymanId || null,
             assignedAt: new Date(),
-            assignedBy: session.user.id
+            assignedBy: user.id // Use the user ID from the database lookup
           }
         })
+
+        console.log('Successfully created overseer assignment:', overseerAssignment.id)
 
         return res.status(201).json({
           success: true,
