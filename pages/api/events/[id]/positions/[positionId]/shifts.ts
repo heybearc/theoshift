@@ -7,8 +7,8 @@ import crypto from 'crypto'
 
 // Validation schema for shift creation
 const shiftSchema = z.object({
-  startTime: z.string().optional(),
-  endTime: z.string().optional(),
+  startTime: z.string().nullable().optional(),
+  endTime: z.string().nullable().optional(),
   isAllDay: z.boolean().default(false)
 })
 
