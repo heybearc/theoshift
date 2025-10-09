@@ -56,19 +56,9 @@ async function handleGetAttendant(req: NextApiRequest, res: NextApiResponse, eve
       return res.status(404).json({ error: 'Attendant not found' })
     }
 
-    // Check if attendant is associated with the event (NEW SYSTEM - position assignments)
-    const positionAssignment = await prisma.position_assignments.findFirst({
-      where: {
-        attendantId,
-        position: {
-          eventId
-        }
-      }
-    })
-
-    if (!positionAssignment) {
-      return res.status(404).json({ error: 'Attendant not associated with this event' })
-    }
+    // APEX GUARDIAN: Event Attendants page is source of truth for all attendants
+    // All active attendants are available for this event - no position assignment required
+    console.log(`✅ Fetching attendant ${attendantId} - Event Attendants page is source of truth`)
 
     return res.status(200).json({
       success: true,
@@ -109,20 +99,9 @@ async function handleUpdateAttendant(req: NextApiRequest, res: NextApiResponse, 
       return res.status(404).json({ error: 'Attendant not found' })
     }
 
-    // Verify attendant is associated with this event (NEW SYSTEM - position assignments)
-    const positionAssignment = await prisma.position_assignments.findFirst({
-      where: {
-        attendantId,
-        position: {
-          eventId
-        }
-      }
-    })
-    
-    if (!positionAssignment) {
-      console.error(`❌ Attendant ${attendantId} not associated with event ${eventId}`)
-      return res.status(404).json({ error: 'Attendant not associated with this event' })
-    }
+    // APEX GUARDIAN: Event Attendants page is source of truth for all attendants
+    // No need to check for position assignments - all active attendants are editable
+    console.log(`✅ Editing attendant ${attendantId} - Event Attendants page is source of truth`)
 
     // Process forms of service
     let processedFormsOfService: string[] = []
