@@ -2383,25 +2383,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
                 }
               }
             },
-            shifts: true,
-            oversight: {
-              include: {
-                overseer: {
-                  select: {
-                    id: true,
-                    firstName: true,
-                    lastName: true
-                  }
-                },
-                keyman: {
-                  select: {
-                    id: true,
-                    firstName: true,
-                    lastName: true
-                  }
-                }
-              }
-            }
+            shifts: true
           },
           orderBy: [
             { positionNumber: 'asc' }
@@ -2412,7 +2394,40 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     console.log('🔍 Step 7: Event data fetched successfully, positions count:', eventData?.positions?.length || 0)
 
     // Fetch attendants for overseer assignment from attendants table
-    console.log('🔍 Step 8: Fetching attendants data...')
+    // APEX GUARDIAN: Manually fetch oversight data since relation has TypeScript issues
+    console.log('🔍 Step 8: Fetching oversight data separately...')
+    const oversightData = await (prisma as any).position_oversight_assignments.findMany({
+      where: { eventId: id as string },
+      include: {
+        overseer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true
+          }
+        },
+        keyman: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true
+          }
+        }
+      }
+    })
+    console.log('🔍 Step 9: Oversight data fetched, count:', oversightData.length)
+
+    // Attach oversight data to positions
+    const positionsWithOversight = eventData!.positions.map((position: any) => {
+      const positionOversight = oversightData.filter((oversight: any) => oversight.positionId === position.id)
+      return {
+        ...position,
+        oversight: positionOversight
+      }
+    })
+    console.log('🔍 Step 10: Positions with oversight attached')
+
+    console.log('🔍 Step 11: Fetching attendants data...')
     const attendantsData = await prisma.attendants.findMany({
       where: {
         isActive: true
@@ -2479,26 +2494,22 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
           endTime: assignment.shift.endTime,
           isAllDay: assignment.shift.isAllDay
         } : null
-      })).filter(assignment => assignment.attendant !== null),
-      shifts: position.shifts || []
-    }))
+      })).filter(assignment => assignment.attendant !== null)
 
     return {
       props: {
-        eventId: id as string,
         event,
-        positions,
+        positions: positionsWithOversight,
         attendants: attendantsData,
         stats: {
-          total: positions.length,
-          active: positions.filter(p => p.isActive).length,
-          assigned: positions.filter(p => p.assignments.length > 0).length
+          total: positionsWithOversight.length,
+          active: positionsWithOversight.filter(p => p.isActive).length,
+          assigned: positionsWithOversight.filter(p => p.assignments.length > 0).length
         }
       }
     }
 
     // APEX GUARDIAN: Debug positions data loading
-    console.log('🔍 Positions loaded:', positions?.length || 0)
     console.log('🔍 First position assignments:', positions?.[0]?.assignments?.length || 0)
     console.log('🔍 First position data keys:', positions?.[0] ? Object.keys(positions[0]) : 'No positions')
     if (positions && positions.length > 0) {
