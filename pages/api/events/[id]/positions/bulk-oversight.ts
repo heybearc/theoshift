@@ -112,65 +112,108 @@ async function handleBulkOversightAssignment(req: NextApiRequest, res: NextApiRe
     // Perform bulk upsert in transaction
     console.log('7. Performing bulk oversight assignment...')
     const results = await prisma.$transaction(async (tx) => {
-      const assignments = []
+      const assignments: any[] = []
       
       for (const positionId of validatedData.positionIds) {
-        // APEX GUARDIAN: Try to find existing assignment first
-        const existingAssignment = await tx.position_oversight_assignments.findFirst({
+        // APEX GUARDIAN: Create assignments in position_assignments table to match individual API
+        
+        // Get or create All Day shift for this position
+        let allDayShift = await tx.position_shifts.findFirst({
           where: {
             positionId: positionId,
-            eventId: eventId
+            name: 'All Day'
           }
         })
 
-        let assignment
-        if (existingAssignment) {
-          // Update existing assignment
-          assignment = await tx.position_oversight_assignments.update({
-            where: { id: existingAssignment.id },
+        if (!allDayShift) {
+          allDayShift = await tx.position_shifts.create({
             data: {
-              overseerId: validatedData.overseerId || null,
-              keymanId: validatedData.keymanId || null,
-              assignedBy: userId,
-              updatedAt: new Date()
-            },
-            include: {
-              position: {
-                select: { name: true, positionNumber: true }
-              },
-              overseer: {
-                select: { id: true, firstName: true, lastName: true }
-              },
-              keyman: {
-                select: { id: true, firstName: true, lastName: true }
-              }
-            }
-          })
-        } else {
-          // Create new assignment
-          assignment = await tx.position_oversight_assignments.create({
-            data: {
+              id: require('crypto').randomUUID(),
               positionId: positionId,
-              eventId: eventId,
-              overseerId: validatedData.overseerId || null,
-              keymanId: validatedData.keymanId || null,
-              assignedBy: userId
-            },
-            include: {
-              position: {
-                select: { name: true, positionNumber: true }
-              },
-              overseer: {
-                select: { id: true, firstName: true, lastName: true }
-              },
-              keyman: {
-                select: { id: true, firstName: true, lastName: true }
-              }
+              name: 'All Day',
+              startTime: null,
+              endTime: null,
+              isAllDay: true,
+              sequence: 1
             }
           })
         }
+
+        const positionAssignments: any[] = []
+
+        // Create overseer assignment if provided
+        if (validatedData.overseerId) {
+          // Remove existing overseer assignment for this position
+          await tx.position_assignments.deleteMany({
+            where: {
+              positionId: positionId,
+              role: 'OVERSEER'
+            }
+          })
+
+          const overseerAssignment = await tx.position_assignments.create({
+            data: {
+              id: require('crypto').randomUUID(),
+              positionId: positionId,
+              attendantId: validatedData.overseerId,
+              shiftId: allDayShift.id,
+              role: 'OVERSEER',
+              overseerId: validatedData.overseerId,
+              assignedAt: new Date(),
+              assignedBy: userId
+            },
+            include: {
+              attendant: {
+                select: { id: true, firstName: true, lastName: true }
+              },
+              overseer: {
+                select: { id: true, firstName: true, lastName: true }
+              },
+              position: {
+                select: { name: true, positionNumber: true }
+              }
+            }
+          })
+          positionAssignments.push(overseerAssignment)
+        }
+
+        // Create keyman assignment if provided
+        if (validatedData.keymanId) {
+          // Remove existing keyman assignment for this position
+          await tx.position_assignments.deleteMany({
+            where: {
+              positionId: positionId,
+              role: 'KEYMAN'
+            }
+          })
+
+          const keymanAssignment = await tx.position_assignments.create({
+            data: {
+              id: require('crypto').randomUUID(),
+              positionId: positionId,
+              attendantId: validatedData.keymanId,
+              shiftId: allDayShift.id,
+              role: 'KEYMAN',
+              keymanId: validatedData.keymanId,
+              assignedAt: new Date(),
+              assignedBy: userId
+            },
+            include: {
+              attendant: {
+                select: { id: true, firstName: true, lastName: true }
+              },
+              keyman: {
+                select: { id: true, firstName: true, lastName: true }
+              },
+              position: {
+                select: { name: true, positionNumber: true }
+              }
+            }
+          })
+          positionAssignments.push(keymanAssignment)
+        }
         
-        assignments.push(assignment)
+        assignments.push(...positionAssignments)
       }
       
       return assignments
