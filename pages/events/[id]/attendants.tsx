@@ -2,7 +2,7 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import EventLayout from '../../../components/EventLayout'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 
 interface Event {
@@ -122,6 +122,18 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
   const itemsPerPage = 20
   const [loading, setLoading] = useState(false)
   const [importResults, setImportResults] = useState<any>(null)
+
+  // Restore filter state from URL parameters on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const search = urlParams.get('search') || ''
+    const congregation = urlParams.get('congregation') || ''
+    const isActive = (urlParams.get('isActive') as 'all' | 'true' | 'false') || 'all'
+    const page = parseInt(urlParams.get('page') || '1')
+    
+    setFilters({ search, congregation, isActive })
+    setCurrentPage(page)
+  }, [])
 
   // Filter and paginate attendants (using sorted data)
   const filteredAttendants = sortedAttendants.filter(attendant => {
@@ -815,7 +827,13 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                   body: JSON.stringify({ overseerId })
                                 })
                                 if (response.ok) {
-                                  router.reload()
+                                  // Preserve filter state in URL before reload
+                                  const url = new URL(window.location.href)
+                                  if (filters.search) url.searchParams.set('search', filters.search)
+                                  if (filters.congregation) url.searchParams.set('congregation', filters.congregation)
+                                  if (filters.isActive !== 'all') url.searchParams.set('isActive', filters.isActive)
+                                  url.searchParams.set('page', currentPage.toString())
+                                  window.location.href = url.toString()
                                 } else {
                                   alert('Failed to update overseer')
                                 }
@@ -850,7 +868,13 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                   body: JSON.stringify({ keymanId })
                                 })
                                 if (response.ok) {
-                                  router.reload()
+                                  // Preserve filter state in URL before reload
+                                  const url = new URL(window.location.href)
+                                  if (filters.search) url.searchParams.set('search', filters.search)
+                                  if (filters.congregation) url.searchParams.set('congregation', filters.congregation)
+                                  if (filters.isActive !== 'all') url.searchParams.set('isActive', filters.isActive)
+                                  url.searchParams.set('page', currentPage.toString())
+                                  window.location.href = url.toString()
                                 } else {
                                   alert('Failed to update keyman')
                                 }
