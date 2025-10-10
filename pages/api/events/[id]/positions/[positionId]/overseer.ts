@@ -90,7 +90,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // APEX GUARDIAN: Create position-level oversight assignment (NOT tied to shifts)
         
         // Find existing oversight assignment for this position
-        const existingOversight = await prisma.position_oversight_assignments.findFirst({
+        const existingOversight = await (prisma as any).position_oversight_assignments.findFirst({
           where: {
             positionId: positionId,
             eventId: eventId
@@ -101,7 +101,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (existingOversight) {
           // Update existing oversight assignment
           console.log('Updating existing oversight assignment:', existingOversight.id)
-          oversightAssignment = await prisma.position_oversight_assignments.update({
+          oversightAssignment = await (prisma as any).position_oversight_assignments.update({
             where: { id: existingOversight.id },
             data: {
               overseerId: validatedData.overseerId,
@@ -124,7 +124,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         } else {
           // Create new position-level oversight assignment
           console.log('Creating new position-level oversight assignment')
-          oversightAssignment = await prisma.position_oversight_assignments.create({
+          oversightAssignment = await (prisma as any).position_oversight_assignments.create({
             data: {
               positionId: positionId,
               eventId: eventId,
