@@ -125,14 +125,19 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
 
   // Restore filter state from URL parameters on component mount
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const search = urlParams.get('search') || ''
-    const congregation = urlParams.get('congregation') || ''
-    const isActive = (urlParams.get('isActive') as 'all' | 'true' | 'false') || 'all'
-    const page = parseInt(urlParams.get('page') || '1')
-    
-    setFilters({ search, congregation, isActive })
-    setCurrentPage(page)
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const search = urlParams.get('search') || ''
+      const congregation = urlParams.get('congregation') || ''
+      const isActive = (urlParams.get('isActive') as 'all' | 'true' | 'false') || 'all'
+      const page = parseInt(urlParams.get('page') || '1')
+      
+      // Only update if there are actual URL parameters to restore
+      if (search || congregation || isActive !== 'all' || page !== 1) {
+        setFilters({ search, congregation, isActive })
+        setCurrentPage(page)
+      }
+    }
   }, [])
 
   // Filter and paginate attendants (using sorted data)
@@ -828,12 +833,18 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                 })
                                 if (response.ok) {
                                   // Preserve filter state in URL before reload
-                                  const url = new URL(window.location.href)
-                                  if (filters.search) url.searchParams.set('search', filters.search)
-                                  if (filters.congregation) url.searchParams.set('congregation', filters.congregation)
-                                  if (filters.isActive !== 'all') url.searchParams.set('isActive', filters.isActive)
-                                  url.searchParams.set('page', currentPage.toString())
-                                  window.location.href = url.toString()
+                                  try {
+                                    const url = new URL(window.location.href)
+                                    if (filters.search) url.searchParams.set('search', filters.search)
+                                    if (filters.congregation) url.searchParams.set('congregation', filters.congregation)
+                                    if (filters.isActive !== 'all') url.searchParams.set('isActive', filters.isActive)
+                                    url.searchParams.set('page', currentPage.toString())
+                                    window.location.href = url.toString()
+                                  } catch (error) {
+                                    console.error('Error preserving filter state:', error)
+                                    // Fallback to simple reload
+                                    window.location.reload()
+                                  }
                                 } else {
                                   alert('Failed to update overseer')
                                 }
@@ -869,12 +880,18 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                 })
                                 if (response.ok) {
                                   // Preserve filter state in URL before reload
-                                  const url = new URL(window.location.href)
-                                  if (filters.search) url.searchParams.set('search', filters.search)
-                                  if (filters.congregation) url.searchParams.set('congregation', filters.congregation)
-                                  if (filters.isActive !== 'all') url.searchParams.set('isActive', filters.isActive)
-                                  url.searchParams.set('page', currentPage.toString())
-                                  window.location.href = url.toString()
+                                  try {
+                                    const url = new URL(window.location.href)
+                                    if (filters.search) url.searchParams.set('search', filters.search)
+                                    if (filters.congregation) url.searchParams.set('congregation', filters.congregation)
+                                    if (filters.isActive !== 'all') url.searchParams.set('isActive', filters.isActive)
+                                    url.searchParams.set('page', currentPage.toString())
+                                    window.location.href = url.toString()
+                                  } catch (error) {
+                                    console.error('Error preserving filter state:', error)
+                                    // Fallback to simple reload
+                                    window.location.reload()
+                                  }
                                 } else {
                                   alert('Failed to update keyman')
                                 }
