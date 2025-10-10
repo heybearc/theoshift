@@ -2317,6 +2317,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   console.log('🔍 APEX GUARDIAN: getServerSideProps called at', new Date().toISOString())
   try {
+    console.log('🔍 Step 1: Getting session...')
     const session = await getServerSession(context.req, context.res, authOptions)
   
     if (!session) {
@@ -2328,10 +2329,16 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     }
 
     // APEX GUARDIAN: Full SSR data fetching for positions tab
+    console.log('🔍 Step 2: Getting event ID from params...')
     const { id } = context.params!
+    console.log('🔍 Step 3: Event ID:', id)
+    
+    console.log('🔍 Step 4: Importing Prisma...')
     const { prisma } = await import('../../../src/lib/prisma')
+    console.log('🔍 Step 5: Prisma imported successfully')
     
     // Fetch event with positions data
+    console.log('🔍 Step 6: Fetching event data...')
     const eventData = await prisma.events.findUnique({
       where: { id: id as string },
       include: {
@@ -2398,8 +2405,10 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         }
       }
     })
+    console.log('🔍 Step 7: Event data fetched successfully, positions count:', eventData?.positions?.length || 0)
 
     // Fetch attendants for overseer assignment from attendants table
+    console.log('🔍 Step 8: Fetching attendants data...')
     const attendantsData = await prisma.attendants.findMany({
       where: {
         isActive: true
