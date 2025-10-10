@@ -1442,11 +1442,44 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       ]
     });
 
+    // Get event-attendant associations for oversight assignments
+    const eventAssociations = await prisma.event_attendant_associations.findMany({
+      where: {
+        eventId: id as string
+      },
+      include: {
+        overseer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true
+          }
+        },
+        keyman: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true
+          }
+        }
+      }
+    });
+
+    // Create association map for quick lookup
+    const associationMap = new Map();
+    eventAssociations.forEach(assoc => {
+      if (assoc.attendantId) {
+        associationMap.set(assoc.attendantId, assoc);
+      }
+    });
+
     // Create attendant map with assignment info
     const attendantMap = new Map();
     
     // First, add all active attendants
     allAttendants.forEach(attendant => {
+      const association = associationMap.get(attendant.id);
+      
       attendantMap.set(attendant.id, {
         id: attendant.id,
         firstName: attendant.firstName,
@@ -1457,11 +1490,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         formsOfService: attendant.formsOfService,
         isActive: attendant.isActive,
         createdAt: attendant.createdAt?.toISOString() || null,
-        associationId: attendant.id, // Use attendant ID for compatibility
-        overseerId: null,
-        keymanId: null,
-        overseer: null,
-        keyman: null,
+        associationId: association?.id || attendant.id, // Use association ID if exists
+        overseerId: association?.overseerId || null,
+        keymanId: association?.keymanId || null,
+        overseer: association?.overseer || null,
+        keyman: association?.keyman || null,
         assignments: []
       });
     });
@@ -1472,12 +1505,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         if (assignment.attendant && attendantMap.has(assignment.attendant.id)) {
           const attendant = attendantMap.get(assignment.attendant.id);
           
-          // Update oversight info if this is an oversight assignment
-          if (assignment.role === 'OVERSEER' && assignment.overseer) {
+          // Update oversight info if this is an oversight assignment (but don't override association data)
+          if (assignment.role === 'OVERSEER' && assignment.overseer && !attendant.overseerId) {
             attendant.overseerId = assignment.overseer.id;
             attendant.overseer = assignment.overseer;
           }
-          if (assignment.role === 'KEYMAN' && assignment.keyman) {
+          if (assignment.role === 'KEYMAN' && assignment.keyman && !attendant.keymanId) {
             attendant.keymanId = assignment.keyman.id;
             attendant.keyman = assignment.keyman;
           }
