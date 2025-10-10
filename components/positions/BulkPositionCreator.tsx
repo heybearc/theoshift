@@ -42,11 +42,8 @@ export default function BulkPositionCreator({ eventId, onSuccess, onCancel }: Bu
       
       if (data.success) {
         setTemplates(data.data)
-        // Default to "All Day" template
-        const allDayTemplate = data.data.find((t: ShiftTemplate) => t.name === 'All Day')
-        if (allDayTemplate) {
-          setShiftTemplateId(allDayTemplate.id)
-        }
+        // Don't default to any template - let user choose
+        // setShiftTemplateId('') // Keep empty by default
       } else {
         console.error('Failed to fetch shift templates:', data.error)
         // Set a default template structure if API fails
@@ -59,7 +56,8 @@ export default function BulkPositionCreator({ eventId, onSuccess, onCancel }: Bu
             isSystemTemplate: true
           }
         ])
-        setShiftTemplateId('default')
+        // Don't auto-select even the fallback template
+        // setShiftTemplateId('default')
       }
     } catch (error) {
       console.error('Failed to fetch shift templates:', error)
@@ -73,7 +71,8 @@ export default function BulkPositionCreator({ eventId, onSuccess, onCancel }: Bu
           isSystemTemplate: true
         }
       ])
-      setShiftTemplateId('default')
+      // Don't auto-select even the fallback template
+      // setShiftTemplateId('default')
     }
   }
 
