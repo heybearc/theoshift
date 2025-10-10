@@ -2487,7 +2487,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // APEX GUARDIAN: Debug positions data loading
     console.log('🔍 Positions loaded:', positions?.length || 0)
     console.log('🔍 First position assignments:', positions?.[0]?.assignments?.length || 0)
+    console.log('🔍 First position data keys:', positions?.[0] ? Object.keys(positions[0]) : 'No positions')
     if (positions && positions.length > 0) {
+      // Check if oversight property exists at all
+      const firstPosition = positions[0] as any
+      console.log('🔍 First position has oversight property:', 'oversight' in firstPosition)
+      console.log('🔍 First position oversight value:', firstPosition.oversight)
+      
       const positionsWithOversight = positions.filter((p: any) => p.oversight && p.oversight.length > 0)
       console.log('🔍 Positions with oversight:', positionsWithOversight.length)
       positionsWithOversight.forEach((p: any) => {
