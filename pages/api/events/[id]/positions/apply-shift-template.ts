@@ -8,7 +8,7 @@ import crypto from 'crypto'
 // Validation schema for applying shift templates
 const applyTemplateSchema = z.object({
   positionIds: z.array(z.string().min(1)),
-  templateType: z.enum(['standard', 'extended', 'custom']),
+  templateType: z.enum(['standard', 'extended', 'allday', 'custom']),
   customShifts: z.array(z.object({
     name: z.string().min(1),
     startTime: z.string().min(1),
@@ -31,6 +31,9 @@ const SHIFT_TEMPLATES = {
     { name: 'Late Morning', startTime: '10:30', endTime: '12:45', isAllDay: false },
     { name: 'Early Afternoon', startTime: '12:45', endTime: '15:00', isAllDay: false },
     { name: 'Late Afternoon', startTime: '15:00', endTime: '21:00', isAllDay: false }
+  ],
+  'allday': [
+    { name: 'All Day', startTime: '', endTime: '', isAllDay: true }
   ]
 }
 
