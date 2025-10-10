@@ -22,11 +22,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('1. Checking session...')
     const session = await getServerSession(req, res, authOptions)
     
-    if (!session?.user?.id) {
+    if (!session) {
       console.log('❌ No session found')
       return res.status(401).json({ success: false, error: 'Unauthorized' })
     }
-    console.log('✅ Session valid for user:', session.user.id)
+    console.log('✅ Session valid for user:', session.user?.email)
+
+    // Check user permissions
+    const user = await prisma.users.findUnique({
+      where: { email: session.user?.email || '' }
+    })
+
+    if (!user || !['ADMIN', 'OVERSEER', 'admin', 'overseer'].includes(user.role)) {
+      console.log('❌ Insufficient permissions for user:', user?.role)
+      return res.status(403).json({ success: false, error: 'Insufficient permissions' })
+    }
+    console.log('✅ User permissions valid:', user.role)
 
     const { id: eventId } = req.query
     console.log('2. Event ID:', eventId)
@@ -111,6 +122,7 @@ async function handleBulkOversightAssignment(req: NextApiRequest, res: NextApiRe
 
     // Perform bulk upsert in transaction
     console.log('7. Performing bulk oversight assignment...')
+    const userId = user?.id
     const results = await prisma.$transaction(async (tx) => {
       const assignments: any[] = []
       
