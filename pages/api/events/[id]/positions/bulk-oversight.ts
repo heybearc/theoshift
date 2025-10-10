@@ -115,38 +115,60 @@ async function handleBulkOversightAssignment(req: NextApiRequest, res: NextApiRe
       const assignments = []
       
       for (const positionId of validatedData.positionIds) {
-        const assignment = await tx.position_oversight_assignments.upsert({
+        // APEX GUARDIAN: Try to find existing assignment first
+        const existingAssignment = await tx.position_oversight_assignments.findFirst({
           where: {
-            positionId_eventId: {
-              positionId: positionId,
-              eventId: eventId
-            }
-          },
-          update: {
-            overseerId: validatedData.overseerId || null,
-            keymanId: validatedData.keymanId || null,
-            assignedBy: userId,
-            updatedAt: new Date()
-          },
-          create: {
             positionId: positionId,
-            eventId: eventId,
-            overseerId: validatedData.overseerId || null,
-            keymanId: validatedData.keymanId || null,
-            assignedBy: userId
-          },
-          include: {
-            position: {
-              select: { name: true, positionNumber: true }
-            },
-            overseer: {
-              select: { id: true, firstName: true, lastName: true }
-            },
-            keyman: {
-              select: { id: true, firstName: true, lastName: true }
-            }
+            eventId: eventId
           }
         })
+
+        let assignment
+        if (existingAssignment) {
+          // Update existing assignment
+          assignment = await tx.position_oversight_assignments.update({
+            where: { id: existingAssignment.id },
+            data: {
+              overseerId: validatedData.overseerId || null,
+              keymanId: validatedData.keymanId || null,
+              assignedBy: userId,
+              updatedAt: new Date()
+            },
+            include: {
+              position: {
+                select: { name: true, positionNumber: true }
+              },
+              overseer: {
+                select: { id: true, firstName: true, lastName: true }
+              },
+              keyman: {
+                select: { id: true, firstName: true, lastName: true }
+              }
+            }
+          })
+        } else {
+          // Create new assignment
+          assignment = await tx.position_oversight_assignments.create({
+            data: {
+              positionId: positionId,
+              eventId: eventId,
+              overseerId: validatedData.overseerId || null,
+              keymanId: validatedData.keymanId || null,
+              assignedBy: userId
+            },
+            include: {
+              position: {
+                select: { name: true, positionNumber: true }
+              },
+              overseer: {
+                select: { id: true, firstName: true, lastName: true }
+              },
+              keyman: {
+                select: { id: true, firstName: true, lastName: true }
+              }
+            }
+          })
+        }
         
         assignments.push(assignment)
       }
