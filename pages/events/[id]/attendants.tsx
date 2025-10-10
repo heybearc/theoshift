@@ -519,7 +519,20 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
       setShowBulkEditModal(false)
       setSelectedAttendants(new Set())
       setBulkEditData({ isActive: '', formsOfService: '', congregation: '', overseerId: null, keymanId: null })
-      router.reload()
+      
+      // Preserve filter state and pagination in URL before reload
+      try {
+        const url = new URL(window.location.href)
+        if (filters.search) url.searchParams.set('search', filters.search)
+        if (filters.congregation) url.searchParams.set('congregation', filters.congregation)
+        if (filters.isActive !== 'all') url.searchParams.set('isActive', filters.isActive)
+        url.searchParams.set('page', currentPage.toString())
+        window.location.href = url.toString()
+      } catch (error) {
+        console.error('Error preserving filter state:', error)
+        // Fallback to simple reload
+        router.reload()
+      }
     } catch (error) {
       console.error('Bulk edit error:', error)
       alert('Failed to update attendants')
