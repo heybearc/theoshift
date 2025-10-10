@@ -82,90 +82,73 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         }
 
-        // Get or create an All Day shift for this position (required for assignments)
-        let allDayShift = await prisma.position_shifts.findFirst({
+        // APEX GUARDIAN: Create position-level oversight assignment (NOT tied to shifts)
+        
+        // Find existing oversight assignment for this position
+        const existingOversight = await prisma.position_oversight_assignments.findFirst({
           where: {
             positionId: positionId,
-            name: 'All Day'
+            eventId: eventId
           }
         })
 
-        if (!allDayShift) {
-          console.log('All Day shift not found, creating one...')
-          allDayShift = await prisma.position_shifts.create({
+        let oversightAssignment
+        if (existingOversight) {
+          // Update existing oversight assignment
+          console.log('Updating existing oversight assignment:', existingOversight.id)
+          oversightAssignment = await prisma.position_oversight_assignments.update({
+            where: { id: existingOversight.id },
             data: {
-              id: require('crypto').randomUUID(),
-              positionId: positionId,
-              name: 'All Day',
-              startTime: null,
-              endTime: null,
-              isAllDay: true,
-              sequence: 1
+              overseerId: validatedData.overseerId,
+              keymanId: validatedData.keymanId || null,
+              assignedBy: user.id,
+              updatedAt: new Date()
+            },
+            include: {
+              position: {
+                select: { name: true, positionNumber: true }
+              },
+              overseer: {
+                select: { id: true, firstName: true, lastName: true }
+              },
+              keyman: {
+                select: { id: true, firstName: true, lastName: true }
+              }
             }
           })
-          console.log('✅ Created All Day shift:', allDayShift.id)
-        }
-
-        // Create overseer assignment in position_assignments table
-        console.log('Creating overseer assignment with data:', {
-          positionId,
-          attendantId: validatedData.overseerId,
-          role: 'OVERSEER',
-          overseerId: validatedData.overseerId,
-          shiftId: allDayShift.id,
-          assignedBy: user.id
-        })
-
-        const overseerAssignment = await prisma.position_assignments.create({
-          data: {
-            id: crypto.randomUUID(),
-            positionId: positionId,
-            attendantId: validatedData.overseerId, // The overseer is also an attendant
-            shiftId: allDayShift.id,
-            role: 'OVERSEER',
-            overseerId: validatedData.overseerId,
-            assignedAt: new Date(),
-            assignedBy: user.id // Use the user ID from the database lookup
-          }
-        })
-
-        console.log('Successfully created overseer assignment:', overseerAssignment.id)
-
-        // Create separate keyman assignment if keyman is provided
-        let keymanAssignment: any = null
-        if (validatedData.keymanId) {
-          console.log('Creating keyman assignment with data:', {
-            positionId,
-            attendantId: validatedData.keymanId,
-            role: 'KEYMAN',
-            keymanId: validatedData.keymanId,
-            shiftId: allDayShift.id,
-            assignedBy: user.id
-          })
-
-          keymanAssignment = await prisma.position_assignments.create({
+        } else {
+          // Create new position-level oversight assignment
+          console.log('Creating new position-level oversight assignment')
+          oversightAssignment = await prisma.position_oversight_assignments.create({
             data: {
-              id: crypto.randomUUID(),
               positionId: positionId,
-              attendantId: validatedData.keymanId, // The keyman is also an attendant
-              shiftId: allDayShift.id,
-              role: 'KEYMAN',
-              keymanId: validatedData.keymanId,
-              assignedAt: new Date(),
+              eventId: eventId,
+              overseerId: validatedData.overseerId,
+              keymanId: validatedData.keymanId || null,
               assignedBy: user.id
+            },
+            include: {
+              position: {
+                select: { name: true, positionNumber: true }
+              },
+              overseer: {
+                select: { id: true, firstName: true, lastName: true }
+              },
+              keyman: {
+                select: { id: true, firstName: true, lastName: true }
+              }
             }
           })
-
-          console.log('Successfully created keyman assignment:', keymanAssignment?.id)
         }
+
+        console.log('✅ Successfully created/updated position-level oversight assignment:', oversightAssignment.id)
 
         return res.status(201).json({
           success: true,
           data: {
-            overseerAssignment,
-            keymanAssignment
+            oversightAssignment
           },
-          message: keymanAssignment ? 
+          message: oversightAssignment.keyman ? 
             'Overseer and keyman assigned successfully' : 
             'Overseer assigned successfully'
         })
