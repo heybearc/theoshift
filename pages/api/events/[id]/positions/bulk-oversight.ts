@@ -38,6 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(403).json({ success: false, error: 'Insufficient permissions' })
     }
     console.log('✅ User permissions valid:', user.role)
+    const userId = user.id
 
     const { id: eventId } = req.query
     console.log('2. Event ID:', eventId)
@@ -122,7 +123,6 @@ async function handleBulkOversightAssignment(req: NextApiRequest, res: NextApiRe
 
     // Perform bulk upsert in transaction
     console.log('7. Performing bulk oversight assignment...')
-    const userId = user?.id
     const results = await prisma.$transaction(async (tx) => {
       const assignments: any[] = []
       
