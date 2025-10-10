@@ -2495,6 +2495,15 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
           isAllDay: assignment.shift.isAllDay
         } : null
       })).filter(assignment => assignment.attendant !== null)
+    }))
+
+    // APEX GUARDIAN: Debug positions data loading
+    console.log('🔍 Step 12: Final positions with oversight count:', positionsWithOversight.length)
+    const positionsWithOversightData = positionsWithOversight.filter((p: any) => p.oversight && p.oversight.length > 0)
+    console.log('🔍 Step 13: Positions that have oversight data:', positionsWithOversightData.length)
+    positionsWithOversightData.forEach((p: any) => {
+      console.log(`🔍 Position ${p.positionNumber} oversight:`, p.oversight)
+    })
 
     return {
       props: {
@@ -2507,22 +2516,6 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
           assigned: positionsWithOversight.filter(p => p.assignments.length > 0).length
         }
       }
-    }
-
-    // APEX GUARDIAN: Debug positions data loading
-    console.log('🔍 First position assignments:', positions?.[0]?.assignments?.length || 0)
-    console.log('🔍 First position data keys:', positions?.[0] ? Object.keys(positions[0]) : 'No positions')
-    if (positions && positions.length > 0) {
-      // Check if oversight property exists at all
-      const firstPosition = positions[0] as any
-      console.log('🔍 First position has oversight property:', 'oversight' in firstPosition)
-      console.log('🔍 First position oversight value:', firstPosition.oversight)
-      
-      const positionsWithOversight = positions.filter((p: any) => p.oversight && p.oversight.length > 0)
-      console.log('🔍 Positions with oversight:', positionsWithOversight.length)
-      positionsWithOversight.forEach((p: any) => {
-        console.log(`🔍 Position ${p.positionNumber} oversight:`, p.oversight)
-      })
     }
 
   } catch (error) {
