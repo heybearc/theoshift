@@ -20,7 +20,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: 'Unauthorized' })
     }
 
-    const { id: eventId, positionId } = req.query
+    const { id, positionId: posId } = req.query
+    const eventId = Array.isArray(id) ? id[0] : id
+    const positionId = Array.isArray(posId) ? posId[0] : posId
+
+    console.log('Event ID:', eventId, 'Type:', typeof eventId)
+    console.log('Position ID:', positionId, 'Type:', typeof positionId)
 
     if (!eventId || typeof eventId !== 'string' || !positionId || typeof positionId !== 'string') {
       return res.status(400).json({ error: 'Event ID and Position ID are required' })
