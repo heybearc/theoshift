@@ -43,6 +43,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(403).json({ error: 'Insufficient permissions' })
     }
 
+    // Verify event exists
+    console.log('Verifying event exists for eventId:', eventId)
+    const event = await prisma.events.findUnique({
+      where: { id: eventId }
+    })
+    console.log('Event lookup result:', event ? 'Found' : 'Not found')
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' })
+    }
+
     switch (req.method) {
       case 'POST':
         console.log('Overseer assignment request body:', req.body)
@@ -56,6 +66,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })
         
         console.log('Position lookup result:', position ? 'Found' : 'Not found')
+        if (position) {
+          console.log('Position eventId:', position.eventId)
+          console.log('API eventId:', eventId)
+          console.log('EventId match:', position.eventId === eventId)
+        }
         
         if (!position) {
           // Also check event_positions table for debugging

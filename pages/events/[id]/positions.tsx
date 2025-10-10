@@ -2507,6 +2507,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
     return {
       props: {
+        eventId: id as string,
         event,
         positions: positionsWithOversight,
         attendants: attendantsData,
