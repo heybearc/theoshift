@@ -2314,22 +2314,21 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   )
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await getServerSession(context.req, context.res, authOptions)
-  
-  if (!session) {
-    return {
-      redirect: {
-        destination: '/auth/signin',
-        permanent: false,
-      },
-    }
-  }
-
-  // APEX GUARDIAN: Full SSR data fetching for positions tab
-  const { id } = context.params!
-  
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  console.log('🔍 APEX GUARDIAN: getServerSideProps called at', new Date().toISOString())
   try {
+    const session = await getServerSession(context.req, context.res, authOptions)
+  
+    if (!session) {
+      return {
+        redirect: {
+          destination: '/auth/signin',
+        },
+      }
+    }
+
+    // APEX GUARDIAN: Full SSR data fetching for positions tab
+    const { id } = context.params!
     const { prisma } = await import('../../../src/lib/prisma')
     
     // Fetch event with positions data
