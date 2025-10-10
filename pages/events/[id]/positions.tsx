@@ -2372,26 +2372,25 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 }
               }
             },
-            shifts: true
-            // APEX GUARDIAN: Temporarily commented out oversight relation due to TypeScript issues
-            // oversight: {
-            //   include: {
-            //     overseer: {
-            //       select: {
-            //         id: true,
-            //         firstName: true,
-            //         lastName: true
-            //       }
-            //     },
-            //     keyman: {
-            //       select: {
-            //         id: true,
-            //         firstName: true,
-            //         lastName: true
-            //       }
-            //     }
-            //   }
-            // }
+            shifts: true,
+            oversight: {
+              include: {
+                overseer: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true
+                  }
+                },
+                keyman: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true
+                  }
+                }
+              }
+            }
           },
           orderBy: [
             { positionNumber: 'asc' }
@@ -2488,7 +2487,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // APEX GUARDIAN: Debug positions data loading
     console.log('🔍 Positions loaded:', positions?.length || 0)
     console.log('🔍 First position assignments:', positions?.[0]?.assignments?.length || 0)
-    // TODO: Add oversight debugging once TypeScript types are fixed
+    if (positions && positions.length > 0) {
+      const positionsWithOversight = positions.filter((p: any) => p.oversight && p.oversight.length > 0)
+      console.log('🔍 Positions with oversight:', positionsWithOversight.length)
+      positionsWithOversight.forEach((p: any) => {
+        console.log(`🔍 Position ${p.positionNumber} oversight:`, p.oversight)
+      })
+    }
 
   } catch (error) {
     console.error('Error fetching event data:', error)
