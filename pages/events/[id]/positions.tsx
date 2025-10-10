@@ -247,6 +247,19 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
     
     if (!selectedPosition) return
     
+    // APEX GUARDIAN: Bidirectional shift logic validation
+    if (shiftFormData.isAllDay && selectedPosition.shifts && selectedPosition.shifts.length > 0) {
+      const hasPartialShifts = selectedPosition.shifts.some(shift => !shift.isAllDay)
+      if (hasPartialShifts) {
+        alert(
+          '❌ Cannot add All Day shift\n\n' +
+          'This position already has partial shifts. An All Day shift covers the entire 24-hour period and conflicts with existing partial shifts.\n\n' +
+          'Please delete existing partial shifts first, then add the All Day shift.'
+        )
+        return
+      }
+    }
+    
     try {
       const response = await fetch(`/api/events/${eventId}/positions/${selectedPosition.id}/shifts`, {
         method: 'POST',
@@ -263,7 +276,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       })
 
       if (response.ok) {
-        alert('Shift added successfully')
+        alert('✅ Shift added successfully')
         setShowShiftModal(false)
         setShiftFormData({ startTime: '', endTime: '', isAllDay: false })
         router.reload()
@@ -372,6 +385,24 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
         return
       }
       
+      // APEX GUARDIAN: Bidirectional shift logic validation for All Day template
+      if (templateType === 'allday') {
+        const selectedPositionObjects = positions.filter(p => selectedPositions.has(p.id))
+        const positionsWithPartialShifts = selectedPositionObjects.filter(position => 
+          position.shifts && position.shifts.some(shift => !shift.isAllDay)
+        )
+        
+        if (positionsWithPartialShifts.length > 0) {
+          const positionNames = positionsWithPartialShifts.map(p => p.name).join(', ')
+          alert(
+            '❌ Cannot apply All Day template to some positions\n\n' +
+            `The following positions have partial shifts that conflict with All Day shifts:\n${positionNames}\n\n` +
+            'Please delete existing partial shifts from these positions first, then apply the All Day template.'
+          )
+          return
+        }
+      }
+      
       const response = await fetch(`/api/events/${eventId}/positions/apply-shift-template`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -417,6 +448,24 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       if (!shiftName) {
         alert('Please specify a shift name')
         return
+      }
+      
+      // APEX GUARDIAN: Bidirectional shift logic validation for bulk operations
+      if (isAllDay) {
+        const selectedPositionObjects = positions.filter(p => selectedPositions.has(p.id))
+        const positionsWithPartialShifts = selectedPositionObjects.filter(position => 
+          position.shifts && position.shifts.some(shift => !shift.isAllDay)
+        )
+        
+        if (positionsWithPartialShifts.length > 0) {
+          const positionNames = positionsWithPartialShifts.map(p => p.name).join(', ')
+          alert(
+            '❌ Cannot add All Day shift to some positions\n\n' +
+            `The following positions have partial shifts that conflict with All Day shifts:\n${positionNames}\n\n` +
+            'Please delete existing partial shifts from these positions first, then add the All Day shift.'
+          )
+          return
+        }
       }
       
       let successCount = 0
