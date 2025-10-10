@@ -1728,9 +1728,9 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                     </div>
                   </div>
 
-                  {/* Leadership Assignment */}
+                  {/* Oversight Assignment */}
                   <div className="space-y-4">
-                    <h4 className="font-medium text-gray-900">Leadership Assignment</h4>
+                    <h4 className="font-medium text-gray-900">Oversight Assignment</h4>
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">

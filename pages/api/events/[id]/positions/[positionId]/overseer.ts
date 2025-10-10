@@ -82,8 +82,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         }
 
-        // Get the All Day shift for this position (required for assignments)
-        const allDayShift = await prisma.position_shifts.findFirst({
+        // Get or create an All Day shift for this position (required for assignments)
+        let allDayShift = await prisma.position_shifts.findFirst({
           where: {
             positionId: positionId,
             name: 'All Day'
@@ -91,7 +91,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })
 
         if (!allDayShift) {
-          return res.status(400).json({ error: 'All Day shift not found for this position' })
+          console.log('All Day shift not found, creating one...')
+          allDayShift = await prisma.position_shifts.create({
+            data: {
+              id: require('crypto').randomUUID(),
+              positionId: positionId,
+              name: 'All Day',
+              startTime: null,
+              endTime: null,
+              isAllDay: true,
+              sequence: 1
+            }
+          })
+          console.log('✅ Created All Day shift:', allDayShift.id)
         }
 
         // Create overseer assignment in position_assignments table
