@@ -425,7 +425,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
     setLoading(true)
     try {
       const updates: Promise<Response>[] = []
-      const leadershipUpdates: Promise<Response>[] = []
+      const oversightUpdates: Promise<Response>[] = []
       
       for (const associationId of selectedAttendants) {
         // Find the attendant by association ID first
@@ -472,31 +472,31 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
           )
         }
 
-        // Handle leadership assignments separately
-        const leadershipData: any = {}
+        // Handle oversight assignments separately
+        const oversightData: any = {}
         if (bulkEditData.overseerId !== null) {
-          leadershipData.overseerId = bulkEditData.overseerId === 'REMOVE' ? null : bulkEditData.overseerId
+          oversightData.overseerId = bulkEditData.overseerId === 'REMOVE' ? null : bulkEditData.overseerId
         }
         if (bulkEditData.keymanId !== null) {
-          leadershipData.keymanId = bulkEditData.keymanId === 'REMOVE' ? null : bulkEditData.keymanId
+          oversightData.keymanId = bulkEditData.keymanId === 'REMOVE' ? null : bulkEditData.keymanId
         }
 
-        if (Object.keys(leadershipData).length > 0) {
-          console.log(`🔧 Bulk leadership update for attendant ${attendant.firstName} ${attendant.lastName}:`, leadershipData)
-          leadershipUpdates.push(
-            fetch(`/api/events/${eventId}/attendants/${attendant.id}/leadership`, {
+        if (Object.keys(oversightData).length > 0) {
+          console.log(`🔧 Bulk oversight update for attendant ${attendant.firstName} ${attendant.lastName}:`, oversightData)
+          oversightUpdates.push(
+            fetch(`/api/events/${eventId}/attendants/${attendant.id}/oversight`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(leadershipData)
+              body: JSON.stringify(oversightData)
             }).then(response => {
               if (!response.ok) {
-                console.error(`Leadership update failed for ${attendant.firstName} ${attendant.lastName}:`, response.status)
+                console.error(`Oversight update failed for ${attendant.firstName} ${attendant.lastName}:`, response.status)
                 return response.json().then(err => {
                   console.error('Error details:', err)
-                  throw new Error(`Leadership update failed: ${err.error}`)
+                  throw new Error(`Oversight update failed: ${err.error}`)
                 })
               }
-              console.log(`✅ Leadership updated for ${attendant.firstName} ${attendant.lastName}`)
+              console.log(`✅ Oversight updated for ${attendant.firstName} ${attendant.lastName}`)
               return response
             })
           )
@@ -504,7 +504,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
       }
 
       // Execute all updates in parallel
-      const results = await Promise.allSettled([...updates, ...leadershipUpdates])
+      const results = await Promise.allSettled([...updates, ...oversightUpdates])
       
       const failed = results.filter(result => result.status === 'rejected')
       const successful = results.filter(result => result.status === 'fulfilled')
@@ -826,7 +826,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             onChange={async (e) => {
                               const overseerId = e.target.value || null
                               try {
-                                const response = await fetch(`/api/events/${eventId}/attendants/${attendant.id}/leadership`, {
+                                const response = await fetch(`/api/events/${eventId}/attendants/${attendant.id}/oversight`, {
                                   method: 'PUT',
                                   headers: { 'Content-Type': 'application/json' },
                                   body: JSON.stringify({ overseerId })
@@ -873,7 +873,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             onChange={async (e) => {
                               const keymanId = e.target.value || null
                               try {
-                                const response = await fetch(`/api/events/${eventId}/attendants/${attendant.id}/leadership`, {
+                                const response = await fetch(`/api/events/${eventId}/attendants/${attendant.id}/oversight`, {
                                   method: 'PUT',
                                   headers: { 'Content-Type': 'application/json' },
                                   body: JSON.stringify({ keymanId })
