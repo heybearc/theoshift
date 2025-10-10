@@ -489,6 +489,30 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
     }
   }
 
+  // APEX GUARDIAN: Handle individual shift deletion
+  const handleDeleteShift = async (positionId: string, shiftId: string, shiftName: string) => {
+    if (!confirm(`Delete "${shiftName}" shift? This will also remove any attendant assignments to this shift.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/events/${eventId}/positions/${positionId}/shifts/${shiftId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        alert(`✅ "${shiftName}" shift deleted successfully`)
+        reloadWithState()
+      } else {
+        const error = await response.json()
+        alert(`Failed to delete shift: ${error.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Delete shift error:', error)
+      alert('Failed to delete shift')
+    }
+  }
+
   // Handle bulk delete
   const handleBulkDelete = async () => {
     if (!confirm(`Delete ${selectedPositions.size} selected positions? This action cannot be undone.`)) {
@@ -1136,9 +1160,18 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                                       </span>
                                     )}
                                   </div>
-                                  <span className="text-xs text-gray-400">
-                                    {attendantAssignments.length} attendant{attendantAssignments.length !== 1 ? 's' : ''}
-                                  </span>
+                                  <div className="flex items-center space-x-2">
+                                    <span className="text-xs text-gray-400">
+                                      {attendantAssignments.length} attendant{attendantAssignments.length !== 1 ? 's' : ''}
+                                    </span>
+                                    <button
+                                      onClick={() => handleDeleteShift(position.id, shift.id, shift.name)}
+                                      className="text-xs text-red-600 hover:text-red-800 hover:bg-red-100 rounded px-1 py-0.5 transition-colors"
+                                      title={`Delete ${shift.name} shift`}
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
                                 </div>
                                 
                                 {/* Shift Leadership Assignments */}
@@ -1220,16 +1253,22 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                           })}
                         </div>
                         
-                        {/* Add Shift Button */}
-                        <button
-                          onClick={() => {
-                            setSelectedPosition(position)
-                            setShowShiftModal(true)
-                          }}
-                          className="w-full mt-2 text-xs text-green-600 hover:text-green-800 bg-green-50 hover:bg-green-100 border border-green-200 rounded px-2 py-1 transition-colors"
-                        >
-                          + Add Shift
-                        </button>
+                        {/* Add Shift Button - Only show if no All Day shift exists */}
+                        {!position.shifts?.some(s => s.isAllDay) ? (
+                          <button
+                            onClick={() => {
+                              setSelectedPosition(position)
+                              setShowShiftModal(true)
+                            }}
+                            className="w-full mt-2 text-xs text-green-600 hover:text-green-800 bg-green-50 hover:bg-green-100 border border-green-200 rounded px-2 py-1 transition-colors"
+                          >
+                            + Add Shift
+                          </button>
+                        ) : (
+                          <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+                            ℹ️ Cannot add more shifts - this position has an All Day shift that covers the entire 24-hour period
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="mb-4">
@@ -1289,25 +1328,6 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                     <div className="flex flex-wrap gap-2 mb-4">
                       <button
                         onClick={() => {
-                          const hasAllDayShift = position.shifts?.some(s => s.isAllDay)
-                          if (hasAllDayShift) {
-                            alert('Cannot add shifts: This position has an All-Day shift which covers the entire 24-hour period.')
-                            return
-                          }
-                          setSelectedPosition(position)
-                          setShowShiftModal(true)
-                        }}
-                        className={`text-xs px-2 py-1 rounded transition-colors ${
-                          position.shifts?.some(s => s.isAllDay)
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-blue-100 hover:bg-blue-200 text-blue-800'
-                        }`}
-                        disabled={position.shifts?.some(s => s.isAllDay)}
-                      >
-                        ⏰ Add Shifts
-                      </button>
-                      <button
-                        onClick={() => {
                           setSelectedPosition(position)
                           setShowOverseerModal(true)
                         }}
@@ -1321,93 +1341,82 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                       >
                         ✏️ Edit
                       </button>
+                      <button
+                        onClick={() => handleDelete(position.id)}
+                        className="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded transition-colors"
+                      >
+                        🗑️ Delete
+                      </button>
                     </div>
 
-
-                    <div className="flex space-x-2">
-                      {!position.isActive ? (
-                        <>
-                          <button
-                            onClick={async () => {
-                              try {
-                                const response = await fetch(`/api/events/${eventId}/positions/${position.id}`, {
-                                  method: 'PUT',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ isActive: true }),
-                                })
-                                if (response.ok) {
-                                  reloadWithState()
-                                } else {
-                                  alert('Failed to activate position')
-                                }
-                              } catch (error) {
+                    {/* Special handling for inactive positions */}
+                    {!position.isActive && (
+                      <div className="flex space-x-2 mt-4 pt-4 border-t border-gray-200">
+                        <button
+                          onClick={async () => {
+                            try {
+                              const response = await fetch(`/api/events/${eventId}/positions/${position.id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ isActive: true }),
+                              })
+                              if (response.ok) {
+                                reloadWithState()
+                              } else {
                                 alert('Failed to activate position')
                               }
-                            }}
-                            className="flex-1 bg-green-100 hover:bg-green-200 text-green-700 px-3 py-2 rounded text-sm font-medium transition-colors"
-                          >
-                            ✅ Activate
-                          </button>
-                          {isAdmin && (
-                            <button
-                              onClick={async () => {
-                                const confirmed = confirm(
-                                  `⚠️ PERMANENT DELETION ⚠️\n\n` +
-                                  `This will permanently delete "${position.name}" from the database.\n` +
-                                  `This action CANNOT be undone.\n\n` +
-                                  `Are you absolutely sure?`
-                                )
-                                if (!confirmed) return
+                            } catch (error) {
+                              alert('Failed to activate position')
+                            }
+                          }}
+                          className="flex-1 bg-green-100 hover:bg-green-200 text-green-700 px-3 py-2 rounded text-sm font-medium transition-colors"
+                        >
+                          ✅ Activate
+                        </button>
+                        {isAdmin && (
+                          <button
+                            onClick={async () => {
+                              const confirmed = confirm(
+                                `⚠️ PERMANENT DELETION ⚠️\n\n` +
+                                `This will permanently delete "${position.name}" from the database.\n` +
+                                `This action CANNOT be undone.\n\n` +
+                                `Are you absolutely sure?`
+                              )
+                              if (!confirmed) return
 
-                                try {
-                                  const response = await fetch(`/api/events/${eventId}/positions/${position.id}?hardDelete=true`, {
-                                    method: 'DELETE'
-                                  })
-                                  const result = await response.json()
-                                  
-                                  if (response.ok) {
-                                    alert(`Position "${position.name}" permanently deleted.`)
-                                    reloadWithState()
+                              try {
+                                const response = await fetch(`/api/events/${eventId}/positions/${position.id}?hardDelete=true`, {
+                                  method: 'DELETE'
+                                })
+                                const result = await response.json()
+                                
+                                if (response.ok) {
+                                  alert(`Position "${position.name}" permanently deleted.`)
+                                  reloadWithState()
+                                } else {
+                                  if (result.dependencies) {
+                                    alert(
+                                      `Cannot delete - has dependencies:\n` +
+                                      `• ${result.dependencies.assignments} assignments\n` +
+                                      `• ${result.dependencies.shifts} shifts\n\n` +
+                                      `Remove dependencies first.`
+                                    )
                                   } else {
-                                    if (result.dependencies) {
-                                      alert(
-                                        `Cannot delete - has dependencies:\n` +
-                                        `• ${result.dependencies.assignments} assignments\n` +
-                                        `• ${result.dependencies.shifts} shifts\n\n` +
-                                        `Remove dependencies first.`
-                                      )
-                                    } else {
-                                      alert(`Failed: ${result.error}`)
-                                    }
+                                    alert(`Failed: ${result.error}`)
                                   }
-                                } catch (error) {
-                                  alert('Failed to permanently delete position')
                                 }
-                              }}
-                              className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
-                              title="Permanently delete position (Admin only)"
-                            >
-                              🗑️ Delete Forever
-                            </button>
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => handleEdit(position)}
-                            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded text-sm font-medium transition-colors"
+                              } catch (error) {
+                                alert('Failed to permanently delete position')
+                              }
+                            }}
+                            className="flex-1 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
+                            title="Permanently delete position (Admin only)"
                           >
-                            Edit
+                            🗑️ Delete Forever
                           </button>
-                          <button
-                            onClick={() => handleDelete(position.id)}
-                            className="flex-1 bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded text-sm font-medium transition-colors"
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                    </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))
@@ -1532,11 +1541,42 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
             <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
               <div className="mt-3">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Add Shifts to {selectedPosition.name}
+                  Add Shift to {selectedPosition.name}
                 </h3>
                 
                 <form onSubmit={handleShiftSubmit}>
                   <div className="space-y-4">
+                    
+                    {/* Template Option */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Quick Templates
+                      </label>
+                      <select 
+                        onChange={(e) => {
+                          const template = e.target.value
+                          if (template === 'morning') {
+                            setShiftFormData({ ...shiftFormData, startTime: '07:50', endTime: '10:00', isAllDay: false })
+                          } else if (template === 'midday') {
+                            setShiftFormData({ ...shiftFormData, startTime: '10:00', endTime: '12:00', isAllDay: false })
+                          } else if (template === 'afternoon') {
+                            setShiftFormData({ ...shiftFormData, startTime: '12:00', endTime: '14:00', isAllDay: false })
+                          } else if (template === 'evening') {
+                            setShiftFormData({ ...shiftFormData, startTime: '14:00', endTime: '17:00', isAllDay: false })
+                          } else if (template === 'allday') {
+                            setShiftFormData({ ...shiftFormData, startTime: '', endTime: '', isAllDay: true })
+                          }
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Select a template or create custom...</option>
+                        <option value="morning">Morning (7:50 - 10:00)</option>
+                        <option value="midday">Midday (10:00 - 12:00)</option>
+                        <option value="afternoon">Afternoon (12:00 - 14:00)</option>
+                        <option value="evening">Evening (14:00 - 17:00)</option>
+                        <option value="allday">All Day</option>
+                      </select>
+                    </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
