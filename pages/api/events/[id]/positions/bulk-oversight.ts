@@ -40,9 +40,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('✅ User permissions valid:', user.role)
     const userId = user.id
 
+    console.log('2. Full req.query:', JSON.stringify(req.query))
     const { id } = req.query
     const eventId = Array.isArray(id) ? id[0] : id
     console.log('2. Event ID:', eventId, 'Type:', typeof eventId)
+    console.log('2. Raw id value:', id)
 
     if (!eventId || typeof eventId !== 'string') {
       console.log('❌ Invalid event ID')
