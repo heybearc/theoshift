@@ -63,7 +63,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             eventId: eventId,
             attendantId: attendantId,
             overseerId: validatedData.overseerId,
-            keymanId: validatedData.keymanId
+            keymanId: validatedData.keymanId,
+            updatedAt: new Date()
           }
         })
         
