@@ -676,14 +676,12 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       )
       
       // Group attendants by their leadership (overseer/keyman)
+      // APEX GUARDIAN: Attendants don't have direct oversight - they inherit from positions
+      // For now, put all available attendants in a general pool
       const attendantsByLeadership = new Map()
-      availableAttendants.forEach(attendant => {
-        const leadershipKey = `${attendant.overseerId || 'none'}-${attendant.keymanId || 'none'}`
-        if (!attendantsByLeadership.has(leadershipKey)) {
-          attendantsByLeadership.set(leadershipKey, [])
-        }
-        attendantsByLeadership.get(leadershipKey).push(attendant)
-      })
+      attendantsByLeadership.set('general-pool', [...availableAttendants])
+      
+      console.log(`👥 Available attendants for assignment: ${availableAttendants.length}`)
       
       // Group positions by their leadership (overseer/keyman) 
       const positionsByLeadership = new Map()
@@ -692,11 +690,18 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       )
       
       positionsNeedingAttendants.forEach(position => {
-        const leadershipKey = `${position.overseerId || 'none'}-${position.keymanId || 'none'}`
+        // APEX GUARDIAN: Get oversight from position.oversight array
+        const oversight = position.oversight && position.oversight.length > 0 ? position.oversight[0] : null
+        const overseerId = oversight?.overseer?.id || 'none'
+        const keymanId = oversight?.keyman?.id || 'none'
+        const leadershipKey = `${overseerId}-${keymanId}`
+        
         if (!positionsByLeadership.has(leadershipKey)) {
           positionsByLeadership.set(leadershipKey, [])
         }
         positionsByLeadership.get(leadershipKey).push(position)
+        
+        console.log(`📍 Position ${position.positionNumber}: Leadership key = ${leadershipKey}`)
       })
       
       let assignmentCount = 0
@@ -705,61 +710,27 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       
       console.log(`📊 Leadership Groups: ${attendantsByLeadership.size} attendant groups, ${positionsByLeadership.size} position groups`)
       
-      // Phase 1: Hierarchy-based assignments (perfect matches)
+      // Phase 1: Priority assignment to positions with oversight
+      const generalPool = attendantsByLeadership.get('general-pool') || []
+      const positionsWithOversight: Position[] = []
+      const positionsWithoutOversight: Position[] = []
+      
+      // Separate positions by oversight status
       for (const [leadershipKey, positionsInGroup] of positionsByLeadership) {
-        const attendantsInGroup = attendantsByLeadership.get(leadershipKey) || []
-        
-        if (attendantsInGroup.length > 0) {
-          console.log(`🎯 Matching leadership group: ${leadershipKey} (${attendantsInGroup.length} attendants → ${positionsInGroup.length} positions)`)
-          
-          for (const position of positionsInGroup) {
-            if (attendantsInGroup.length === 0) break
-            
-            const attendant = attendantsInGroup.shift()
-            if (!attendant) continue
-            
-            const response = await fetch(`/api/events/${eventId}/assignments`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                positionId: position.id,
-                attendantId: attendant.id,
-                role: 'ATTENDANT'
-              })
-            })
-            
-            if (response.ok) {
-              assignmentCount++
-              hierarchyMatches++
-              assignedAttendantIds.add(attendant.id)
-              console.log(`✅ Hierarchy match: ${attendant.firstName} ${attendant.lastName} → ${position.positionName}`)
-            }
-          }
-          
-          // Remove assigned attendants from the main pool
-          attendantsByLeadership.set(leadershipKey, attendantsInGroup)
+        if (leadershipKey === 'none-none') {
+          positionsWithoutOversight.push(...positionsInGroup)
+        } else {
+          positionsWithOversight.push(...positionsInGroup)
         }
       }
       
-      // Phase 2: Fallback assignments for unmatched positions
-      const remainingAttendants: Attendant[] = []
-      for (const attendantsGroup of attendantsByLeadership.values()) {
-        remainingAttendants.push(...attendantsGroup)
-      }
+      console.log(`🎯 Phase 1: Assigning to ${positionsWithOversight.length} positions with oversight`)
       
-      const unassignedPositions: Position[] = []
-      for (const positionsGroup of positionsByLeadership.values()) {
-        unassignedPositions.push(...positionsGroup.filter(pos => 
-          (pos.assignments?.length || 0) < 2 && !assignedAttendantIds.has(pos.id)
-        ))
-      }
-      
-      console.log(`🔄 Fallback phase: ${remainingAttendants.length} attendants → ${unassignedPositions.length} positions`)
-      
-      for (const position of unassignedPositions) {
-        if (remainingAttendants.length === 0) break
+      // Assign to positions with oversight first
+      for (const position of positionsWithOversight) {
+        if (generalPool.length === 0) break
         
-        const attendant = remainingAttendants.shift()
+        const attendant = generalPool.shift()
         if (!attendant) continue
         
         const response = await fetch(`/api/events/${eventId}/assignments`, {
@@ -774,10 +745,45 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
         
         if (response.ok) {
           assignmentCount++
-          fallbackAssignments++
-          console.log(`⚡ Fallback assignment: ${attendant.firstName} ${attendant.lastName} → ${position.positionName}`)
+          hierarchyMatches++
+          assignedAttendantIds.add(attendant.id)
+          const oversight = position.oversight?.[0]
+          const overseerName = oversight?.overseer ? `${oversight.overseer.firstName} ${oversight.overseer.lastName}` : 'None'
+          const keymanName = oversight?.keyman ? `${oversight.keyman.firstName} ${oversight.keyman.lastName}` : 'None'
+          console.log(`✅ Oversight assignment: ${attendant.firstName} ${attendant.lastName} → ${position.name} (Overseer: ${overseerName}, Keyman: ${keymanName})`)
         }
       }
+      
+      console.log(`🎯 Phase 2: Assigning to ${positionsWithoutOversight.length} positions without oversight`)
+      
+      // Then assign to positions without oversight
+      for (const position of positionsWithoutOversight) {
+        if (generalPool.length === 0) break
+        
+        const attendant = generalPool.shift()
+        if (!attendant) continue
+        
+        const response = await fetch(`/api/events/${eventId}/assignments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            positionId: position.id,
+            attendantId: attendant.id,
+            role: 'ATTENDANT'
+          })
+        })
+        
+        if (response.ok) {
+          assignmentCount++
+          hierarchyMatches++
+          assignedAttendantIds.add(attendant.id)
+          console.log(`✅ General assignment: ${attendant.firstName} ${attendant.lastName} → ${position.name}`)
+        }
+      }
+      
+      // Remaining attendants are already handled in the general pool above
+      const remainingAttendants = generalPool
+      console.log(`🔄 Remaining unassigned attendants: ${remainingAttendants.length}`)
       
       // PHASE 3: BALANCED SHIFT ASSIGNMENT
       console.log('📅 Phase 3: Ensuring balanced shift coverage...')
@@ -822,13 +828,13 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       const hierarchySuccessRate = assignmentCount > 0 ? Math.round((hierarchyMatches / assignmentCount) * 100) : 0
       const totalFinalAssignments = assignmentCount + shiftAssignments
       
-      alert(`🎯 Advanced Auto-Assign Complete!\n\n` +
-            `✅ Position Assignments: ${assignmentCount}\n` +
-            `🎯 Hierarchy Matches: ${hierarchyMatches} (${hierarchySuccessRate}%)\n` +
-            `⚡ Fallback Assignments: ${fallbackAssignments}\n` +
+      alert(`🎯 Oversight-Aware Auto-Assign Complete!\n\n` +
+            `✅ Total Assignments: ${assignmentCount}\n` +
+            `👥 Positions with Oversight: ${positionsWithOversight.length} (prioritized)\n` +
+            `📋 Positions without Oversight: ${positionsWithoutOversight.length}\n` +
             `📅 Shift Coverage: ${shiftAssignments}\n` +
-            `🎉 Total Assignments: ${totalFinalAssignments}\n\n` +
-            `System ensures every shift has at least one attendant with leadership-based prioritization.`)
+            `🎉 Total Final Assignments: ${totalFinalAssignments}\n\n` +
+            `System prioritizes positions with assigned overseers/keymen for better supervision.`)
       router.reload()
     } catch (error) {
       console.error('Auto-assign error:', error)
