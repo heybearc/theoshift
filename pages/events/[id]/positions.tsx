@@ -66,7 +66,20 @@ interface Position {
       startTime?: string
       endTime?: string
       isAllDay: boolean
-    } | null
+    }
+  }>
+  oversight?: Array<{
+    id: string
+    overseer?: {
+      id: string
+      firstName: string
+      lastName: string
+    }
+    keyman?: {
+      id: string
+      firstName: string
+      lastName: string
+    }
   }>
 }
 
@@ -1398,6 +1411,27 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                       </button>
                     </div>
 
+                    {/* APEX GUARDIAN: Oversight Assignments Display */}
+                    {position.oversight && position.oversight.length > 0 && (
+                      <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                        <h4 className="text-sm font-medium text-green-800 mb-2">👥 Position Oversight</h4>
+                        {position.oversight.map((oversight) => (
+                          <div key={oversight.id} className="space-y-1">
+                            {oversight.overseer && (
+                              <div className="text-xs text-green-700">
+                                <span className="font-medium">Overseer:</span> {oversight.overseer.firstName} {oversight.overseer.lastName}
+                              </div>
+                            )}
+                            {oversight.keyman && (
+                              <div className="text-xs text-green-700">
+                                <span className="font-medium">Keyman:</span> {oversight.keyman.firstName} {oversight.keyman.lastName}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     {/* Special handling for inactive positions */}
                     {!position.isActive && (
                       <div className="flex space-x-2 mt-4 pt-4 border-t border-gray-200">
@@ -2338,7 +2372,25 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 }
               }
             },
-            shifts: true
+            shifts: true,
+            oversight: {
+              include: {
+                overseer: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true
+                  }
+                },
+                keyman: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true
+                  }
+                }
+              }
+            }
           },
           orderBy: [
             { positionNumber: 'asc' }
