@@ -54,6 +54,8 @@ model attendants {
   keyman_assignments           position_assignments[]         @relation("KeymanRelation")
   event_overseer_assignments   event_attendant_associations[] @relation("EventOverseerRelation")
   event_keyman_assignments     event_attendant_associations[] @relation("EventKeymanRelation")
+  position_overseer_assignments position_oversight_assignments[] @relation("OverseerAssignments")
+  position_keyman_assignments   position_oversight_assignments[] @relation("KeymanAssignments")
 }
 
 model count_sessions {
@@ -165,6 +167,7 @@ model events {
   lanyard_settings             lanyard_settings?
   oversight_assignments        oversight_assignments[]
   positions                    positions[]
+  position_oversight           position_oversight_assignments[]
 }
 
 model lanyard_settings {
@@ -268,6 +271,7 @@ model users {
   oversight_assignments        oversight_assignments[]
   assigned_positions           position_assignments[]         @relation("AssignedByUser")
   created_templates            shift_templates[]              @relation("CreatedByUser")
+  assigned_position_oversight  position_oversight_assignments[] @relation("AssignedByUser")
 
   @@map("users")
 }
@@ -409,6 +413,7 @@ model positions {
   event            events                 @relation(fields: [eventId], references: [id], onDelete: Cascade)
   shifts           position_shifts[]
   assignments      position_assignments[]
+  oversight        position_oversight_assignments[]
 
   @@unique([eventId, positionNumber])
   @@index([eventId, sequence])
@@ -466,6 +471,30 @@ model shift_templates {
   creator          users?   @relation("CreatedByUser", fields: [createdBy], references: [id])
 
   @@index([isSystemTemplate])
+}
+
+model position_oversight_assignments {
+  id          String     @id @default(uuid())
+  positionId  String     @map("position_id")
+  eventId     String     @map("event_id")
+  overseerId  String?    @map("overseer_id")
+  keymanId    String?    @map("keyman_id")
+  assignedBy  String?    @map("assigned_by")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  
+  // Relations
+  position    positions  @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  event       events     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  overseer    attendants? @relation("OverseerAssignments", fields: [overseerId], references: [id], onDelete: SetNull)
+  keyman      attendants? @relation("KeymanAssignments", fields: [keymanId], references: [id], onDelete: SetNull)
+  assignedByUser users?  @relation("AssignedByUser", fields: [assignedBy], references: [id])
+
+  @@unique([positionId, eventId])
+  @@index([eventId])
+  @@index([positionId])
+  @@index([overseerId])
+  @@index([keymanId])
 }
 
 enum PositionRole {
