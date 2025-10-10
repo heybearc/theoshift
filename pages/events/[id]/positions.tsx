@@ -2371,25 +2371,26 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
                 }
               }
             },
-            shifts: true,
-            oversight: {
-              include: {
-                overseer: {
-                  select: {
-                    id: true,
-                    firstName: true,
-                    lastName: true
-                  }
-                },
-                keyman: {
-                  select: {
-                    id: true,
-                    firstName: true,
-                    lastName: true
-                  }
-                }
-              }
-            }
+            shifts: true
+            // APEX GUARDIAN: Temporarily disabled oversight relation to test if it's causing SSR errors
+            // oversight: {
+            //   include: {
+            //     overseer: {
+            //       select: {
+            //         id: true,
+            //         firstName: true,
+            //         lastName: true
+            //       }
+            //     },
+            //     keyman: {
+            //       select: {
+            //         id: true,
+            //         firstName: true,
+            //         lastName: true
+            //       }
+            //     }
+            //   }
+            // }
           },
           orderBy: [
             { positionNumber: 'asc' }
