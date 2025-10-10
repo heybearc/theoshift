@@ -1412,6 +1412,11 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                     </div>
 
                     {/* APEX GUARDIAN: Oversight Assignments Display */}
+                    {(() => {
+                      console.log(`🔍 Position ${position.positionNumber} oversight data:`, position.oversight)
+                      console.log(`🔍 Position ${position.positionNumber} has oversight:`, position.oversight && position.oversight.length > 0)
+                      return null
+                    })()}
                     {position.oversight && position.oversight.length > 0 && (
                       <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
                         <h4 className="text-sm font-medium text-green-800 mb-2">👥 Position Oversight</h4>
