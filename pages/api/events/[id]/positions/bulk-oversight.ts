@@ -118,7 +118,7 @@ async function handleBulkOversightAssignment(req: NextApiRequest, res: NextApiRe
         // APEX GUARDIAN: Create position-level oversight assignments (NOT tied to shifts)
         
         // Find existing oversight assignment for this position
-        const existingOversight = await tx.positionOversightAssignments.findFirst({
+        const existingOversight = await tx.position_oversight_assignments.findFirst({
           where: {
             positionId: positionId,
             eventId: eventId
@@ -128,7 +128,7 @@ async function handleBulkOversightAssignment(req: NextApiRequest, res: NextApiRe
         let oversightAssignment
         if (existingOversight) {
           // Update existing oversight assignment
-          oversightAssignment = await tx.positionOversightAssignments.update({
+          oversightAssignment = await tx.position_oversight_assignments.update({
             where: { id: existingOversight.id },
             data: {
               overseerId: validatedData.overseerId || null,
@@ -150,7 +150,7 @@ async function handleBulkOversightAssignment(req: NextApiRequest, res: NextApiRe
           })
         } else {
           // Create new oversight assignment
-          oversightAssignment = await tx.positionOversightAssignments.create({
+          oversightAssignment = await tx.position_oversight_assignments.create({
             data: {
               positionId: positionId,
               eventId: eventId,
