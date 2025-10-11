@@ -102,12 +102,25 @@ interface Attendant {
   id: string
   firstName: string
   lastName: string
-  role: string
+  email?: string
+  phone?: string
+  emergencyContact?: string
+  medicalInfo?: string
   formsOfService: string[] | string
   congregation?: string
   isActive: boolean
   overseerId?: string | null
   keymanId?: string | null
+  overseer?: {
+    id: string
+    firstName: string
+    lastName: string
+  } | null
+  keyman?: {
+    id: string
+    firstName: string
+    lastName: string
+  } | null
 }
 
 interface EventPositionsProps {
@@ -639,15 +652,55 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
     }
   }
 
-  // Auto-assign algorithm
-  const handleAutoAssign = async () => {
+  // Auto-assign algorithm - APEX GUARDIAN OVERSIGHT-AWARE VERSION v3.0 - NUCLEAR CACHE BUST
+  const handleAutoAssignOversightAware = async () => {
+    console.log('🚨🚨🚨 OVERSIGHT-AWARE v4.0 - TIMESTAMP: ' + Date.now() + ' 🚨🚨🚨')
+    console.log('🎯 OVERSIGHT-AWARE AUTO-ASSIGN v4.0 RUNNING!')
+    console.log('🔥 CACHE BUSTED - NEW VERSION LOADED!')
+    
     if (!confirm('Auto-assign available attendants to unfilled positions?')) return
     
     try {
       setIsSubmitting(true)
       
       // HIERARCHY-BASED AUTO-ASSIGN ALGORITHM
-      console.log('🎯 Starting Hierarchy-Based Auto-Assign...')
+      console.log('🎯 Starting Hierarchy-Based Auto-Assign - OVERSIGHT-AWARE VERSION!')
+      
+      // APEX GUARDIAN: Debug the attendants array being used
+      console.log('🔍 CRITICAL DEBUG: Attendants array in auto-assign:')
+      console.log(`   📊 Total attendants: ${attendants?.length || 0}`)
+      console.log(`   📊 Attendants array:`, attendants)
+      
+      // CRITICAL FIX: Use the same attendants data that manual assignment uses
+      console.log('🔧 CRITICAL FIX: Ensuring auto-assign uses same data as manual assignment')
+      
+      // The attendants prop should already be the event-specific data from getServerSideProps
+      // But let's verify and use it explicitly
+      const eventSpecificAttendants = attendants
+      console.log(`   📊 Event-specific attendants: ${eventSpecificAttendants?.length || 0}`)
+      
+      // Check if attendants have oversight data
+      if (attendants && attendants.length > 0) {
+        console.log('🔍 First 3 attendants oversight check:')
+        attendants.slice(0, 3).forEach((att, index) => {
+          console.log(`   ${index + 1}. ${att.firstName} ${att.lastName}:`)
+          console.log(`      - overseerId: ${att.overseerId}`)
+          console.log(`      - keymanId: ${att.keymanId}`)
+          console.log(`      - overseer: ${att.overseer ? `${att.overseer.firstName} ${att.overseer.lastName}` : 'null'}`)
+          console.log(`      - keyman: ${att.keyman ? `${att.keyman.firstName} ${att.keyman.lastName}` : 'null'}`)
+        })
+        
+        // Count attendants with oversight
+        const attendantsWithOversight = attendants.filter(att => att.overseerId)
+        console.log(`❌ CRITICAL ISSUE: Only ${attendantsWithOversight.length} out of ${attendants.length} attendants have overseerId!`)
+        
+        if (attendantsWithOversight.length === 0) {
+          console.log('🚨 PROBLEM IDENTIFIED: Attendants array does not have event-specific oversight data!')
+          console.log('💡 SOLUTION: Auto-assign needs to use event-specific attendant data with oversight assignments')
+        }
+      } else {
+        console.log('❌ CRITICAL ERROR: No attendants array available!')
+      }
       
       // Get all assigned attendant IDs and leadership IDs to avoid double assignments
       const assignedAttendantIds = new Set()
@@ -669,24 +722,73 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       })
       
       // Find available attendants (not already assigned and not in leadership roles)
-      const availableAttendants = attendants.filter(att => 
+      // CRITICAL FIX: Use eventSpecificAttendants to ensure we have oversight data
+      const availableAttendants = eventSpecificAttendants.filter(att => 
         att.isActive && 
         !assignedAttendantIds.has(att.id) && 
         !leadershipAttendantIds.has(att.id)
       )
       
-      // Group attendants by their leadership (overseer/keyman)
-      // APEX GUARDIAN: Attendants don't have direct oversight - they inherit from positions
-      // For now, put all available attendants in a general pool
+      // APEX GUARDIAN: Debug attendant oversight data in auto-assign
+      console.log(`🔍 AUTO-ASSIGN DEBUG: Checking attendant oversight data...`)
+      console.log(`👥 Available attendants: ${availableAttendants.length}`)
+      
+      // Check first few attendants to see their oversight data
+      availableAttendants.slice(0, 5).forEach(attendant => {
+        console.log(`   👤 ${attendant.firstName} ${attendant.lastName}:`)
+        console.log(`      - overseerId: ${attendant.overseerId}`)
+        console.log(`      - keymanId: ${attendant.keymanId}`)
+        console.log(`      - overseer: ${attendant.overseer ? `${attendant.overseer.firstName} ${attendant.overseer.lastName}` : 'null'}`)
+        console.log(`      - keyman: ${attendant.keyman ? `${attendant.keyman.firstName} ${attendant.keyman.lastName}` : 'null'}`)
+      })
+      
+      // Group attendants by their assigned leadership (overseer/keyman)
       const attendantsByLeadership = new Map()
-      attendantsByLeadership.set('general-pool', [...availableAttendants])
+      
+      availableAttendants.forEach(attendant => {
+        // CRITICAL: Exclude overseers and keymen from being assigned as attendants
+        const isOverseer = positions.some(pos => 
+          pos.oversight?.some(o => o.overseer?.id === attendant.id)
+        )
+        const isKeyman = positions.some(pos => 
+          pos.oversight?.some(o => o.keyman?.id === attendant.id)
+        )
+        
+        if (isOverseer || isKeyman) {
+          console.log(`🚫 EXCLUDING ${attendant.firstName} ${attendant.lastName} - is ${isOverseer ? 'Overseer' : 'Keyman'}`)
+          return // Skip this attendant
+        }
+        
+        // Create leadership key based on attendant's assigned overseer/keyman
+        const overseerId = attendant.overseerId || 'none'
+        const keymanId = attendant.keymanId || 'none'
+        const leadershipKey = `${overseerId}-${keymanId}`
+        
+        if (!attendantsByLeadership.has(leadershipKey)) {
+          attendantsByLeadership.set(leadershipKey, [])
+        }
+        attendantsByLeadership.get(leadershipKey).push(attendant)
+        
+        const overseerName = attendant.overseer ? `${attendant.overseer.firstName} ${attendant.overseer.lastName}` : 'None'
+        const keymanName = attendant.keyman ? `${attendant.keyman.firstName} ${attendant.keyman.lastName}` : 'None'
+        console.log(`👤 ${attendant.firstName} ${attendant.lastName} → Leadership: ${leadershipKey} (Overseer: ${overseerName}, Keyman: ${keymanName})`)
+      })
       
       console.log(`👥 Available attendants for assignment: ${availableAttendants.length}`)
+      console.log(`📊 Attendant leadership groups: ${attendantsByLeadership.size}`)
+      
+      // Debug the leadership groups
+      for (const [leadershipKey, attendantsInGroup] of attendantsByLeadership) {
+        console.log(`📊 Leadership group "${leadershipKey}": ${attendantsInGroup.length} attendants`)
+        if (leadershipKey === 'none-none') {
+          console.log(`   ⚠️  WARNING: ${attendantsInGroup.length} attendants have no oversight assigned!`)
+        }
+      }
       
       // Group positions by their leadership (overseer/keyman) 
       const positionsByLeadership = new Map()
       const positionsNeedingAttendants = positions.filter(pos => 
-        pos.isActive && (pos.assignments?.length || 0) < 2
+        pos.isActive
       )
       
       positionsNeedingAttendants.forEach(position => {
@@ -710,105 +812,68 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       
       console.log(`📊 Leadership Groups: ${attendantsByLeadership.size} attendant groups, ${positionsByLeadership.size} position groups`)
       
-      // Phase 1: Priority assignment to positions with oversight
-      const generalPool = attendantsByLeadership.get('general-pool') || []
-      const positionsWithOversight: Position[] = []
-      const positionsWithoutOversight: Position[] = []
-      
-      // Separate positions by oversight status
+      // Phase 1: Hierarchy-based assignments (perfect matches)
       for (const [leadershipKey, positionsInGroup] of positionsByLeadership) {
-        if (leadershipKey === 'none-none') {
-          positionsWithoutOversight.push(...positionsInGroup)
-        } else {
-          positionsWithOversight.push(...positionsInGroup)
-        }
-      }
-      
-      console.log(`🎯 Phase 1: Assigning to ${positionsWithOversight.length} positions with oversight`)
-      
-      // Assign to positions with oversight first
-      for (const position of positionsWithOversight) {
-        if (generalPool.length === 0) break
+        const attendantsInGroup = attendantsByLeadership.get(leadershipKey) || []
         
-        const attendant = generalPool.shift()
-        if (!attendant) continue
-        
-        const response = await fetch(`/api/events/${eventId}/assignments`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            positionId: position.id,
-            attendantId: attendant.id,
-            role: 'ATTENDANT'
-          })
-        })
-        
-        if (response.ok) {
-          assignmentCount++
-          hierarchyMatches++
-          assignedAttendantIds.add(attendant.id)
-          const oversight = position.oversight?.[0]
-          const overseerName = oversight?.overseer ? `${oversight.overseer.firstName} ${oversight.overseer.lastName}` : 'None'
-          const keymanName = oversight?.keyman ? `${oversight.keyman.firstName} ${oversight.keyman.lastName}` : 'None'
-          console.log(`✅ Oversight assignment: ${attendant.firstName} ${attendant.lastName} → ${position.name} (Overseer: ${overseerName}, Keyman: ${keymanName})`)
-        }
-      }
-      
-      console.log(`🎯 Phase 2: Assigning to ${positionsWithoutOversight.length} positions without oversight`)
-      
-      // Then assign to positions without oversight
-      for (const position of positionsWithoutOversight) {
-        if (generalPool.length === 0) break
-        
-        const attendant = generalPool.shift()
-        if (!attendant) continue
-        
-        const response = await fetch(`/api/events/${eventId}/assignments`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            positionId: position.id,
-            attendantId: attendant.id,
-            role: 'ATTENDANT'
-          })
-        })
-        
-        if (response.ok) {
-          assignmentCount++
-          hierarchyMatches++
-          assignedAttendantIds.add(attendant.id)
-          console.log(`✅ General assignment: ${attendant.firstName} ${attendant.lastName} → ${position.name}`)
-        }
-      }
-      
-      // Remaining attendants are already handled in the general pool above
-      const remainingAttendants = generalPool
-      console.log(`🔄 Remaining unassigned attendants: ${remainingAttendants.length}`)
-      
-      // PHASE 3: BALANCED SHIFT ASSIGNMENT
-      console.log('📅 Phase 3: Ensuring balanced shift coverage...')
-      
-      let shiftAssignments = 0
-      
-      // Get all positions with shifts that need coverage
-      const positionsWithShifts = positions.filter(pos => pos.shifts && pos.shifts.length > 0)
-      
-      for (const position of positionsWithShifts) {
-        if (!position.shifts) continue
-        
-        for (const shift of position.shifts) {
-          // Check current assignments for this shift
-          const currentShiftAssignments = position.assignments?.filter(a => a.shift?.id === shift.id).length || 0
+        if (attendantsInGroup.length > 0) {
+          console.log(`🎯 Matching leadership group: ${leadershipKey} (${attendantsInGroup.length} attendants → ${positionsInGroup.length} positions)`)
           
-          if (currentShiftAssignments === 0 && availableAttendants.length > 0) {
-            // This shift has no attendants - assign at least one
-            const attendant = availableAttendants.shift()
-            if (attendant) {
+          for (const position of positionsInGroup) {
+            if (attendantsInGroup.length === 0) break
+            
+            // CRITICAL FIX: Include All Day shifts for positions with oversight
+            const positionOversight = position.oversight?.[0]
+            const hasOversight = positionOversight?.overseer || positionOversight?.keyman
+
+            // Include All Day shifts ONLY if position has oversight
+            const availableShifts = hasOversight
+              ? position.shifts  // Include All Day if has oversight
+              : position.shifts?.filter(shift => !shift.isAllDay) || []
+
+            if (!availableShifts || availableShifts.length === 0) {
+              console.log(`⚠️ Skipping ${position.name} - no shifts available`)
+              continue
+            }
+            
+            // CORRECT LOGIC: Build list of all shifts that need assignments (1 per shift)
+            const shiftsNeedingAssignment: Array<{position: Position, shift: any}> = []
+            
+            for (const shift of availableShifts) {
+              // Check if this shift already has an attendant assigned
+              const currentAssignments = position.assignments?.filter(a => a.shift?.id === shift.id).length || 0
+              if (currentAssignments === 0) {
+                shiftsNeedingAssignment.push({position, shift})
+              }
+            }
+            
+            console.log(`🔍 POSITION DEBUG: ${position.name} has ${shiftsNeedingAssignment.length} shifts needing assignment`)
+            
+            // Assign attendants to shifts in this position using round-robin from the oversight group
+            for (const {position: pos, shift} of shiftsNeedingAssignment) {
+              if (attendantsInGroup.length === 0) {
+                console.log(`⚠️ No more attendants in ${leadershipKey} group for ${pos.name} - ${shift.name}`)
+                break
+              }
+              
+              // Get next attendant (round-robin within the group)
+              const attendant = attendantsInGroup.shift()
+              if (!attendant) continue
+              
+              console.log(`🔍 OVERSIGHT DEBUG for ${pos.name} - ${shift.name}:`)
+              const positionOversight = pos.oversight?.[0]
+              console.log(`   📍 Position Overseer: ${positionOversight?.overseer?.firstName} ${positionOversight?.overseer?.lastName}`)
+              console.log(`   📍 Position Keyman: ${positionOversight?.keyman?.firstName} ${positionOversight?.keyman?.lastName}`)
+              console.log(`   👤 Attendant Overseer: ${attendant.overseer?.firstName} ${attendant.overseer?.lastName}`)
+              console.log(`   👤 Attendant Keyman: ${attendant.keyman?.firstName} ${attendant.keyman?.lastName}`)
+              console.log(`   🔑 Leadership Key: ${leadershipKey}`)
+              console.log(`   🎯 Using shift: ${shift.name} (${shift.startTime} - ${shift.endTime})`)
+              
               const response = await fetch(`/api/events/${eventId}/assignments`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  positionId: position.id,
+                  positionId: pos.id,
                   attendantId: attendant.id,
                   shiftId: shift.id,
                   role: 'ATTENDANT'
@@ -816,25 +881,365 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
               })
               
               if (response.ok) {
-                shiftAssignments++
-                console.log(`📅 Shift coverage: ${attendant.firstName} ${attendant.lastName} → ${position.name} (${shift.name})`)
+                assignmentCount++
+                hierarchyMatches++
+                const oversight = pos.oversight?.[0]
+                const positionOverseerName = oversight?.overseer ? `${oversight.overseer.firstName} ${oversight.overseer.lastName}` : 'None'
+                const positionKeymanName = oversight?.keyman ? `${oversight.keyman.firstName} ${oversight.keyman.lastName}` : 'None'
+                const attendantOverseerName = attendant.overseer ? `${attendant.overseer.firstName} ${attendant.overseer.lastName}` : 'None'
+                const attendantKeymanName = attendant.keyman ? `${attendant.keyman.firstName} ${attendant.keyman.lastName}` : 'None'
+                console.log(`✅ Perfect match: ${attendant.firstName} ${attendant.lastName} → ${pos.name} - ${shift.name}`)
+                console.log(`   👤 Attendant under: Overseer: ${attendantOverseerName}, Keyman: ${attendantKeymanName}`)
+                console.log(`   📍 Position under: Overseer: ${positionOverseerName}, Keyman: ${positionKeymanName}`)
+                
+                // Put attendant back at END of group for round-robin (can get multiple shifts)
+                attendantsInGroup.push(attendant)
+              } else {
+                console.log(`❌ Assignment failed: ${attendant.firstName} ${attendant.lastName} → ${pos.name} - ${shift.name} (${response.status})`)
+                // Put attendant back for retry
+                attendantsInGroup.unshift(attendant)
               }
             }
           }
+          
+          // Remove assigned attendants from the main pool
+          attendantsByLeadership.set(leadershipKey, attendantsInGroup)
         }
+      }
+      
+      // Phase 2: Fallback assignments for unmatched positions
+      const remainingAttendants: Attendant[] = []
+      for (const attendantsGroup of attendantsByLeadership.values()) {
+        // Only add attendants who haven't been assigned yet
+        const unassignedFromGroup = attendantsGroup.filter(att => !assignedAttendantIds.has(att.id))
+        remainingAttendants.push(...unassignedFromGroup)
+      }
+      
+      const unassignedPositions: Position[] = []
+      for (const positionsGroup of positionsByLeadership.values()) {
+        unassignedPositions.push(...positionsGroup.filter(pos => 
+          (pos.assignments?.length || 0) === 0  // Only positions with NO assignments
+        ))
+      }
+      
+      console.log(`🔄 Fallback phase: ${remainingAttendants.length} attendants → ${unassignedPositions.length} positions`)
+      
+      for (const position of unassignedPositions) {
+        if (remainingAttendants.length === 0) break
+        
+        // CRITICAL FIX: Include All Day shifts for positions with oversight
+        const positionOversight = position.oversight?.[0]
+        const hasOversight = positionOversight?.overseer || positionOversight?.keyman
+        
+        // Include All Day shifts ONLY if position has oversight
+        const availableShifts = hasOversight 
+          ? position.shifts  // Include All Day if has oversight
+          : position.shifts?.filter(shift => !shift.isAllDay) || []
+        
+        if (!availableShifts || availableShifts.length === 0) {
+          console.log(`⚠️ Skipping fallback for ${position.name} - no shifts available`)
+          continue
+        }
+        
+        // CORRECT FALLBACK LOGIC: Assign 1 attendant per shift using round-robin
+        const shiftsNeedingAssignment: Array<{position: Position, shift: any}> = []
+        
+        for (const shift of availableShifts) {
+          // Check if this shift already has an attendant assigned
+          const currentAssignments = position.assignments?.filter(a => a.shift?.id === shift.id).length || 0
+          if (currentAssignments === 0) {
+            shiftsNeedingAssignment.push({position, shift})
+          }
+        }
+        
+        console.log(`🔍 FALLBACK DEBUG: ${position.name} has ${shiftsNeedingAssignment.length} shifts needing assignment`)
+        
+        // Assign remaining attendants to shifts using round-robin
+        for (const {position: pos, shift} of shiftsNeedingAssignment) {
+          if (remainingAttendants.length === 0) {
+            console.log(`⚠️ No more attendants available for ${pos.name} - ${shift.name}`)
+            break
+          }
+          
+          const attendant = remainingAttendants.shift()
+          if (!attendant) continue
+          
+          const response = await fetch(`/api/events/${eventId}/assignments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              positionId: pos.id,
+              attendantId: attendant.id,
+              shiftId: shift.id,
+              role: 'ATTENDANT'
+            })
+          })
+          
+          if (response.ok) {
+            assignmentCount++
+            fallbackAssignments++
+            console.log(`⚡ Fallback assignment: ${attendant.firstName} ${attendant.lastName} → ${pos.name} - ${shift.name}`)
+            
+            // Put attendant back at END for round-robin (can get multiple shifts)
+            remainingAttendants.push(attendant)
+          } else {
+            console.log(`❌ Fallback failed: ${attendant.firstName} ${attendant.lastName} → ${pos.name} - ${shift.name} (${response.status})`)
+            // Put attendant back for retry
+            remainingAttendants.unshift(attendant)
+          }
+        }
+      }
+      
+      // PHASE 3: BALANCED SHIFT ASSIGNMENT (FILL ALL SHIFTS WITH ROUND-ROBIN)
+      console.log('📅 Phase 3: Filling ALL remaining shifts with balanced round-robin assignment...')
+      
+      let shiftAssignments = 0
+      
+      // Group ALL attendants by oversight (including already assigned ones for round-robin)
+      const allAttendantsByOversight = new Map()
+      const excludedAttendants: string[] = []
+      
+      console.log(`🔍 DEBUGGING: Processing ${eventSpecificAttendants.length} total attendants for Phase 3`)
+      
+      eventSpecificAttendants.forEach(attendant => {
+        // Skip overseers/keymen
+        const isOverseer = positions.some(pos => 
+          pos.oversight?.some(o => o.overseer?.id === attendant.id)
+        )
+        const isKeyman = positions.some(pos => 
+          pos.oversight?.some(o => o.keyman?.id === attendant.id)
+        )
+        
+        if (isOverseer || isKeyman) {
+          excludedAttendants.push(`${attendant.firstName} ${attendant.lastName} (${isOverseer ? 'Overseer' : 'Keyman'})`)
+          console.log(`🚫 EXCLUDING: ${attendant.firstName} ${attendant.lastName} - is ${isOverseer ? 'Overseer' : 'Keyman'}`)
+          return
+        }
+        
+        const overseerId = attendant.overseer?.id || 'none'
+        const keymanId = attendant.keyman?.id || 'none'
+        const leadershipKey = `${overseerId}-${keymanId}`
+        
+        console.log(`✅ INCLUDING: ${attendant.firstName} ${attendant.lastName} - oversight: ${leadershipKey}`)
+        
+        if (!allAttendantsByOversight.has(leadershipKey)) {
+          allAttendantsByOversight.set(leadershipKey, [])
+        }
+        allAttendantsByOversight.get(leadershipKey).push(attendant)
+      })
+      
+      console.log(`🚫 TOTAL EXCLUDED: ${excludedAttendants.length} attendants:`, excludedAttendants)
+      
+      console.log(`📅 Attendant pools by oversight:`)
+      allAttendantsByOversight.forEach((attendants, key) => {
+        console.log(`   ${key}: ${attendants.length} attendants`)
+        // Show detailed list for Darrell McCoy's group
+        if (key.includes('Darrell') || attendants.some(a => a.overseer?.firstName === 'Darrell')) {
+          console.log(`   🔍 DARRELL MCCOY ATTENDANTS:`)
+          attendants.forEach((att, index) => {
+            console.log(`      ${index + 1}. ${att.firstName} ${att.lastName} (overseer: ${att.overseer?.firstName || 'none'})`)
+          })
+        }
+      })
+      
+      // Collect ALL unfilled shifts grouped by oversight
+      const unfilledShiftsByOversight = new Map()
+      
+      positions.forEach(position => {
+        if (!position.shifts || position.shifts.length === 0) return
+        
+        const positionOversight = position.oversight?.[0]
+        const hasOversight = positionOversight?.overseer || positionOversight?.keyman
+        
+        // Include All Day shifts ONLY if position has oversight
+        const shiftsToFill = hasOversight 
+          ? position.shifts  // Include All Day if has oversight
+          : position.shifts.filter(shift => !shift.isAllDay)  // Exclude All Day if no oversight
+        
+        const positionOverseerId = positionOversight?.overseer?.id || 'none'
+        const positionKeymanId = positionOversight?.keyman?.id || 'none'
+        const positionLeadershipKey = `${positionOverseerId}-${positionKeymanId}`
+        
+        shiftsToFill.forEach(shift => {
+          const currentAssignments = position.assignments?.filter(a => a.shift?.id === shift.id).length || 0
+          if (currentAssignments === 0) {
+            if (!unfilledShiftsByOversight.has(positionLeadershipKey)) {
+              unfilledShiftsByOversight.set(positionLeadershipKey, [])
+            }
+            unfilledShiftsByOversight.get(positionLeadershipKey).push({
+              position,
+              shift,
+              positionName: position.name,
+              shiftName: shift.name
+            })
+          }
+        })
+      })
+      
+      console.log(`📅 Unfilled shifts by oversight:`)
+      unfilledShiftsByOversight.forEach((shifts, key) => {
+        console.log(`   ${key}: ${shifts.length} unfilled shifts`)
+      })
+      
+      // ROUND-ROBIN ASSIGNMENT: Fill all shifts for each oversight group
+      for (const [leadershipKey, unfilledShifts] of unfilledShiftsByOversight.entries()) {
+        const availableAttendants = allAttendantsByOversight.get(leadershipKey) || []
+        
+        if (availableAttendants.length === 0) {
+          console.log(`⚠️ No attendants available for oversight group: ${leadershipKey}`)
+          continue
+        }
+        
+        console.log(`🔄 Round-robin assignment for ${leadershipKey}: ${unfilledShifts.length} shifts, ${availableAttendants.length} attendants`)
+        
+        // ENHANCED ROUND-ROBIN: Fill all shifts with conflict detection
+        console.log(`🔄 Starting enhanced round-robin for ${leadershipKey}...`)
+        
+        // Track assignments per attendant to ensure balanced distribution
+        const attendantAssignments = new Map()
+        availableAttendants.forEach(att => attendantAssignments.set(att.id, []))
+        
+        // Sort shifts by time to help avoid back-to-back conflicts
+        const sortedShifts = [...unfilledShifts].sort((a, b) => {
+          const aTime = a.shift.startTime || '00:00'
+          const bTime = b.shift.startTime || '00:00'
+          return aTime.localeCompare(bTime)
+        })
+        
+        let attendantIndex = 0
+        let maxAttempts = sortedShifts.length * 2 // Prevent infinite loops
+        let attempts = 0
+        
+        for (const shiftInfo of sortedShifts) {
+          let assigned = false
+          let cycleAttempts = 0
+          
+          while (!assigned && cycleAttempts < availableAttendants.length && attempts < maxAttempts) {
+            const attendant = availableAttendants[attendantIndex % availableAttendants.length]
+            const attendantCurrentAssignments = attendantAssignments.get(attendant.id) || []
+            
+            // Check for time conflicts (back-to-back shifts)
+            const hasConflict = attendantCurrentAssignments.some(existingShift => {
+              const existingEnd = existingShift.endTime || '23:59'
+              const newStart = shiftInfo.shift.startTime || '00:00'
+              const existingStart = existingShift.startTime || '00:00'
+              const newEnd = shiftInfo.shift.endTime || '23:59'
+              
+              // Check for overlap or back-to-back (within 30 minutes)
+              return (existingEnd >= newStart && existingStart <= newEnd) ||
+                     Math.abs(new Date(`1970-01-01T${existingEnd}`) - new Date(`1970-01-01T${newStart}`)) < 30 * 60 * 1000
+            })
+            
+            if (!hasConflict) {
+              const response = await fetch(`/api/events/${eventId}/assignments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  positionId: shiftInfo.position.id,
+                  attendantId: attendant.id,
+                  shiftId: shiftInfo.shift.id,
+                  role: 'ATTENDANT'
+                })
+              })
+              
+              if (response.ok) {
+                shiftAssignments++
+                attendantCurrentAssignments.push(shiftInfo.shift)
+                attendantAssignments.set(attendant.id, attendantCurrentAssignments)
+                assigned = true
+                console.log(`🎯 Enhanced round-robin: ${attendant.firstName} ${attendant.lastName} → ${shiftInfo.positionName} (${shiftInfo.shiftName}) [${attendantCurrentAssignments.length} total]`)
+              } else {
+                console.log(`❌ API failed for ${attendant.firstName} ${attendant.lastName} to ${shiftInfo.positionName}`)
+              }
+            } else {
+              console.log(`⏰ Conflict avoided: ${attendant.firstName} ${attendant.lastName} already has conflicting shift`)
+            }
+            
+            attendantIndex++
+            cycleAttempts++
+            attempts++
+          }
+          
+          if (!assigned) {
+            console.log(`⚠️ Could not assign anyone to ${shiftInfo.positionName} (${shiftInfo.shiftName}) - all attendants have conflicts`)
+          }
+        }
+        
+        // Log final distribution
+        console.log(`📊 Final assignment distribution for ${leadershipKey}:`)
+        attendantAssignments.forEach((assignments, attendantId) => {
+          const attendant = availableAttendants.find(a => a.id === attendantId)
+          if (assignments.length > 0) {
+            console.log(`   ${attendant?.firstName} ${attendant?.lastName}: ${assignments.length} shifts`)
+          }
+        })
       }
 
       // Enhanced success message with all statistics
       const hierarchySuccessRate = assignmentCount > 0 ? Math.round((hierarchyMatches / assignmentCount) * 100) : 0
       const totalFinalAssignments = assignmentCount + shiftAssignments
       
-      alert(`🎯 Oversight-Aware Auto-Assign Complete!\n\n` +
+      // Calculate oversight statistics
+      const positionsWithOversightCount = Array.from(positionsByLeadership.keys()).filter(key => key !== 'none-none').reduce((count, key) => {
+        return count + (positionsByLeadership.get(key)?.length || 0)
+      }, 0)
+      const positionsWithoutOversightCount = positionsByLeadership.get('none-none')?.length || 0
+      
+      // CRITICAL: Calculate utilization and coverage warnings
+      let warningMessages = []
+      
+      // Check attendant utilization by oversight group
+      for (const [leadershipKey, attendantsInGroup] of attendantsByLeadership) {
+        const totalAttendants = (attendantsByLeadership.get(leadershipKey) || []).length
+        const positionsInGroup = positionsByLeadership.get(leadershipKey) || []
+        const totalShiftsNeeded = positionsInGroup.reduce((sum, pos) => {
+          const shifts = pos.shifts?.filter(s => !s.isAllDay) || []
+          return sum + shifts.length
+        }, 0)
+        
+        if (totalShiftsNeeded > 0 && attendantsInGroup.length > 0) {
+          console.log(`📊 UTILIZATION: ${leadershipKey} - ${attendantsInGroup.length} attendants remaining, ${totalShiftsNeeded} shifts needed`)
+          if (attendantsInGroup.length > totalShiftsNeeded * 0.5) {
+            warningMessages.push(`⚠️ ${leadershipKey}: ${attendantsInGroup.length} unused attendants (${totalShiftsNeeded} shifts needed)`)
+          }
+        }
+      }
+      
+      // Check for unfilled shifts
+      let totalUnfilledShifts = 0
+      for (const positionsGroup of positionsByLeadership.values()) {
+        for (const position of positionsGroup) {
+          const shifts = position.shifts?.filter(s => !s.isAllDay) || []
+          for (const shift of shifts) {
+            const assignments = position.assignments?.filter(a => a.shift?.id === shift.id).length || 0
+            if (assignments === 0) {
+              totalUnfilledShifts++
+            }
+          }
+        }
+      }
+      
+      if (totalUnfilledShifts > 0) {
+        warningMessages.push(`🚨 ${totalUnfilledShifts} shifts remain unfilled - insufficient attendants!`)
+      }
+      
+      // Build final message
+      let finalMessage = `🎯 Oversight-Aware Auto-Assign Complete!\n\n` +
             `✅ Total Assignments: ${assignmentCount}\n` +
-            `👥 Positions with Oversight: ${positionsWithOversight.length} (prioritized)\n` +
-            `📋 Positions without Oversight: ${positionsWithoutOversight.length}\n` +
+            `🎯 Perfect Matches: ${hierarchyMatches} (attendant ↔ position oversight match)\n` +
+            `⚡ Fallback Assignments: ${fallbackAssignments}\n` +
+            `👥 Positions with Oversight: ${positionsWithOversightCount} (prioritized)\n` +
+            `📋 Positions without Oversight: ${positionsWithoutOversightCount}\n` +
             `📅 Shift Coverage: ${shiftAssignments}\n` +
-            `🎉 Total Final Assignments: ${totalFinalAssignments}\n\n` +
-            `System prioritizes positions with assigned overseers/keymen for better supervision.`)
+            `🎉 Total Final Assignments: ${totalFinalAssignments}\n\n`
+      
+      if (warningMessages.length > 0) {
+        finalMessage += `⚠️ WARNINGS:\n${warningMessages.join('\n')}\n\n`
+      }
+      
+      finalMessage += `System assigns 1 attendant per shift using round-robin within oversight groups.`
+      
+      alert(finalMessage)
       router.reload()
     } catch (error) {
       console.error('Auto-assign error:', error)
@@ -973,12 +1378,12 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 )}
                 
                 <button
-                  onClick={handleAutoAssign}
+                  onClick={handleAutoAssignOversightAware}
                   disabled={isSubmitting || getUnassignedCount() === 0}
                   className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                  title={`Auto-assign ${getUnassignedCount()} available attendants`}
+                  title={`Auto-assign ${getUnassignedCount()} available attendants with oversight awareness`}
                 >
-                  🤖 Auto-Assign ({getUnassignedCount()})
+                  🚨 OVERSIGHT-AWARE AUTO-ASSIGN v4.0 ({getUnassignedCount()})
                 </button>
                 
                 <button
@@ -1923,21 +2328,62 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                     >
                       <option value="">Select an attendant...</option>
                       {(() => {
-                        // Get the overseer and keyman for this position
-                        const positionOverseer = selectedPosition.assignments?.find(a => a.role === 'OVERSEER')?.attendant
-                        const positionKeyman = selectedPosition.assignments?.find(a => a.role === 'KEYMAN')?.attendant
+                        // APEX GUARDIAN: Get oversight from position.oversight array
+                        const oversight = selectedPosition.oversight && selectedPosition.oversight.length > 0 ? selectedPosition.oversight[0] : null
+                        const positionOverseer = oversight?.overseer
+                        const positionKeyman = oversight?.keyman
                         
-                        // For now, show all active attendants since the overseer/keyman relationships 
-                        // are not properly set up in the database yet
+                        // Filter attendants based on position's oversight
                         let filteredAttendants = attendants?.filter(att => att.isActive) || []
                         
-                        // TODO: Implement proper filtering once overseer/keyman relationships are established
-                        // if (positionOverseer || positionKeyman) {
-                        //   filteredAttendants = filteredAttendants.filter(attendant => {
-                        //     return (positionOverseer && attendant.overseerId === positionOverseer.id) ||
-                        //            (positionKeyman && attendant.keymanId === positionKeyman.id)
-                        //   })
-                        // }
+                        // APEX GUARDIAN: Debug attendant data first
+                        console.log(`🔍 DEBUGGING ATTENDANT DATA:`)
+                        console.log(`   📊 Total attendants: ${attendants?.length || 0}`)
+                        console.log(`   📊 Active attendants: ${filteredAttendants.length}`)
+                        
+                        // Log first few attendants to see their structure
+                        filteredAttendants.slice(0, 5).forEach(attendant => {
+                          console.log(`   👤 ${attendant.firstName} ${attendant.lastName}:`)
+                          console.log(`      - overseerId: ${attendant.overseerId}`)
+                          console.log(`      - keymanId: ${attendant.keymanId}`)
+                          console.log(`      - overseer: ${attendant.overseer ? `${attendant.overseer.firstName} ${attendant.overseer.lastName}` : 'null'}`)
+                          console.log(`      - keyman: ${attendant.keyman ? `${attendant.keyman.firstName} ${attendant.keyman.lastName}` : 'null'}`)
+                        })
+                        
+                        // APEX GUARDIAN: EXACT overseer matching filtering
+                        if (positionOverseer || positionKeyman) {
+                          // Show ONLY attendants assigned to the SAME overseer/keyman as this position
+                          const beforeFilter = filteredAttendants.length
+                          filteredAttendants = filteredAttendants.filter(attendant => {
+                            // Must match the exact overseer or keyman of this position
+                            const matchesOverseer = positionOverseer && attendant.overseerId === positionOverseer.id
+                            const matchesKeyman = positionKeyman && attendant.keymanId === positionKeyman.id
+                            return matchesOverseer || matchesKeyman
+                          })
+                          
+                          console.log(`🔍 Position oversight filtering (EXACT MATCH):`)
+                          console.log(`   📍 Position: ${selectedPosition.name}`)
+                          console.log(`   👥 Position Overseer: ${positionOverseer ? `${positionOverseer.firstName} ${positionOverseer.lastName} (${positionOverseer.id})` : 'None'}`)
+                          console.log(`   👥 Position Keyman: ${positionKeyman ? `${positionKeyman.firstName} ${positionKeyman.lastName} (${positionKeyman.id})` : 'None'}`)
+                          console.log(`   📊 Before filter: ${beforeFilter} attendants`)
+                          console.log(`   📊 After exact match filter: ${filteredAttendants.length} attendants`)
+                          
+                          // Log which attendants are shown
+                          if (filteredAttendants.length > 0) {
+                            filteredAttendants.forEach(attendant => {
+                              const attendantOverseerName = attendant.overseer ? `${attendant.overseer.firstName} ${attendant.overseer.lastName}` : 'None'
+                              const attendantKeymanName = attendant.keyman ? `${attendant.keyman.firstName} ${attendant.keyman.lastName}` : 'None'
+                              console.log(`   ✅ ${attendant.firstName} ${attendant.lastName}:`)
+                              console.log(`      - Attendant Overseer: ${attendantOverseerName} (${attendant.overseerId || 'null'})`)
+                              console.log(`      - Attendant Keyman: ${attendantKeymanName} (${attendant.keymanId || 'null'})`)
+                            })
+                          } else {
+                            console.log(`   ❌ NO ATTENDANTS MATCH THIS POSITION'S OVERSIGHT!`)
+                            console.log(`   💡 No attendants are assigned to ${positionOverseer ? positionOverseer.firstName + ' ' + positionOverseer.lastName : 'this overseer'} in the attendants page`)
+                          }
+                        } else {
+                          console.log(`🔍 Position "${selectedPosition.name}" has no oversight - showing all active attendants`)
+                        }
                         
                         return filteredAttendants.map(attendant => (
                           <option key={attendant.id} value={attendant.id}>
@@ -2433,8 +2879,10 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     })
     console.log('🔍 Step 10: Positions with oversight attached')
 
-    console.log('🔍 Step 11: Fetching attendants data...')
-    const attendantsData = await prisma.attendants.findMany({
+    console.log('🔍 Step 11: Fetching attendants data with event-specific oversight...')
+    
+    // Get all active attendants
+    const allAttendants = await prisma.attendants.findMany({
       where: {
         isActive: true
       },
@@ -2451,6 +2899,55 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         { lastName: 'asc' }
       ]
     })
+
+    // Get event-attendant associations for oversight assignments (SOURCE OF TRUTH)
+    const eventAssociations = await prisma.event_attendant_associations.findMany({
+      where: {
+        eventId: id as string
+      },
+      include: {
+        overseer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true
+          }
+        },
+        keyman: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true
+          }
+        }
+      }
+    })
+
+    // Create association map for quick lookup
+    const associationMap = new Map()
+    eventAssociations.forEach(assoc => {
+      if (assoc.attendantId) {
+        associationMap.set(assoc.attendantId, assoc)
+      }
+    })
+
+    // Merge attendants with their event-specific oversight assignments
+    const attendantsData = allAttendants.map(attendant => {
+      const association = associationMap.get(attendant.id)
+      return {
+        ...attendant,
+        overseerId: association?.overseerId || null,
+        keymanId: association?.keymanId || null,
+        overseer: association?.overseer || null,
+        keyman: association?.keyman || null
+      }
+    })
+
+    console.log('🔍 Step 11b: Event-specific attendant oversight loaded')
+    console.log(`   📊 Total attendants: ${attendantsData.length}`)
+    console.log(`   📊 Event associations: ${eventAssociations.length}`)
+    const attendantsWithOversight = attendantsData.filter(att => att.overseerId)
+    console.log(`   📊 Attendants with overseers: ${attendantsWithOversight.length}`)
     
     if (!eventData) {
       return { notFound: true }
