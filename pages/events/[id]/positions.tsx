@@ -1380,10 +1380,36 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 <button
                   onClick={handleAutoAssignOversightAware}
                   disabled={isSubmitting || getUnassignedCount() === 0}
-                  className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  className={`relative px-6 py-3 rounded-lg font-bold text-white transition-all duration-300 transform hover:scale-105 shadow-lg ${
+                    isSubmitting 
+                      ? 'bg-blue-500 cursor-not-allowed' 
+                      : getUnassignedCount() === 0
+                        ? 'bg-green-500 hover:bg-green-600'
+                        : 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 animate-pulse'
+                  }`}
                   title={`Auto-assign ${getUnassignedCount()} available attendants with oversight awareness`}
                 >
-                  🚨 OVERSIGHT-AWARE AUTO-ASSIGN v4.0 ({getUnassignedCount()})
+                  <div className="flex items-center space-x-2">
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>Assigning...</span>
+                      </>
+                    ) : getUnassignedCount() === 0 ? (
+                      <>
+                        <span>🎉</span>
+                        <span>ALL ASSIGNED!</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>🚨</span>
+                        <span>SMART AUTO-ASSIGN v5.0</span>
+                        <span className="bg-white bg-opacity-20 px-2 py-1 rounded-full text-sm">
+                          {getUnassignedCount()}
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </button>
                 
                 <button
@@ -1429,63 +1455,77 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
             </div>
           </div>
 
-          {/* Stats */}
+          {/* Enhanced Dashboard Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <span className="text-blue-600 font-semibold">📋</span>
-                  </div>
-                </div>
-                <div className="ml-4">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
                   <p className="text-sm font-medium text-gray-500">Total Positions</p>
-                  <p className="text-2xl font-semibold text-gray-900">{positions.filter(p => p.isActive).length}</p>
+                  <p className="text-3xl font-bold text-gray-900">{positions.filter(p => p.isActive).length}</p>
+                </div>
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">📋</span>
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                    <span className="text-green-600 font-semibold">✓</span>
+            {(() => {
+              const totalShifts = positions.filter(p => p.isActive).reduce((sum, pos) => sum + (pos.shifts?.length || 0), 0)
+              const assignedShifts = positions.filter(p => p.isActive).reduce((sum, pos) => {
+                return sum + (pos.shifts?.filter(shift => {
+                  const shiftAssignments = pos.assignments?.filter(a => a.shift?.id === shift.id && a.role === 'ATTENDANT').length || 0
+                  return shiftAssignments > 0
+                }).length || 0)
+              }, 0)
+              const completionPercentage = totalShifts > 0 ? Math.round((assignedShifts / totalShifts) * 100) : 0
+              
+              return (
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Shift Coverage</p>
+                      <p className="text-3xl font-bold text-gray-900">{assignedShifts}/{totalShifts}</p>
+                    </div>
+                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                      <span className="text-2xl">✅</span>
+                    </div>
                   </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+                    <div 
+                      className={`h-3 rounded-full transition-all duration-500 ${
+                        completionPercentage === 100 ? 'bg-green-500' : 
+                        completionPercentage >= 80 ? 'bg-blue-500' : 
+                        completionPercentage >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                      }`}
+                      style={{ width: `${completionPercentage}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-sm text-gray-600">{completionPercentage}% Complete</p>
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Active Positions</p>
-                  <p className="text-2xl font-semibold text-gray-900">
-                    {positions.filter(p => p.isActive).length}
-                  </p>
+              )
+            })()}
+            
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Available Attendants</p>
+                  <p className="text-3xl font-bold text-gray-900">{getUnassignedCount()}</p>
+                </div>
+                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">👥</span>
                 </div>
               </div>
             </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <span className="text-purple-600 font-semibold">🏢</span>
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Areas</p>
-                  <p className="text-2xl font-semibold text-gray-900">
-                    {new Set(positions.filter(p => p.isActive).map(p => p.area).filter(Boolean)).size}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <span className="text-orange-600 font-semibold">👥</span>
-                  </div>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Total Attendants</p>
-                  <p className="text-2xl font-semibold text-gray-900">
+            
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Total Assignments</p>
+                  <p className="text-3xl font-bold text-gray-900">
                     {positions.filter(p => p.isActive).reduce((sum, p) => sum + (p.assignments?.filter(a => a.role === 'ATTENDANT').length || 0), 0)}
                   </p>
+                </div>
+                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">🎯</span>
                 </div>
               </div>
             </div>
