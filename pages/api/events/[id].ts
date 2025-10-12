@@ -45,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === "PUT") {
-      const { name, description, eventType, startDate, endDate, location, status, capacity, attendantsNeeded } = req.body
+      const { name, description, eventType, startDate, endDate, startTime, endTime, location, status, capacity, attendantsNeeded } = req.body
 
       const event = await prisma.events.update({
         where: { id },
@@ -55,6 +55,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           eventType,
           startDate: startDate ? new Date(startDate) : undefined,
           endDate: endDate ? new Date(endDate) : undefined,
+          startTime,
+          endTime,
           location,
           status,
           capacity: capacity ? parseInt(capacity) : null,
