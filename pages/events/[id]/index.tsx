@@ -352,44 +352,50 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
           </div>
         </div>
 
+        {/* APEX GUARDIAN: Event Command Center Dashboard */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Event Details */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Event Details</h3>
+            {/* Enhanced Event Details */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-200 rounded-xl shadow-lg p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mr-4">
+                  <span className="text-2xl">📋</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Event Command Center</h3>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-500">Event Type</label>
-                  <p className="mt-1 text-sm text-gray-900">{getEventTypeLabel(event.eventType)}</p>
+                  <p className="mt-1 text-sm font-semibold text-gray-900">{getEventTypeLabel(event.eventType)}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500">Status</label>
-                  <span className={`mt-1 inline-block px-2 py-1 text-xs rounded-full ${getStatusBadge(event.status)}`}>
+                  <span className={`mt-1 inline-block px-3 py-1 text-sm font-medium rounded-full ${getStatusBadge(event.status)}`}>
                     {event.status}
                   </span>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500">Start Date</label>
-                  <p className="mt-1 text-sm text-gray-900">{formatDate(event.startDate)}</p>
+                  <p className="mt-1 text-sm font-semibold text-gray-900">{formatDate(event.startDate)}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500">End Date</label>
-                  <p className="mt-1 text-sm text-gray-900">{formatDate(event.endDate)}</p>
+                  <p className="mt-1 text-sm font-semibold text-gray-900">{formatDate(event.endDate)}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500">Start Time</label>
-                  <p className="mt-1 text-sm text-gray-900">{formatTime(event.startTime)}</p>
+                  <p className="mt-1 text-sm font-semibold text-gray-900">{formatTime(event.startTime)}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500">End Time</label>
-                  <p className="mt-1 text-sm text-gray-900">
+                  <p className="mt-1 text-sm font-semibold text-gray-900">
                     {event.endTime ? formatTime(event.endTime) : 'Not specified'}
                   </p>
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-500">Location</label>
-                  <p className="mt-1 text-sm text-gray-900">{event.location}</p>
+                  <p className="mt-1 text-sm font-semibold text-gray-900">{event.location}</p>
                 </div>
                 {event.description && (
                   <div className="md:col-span-2">
@@ -399,213 +405,177 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                 )}
                 <div>
                   <label className="block text-sm font-medium text-gray-500">Capacity</label>
-                  <p className="mt-1 text-sm text-gray-900">
+                  <p className="mt-1 text-sm font-semibold text-gray-900">
                     {event.capacity ? event.capacity.toLocaleString() : 'Not specified'}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500">Attendants Needed</label>
-                  <p className="mt-1 text-sm text-gray-900">
+                  <p className="mt-1 text-sm font-semibold text-gray-900">
                     {event.attendantsNeeded ? event.attendantsNeeded.toLocaleString() : 'Not specified'}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Positions */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Positions ({event._count.positions})
-                </h3>
-                <Link
-                  href={`/events/${event.id}/positions`}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm transition-colors"
-                >
-                  ➕ Manage Positions
-                </Link>
-              </div>
-              {event.positions.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-500">No positions created yet</p>
-                  <Link
-                    href={`/events/${event.id}/positions`}
-                    className="mt-2 inline-block text-blue-600 hover:text-blue-800"
-                  >
-                    Create first position →
-                  </Link>
+            {/* APEX GUARDIAN: Assignment Progress Dashboard */}
+            <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center mr-4">
+                  <span className="text-2xl">📊</span>
                 </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Position
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Department
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Assignments
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {event.positions.slice(0, 5).map((position) => (
-                        <tr key={position.id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">
-                                #{position.positionNumber} - {position.name}
-                              </div>
-                              {position.description && (
-                                <div className="text-sm text-gray-500">{position.area || 'No area'}</div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {position.department || 'No department'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                              {position._count.assignments} assigned
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {event.positions.length > 5 && (
-                    <div className="mt-3 text-center">
-                      <Link
-                        href={`/admin/events/${event.id}/positions`}
-                        className="text-blue-600 hover:text-blue-800 text-sm"
-                      >
-                        View all {event.positions.length} positions →
-                      </Link>
-                    </div>
-                  )}
+                <h3 className="text-xl font-bold text-gray-900">Assignment Progress Dashboard</h3>
+              </div>
+              
+              {/* Progress Stats Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-blue-600">{event._count.positions}</div>
+                  <div className="text-sm text-blue-600 font-medium">Total Positions</div>
+                </div>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-green-600">{event._count.assignments}</div>
+                  <div className="text-sm text-green-600 font-medium">Assignments Made</div>
+                </div>
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-purple-600">{event._count.event_attendant_associations}</div>
+                  <div className="text-sm text-purple-600 font-medium">Attendants Linked</div>
+                </div>
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-orange-600">
+                    {event.attendantsNeeded ? Math.round((event._count.assignments / event.attendantsNeeded) * 100) : 0}%
+                  </div>
+                  <div className="text-sm text-orange-600 font-medium">Fill Rate</div>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              {event.attendantsNeeded && (
+                <div className="mb-4">
+                  <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                    <span>Assignment Progress</span>
+                    <span>{event._count.assignments} of {event.attendantsNeeded} needed</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div 
+                      className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full transition-all duration-500"
+                      style={{ 
+                        width: `${Math.min((event._count.assignments / event.attendantsNeeded) * 100, 100)}%` 
+                      }}
+                    ></div>
+                  </div>
                 </div>
               )}
+
+              {/* Readiness Indicator */}
+              <div className="flex items-center justify-center p-4 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100">
+                {(() => {
+                  const fillRate = event.attendantsNeeded ? (event._count.assignments / event.attendantsNeeded) * 100 : 0
+                  if (fillRate >= 100) {
+                    return (
+                      <div className="flex items-center text-green-700">
+                        <span className="text-2xl mr-2">✅</span>
+                        <span className="font-bold">Event Ready - All Positions Filled</span>
+                      </div>
+                    )
+                  } else if (fillRate >= 75) {
+                    return (
+                      <div className="flex items-center text-yellow-700">
+                        <span className="text-2xl mr-2">⏳</span>
+                        <span className="font-bold">Nearly Ready - {Math.round(100 - fillRate)}% Remaining</span>
+                      </div>
+                    )
+                  } else {
+                    return (
+                      <div className="flex items-center text-red-700">
+                        <span className="text-2xl mr-2">🔴</span>
+                        <span className="font-bold">Needs Attention - {Math.round(100 - fillRate)}% Unfilled</span>
+                      </div>
+                    )
+                  }
+                })()}
+              </div>
             </div>
 
-            {/* Recent Assignments */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Recent Assignments ({event._count.assignments})
-                </h3>
+            {/* APEX GUARDIAN: Count Times Summary */}
+            <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center mr-4">
+                  <span className="text-2xl">📈</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Count Times Summary</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-purple-600">--</div>
+                  <div className="text-sm text-purple-600 font-medium">Peak Attendance</div>
+                </div>
+                <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-indigo-600">--</div>
+                  <div className="text-sm text-indigo-600 font-medium">Average Count</div>
+                </div>
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-blue-600">0</div>
+                  <div className="text-sm text-blue-600 font-medium">Sessions Tracked</div>
+                </div>
+              </div>
+              
+              <div className="text-center">
                 <Link
-                  href={`/events/${event.id}/assignments`}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded text-sm transition-colors"
+                  href={`/events/${event.id}/count-times`}
+                  className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
                 >
-                  📋 Manage Assignments
+                  📊 View Detailed Count Reports →
                 </Link>
               </div>
-              {event.assignments.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-500">No assignments yet</p>
-                  <Link
-                    href={`/events/${event.id}/assignments`}
-                    className="mt-2 inline-block text-blue-600 hover:text-blue-800"
-                  >
-                    Create first assignment →
-                  </Link>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Attendant
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Position
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Shift
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {event.assignments.slice(0, 5).map((assignment) => (
-                        <tr key={assignment.id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
-                              {assignment.users.firstName} {assignment.users.lastName}
-                            </div>
-                            <div className="text-sm text-gray-500">{assignment.users.email}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
-                              #{assignment.positions.positionNumber} - {assignment.positions.name}
-                            </div>
-                            <div className="text-sm text-gray-500">{assignment.positions.area}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {formatTime(assignment.shiftStart)} - {formatTime(assignment.shiftEnd)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs rounded-full ${getAssignmentStatusBadge(assignment.status)}`}>
-                              {assignment.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {event.assignments.length > 5 && (
-                    <div className="mt-3 text-center">
-                      <Link
-                        href={`/events/${event.id}/assignments`}
-                        className="text-blue-600 hover:text-blue-800 text-sm"
-                      >
-                        View all {event.assignments.length} assignments →
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Quick Stats */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Stats</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Total Positions</span>
-                  <span className="text-sm font-medium text-gray-900">{event._count.positions}</span>
+            {/* APEX GUARDIAN: Oversight Command Structure */}
+            <div className="bg-gradient-to-br from-yellow-50 to-orange-100 border border-yellow-200 shadow-lg rounded-xl p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-yellow-600 rounded-lg flex items-center justify-center mr-3">
+                  <span className="text-xl">👥</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Total Assignments</span>
-                  <span className="text-sm font-medium text-gray-900">{event._count.assignments}</span>
+                <h3 className="text-lg font-bold text-gray-900">Oversight Command</h3>
+              </div>
+              <div className="space-y-3">
+                <div className="bg-white bg-opacity-60 rounded-lg p-3">
+                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Circuit Overseer</div>
+                  <div className="text-sm font-semibold text-gray-900">Not Assigned</div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Attendants Linked</span>
-                  <span className="text-sm font-medium text-gray-900">{event._count.event_attendant_associations}</span>
+                <div className="bg-white bg-opacity-60 rounded-lg p-3">
+                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Assembly Overseer</div>
+                  <div className="text-sm font-semibold text-gray-900">Not Assigned</div>
                 </div>
-                {event.attendantsNeeded && (
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Fill Rate</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      {Math.round((event._count.assignments / event.attendantsNeeded) * 100)}%
-                    </span>
+                <div className="bg-white bg-opacity-60 rounded-lg p-3">
+                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Department Overseers</div>
+                  <div className="text-sm font-semibold text-gray-900">
+                    {event._count.positions > 0 ? `${event._count.positions} Positions` : 'None Assigned'}
                   </div>
-                )}
+                </div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-yellow-200">
+                <Link
+                  href={`/events/${event.id}/attendants`}
+                  className="text-xs text-yellow-700 hover:text-yellow-800 font-medium"
+                >
+                  📞 View Contact Information →
+                </Link>
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+            {/* APEX GUARDIAN: Enhanced Quick Actions */}
+            <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-gray-600 rounded-lg flex items-center justify-center mr-3">
+                  <span className="text-xl">⚡</span>
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Quick Actions</h3>
+              </div>
               <div className="space-y-3">
                 {/* Status Change Actions */}
                 {event.status === 'UPCOMING' && (
@@ -625,25 +595,37 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                   </button>
                 )}
                 
-                {/* Workflow Actions */}
+                {/* Enhanced Workflow Actions */}
+                <Link
+                  href={`/events/${event.id}/positions`}
+                  className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  📋 Manage Positions
+                </Link>
+                <Link
+                  href={`/events/${event.id}/attendants`}
+                  className="w-full flex items-center justify-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  👥 View Attendants
+                </Link>
+                <Link
+                  href={`/events/${event.id}/count-times`}
+                  className="w-full flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  📊 Count Times
+                </Link>
                 <button
                   onClick={handleExportData}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                 >
-                  📊 Export Data
+                  📄 Generate Reports
                 </button>
-                <button
-                  onClick={() => window.print()}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                <Link
+                  href={`/events/${event.id}/edit`}
+                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                 >
-                  🖨️ Print Report
-                </button>
-                <button
-                  onClick={handleCloneEvent}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  📋 Clone Event
-                </button>
+                  ⚙️ Event Settings
+                </Link>
                 
                 {/* Archive Action (only for completed events) */}
                 {event.status === 'COMPLETED' && (
