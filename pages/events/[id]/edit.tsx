@@ -599,6 +599,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       startTime: event.startTime || '',
       endTime: event.endTime || '',
       location: event.location || '',
+      capacity: event.capacity,
+      attendantsNeeded: event.attendantsNeeded,
       status: event.status,
       createdAt: event.createdAt?.toISOString() || null,
       updatedAt: event.updatedAt?.toISOString() || null

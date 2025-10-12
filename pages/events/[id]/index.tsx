@@ -704,15 +704,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             users: true
           }
         },
-        positions: {
-          include: {
-            _count: {
-              select: {
-                assignments: true
-              }
-            }
-          }
-        }
+        positions: true
       }
     })
 
@@ -722,6 +714,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     }
 
+    // Get total position assignments for this event
+    const totalAssignments = await prisma.position_assignments.count({
+      where: {
+        position: {
+          eventId: id as string
+        }
+      }
+    })
+
     // Transform event data for frontend compatibility
     const transformedEvent = {
       ...event,
@@ -730,9 +731,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       createdAt: event.createdAt?.toISOString() || null,
       updatedAt: event.updatedAt?.toISOString() || null,
       _count: {
-        event_attendant_associations: event.event_attendant_associations.length,
-        assignments: event.assignments.length,
-        positions: event.positions.length
+        event_attendant_associations: event.event_attendant_associations?.length || 0,
+        assignments: totalAssignments,
+        positions: event.positions?.length || 0
       }
     }
 
