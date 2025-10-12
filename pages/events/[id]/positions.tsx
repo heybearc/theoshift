@@ -145,6 +145,14 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   const [showAssignAttendantModal, setShowAssignAttendantModal] = useState(false)
   const [showBulkEditModal, setShowBulkEditModal] = useState(false)
   const [showTemplateModal, setShowTemplateModal] = useState(false)
+  const [showProgressModal, setShowProgressModal] = useState(false)
+  const [assignmentProgress, setAssignmentProgress] = useState({
+    phase: '',
+    current: 0,
+    total: 0,
+    message: '',
+    assignments: [] as Array<{attendant: string, position: string, shift: string}>
+  })
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
   const [selectedShift, setSelectedShift] = useState<any | null>(null)
   const [editingPosition, setEditingPosition] = useState<Position | null>(null)
@@ -153,6 +161,16 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   const [message, setMessage] = useState('')
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set())
   const [showInactive, setShowInactive] = useState(false)
+
+  // Utility function to format 24-hour time to 12-hour format
+  const formatTime12Hour = (time24: string) => {
+    if (!time24) return '';
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  }
 
   // Initialize showInactive state from URL or localStorage on component mount
   useEffect(() => {
@@ -662,6 +680,18 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
     
     try {
       setIsSubmitting(true)
+      setShowProgressModal(true)
+      
+      // Calculate total shifts to assign for progress tracking
+      const totalShifts = positions.filter(p => p.isActive).reduce((sum, pos) => sum + (pos.shifts?.length || 0), 0)
+      
+      setAssignmentProgress({
+        phase: 'Initializing Smart Auto-Assignment...',
+        current: 0,
+        total: totalShifts,
+        message: `Analyzing ${totalShifts} shifts across ${positions.filter(p => p.isActive).length} positions...`,
+        assignments: []
+      })
       
       // HIERARCHY-BASED AUTO-ASSIGN ALGORITHM
       console.log('🎯 Starting Hierarchy-Based Auto-Assign - OVERSIGHT-AWARE VERSION!')
@@ -809,6 +839,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       let assignmentCount = 0
       let hierarchyMatches = 0
       let fallbackAssignments = 0
+      let progressCount = 0
       
       console.log(`📊 Leadership Groups: ${attendantsByLeadership.size} attendant groups, ${positionsByLeadership.size} position groups`)
       
@@ -883,6 +914,17 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
               if (response.ok) {
                 assignmentCount++
                 hierarchyMatches++
+                progressCount++
+                
+                // Update progress
+                setAssignmentProgress(prev => ({
+                  ...prev,
+                  phase: 'Phase 1: Perfect Oversight Matches',
+                  current: progressCount,
+                  message: `Assigning attendants to positions with matching oversight...`,
+                  assignments: [...prev.assignments, `${attendant.firstName} ${attendant.lastName} → ${pos.name} - ${shift.name}`]
+                }))
+                
                 const oversight = pos.oversight?.[0]
                 const positionOverseerName = oversight?.overseer ? `${oversight.overseer.firstName} ${oversight.overseer.lastName}` : 'None'
                 const positionKeymanName = oversight?.keyman ? `${oversight.keyman.firstName} ${oversight.keyman.lastName}` : 'None'
@@ -978,6 +1020,17 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
           if (response.ok) {
             assignmentCount++
             fallbackAssignments++
+            progressCount++
+            
+            // Update progress
+            setAssignmentProgress(prev => ({
+              ...prev,
+              phase: 'Phase 2: Fallback Assignments',
+              current: progressCount,
+              message: `Filling remaining positions with available attendants...`,
+              assignments: [...prev.assignments, `${attendant.firstName} ${attendant.lastName} → ${pos.name} - ${shift.name}`]
+            }))
+            
             console.log(`⚡ Fallback assignment: ${attendant.firstName} ${attendant.lastName} → ${pos.name} - ${shift.name}`)
             
             // Put attendant back at END for round-robin (can get multiple shifts)
@@ -1144,6 +1197,17 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
               
               if (response.ok) {
                 shiftAssignments++
+                progressCount++
+                
+                // Update progress
+                setAssignmentProgress(prev => ({
+                  ...prev,
+                  phase: 'Phase 3: Balanced Round-Robin',
+                  current: progressCount,
+                  message: `Filling all remaining shifts with balanced distribution...`,
+                  assignments: [...prev.assignments, `${attendant.firstName} ${attendant.lastName} → ${shiftInfo.positionName} (${shiftInfo.shiftName})`]
+                }))
+                
                 attendantCurrentAssignments.push(shiftInfo.shift)
                 attendantAssignments.set(attendant.id, attendantCurrentAssignments)
                 assigned = true
@@ -1239,13 +1303,35 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       
       finalMessage += `System assigns 1 attendant per shift using round-robin within oversight groups.`
       
-      alert(finalMessage)
-      router.reload()
+      // Final progress update
+      setAssignmentProgress(prev => ({
+        ...prev,
+        phase: 'Assignment Complete!',
+        current: prev.total,
+        message: `Successfully assigned ${assignmentCount} attendants with ${hierarchyMatches} perfect matches!`,
+        assignments: [...prev.assignments, '🎉 All assignments completed successfully!']
+      }))
+      
+      // Show completion for a moment before closing
+      setTimeout(() => {
+        setShowProgressModal(false)
+        router.reload()
+      }, 2000)
+      
+      return // Don't close modal immediately
     } catch (error) {
       console.error('Auto-assign error:', error)
       alert('Failed to auto-assign attendants')
     } finally {
       setIsSubmitting(false)
+      setShowProgressModal(false)
+      setAssignmentProgress({
+        phase: '',
+        current: 0,
+        total: 0,
+        message: '',
+        assignments: []
+      })
     }
   }
 
@@ -1554,10 +1640,21 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 </div>
               </div>
             ) : (
-              positions.filter(p => showInactive ? true : p.isActive).map((position) => (
-                <div key={position.id} className={`rounded-lg shadow hover:shadow-md transition-shadow ${
-                  position.isActive ? 'bg-white' : 'bg-gray-50 border-2 border-dashed border-gray-300'
-                }`}>
+              positions.filter(p => showInactive ? true : p.isActive).map((position) => {
+                // Calculate completion percentage for this position
+                const totalShifts = position.shifts?.length || 0
+                const assignedShifts = position.shifts?.filter(shift => {
+                  const shiftAssignments = position.assignments?.filter(a => a.shift?.id === shift.id && a.role === 'ATTENDANT').length || 0
+                  return shiftAssignments > 0
+                }).length || 0
+                const completionPercentage = totalShifts > 0 ? Math.round((assignedShifts / totalShifts) * 100) : 0
+                
+                return (
+                <div key={position.id} className={`group relative rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
+                  position.isActive 
+                    ? 'bg-white border border-gray-200 hover:border-blue-300' 
+                    : 'bg-gray-50 border-2 border-dashed border-gray-300'
+                } ${completionPercentage === 100 ? 'ring-2 ring-green-200' : ''}`}>
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-start space-x-3">
@@ -1595,13 +1692,48 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                           )}
                         </div>
                       </div>
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        position.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {position.isActive ? 'Active' : 'Inactive'}
-                      </span>
+                      <div className="flex flex-col items-end space-y-2">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          position.isActive 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {position.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                        {/* Completion Badge */}
+                        <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
+                          completionPercentage === 100 
+                            ? 'bg-green-100 text-green-800' 
+                            : completionPercentage > 0 
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          <span className="text-xs">
+                            {completionPercentage === 100 ? '✅' : completionPercentage > 0 ? '⏳' : '⭕'}
+                          </span>
+                          <span>{completionPercentage}%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Enhanced Progress Bar */}
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                        <span>Assignment Progress</span>
+                        <span>{assignedShifts}/{totalShifts} shifts filled</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <div 
+                          className={`h-2 rounded-full transition-all duration-500 ${
+                            completionPercentage === 100 
+                              ? 'bg-gradient-to-r from-green-500 to-green-600' 
+                              : completionPercentage > 0 
+                                ? 'bg-gradient-to-r from-yellow-500 to-orange-500'
+                                : 'bg-gray-300'
+                          }`}
+                          style={{ width: `${completionPercentage}%` }}
+                        ></div>
+                      </div>
                     </div>
 
                     {position.description && (
@@ -1656,7 +1788,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                             )
                             
                             return (
-                              <div key={shift.id} className="bg-gray-50 border border-gray-200 rounded-lg p-2">
+                              <div key={shift.id} className="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-all duration-200">
                                 <div className="flex items-center justify-between mb-1">
                                   <div className="flex items-center space-x-2">
                                     <span className="text-xs font-medium text-gray-700">
@@ -1664,7 +1796,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                                     </span>
                                     {!shift.isAllDay && (
                                       <span className="text-xs text-gray-500">
-                                        {shift.startTime} - {shift.endTime}
+                                        {formatTime12Hour(shift.startTime || '')} - {formatTime12Hour(shift.endTime || '')}
                                       </span>
                                     )}
                                     {shift.isAllDay && (
@@ -1958,7 +2090,8 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                     )}
                   </div>
                 </div>
-              ))
+                )
+              })
             )}
           </div>
         </div>
@@ -2282,7 +2415,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                   Assign Attendant to {selectedPosition.name}
                   {selectedShift && (
                     <div className="text-sm text-gray-600 mt-1">
-                      Shift: {selectedShift.name} {!selectedShift.isAllDay && `(${selectedShift.startTime} - ${selectedShift.endTime})`}
+                      Shift: {selectedShift.name} {!selectedShift.isAllDay && `(${formatTime12Hour(selectedShift.startTime || '')} - ${formatTime12Hour(selectedShift.endTime || '')})`}
                     </div>
                   )}
                 </h3>
@@ -2448,7 +2581,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                       <option value="">Select a shift...</option>
                       {selectedPosition.shifts?.map(shift => (
                         <option key={shift.id} value={shift.id}>
-                          {shift.name} {!shift.isAllDay && `(${shift.startTime} - ${shift.endTime})`}
+                          {shift.name} {!shift.isAllDay && `(${formatTime12Hour(shift.startTime || '')} - ${formatTime12Hour(shift.endTime || '')})`}
                         </option>
                       ))}
                     </select>
@@ -2802,6 +2935,63 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Progress Modal */}
+        {showProgressModal && (
+          <div className="fixed inset-0 bg-gray-900 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+            <div className="relative mx-auto p-8 border w-11/12 md:w-2/3 lg:w-1/2 shadow-2xl rounded-xl bg-white">
+              <div className="text-center">
+                <div className="mb-6">
+                  <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">🚀 Smart Auto-Assignment in Progress</h3>
+                  <p className="text-gray-600">Intelligently matching attendants to positions with oversight awareness</p>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">{assignmentProgress.phase}</span>
+                    <span className="text-sm text-gray-500">
+                      {assignmentProgress.current} / {assignmentProgress.total}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div 
+                      className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500 ease-out"
+                      style={{ 
+                        width: `${assignmentProgress.total > 0 ? (assignmentProgress.current / assignmentProgress.total) * 100 : 0}%` 
+                      }}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* Assignment Feed */}
+                {assignmentProgress.assignments.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Recent Assignments</h4>
+                    <div className="bg-gray-50 rounded-lg p-4 max-h-40 overflow-y-auto">
+                      {assignmentProgress.assignments.slice(-5).map((assignment, index) => (
+                        <div key={index} className="text-sm text-gray-700 mb-1 flex items-center">
+                          <span className="text-green-500 mr-2">✓</span>
+                          {assignment}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Status Message */}
+                {assignmentProgress.message && (
+                  <div className="mb-4">
+                    <p className="text-sm text-gray-600">{assignmentProgress.message}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
