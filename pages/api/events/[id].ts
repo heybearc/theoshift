@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const event = await prisma.events.findUnique({
         where: { id },
         include: {
-          event_attendant_associations: true,
+          event_attendants: true,
           assignments: true,
           event_positions: true
         }
@@ -35,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const transformedEvent = {
         ...event,
         _count: {
-          event_attendant_associations: event.event_attendant_associations.length,
+          event_attendants: event.event_attendants.length,
           assignments: event.assignments.length,
           event_positions: event.event_positions.length
         }

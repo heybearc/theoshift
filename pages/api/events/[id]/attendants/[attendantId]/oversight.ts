@@ -48,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Find or create an event-attendant association
-      let association = await prisma.event_attendant_associations.findFirst({
+      let association = await prisma.event_attendants.findFirst({
         where: {
           eventId: eventId,
           attendantId: attendantId
@@ -57,7 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       if (!association) {
         // Create new association
-        association = await prisma.event_attendant_associations.create({
+        association = await prisma.event_attendants.create({
           data: {
             id: require('crypto').randomUUID(),
             eventId: eventId,
@@ -71,7 +71,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log(`✅ Created new event-attendant association: ${association.id}`)
       } else {
         // Update existing association
-        association = await prisma.event_attendant_associations.update({
+        association = await prisma.event_attendants.update({
           where: {
             id: association.id
           },
@@ -85,7 +85,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Fetch the updated association with related data
-      const updatedAssociation = await prisma.event_attendant_associations.findUnique({
+      const updatedAssociation = await prisma.event_attendants.findUnique({
         where: {
           id: association.id
         },

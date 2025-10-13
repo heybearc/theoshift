@@ -3131,7 +3131,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     })
 
     // Get event-attendant associations for oversight assignments (SOURCE OF TRUTH)
-    const eventAssociations = await prisma.event_attendant_associations.findMany({
+    const eventAssociations = await prisma.event_attendants.findMany({
       where: {
         eventId: id as string
       },
