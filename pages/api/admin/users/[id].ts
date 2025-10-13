@@ -36,7 +36,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 async function handleGetUser(req: NextApiRequest, res: NextApiResponse, id: string) {
   try {
     const user = await prisma.users.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        attendants: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true
+          }
+        }
+      }
     })
 
     if (!user) {
@@ -54,9 +63,26 @@ async function handleGetUser(req: NextApiRequest, res: NextApiResponse, id: stri
 }
 
 async function handleUpdateUser(req: NextApiRequest, res: NextApiResponse, id: string) {
-  const { firstName, lastName, email, role, isActive } = req.body
+  const { firstName, lastName, email, role, isActive, linkedAttendantId } = req.body
 
   try {
+    // Handle attendant linking/unlinking
+    if (linkedAttendantId !== undefined) {
+      if (linkedAttendantId) {
+        // Link to new attendant
+        await prisma.attendants.update({
+          where: { id: linkedAttendantId },
+          data: { userId: id }
+        })
+      } else {
+        // Unlink current attendant
+        await prisma.attendants.updateMany({
+          where: { userId: id },
+          data: { userId: null }
+        })
+      }
+    }
+
     const user = await prisma.users.update({
       where: { id },
       data: {
@@ -64,7 +90,17 @@ async function handleUpdateUser(req: NextApiRequest, res: NextApiResponse, id: s
         ...(lastName && { lastName }),
         ...(email && { email }),
         ...(role && { role }),
-        ...(typeof isActive === 'boolean' && { isActive })
+        ...(typeof isActive === 'boolean' && { isActive }),
+        updatedAt: new Date()
+      },
+      include: {
+        attendants: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true
+          }
+        }
       }
     })
 

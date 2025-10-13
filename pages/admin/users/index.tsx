@@ -13,9 +13,11 @@ interface User {
   role: string
   isActive: boolean
   createdAt: string
-  _count: {
-    assignments: number
-  }
+  attendants?: {
+    id: string
+    firstName: string
+    lastName: string
+  } | null
 }
 
 interface UsersResponse {
@@ -174,8 +176,10 @@ export default function UsersPage() {
             >
               <option value="">All Roles</option>
               <option value="ADMIN">Admin</option>
-              <option value="USER">User</option>
-              <option value="MODERATOR">Moderator</option>
+              <option value="OVERSEER">Overseer</option>
+              <option value="ASSISTANT_OVERSEER">Assistant Overseer</option>
+              <option value="KEYMAN">Keyman</option>
+              <option value="ATTENDANT">Attendant</option>
             </select>
           </div>
           <button
@@ -220,7 +224,7 @@ export default function UsersPage() {
                         Status
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Assignments
+                        Linked Attendant
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Created
@@ -256,7 +260,13 @@ export default function UsersPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user._count.assignments} assignments
+                          {user.attendants ? (
+                            <span className="text-green-600">
+                              ✅ {user.attendants.firstName} {user.attendants.lastName}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">No attendant linked</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {new Date(user.createdAt).toLocaleDateString()}

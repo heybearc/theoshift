@@ -54,9 +54,11 @@ async function handleGetUsers(req: NextApiRequest, res: NextApiResponse) {
         skip,
         take: limitNum,
         include: {
-          _count: {
+          attendants: {
             select: {
-              assignments: true
+              id: true,
+              firstName: true,
+              lastName: true
             }
           }
         },
