@@ -63,6 +63,8 @@ export default function AttendantDashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [attendant, setAttendant] = useState<Attendant | null>(null)
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
+  const [showProfileVerification, setShowProfileVerification] = useState(false)
+  const [profileData, setProfileData] = useState({ email: '', phone: '' })
 
   useEffect(() => {
     loadDashboard()
@@ -89,6 +91,17 @@ export default function AttendantDashboard() {
 
       if (result.success) {
         setDashboardData(result.data)
+        
+        // Check if this is first login (no profileVerified flag in localStorage)
+        const hasVerified = localStorage.getItem('profileVerified')
+        if (!hasVerified) {
+          // Pre-fill with existing data
+          setProfileData({
+            email: result.data.attendant.email || '',
+            phone: result.data.attendant.phone || ''
+          })
+          setShowProfileVerification(true)
+        }
       } else {
         setError(result.error || 'Failed to load dashboard')
       }
@@ -96,6 +109,30 @@ export default function AttendantDashboard() {
       setError('An error occurred while loading your dashboard')
     } finally {
       setLoading(false)
+    }
+  }
+  
+  const handleProfileVerification = async () => {
+    try {
+      // Update profile via API
+      const response = await fetch(`/api/attendant/profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          attendantId: attendant?.id,
+          email: profileData.email,
+          phone: profileData.phone
+        })
+      })
+      
+      if (response.ok) {
+        localStorage.setItem('profileVerified', 'true')
+        setShowProfileVerification(false)
+        // Reload dashboard to get updated data
+        loadDashboard()
+      }
+    } catch (error) {
+      console.error('Profile update failed:', error)
     }
   }
 
@@ -110,10 +147,13 @@ export default function AttendantDashboard() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    // Parse as UTC and display in local timezone
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      timeZone: 'America/New_York' // Adjust to your timezone
     })
   }
 
@@ -176,6 +216,62 @@ export default function AttendantDashboard() {
       <Head>
         <title>My Dashboard | JW Attendant Scheduler</title>
       </Head>
+
+      {/* Profile Verification Modal */}
+      {showProfileVerification && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="text-center mb-6">
+              <div className="text-4xl mb-3">✅</div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Verify Your Information</h2>
+              <p className="text-sm text-gray-600">
+                Please confirm or update your contact information. This helps us keep you informed about your assignments.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={profileData.email}
+                  onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="your.email@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={profileData.phone}
+                  onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-xs text-blue-800">
+                  <strong>Note:</strong> Your information is kept confidential and only used for event coordination.
+                </p>
+              </div>
+
+              <button
+                onClick={handleProfileVerification}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              >
+                Confirm Information
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="min-h-screen bg-gray-50">
         {/* Header */}

@@ -81,8 +81,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     console.log('✅ Found attendant:', attendant.id)
     
-    // Verify PIN
-    if (!attendant.pinHash) {
+    // Verify PIN using raw query (Prisma client doesn't include pinHash field due to server issue)
+    const pinResult = await prisma.$queryRaw<Array<{ pinHash: string | null }>>`
+      SELECT "pinHash" FROM attendants WHERE id = ${attendant.id}
+    `
+    
+    const pinHash = pinResult[0]?.pinHash
+    
+    if (!pinHash) {
       console.log('❌ No PIN set for attendant')
       return res.status(403).json({ 
         success: false, 
@@ -90,7 +96,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
     }
     
-    const pinValid = await bcrypt.compare(pin, attendant.pinHash)
+    const pinValid = await bcrypt.compare(pin, pinHash)
     if (!pinValid) {
       console.log('❌ Invalid PIN')
       return res.status(401).json({ 
