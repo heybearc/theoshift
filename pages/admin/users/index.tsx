@@ -2,8 +2,9 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import AdminLayout from '../../../components/AdminLayout'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
+import { prisma } from '../../../src/lib/prisma'
 
 interface User {
   id: string
@@ -20,70 +21,34 @@ interface User {
   } | null
 }
 
-interface UsersResponse {
-  success: boolean
-  data: {
-    users: User[]
-    pagination: {
-      page: number
-      limit: number
-      total: number
-      pages: number
-    }
+interface UsersPageProps {
+  users: User[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    pages: number
   }
-  error?: string
+  initialSearch: string
+  initialRoleFilter: string
 }
 
-export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(true)
+export default function UsersPage({ users: initialUsers, pagination: initialPagination, initialSearch, initialRoleFilter }: UsersPageProps) {
+  const [users, setUsers] = useState<User[]>(initialUsers)
   const [error, setError] = useState('')
-  const [search, setSearch] = useState('')
-  const [roleFilter, setRoleFilter] = useState('')
-  const [page, setPage] = useState(1)
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    pages: 0
-  })
-
-  useEffect(() => {
-    fetchUsers()
-  }, [page, search, roleFilter])
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true)
-      setError('')
-
-      const params = new URLSearchParams()
-      params.append('page', page.toString())
-      params.append('limit', '10')
-      if (search) params.append('search', search)
-      if (roleFilter) params.append('role', roleFilter)
-
-      const response = await fetch(`/api/admin/users?${params.toString()}`)
-      const data: UsersResponse = await response.json()
-
-      if (data.success) {
-        setUsers(data.data.users)
-        setPagination(data.data.pagination)
-      } else {
-        setError(data.error || 'Failed to fetch users')
-      }
-    } catch (err) {
-      setError('Error loading users')
-      console.error('Error fetching users:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [search, setSearch] = useState(initialSearch)
+  const [roleFilter, setRoleFilter] = useState(initialRoleFilter)
+  const [pagination, setPagination] = useState(initialPagination)
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    setPage(1)
-    fetchUsers()
+    // Redirect to same page with search parameters
+    const params = new URLSearchParams()
+    if (search) params.append('search', search)
+    if (roleFilter) params.append('role', roleFilter)
+    params.append('page', '1')
+    
+    window.location.href = `/admin/users?${params.toString()}`
   }
 
   const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
@@ -101,7 +66,7 @@ export default function UsersPage() {
       const data = await response.json()
 
       if (data.success) {
-        fetchUsers() // Refresh the list
+        window.location.reload() // Refresh the page
       } else {
         setError(data.error || 'Failed to update user status')
       }
@@ -199,11 +164,7 @@ export default function UsersPage() {
 
         {/* Users Table */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {loading ? (
-            <div className="text-center py-8">
-              <div className="text-gray-500">Loading users...</div>
-            </div>
-          ) : users.length === 0 ? (
+          {users.length === 0 ? (
             <div className="text-center py-8">
               <div className="text-4xl mb-4">👥</div>
               <div className="text-gray-500">No users found</div>
@@ -305,23 +266,29 @@ export default function UsersPage() {
                       {pagination.total} results
                     </div>
                     <div className="flex space-x-2">
-                      <button
-                        onClick={() => setPage(page - 1)}
-                        disabled={page <= 1}
-                        className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
+                      <Link
+                        href={`/admin/users?page=${pagination.page - 1}${search ? `&search=${search}` : ''}${roleFilter ? `&role=${roleFilter}` : ''}`}
+                        className={`px-3 py-1 text-sm rounded ${
+                          pagination.page <= 1 
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
                       >
                         Previous
-                      </button>
+                      </Link>
                       <span className="px-3 py-1 text-sm bg-blue-600 text-white rounded">
-                        {page} of {pagination.pages}
+                        {pagination.page} of {pagination.pages}
                       </span>
-                      <button
-                        onClick={() => setPage(page + 1)}
-                        disabled={page >= pagination.pages}
-                        className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
+                      <Link
+                        href={`/admin/users?page=${pagination.page + 1}${search ? `&search=${search}` : ''}${roleFilter ? `&role=${roleFilter}` : ''}`}
+                        className={`px-3 py-1 text-sm rounded ${
+                          pagination.page >= pagination.pages 
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
                       >
                         Next
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -349,7 +316,7 @@ export default function UsersPage() {
               <span className="text-sm font-medium text-gray-900">Bulk Actions</span>
             </Link>
             <button
-              onClick={fetchUsers}
+              onClick={() => window.location.reload()}
               className="flex flex-col items-center space-y-2 p-4 rounded-lg border border-gray-200 hover:border-gray-500 hover:bg-gray-50 transition-colors"
             >
               <span className="text-2xl">🔄</span>
@@ -381,7 +348,83 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
-  return {
-    props: {},
+  // Get query parameters
+  const { page = '1', limit = '10', search = '', role = '' } = context.query
+  
+  const pageNum = parseInt(page as string)
+  const limitNum = parseInt(limit as string)
+  const skip = (pageNum - 1) * limitNum
+
+  const where: any = {}
+  
+  if (search) {
+    where.OR = [
+      { firstName: { contains: search as string, mode: 'insensitive' } },
+      { lastName: { contains: search as string, mode: 'insensitive' } },
+      { email: { contains: search as string, mode: 'insensitive' } }
+    ]
+  }
+  
+  if (role) {
+    where.role = role
+  }
+
+  try {
+    const [users, total] = await Promise.all([
+      prisma.users.findMany({
+        where,
+        skip,
+        take: limitNum,
+        include: {
+          attendants: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.users.count({ where })
+    ])
+
+    const pages = Math.ceil(total / limitNum)
+
+    // Transform dates for JSON serialization
+    const serializedUsers = users.map(user => ({
+      ...user,
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString()
+    }))
+
+    return {
+      props: {
+        users: serializedUsers,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total,
+          pages
+        },
+        initialSearch: search as string,
+        initialRoleFilter: role as string
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch users:', error)
+    return {
+      props: {
+        users: [],
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 0,
+          pages: 0
+        },
+        initialSearch: '',
+        initialRoleFilter: ''
+      }
+    }
   }
 }
