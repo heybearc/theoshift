@@ -32,7 +32,7 @@ interface Event {
   attendantoverseerphone?: string
   attendantoverseeremail?: string
   attendantoverseerassistants?: any[]
-  event_attendant_associations: Array<{
+  event_attendants: Array<{
     id: string
     users: {
       id: string
@@ -68,7 +68,7 @@ interface Event {
     department: string
   }>
   _count: {
-    event_attendant_associations: number
+    event_attendants: number
     assignments: number
     positions: number
   }
@@ -236,7 +236,7 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
       ['Statistics'],
       ['Total Positions', event._count.positions.toString()],
       ['Total Assignments', event._count.assignments.toString()],
-      ['Attendants Linked', event._count.event_attendant_associations.toString()]
+      ['Attendants Linked', event._count.event_attendants.toString()]
     ]
 
     const csvContent = csvData.map(row => row.join(',')).join('\n')
@@ -449,7 +449,7 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                   <div className="text-sm text-green-600 font-medium">Assignments Made</div>
                 </div>
                 <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-purple-600">{event._count.event_attendant_associations}</div>
+                  <div className="text-2xl font-bold text-purple-600">{event._count.event_attendants}</div>
                   <div className="text-sm text-purple-600 font-medium">Attendants Linked</div>
                 </div>
                 <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
@@ -718,7 +718,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const event = await prisma.events.findUnique({
       where: { id: id as string },
       include: {
-        event_attendant_associations: {
+        event_attendants: {
           include: {
             users: true
           }
@@ -755,7 +755,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       createdAt: event.createdAt?.toISOString() || null,
       updatedAt: event.updatedAt?.toISOString() || null,
       _count: {
-        event_attendant_associations: event.event_attendant_associations?.length || 0,
+        event_attendants: event.event_attendants?.length || 0,
         assignments: totalAssignments,
         positions: event.positions?.length || 0
       }
