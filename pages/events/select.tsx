@@ -225,7 +225,13 @@ export default function EventSelectPage() {
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center text-sm text-gray-600">
                         <span className="mr-2">📅</span>
-                        {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
+                        {(() => {
+                          const startPart = event.startDate.split('T')[0]
+                          const endPart = event.endDate.split('T')[0]
+                          const start = new Date(startPart + 'T12:00:00').toLocaleDateString()
+                          const end = new Date(endPart + 'T12:00:00').toLocaleDateString()
+                          return `${start} - ${end}`
+                        })()}
                       </div>
                       <div className="flex items-center text-sm text-gray-600">
                         <span className="mr-2">📍</span>
