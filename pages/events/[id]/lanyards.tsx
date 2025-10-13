@@ -697,6 +697,7 @@ export default function EventLanyardsPage({ eventId, event, lanyards, attendants
                   <label htmlFor="attendantSearch" className="block text-sm font-medium text-gray-700 mb-1">
                     Select Attendant
                   </label>
+                  <div className="relative">
                   <input
                     type="text"
                     id="attendantSearch"
@@ -707,7 +708,7 @@ export default function EventLanyardsPage({ eventId, event, lanyards, attendants
                   />
                   
                   {attendantSearch && (
-                    <div className="mt-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md">
+                    <div className="absolute z-50 mt-1 w-full max-h-40 overflow-y-auto border border-gray-200 rounded-md bg-white shadow-lg">
                       {attendants
                         .filter(attendant => {
                           const fullName = `${attendant.users.firstName} ${attendant.users.lastName}`.toLowerCase()
@@ -739,6 +740,7 @@ export default function EventLanyardsPage({ eventId, event, lanyards, attendants
                       }
                     </div>
                   )}
+                  </div>
                 </div>
 
                 <div className="flex justify-end space-x-3">
