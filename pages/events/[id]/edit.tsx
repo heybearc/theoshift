@@ -230,7 +230,18 @@ export default function EditEventPage({ event }: EditEventPageProps) {
         body: JSON.stringify(submitData),
       })
 
+      console.log('Response status:', response.status)
+      console.log('Response headers:', response.headers)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('HTTP Error:', response.status, errorText)
+        setError(`HTTP ${response.status}: ${errorText}`)
+        return
+      }
+
       const data = await response.json()
+      console.log('Response data:', data)
 
       if (data.success) {
         setSuccess('Event updated successfully!')
