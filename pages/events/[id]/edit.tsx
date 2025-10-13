@@ -187,7 +187,11 @@ export default function EditEventPage({ event }: EditEventPageProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    console.log('=== APEX GUARDIAN: Form Submit Started ===')
+    console.log('Form data:', formData)
+    
     if (!validateForm()) {
+      console.log('Form validation failed')
       return
     }
 
@@ -218,7 +222,14 @@ export default function EditEventPage({ event }: EditEventPageProps) {
         attendantOverseerName: formData.attendantOverseerName || undefined,
         attendantOverseerPhone: formData.attendantOverseerPhone || undefined,
         attendantOverseerEmail: formData.attendantOverseerEmail || undefined,
-        attendantOverseerAssistants: formData.attendantOverseerAssistants ? JSON.parse(formData.attendantOverseerAssistants) : []
+        attendantOverseerAssistants: (() => {
+          try {
+            return formData.attendantOverseerAssistants ? JSON.parse(formData.attendantOverseerAssistants) : []
+          } catch (e) {
+            console.error('Invalid JSON in attendantOverseerAssistants:', formData.attendantOverseerAssistants)
+            return []
+          }
+        })()
       }
 
       const response = await fetch(`/api/events/${eventId}`, {
