@@ -78,6 +78,16 @@ export default function EditEventPage({ event }: EditEventPageProps) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  // APEX GUARDIAN: Global error handler
+  useEffect(() => {
+    const handleError = (e: ErrorEvent) => {
+      console.error('=== APEX GUARDIAN: Global Error ===', e.error)
+      alert(`JavaScript Error: ${e.message}`)
+    }
+    window.addEventListener('error', handleError)
+    return () => window.removeEventListener('error', handleError)
+  }, [])
+
   const [formData, setFormData] = useState<EventFormData>({
     name: event.name || '',
     description: event.description || '',
@@ -793,6 +803,11 @@ export default function EditEventPage({ event }: EditEventPageProps) {
             <button
               type="submit"
               disabled={submitting}
+              onClick={(e) => {
+                console.log('=== APEX GUARDIAN: Button Clicked ===')
+                alert('Button clicked - check console')
+                // Let the form onSubmit handle it
+              }}
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {submitting ? (
