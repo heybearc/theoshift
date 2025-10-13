@@ -46,10 +46,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === "PUT") {
       try {
-        console.log('=== APEX GUARDIAN DEBUG: PUT Request ===')
-        console.log('Event ID:', id)
-        console.log('Request body:', JSON.stringify(req.body, null, 2))
-
         const { 
           name, description, eventType, startDate, endDate, startTime, endTime, location, status, capacity, attendantsNeeded,
           // APEX GUARDIAN: Oversight Management Fields
@@ -87,20 +83,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (attendantOverseerEmail !== undefined) updateData.attendantoverseeremail = attendantOverseerEmail || null
         if (attendantOverseerAssistants !== undefined) updateData.attendantoverseerassistants = attendantOverseerAssistants || []
 
-        console.log('Update data:', JSON.stringify(updateData, null, 2))
-
         const event = await prisma.events.update({
           where: { id },
           data: updateData
         })
 
-        console.log('Update successful:', event.id)
         return res.status(200).json({ success: true, data: event })
 
       } catch (error) {
-        console.error('=== APEX GUARDIAN ERROR ===')
         console.error('Error updating event:', error)
-        console.error('Stack trace:', error.stack)
         return res.status(500).json({ 
           success: false, 
           error: 'Failed to update event', 

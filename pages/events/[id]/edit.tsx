@@ -78,15 +78,6 @@ export default function EditEventPage({ event }: EditEventPageProps) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
-  // APEX GUARDIAN: Global error handler
-  useEffect(() => {
-    const handleError = (e: ErrorEvent) => {
-      console.error('=== APEX GUARDIAN: Global Error ===', e.error)
-      alert(`JavaScript Error: ${e.message}`)
-    }
-    window.addEventListener('error', handleError)
-    return () => window.removeEventListener('error', handleError)
-  }, [])
 
   const [formData, setFormData] = useState<EventFormData>({
     name: event.name || '',
@@ -197,11 +188,7 @@ export default function EditEventPage({ event }: EditEventPageProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    console.log('=== APEX GUARDIAN: Form Submit Started ===')
-    console.log('Form data:', formData)
-    
     if (!validateForm()) {
-      console.log('Form validation failed')
       return
     }
 
@@ -251,18 +238,13 @@ export default function EditEventPage({ event }: EditEventPageProps) {
         body: JSON.stringify(submitData),
       })
 
-      console.log('Response status:', response.status)
-      console.log('Response headers:', response.headers)
-
       if (!response.ok) {
         const errorText = await response.text()
-        console.error('HTTP Error:', response.status, errorText)
         setError(`HTTP ${response.status}: ${errorText}`)
         return
       }
 
       const data = await response.json()
-      console.log('Response data:', data)
 
       if (data.success) {
         setSuccess('Event updated successfully!')
@@ -803,11 +785,6 @@ export default function EditEventPage({ event }: EditEventPageProps) {
             <button
               type="submit"
               disabled={submitting}
-              onClick={(e) => {
-                console.log('=== APEX GUARDIAN: Button Clicked ===')
-                alert('Button clicked - check console')
-                // Let the form onSubmit handle it
-              }}
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {submitting ? (
