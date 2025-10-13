@@ -51,34 +51,46 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 async function handleGetEventAttendants(req: NextApiRequest, res: NextApiResponse, eventId: string, event: any) {
   try {
-    // NEW SYSTEM: Get attendants who have position assignments
-    const attendantsWithAssignments = await prisma.attendants.findMany({
+    // APEX GUARDIAN FIX: Get attendants from event_attendant_associations (correct source of truth)
+    const eventAttendantAssociations = await prisma.event_attendant_associations.findMany({
       where: {
-        position_assignments: {
-          some: {
-            position: {
-              eventId: eventId
-            }
+        eventId: eventId
+      },
+      include: {
+        attendants: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+            congregation: true,
+            formsOfService: true,
+            isActive: true,
+            createdAt: true,
+            userId: true,
+            availabilityStatus: true,
+            notes: true,
+            servingAs: true,
+            skills: true,
+            preferredDepartments: true,
+            unavailableDates: true,
+            totalAssignments: true,
+            totalHours: true,
+            updatedAt: true
           }
         }
       },
-      include: {
-        position_assignments: {
-          where: {
-            position: {
-              eventId: eventId
-            }
-          },
-          include: {
-            position: {
-              select: {
-                name: true
-              }
-            }
-          }
-        }
-      }
+      orderBy: [
+        { attendants: { firstName: 'asc' } },
+        { attendants: { lastName: 'asc' } }
+      ]
     })
+
+    // Transform to match expected format and filter active attendants
+    const attendantsWithAssignments = eventAttendantAssociations
+      .filter(assoc => assoc.attendants?.isActive)
+      .map(assoc => assoc.attendants!)
 
     return res.status(200).json({
       success: true,
@@ -91,10 +103,9 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
         congregation: attendant.congregation,
         formsOfService: attendant.formsOfService,
         isActive: attendant.isActive,
-        assignments: attendant.position_assignments.map(assignment => ({
-          positionName: assignment.position.name,
-          role: assignment.role
-        }))
+        // Note: Position assignments are now separate from attendant data
+        // They can be fetched separately if needed via positions API
+        assignments: []
       }))
     })
   } catch (error) {
