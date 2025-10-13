@@ -68,17 +68,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           status,
           capacity: capacity ? parseInt(capacity) : null,
           attendantsNeeded: attendantsNeeded ? parseInt(attendantsNeeded) : null,
-          // APEX GUARDIAN: Oversight Management Fields
-          circuitOverseerName: circuitOverseerName || null,
-          circuitOverseerPhone: circuitOverseerPhone || null,
-          circuitOverseerEmail: circuitOverseerEmail || null,
-          assemblyOverseerName: assemblyOverseerName || null,
-          assemblyOverseerPhone: assemblyOverseerPhone || null,
-          assemblyOverseerEmail: assemblyOverseerEmail || null,
-          attendantOverseerName: attendantOverseerName || null,
-          attendantOverseerPhone: attendantOverseerPhone || null,
-          attendantOverseerEmail: attendantOverseerEmail || null,
-          attendantOverseerAssistants: attendantOverseerAssistants || [],
+          // APEX GUARDIAN: Oversight Management Fields (using database field names)
+          circuitoverseername: circuitOverseerName || null,
+          circuitoverseerphone: circuitOverseerPhone || null,
+          circuitoverseeremail: circuitOverseerEmail || null,
+          assemblyoverseername: assemblyOverseerName || null,
+          assemblyoverseerphone: assemblyOverseerPhone || null,
+          assemblyoverseeremail: assemblyOverseerEmail || null,
+          attendantoverseername: attendantOverseerName || null,
+          attendantoverseerphone: attendantOverseerPhone || null,
+          attendantoverseeremail: attendantOverseerEmail || null,
+          attendantoverseerassistants: attendantOverseerAssistants || [],
           updatedAt: new Date()
         }
       })

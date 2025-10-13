@@ -21,17 +21,17 @@ interface Event {
   status: string
   createdAt: string
   updatedAt: string
-  // APEX GUARDIAN: Oversight Management Fields
-  circuitOverseerName?: string
-  circuitOverseerPhone?: string
-  circuitOverseerEmail?: string
-  assemblyOverseerName?: string
-  assemblyOverseerPhone?: string
-  assemblyOverseerEmail?: string
-  attendantOverseerName?: string
-  attendantOverseerPhone?: string
-  attendantOverseerEmail?: string
-  attendantOverseerAssistants?: any[]
+  // APEX GUARDIAN: Oversight Management Fields (database field names)
+  circuitoverseername?: string
+  circuitoverseerphone?: string
+  circuitoverseeremail?: string
+  assemblyoverseername?: string
+  assemblyoverseerphone?: string
+  assemblyoverseeremail?: string
+  attendantoverseername?: string
+  attendantoverseerphone?: string
+  attendantoverseeremail?: string
+  attendantoverseerassistants?: any[]
   event_attendant_associations: Array<{
     id: string
     users: {
@@ -557,28 +557,28 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                 <div className="bg-white bg-opacity-60 rounded-lg p-3">
                   <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Circuit Overseer</div>
                   <div className="text-sm font-semibold text-gray-900">
-                    {event.circuitOverseerName || 'Not Assigned'}
+                    {event.circuitoverseername || 'Not Assigned'}
                   </div>
-                  {event.circuitOverseerPhone && (
-                    <div className="text-xs text-gray-600">📞 {event.circuitOverseerPhone}</div>
+                  {event.circuitoverseerphone && (
+                    <div className="text-xs text-gray-600">📞 {event.circuitoverseerphone}</div>
                   )}
                 </div>
                 <div className="bg-white bg-opacity-60 rounded-lg p-3">
                   <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Assembly Overseer</div>
                   <div className="text-sm font-semibold text-gray-900">
-                    {event.assemblyOverseerName || 'Not Assigned'}
+                    {event.assemblyoverseername || 'Not Assigned'}
                   </div>
-                  {event.assemblyOverseerPhone && (
-                    <div className="text-xs text-gray-600">📞 {event.assemblyOverseerPhone}</div>
+                  {event.assemblyoverseerphone && (
+                    <div className="text-xs text-gray-600">📞 {event.assemblyoverseerphone}</div>
                   )}
                 </div>
                 <div className="bg-white bg-opacity-60 rounded-lg p-3">
                   <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Attendant Overseer</div>
                   <div className="text-sm font-semibold text-gray-900">
-                    {event.attendantOverseerName || 'Not Assigned'}
+                    {event.attendantoverseername || 'Not Assigned'}
                   </div>
-                  {event.attendantOverseerPhone && (
-                    <div className="text-xs text-gray-600">📞 {event.attendantOverseerPhone}</div>
+                  {event.attendantoverseerphone && (
+                    <div className="text-xs text-gray-600">📞 {event.attendantoverseerphone}</div>
                   )}
                 </div>
               </div>

@@ -840,17 +840,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       capacity: event.capacity,
       attendantsNeeded: event.attendantsNeeded,
       status: event.status,
-      // APEX GUARDIAN: Oversight Management Fields
-      circuitOverseerName: eventWithOversight.circuitOverseerName,
-      circuitOverseerPhone: eventWithOversight.circuitOverseerPhone,
-      circuitOverseerEmail: eventWithOversight.circuitOverseerEmail,
-      assemblyOverseerName: eventWithOversight.assemblyOverseerName,
-      assemblyOverseerPhone: eventWithOversight.assemblyOverseerPhone,
-      assemblyOverseerEmail: eventWithOversight.assemblyOverseerEmail,
-      attendantOverseerName: eventWithOversight.attendantOverseerName,
-      attendantOverseerPhone: eventWithOversight.attendantOverseerPhone,
-      attendantOverseerEmail: eventWithOversight.attendantOverseerEmail,
-      attendantOverseerAssistants: eventWithOversight.attendantOverseerAssistants,
+      // APEX GUARDIAN: Oversight Management Fields (using database field names)
+      circuitOverseerName: eventWithOversight.circuitoverseername,
+      circuitOverseerPhone: eventWithOversight.circuitoverseerphone,
+      circuitOverseerEmail: eventWithOversight.circuitoverseeremail,
+      assemblyOverseerName: eventWithOversight.assemblyoverseername,
+      assemblyOverseerPhone: eventWithOversight.assemblyoverseerphone,
+      assemblyOverseerEmail: eventWithOversight.assemblyoverseeremail,
+      attendantOverseerName: eventWithOversight.attendantoverseername,
+      attendantOverseerPhone: eventWithOversight.attendantoverseerphone,
+      attendantOverseerEmail: eventWithOversight.attendantoverseeremail,
+      attendantOverseerAssistants: eventWithOversight.attendantoverseerassistants,
       createdAt: event.createdAt?.toISOString() || null,
       updatedAt: event.updatedAt?.toISOString() || null
     }
