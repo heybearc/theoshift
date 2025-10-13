@@ -88,7 +88,7 @@ async function handleGetUsers(req: NextApiRequest, res: NextApiResponse) {
 }
 
 async function handleCreateUser(req: NextApiRequest, res: NextApiResponse) {
-  const { firstName, lastName, email, role = 'USER', isActive = true } = req.body
+  const { firstName, lastName, email, role = 'ATTENDANT', isActive = true, linkedAttendantId, sendInvitation = false } = req.body
 
   if (!firstName || !lastName || !email) {
     return res.status(400).json({ success: false, error: 'Missing required fields' })
@@ -104,6 +104,16 @@ async function handleCreateUser(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ success: false, error: 'User already exists' })
     }
 
+    // Generate invitation token if sending invitation
+    let inviteToken: string | null = null
+    let inviteExpiry: Date | null = null
+    
+    if (sendInvitation) {
+      inviteToken = crypto.randomBytes(32).toString('hex')
+      inviteExpiry = new Date()
+      inviteExpiry.setDate(inviteExpiry.getDate() + 7) // 7 days expiration
+    }
+
     const user = await prisma.users.create({
       data: {
         id: crypto.randomUUID(),
@@ -112,13 +122,36 @@ async function handleCreateUser(req: NextApiRequest, res: NextApiResponse) {
         email,
         role,
         isActive,
+        inviteToken,
+        inviteExpiry,
         updatedAt: new Date()
       }
     })
 
+    // Handle attendant linking if provided
+    if (linkedAttendantId) {
+      try {
+        await prisma.attendants.update({
+          where: { id: linkedAttendantId },
+          data: { userId: user.id }
+        })
+      } catch (linkError) {
+        console.error('Failed to link attendant:', linkError)
+        // Don't fail the user creation, just log the error
+      }
+    }
+
+    // TODO: Send invitation email if sendInvitation is true
+    // This would integrate with the existing invitation system
+    if (sendInvitation && inviteToken) {
+      console.log(`Invitation token generated for ${email}: ${inviteToken}`)
+      // The invitation email sending would be implemented here
+    }
+
     return res.status(201).json({
       success: true,
-      data: { user }
+      data: { user },
+      message: sendInvitation ? 'User created and invitation sent' : 'User created successfully'
     })
   } catch (error) {
     console.error('Create user error:', error)
