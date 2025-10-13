@@ -47,6 +47,7 @@ model attendants {
   congregation                  String
   formsOfService                Json                             @default("[]")
   isActive                      Boolean                          @default(true)
+  pinHash                       String?
   users                         users?                           @relation(fields: [userId], references: [id], onDelete: Cascade)
   event_attendants              event_attendants[]
   event_keyman_assignments      event_attendants[]               @relation("EventKeymanRelation")

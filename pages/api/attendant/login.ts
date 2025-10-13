@@ -1,28 +1,36 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '../../../src/lib/prisma'
+import bcrypt from 'bcryptjs'
 
 interface AttendantLoginRequest {
   firstName: string
   lastName: string
   congregation: string
+  pin: string
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log('🟢 Attendant login API called')
+  
   if (req.method !== 'POST') {
+    console.log('❌ Wrong method:', req.method)
     return res.status(405).json({ success: false, error: 'Method not allowed' })
   }
 
   try {
-    const { firstName, lastName, congregation }: AttendantLoginRequest = req.body
+    const { firstName, lastName, congregation, pin }: AttendantLoginRequest = req.body
+    console.log('🟢 Login attempt:', { firstName, lastName, congregation, pin: '****' })
 
-    if (!firstName || !lastName || !congregation) {
+    if (!firstName || !lastName || !congregation || !pin) {
+      console.log('❌ Missing fields')
       return res.status(400).json({ 
         success: false, 
-        error: 'First name, last name, and congregation are required' 
+        error: 'All fields are required' 
       })
     }
 
     // Search for attendant by name and congregation
+    console.log('🔍 Searching for attendant in database...')
     const attendant = await prisma.attendants.findFirst({
       where: {
         firstName: {
@@ -64,11 +72,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     })
 
     if (!attendant) {
+      console.log('❌ Attendant not found in database')
       return res.status(404).json({ 
         success: false, 
-        error: 'Attendant not found. Please check your name and congregation spelling.' 
+        error: 'Invalid credentials. Please check your information.' 
       })
     }
+    
+    console.log('✅ Found attendant:', attendant.id)
+    
+    // Verify PIN
+    if (!attendant.pinHash) {
+      console.log('❌ No PIN set for attendant')
+      return res.status(403).json({ 
+        success: false, 
+        error: 'No PIN set. Please contact your overseer.' 
+      })
+    }
+    
+    const pinValid = await bcrypt.compare(pin, attendant.pinHash)
+    if (!pinValid) {
+      console.log('❌ Invalid PIN')
+      return res.status(401).json({ 
+        success: false, 
+        error: 'Invalid PIN. Please try again.' 
+      })
+    }
+    
+    console.log('✅ PIN verified')
 
     // Get active events for this attendant
     const events = attendant.event_attendants.map(ea => ({

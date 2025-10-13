@@ -7,6 +7,7 @@ interface AttendantLoginForm {
   firstName: string
   lastName: string
   congregation: string
+  pin: string
 }
 
 export default function AttendantLogin() {
@@ -16,13 +17,17 @@ export default function AttendantLogin() {
   const [formData, setFormData] = useState<AttendantLoginForm>({
     firstName: '',
     lastName: '',
-    congregation: ''
+    congregation: '',
+    pin: ''
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!formData.firstName || !formData.lastName || !formData.congregation) {
+    console.log('🔵 Login form submitted', formData)
+    
+    if (!formData.firstName || !formData.lastName || !formData.congregation || !formData.pin) {
+      console.log('❌ Validation failed - missing fields')
       setError('Please fill in all fields')
       return
     }
@@ -31,6 +36,7 @@ export default function AttendantLogin() {
     setError('')
 
     try {
+      console.log('🔵 Sending login request...')
       const response = await fetch('/api/attendant/login', {
         method: 'POST',
         headers: {
@@ -39,7 +45,9 @@ export default function AttendantLogin() {
         body: JSON.stringify(formData)
       })
 
+      console.log('🔵 Response status:', response.status)
       const result = await response.json()
+      console.log('🔵 Response data:', result)
 
       if (result.success) {
         // Store attendant session
@@ -49,16 +57,26 @@ export default function AttendantLogin() {
           loginTime: new Date().toISOString()
         }))
 
-        // Redirect based on event count
+        // Store selected event ID if there's only one event
+        if (result.data.defaultEvent) {
+          localStorage.setItem('selectedEventId', result.data.defaultEvent.id)
+        }
+
+        // Use full page redirect instead of client-side routing
+        console.log('✅ Login successful, redirecting...')
         if (result.data.needsEventSelection) {
-          router.push('/attendant/select-event')
+          console.log('🔵 Redirecting to event selection')
+          window.location.href = '/attendant/select-event'
         } else {
-          router.push('/attendant/dashboard')
+          console.log('🔵 Redirecting to dashboard')
+          window.location.href = '/attendant/dashboard'
         }
       } else {
+        console.log('❌ Login failed:', result.error)
         setError(result.error || 'Login failed. Please check your information.')
       }
     } catch (error) {
+      console.error('❌ Exception during login:', error)
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
@@ -150,6 +168,26 @@ export default function AttendantLogin() {
                   placeholder="Enter your congregation name"
                   required
                 />
+              </div>
+
+              <div>
+                <label htmlFor="pin" className="block text-sm font-medium text-gray-700 mb-2">
+                  PIN
+                </label>
+                <input
+                  id="pin"
+                  type="password"
+                  value={formData.pin}
+                  onChange={(e) => handleInputChange('pin', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter your 4-digit PIN"
+                  maxLength={4}
+                  pattern="[0-9]{4}"
+                  required
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Your PIN is the last 4 digits of your phone number
+                </p>
               </div>
 
               <button

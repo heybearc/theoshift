@@ -26,11 +26,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 async function handleDeleteDocument(req: NextApiRequest, res: NextApiResponse, eventId: string, documentId: string) {
+  console.log('🔥 DELETE FUNCTION CALLED - eventId:', eventId, 'documentId:', documentId)
   try {
     // Fetch document from database to get file path
+    console.log('🔍 Looking up document in database...')
     const document = await prisma.event_documents.findUnique({
       where: { id: documentId }
     })
+    console.log('📄 Document found:', document ? document.title : 'NOT FOUND')
 
     if (!document) {
       return res.status(404).json({ success: false, error: 'Document not found' })
@@ -59,11 +62,12 @@ async function handleDeleteDocument(req: NextApiRequest, res: NextApiResponse, e
     })
 
     // Delete document record from database
+    console.log('🗑️ Deleting document from database...')
     await prisma.event_documents.delete({
       where: { id: documentId }
     })
 
-    console.log(`Successfully deleted document ${documentId} from event ${eventId}`)
+    console.log(`✅ Successfully deleted document ${documentId} from event ${eventId}`)
 
     return res.status(200).json({
       success: true,
