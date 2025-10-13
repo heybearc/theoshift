@@ -54,33 +54,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         attendantOverseerAssistants
       } = req.body
 
+      // APEX GUARDIAN: Build update data dynamically to avoid Prisma type issues
+      const updateData: any = {
+        name,
+        description,
+        eventType,
+        startDate: startDate ? new Date(startDate) : undefined,
+        endDate: endDate ? new Date(endDate) : undefined,
+        startTime,
+        endTime,
+        location,
+        status,
+        capacity: capacity ? parseInt(capacity) : null,
+        attendantsNeeded: attendantsNeeded ? parseInt(attendantsNeeded) : null,
+        updatedAt: new Date()
+      }
+
+      // Add oversight fields if provided
+      if (circuitOverseerName !== undefined) updateData.circuitoverseername = circuitOverseerName || null
+      if (circuitOverseerPhone !== undefined) updateData.circuitoverseerphone = circuitOverseerPhone || null
+      if (circuitOverseerEmail !== undefined) updateData.circuitoverseeremail = circuitOverseerEmail || null
+      if (assemblyOverseerName !== undefined) updateData.assemblyoverseername = assemblyOverseerName || null
+      if (assemblyOverseerPhone !== undefined) updateData.assemblyoverseerphone = assemblyOverseerPhone || null
+      if (assemblyOverseerEmail !== undefined) updateData.assemblyoverseeremail = assemblyOverseerEmail || null
+      if (attendantOverseerName !== undefined) updateData.attendantoverseername = attendantOverseerName || null
+      if (attendantOverseerPhone !== undefined) updateData.attendantoverseerphone = attendantOverseerPhone || null
+      if (attendantOverseerEmail !== undefined) updateData.attendantoverseeremail = attendantOverseerEmail || null
+      if (attendantOverseerAssistants !== undefined) updateData.attendantoverseerassistants = attendantOverseerAssistants || []
+
       const event = await prisma.events.update({
         where: { id },
-        data: {
-          name,
-          description,
-          eventType,
-          startDate: startDate ? new Date(startDate) : undefined,
-          endDate: endDate ? new Date(endDate) : undefined,
-          startTime,
-          endTime,
-          location,
-          status,
-          capacity: capacity ? parseInt(capacity) : null,
-          attendantsNeeded: attendantsNeeded ? parseInt(attendantsNeeded) : null,
-          // APEX GUARDIAN: Oversight Management Fields (using database field names)
-          circuitoverseername: circuitOverseerName || null,
-          circuitoverseerphone: circuitOverseerPhone || null,
-          circuitoverseeremail: circuitOverseerEmail || null,
-          assemblyoverseername: assemblyOverseerName || null,
-          assemblyoverseerphone: assemblyOverseerPhone || null,
-          assemblyoverseeremail: assemblyOverseerEmail || null,
-          attendantoverseername: attendantOverseerName || null,
-          attendantoverseerphone: attendantOverseerPhone || null,
-          attendantoverseeremail: attendantOverseerEmail || null,
-          attendantoverseerassistants: attendantOverseerAssistants || [],
-          updatedAt: new Date()
-        }
+        data: updateData
       })
 
       return res.status(200).json({ success: true, data: event })
