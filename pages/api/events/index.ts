@@ -107,7 +107,7 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
       include: {
         _count: {
           select: {
-            event_attendant_associations: true,
+            event_attendants: true,
             assignments: true,
             event_positions: true
           }
@@ -143,13 +143,13 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
         createdAt: event.createdAt?.toISOString() || null,
         updatedAt: event.updatedAt?.toISOString() || null,
         status: event.status,
-        attendantsCount: event._count.event_attendant_associations,
+        attendantsCount: event._count.event_attendants,
         positionsCount: event._count.event_positions
       })),
       currentEvent: currentEvent ? {
         ...currentEvent,
         status: currentEvent.status,
-        attendantsCount: currentEvent._count.event_attendant_associations,
+        attendantsCount: currentEvent._count.event_attendants,
         positionsCount: currentEvent._count.event_positions
       } : null,
       pagination: {

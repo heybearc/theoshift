@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       include: {
         _count: {
           select: {
-            event_attendant_associations: true,
+            event_attendants: true,
             assignments: true,
             event_positions: true
           }
@@ -59,7 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           location: event.location,
           status: getEventStatus(event.startDate, event.endDate),
           stats: {
-            attendants: event._count.event_attendant_associations,
+            attendants: event._count.event_attendants,
             assignments: event._count.assignments,
             positions: event._count.event_positions
           }
