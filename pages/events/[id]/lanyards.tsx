@@ -920,7 +920,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                 firstName: true,
                 lastName: true,
                 email: true,
-                phone: true
+                phone: true,
+                role: true
               }
             }
           }
@@ -943,7 +944,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Transform lanyards data
-    const lanyards = eventData.lanyard_settings?.lanyards?.map(lanyard => ({
+    const lanyardsRaw = eventData.lanyard_settings?.lanyards?.map(lanyard => ({
       id: lanyard.id,
       badgeNumber: lanyard.badgeNumber,
       status: lanyard.isCheckedOut ? 'CHECKED_OUT' : 'AVAILABLE',
@@ -955,6 +956,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       createdAt: lanyard.createdAt?.toISOString() || null,
       updatedAt: lanyard.updatedAt?.toISOString() || null
     })) || []
+
+    // Sort lanyards numerically by badge number
+    const lanyards = lanyardsRaw.sort((a, b) => {
+      const aNum = parseInt(a.badgeNumber.replace(/\D/g, '')) || 0
+      const bNum = parseInt(b.badgeNumber.replace(/\D/g, '')) || 0
+      return aNum - bNum
+    })
 
     // Transform attendants data
     const attendants = eventData.event_attendant_associations

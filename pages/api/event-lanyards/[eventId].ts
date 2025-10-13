@@ -40,13 +40,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const lanyards = await prisma.lanyards.findMany({
           where: { lanyardSettingId: lanyardSettings.id },
-          orderBy: { badgeNumber: 'asc' }
+          orderBy: [
+            { 
+              badgeNumber: 'asc' 
+            }
+          ]
+        })
+
+        // Sort lanyards numerically by badge number
+        const sortedLanyards = lanyards.sort((a, b) => {
+          const aNum = parseInt(a.badgeNumber.replace(/\D/g, '')) || 0
+          const bNum = parseInt(b.badgeNumber.replace(/\D/g, '')) || 0
+          return aNum - bNum
         })
 
         return res.status(200).json({
           success: true,
-          data: lanyards,
-          total: lanyards.length
+          data: sortedLanyards,
+          total: sortedLanyards.length
         })
 
       case 'POST':
@@ -68,6 +79,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               createdAt: new Date(),
               updatedAt: new Date()
             }
+          })
+        }
+
+        // Check if lanyard with this badge number already exists
+        const existingLanyard = await prisma.lanyards.findFirst({
+          where: {
+            lanyardSettingId: lanyardSettingsForCreate.id,
+            badgeNumber: validatedData.badgeNumber
+          }
+        })
+
+        if (existingLanyard) {
+          return res.status(400).json({ 
+            success: false, 
+            error: `Lanyard with badge number "${validatedData.badgeNumber}" already exists` 
           })
         }
         
