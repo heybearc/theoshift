@@ -706,12 +706,35 @@ export default function EventLanyardsPage({ eventId, event, lanyards, attendants
                     value={attendantSearch}
                     onChange={(e) => setAttendantSearch(e.target.value)}
                     onFocus={() => setShowAttendantDropdown(true)}
+                    onBlur={() => {
+                      // Delay closing to allow clicking on dropdown items
+                      setTimeout(() => setShowAttendantDropdown(false), 150)
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        setShowAttendantDropdown(false)
+                        e.currentTarget.blur()
+                      }
+                    }}
                     placeholder="Type to search attendants or click to see all..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   
                   {showAttendantDropdown && (
                     <div className="absolute z-50 mt-1 w-full max-h-40 overflow-y-auto border border-gray-200 rounded-md bg-white shadow-lg">
+                      <div className="sticky top-0 bg-gray-50 px-3 py-2 border-b border-gray-200 flex justify-between items-center">
+                        <span className="text-sm text-gray-600">
+                          {attendantSearch.trim() ? 'Search results' : 'All attendants'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowAttendantDropdown(false)}
+                          className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+                          aria-label="Close dropdown"
+                        >
+                          ×
+                        </button>
+                      </div>
                       {(() => {
                         const filteredAttendants = attendants.filter(attendant => {
                           if (!attendantSearch.trim()) return true // Show all when no search
