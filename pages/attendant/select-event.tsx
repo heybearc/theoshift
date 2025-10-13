@@ -62,7 +62,10 @@ export default function AttendantSelectEvent() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    // Parse date string as-is without timezone conversion
+    const datePart = dateString.split('T')[0]
+    const date = new Date(datePart + 'T12:00:00')
+    return date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',

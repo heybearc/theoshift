@@ -147,13 +147,14 @@ export default function AttendantDashboard() {
   }
 
   const formatDate = (dateString: string) => {
-    // Parse as UTC and display in local timezone
-    const date = new Date(dateString)
+    // Parse date string as-is without timezone conversion
+    // Extract just the date part (YYYY-MM-DD) to avoid timezone issues
+    const datePart = dateString.split('T')[0]
+    const date = new Date(datePart + 'T12:00:00') // Use noon to avoid timezone edge cases
     return date.toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
-      day: 'numeric',
-      timeZone: 'America/New_York' // Adjust to your timezone
+      day: 'numeric'
     })
   }
 
