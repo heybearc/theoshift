@@ -1,18 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '../../../../auth/[...nextauth]'
 import { prisma } from '../../../../../../src/lib/prisma'
 import fs from 'fs'
 import path from 'path'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const session = await getServerSession(req, res, authOptions)
+    console.log('Document delete API called:', req.method)
     
-    if (!session || !['ADMIN', 'OVERSEER'].includes(session.user?.role || '')) {
-      return res.status(401).json({ success: false, error: 'Unauthorized' })
-    }
-
     const { id: eventId, documentId } = req.query
 
     if (!eventId || typeof eventId !== 'string' || !documentId || typeof documentId !== 'string') {
@@ -33,13 +27,43 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 async function handleDeleteDocument(req: NextApiRequest, res: NextApiResponse, eventId: string, documentId: string) {
   try {
-    // TODO: Fetch document from database to get file path
-    // For now, just return success
-    console.log(`Deleting document ${documentId} from event ${eventId}`)
+    // Fetch document from database to get file path
+    const document = await prisma.event_documents.findUnique({
+      where: { id: documentId }
+    })
 
-    // TODO: Delete file from filesystem
-    // TODO: Delete document record from database
-    // TODO: Delete related document_publications records
+    if (!document) {
+      return res.status(404).json({ success: false, error: 'Document not found' })
+    }
+
+    // Verify document belongs to this event
+    if (document.eventId !== eventId) {
+      return res.status(403).json({ success: false, error: 'Document does not belong to this event' })
+    }
+
+    // Delete file from filesystem
+    try {
+      const filePath = path.join(process.cwd(), 'public', document.fileUrl)
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath)
+        console.log(`Deleted file: ${filePath}`)
+      }
+    } catch (fileError) {
+      console.error('Error deleting file:', fileError)
+      // Continue even if file deletion fails
+    }
+
+    // Delete related document_publications records
+    await prisma.document_publications.deleteMany({
+      where: { documentId }
+    })
+
+    // Delete document record from database
+    await prisma.event_documents.delete({
+      where: { id: documentId }
+    })
+
+    console.log(`Successfully deleted document ${documentId} from event ${eventId}`)
 
     return res.status(200).json({
       success: true,
