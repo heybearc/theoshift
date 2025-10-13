@@ -45,49 +45,68 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === "PUT") {
-      const { 
-        name, description, eventType, startDate, endDate, startTime, endTime, location, status, capacity, attendantsNeeded,
-        // APEX GUARDIAN: Oversight Management Fields
-        circuitOverseerName, circuitOverseerPhone, circuitOverseerEmail,
-        assemblyOverseerName, assemblyOverseerPhone, assemblyOverseerEmail,
-        attendantOverseerName, attendantOverseerPhone, attendantOverseerEmail,
-        attendantOverseerAssistants
-      } = req.body
+      try {
+        console.log('=== APEX GUARDIAN DEBUG: PUT Request ===')
+        console.log('Event ID:', id)
+        console.log('Request body:', JSON.stringify(req.body, null, 2))
 
-      // APEX GUARDIAN: Build update data dynamically to avoid Prisma type issues
-      const updateData: any = {
-        name,
-        description,
-        eventType,
-        startDate: startDate ? new Date(startDate) : undefined,
-        endDate: endDate ? new Date(endDate) : undefined,
-        startTime,
-        endTime,
-        location,
-        status,
-        capacity: capacity ? parseInt(capacity) : null,
-        attendantsNeeded: attendantsNeeded ? parseInt(attendantsNeeded) : null,
-        updatedAt: new Date()
+        const { 
+          name, description, eventType, startDate, endDate, startTime, endTime, location, status, capacity, attendantsNeeded,
+          // APEX GUARDIAN: Oversight Management Fields
+          circuitOverseerName, circuitOverseerPhone, circuitOverseerEmail,
+          assemblyOverseerName, assemblyOverseerPhone, assemblyOverseerEmail,
+          attendantOverseerName, attendantOverseerPhone, attendantOverseerEmail,
+          attendantOverseerAssistants
+        } = req.body
+
+        // APEX GUARDIAN: Build update data dynamically to avoid Prisma type issues
+        const updateData: any = {
+          name,
+          description,
+          eventType,
+          startDate: startDate ? new Date(startDate) : undefined,
+          endDate: endDate ? new Date(endDate) : undefined,
+          startTime,
+          endTime,
+          location,
+          status,
+          capacity: capacity ? parseInt(capacity) : null,
+          attendantsNeeded: attendantsNeeded ? parseInt(attendantsNeeded) : null,
+          updatedAt: new Date()
+        }
+
+        // Add oversight fields if provided
+        if (circuitOverseerName !== undefined) updateData.circuitoverseername = circuitOverseerName || null
+        if (circuitOverseerPhone !== undefined) updateData.circuitoverseerphone = circuitOverseerPhone || null
+        if (circuitOverseerEmail !== undefined) updateData.circuitoverseeremail = circuitOverseerEmail || null
+        if (assemblyOverseerName !== undefined) updateData.assemblyoverseername = assemblyOverseerName || null
+        if (assemblyOverseerPhone !== undefined) updateData.assemblyoverseerphone = assemblyOverseerPhone || null
+        if (assemblyOverseerEmail !== undefined) updateData.assemblyoverseeremail = assemblyOverseerEmail || null
+        if (attendantOverseerName !== undefined) updateData.attendantoverseername = attendantOverseerName || null
+        if (attendantOverseerPhone !== undefined) updateData.attendantoverseerphone = attendantOverseerPhone || null
+        if (attendantOverseerEmail !== undefined) updateData.attendantoverseeremail = attendantOverseerEmail || null
+        if (attendantOverseerAssistants !== undefined) updateData.attendantoverseerassistants = attendantOverseerAssistants || []
+
+        console.log('Update data:', JSON.stringify(updateData, null, 2))
+
+        const event = await prisma.events.update({
+          where: { id },
+          data: updateData
+        })
+
+        console.log('Update successful:', event.id)
+        return res.status(200).json({ success: true, data: event })
+
+      } catch (error) {
+        console.error('=== APEX GUARDIAN ERROR ===')
+        console.error('Error updating event:', error)
+        console.error('Stack trace:', error.stack)
+        return res.status(500).json({ 
+          success: false, 
+          error: 'Failed to update event', 
+          details: error.message 
+        })
       }
-
-      // Add oversight fields if provided
-      if (circuitOverseerName !== undefined) updateData.circuitoverseername = circuitOverseerName || null
-      if (circuitOverseerPhone !== undefined) updateData.circuitoverseerphone = circuitOverseerPhone || null
-      if (circuitOverseerEmail !== undefined) updateData.circuitoverseeremail = circuitOverseerEmail || null
-      if (assemblyOverseerName !== undefined) updateData.assemblyoverseername = assemblyOverseerName || null
-      if (assemblyOverseerPhone !== undefined) updateData.assemblyoverseerphone = assemblyOverseerPhone || null
-      if (assemblyOverseerEmail !== undefined) updateData.assemblyoverseeremail = assemblyOverseerEmail || null
-      if (attendantOverseerName !== undefined) updateData.attendantoverseername = attendantOverseerName || null
-      if (attendantOverseerPhone !== undefined) updateData.attendantoverseerphone = attendantOverseerPhone || null
-      if (attendantOverseerEmail !== undefined) updateData.attendantoverseeremail = attendantOverseerEmail || null
-      if (attendantOverseerAssistants !== undefined) updateData.attendantoverseerassistants = attendantOverseerAssistants || []
-
-      const event = await prisma.events.update({
-        where: { id },
-        data: updateData
-      })
-
-      return res.status(200).json({ success: true, data: event })
     }
 
     if (req.method === "DELETE") {
