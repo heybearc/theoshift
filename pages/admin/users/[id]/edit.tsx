@@ -45,6 +45,12 @@ export default function EditUserPage() {
     isActive: true,
     linkedAttendantId: ''
   })
+  const [passwordData, setPasswordData] = useState({
+    changePassword: false,
+    newPassword: '',
+    confirmPassword: '',
+    sendResetEmail: false
+  })
 
   useEffect(() => {
     if (id) {
@@ -104,7 +110,13 @@ export default function EditUserPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          ...(passwordData.changePassword && {
+            newPassword: passwordData.newPassword,
+            sendResetEmail: passwordData.sendResetEmail
+          })
+        })
       })
 
       const result = await response.json()
@@ -291,6 +303,106 @@ export default function EditUserPage() {
               <p className="mt-1 text-sm text-gray-500">
                 Link this user account to an existing attendant record for role-based access
               </p>
+            </div>
+
+            {/* Password Management */}
+            <div className="border-t border-gray-200 pt-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Password Management</h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <input
+                    id="changePassword"
+                    type="checkbox"
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    checked={passwordData.changePassword}
+                    onChange={(e) => setPasswordData({ 
+                      ...passwordData, 
+                      changePassword: e.target.checked,
+                      newPassword: '',
+                      confirmPassword: '',
+                      sendResetEmail: false
+                    })}
+                  />
+                  <label htmlFor="changePassword" className="ml-2 block text-sm text-gray-900">
+                    🔑 Change user password
+                  </label>
+                </div>
+
+                {passwordData.changePassword && (
+                  <div className="ml-6 space-y-4 border-l-2 border-indigo-200 pl-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+                          New Password *
+                        </label>
+                        <input
+                          type="password"
+                          id="newPassword"
+                          required
+                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                          value={passwordData.newPassword}
+                          onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                          minLength={8}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="confirmNewPassword" className="block text-sm font-medium text-gray-700">
+                          Confirm New Password *
+                        </label>
+                        <input
+                          type="password"
+                          id="confirmNewPassword"
+                          required
+                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                          value={passwordData.confirmPassword}
+                          onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                          minLength={8}
+                        />
+                        {passwordData.newPassword && passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword && (
+                          <p className="mt-1 text-sm text-red-600">Passwords do not match</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center">
+                      <input
+                        id="sendResetEmail"
+                        type="checkbox"
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        checked={passwordData.sendResetEmail}
+                        onChange={(e) => setPasswordData({ ...passwordData, sendResetEmail: e.target.checked })}
+                      />
+                      <label htmlFor="sendResetEmail" className="ml-2 block text-sm text-gray-900">
+                        📧 Send password change notification email
+                      </label>
+                    </div>
+
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                      <p className="text-sm text-yellow-700">
+                        ⚠️ <strong>Security Note:</strong> The user will be required to log in again with the new password. 
+                        If notification email is enabled, they will receive an email about the password change.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {!passwordData.changePassword && (
+                  <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
+                    <p className="text-sm text-gray-600">
+                      💡 <strong>Password Reset Options:</strong> Check the box above to change the user's password, 
+                      or use the "Send Password Reset Email" button to let them reset it themselves.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {/* TODO: Implement password reset email */}}
+                      className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      📧 Send Password Reset Email
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {error && (

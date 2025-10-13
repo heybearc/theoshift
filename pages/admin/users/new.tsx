@@ -27,7 +27,10 @@ export default function CreateUserPage() {
     role: 'ATTENDANT',
     isActive: true,
     linkedAttendantId: '',
-    sendInvitation: true
+    sendInvitation: true,
+    passwordOption: 'invitation', // 'invitation', 'manual', 'generate'
+    password: '',
+    confirmPassword: ''
   })
 
   useEffect(() => {
@@ -82,7 +85,10 @@ export default function CreateUserPage() {
           role: 'ATTENDANT',
           isActive: true,
           linkedAttendantId: '',
-          sendInvitation: true
+          sendInvitation: true,
+          passwordOption: 'invitation',
+          password: '',
+          confirmPassword: ''
         })
         
         // Refresh available attendants
@@ -217,21 +223,114 @@ export default function CreateUserPage() {
               </p>
             </div>
 
-            <div className="flex items-center">
-              <input
-                id="sendInvitation"
-                type="checkbox"
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                checked={formData.sendInvitation}
-                onChange={(e) => setFormData({ ...formData, sendInvitation: e.target.checked })}
-              />
-              <label htmlFor="sendInvitation" className="ml-2 block text-sm text-gray-900">
-                Send email invitation to user
-              </label>
+            {/* Password Management */}
+            <div className="border-t border-gray-200 pt-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Password Setup</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    How should the password be set?
+                  </label>
+                  <div className="space-y-2">
+                    <div className="flex items-center">
+                      <input
+                        id="invitation"
+                        type="radio"
+                        name="passwordOption"
+                        value="invitation"
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                        checked={formData.passwordOption === 'invitation'}
+                        onChange={(e) => setFormData({ ...formData, passwordOption: e.target.value, sendInvitation: true })}
+                      />
+                      <label htmlFor="invitation" className="ml-2 block text-sm text-gray-900">
+                        📧 Send invitation email (user sets password)
+                      </label>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        id="manual"
+                        type="radio"
+                        name="passwordOption"
+                        value="manual"
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                        checked={formData.passwordOption === 'manual'}
+                        onChange={(e) => setFormData({ ...formData, passwordOption: e.target.value, sendInvitation: false })}
+                      />
+                      <label htmlFor="manual" className="ml-2 block text-sm text-gray-900">
+                        🔑 Set password manually
+                      </label>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        id="generate"
+                        type="radio"
+                        name="passwordOption"
+                        value="generate"
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                        checked={formData.passwordOption === 'generate'}
+                        onChange={(e) => setFormData({ ...formData, passwordOption: e.target.value, sendInvitation: false })}
+                      />
+                      <label htmlFor="generate" className="ml-2 block text-sm text-gray-900">
+                        🎲 Generate temporary password
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {formData.passwordOption === 'manual' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                        Password *
+                      </label>
+                      <input
+                        type="password"
+                        id="password"
+                        required
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        minLength={8}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                        Confirm Password *
+                      </label>
+                      <input
+                        type="password"
+                        id="confirmPassword"
+                        required
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        value={formData.confirmPassword}
+                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                        minLength={8}
+                      />
+                      {formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                        <p className="mt-1 text-sm text-red-600">Passwords do not match</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {formData.passwordOption === 'invitation' && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                    <p className="text-sm text-blue-700">
+                      📧 An invitation email will be sent to the user with a secure link to set their password.
+                    </p>
+                  </div>
+                )}
+
+                {formData.passwordOption === 'generate' && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                    <p className="text-sm text-yellow-700">
+                      🎲 A temporary password will be generated and displayed after user creation. The user should change it on first login.
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
-            <p className="text-sm text-gray-500 ml-6">
-              If checked, an invitation email will be sent to the user with login instructions
-            </p>
 
             {error && (
               <div className="text-red-600 text-sm bg-red-50 p-3 rounded-md">{error}</div>

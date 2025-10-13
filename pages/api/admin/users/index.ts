@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]'
 import { prisma } from '../../../../src/lib/prisma'
 import crypto from 'crypto'
+import bcrypt from 'bcryptjs'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -88,7 +89,17 @@ async function handleGetUsers(req: NextApiRequest, res: NextApiResponse) {
 }
 
 async function handleCreateUser(req: NextApiRequest, res: NextApiResponse) {
-  const { firstName, lastName, email, role = 'ATTENDANT', isActive = true, linkedAttendantId, sendInvitation = false } = req.body
+  const { 
+    firstName, 
+    lastName, 
+    email, 
+    role = 'ATTENDANT', 
+    isActive = true, 
+    linkedAttendantId, 
+    passwordOption = 'invitation',
+    password,
+    sendInvitation = false 
+  } = req.body
 
   if (!firstName || !lastName || !email) {
     return res.status(400).json({ success: false, error: 'Missing required fields' })
@@ -104,11 +115,21 @@ async function handleCreateUser(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ success: false, error: 'User already exists' })
     }
 
-    // Generate invitation token if sending invitation
+    // Handle password setup based on option
+    let passwordHash: string | null = null
     let inviteToken: string | null = null
     let inviteExpiry: Date | null = null
+    let generatedPassword: string | null = null
     
-    if (sendInvitation) {
+    if (passwordOption === 'manual' && password) {
+      // Hash the provided password
+      passwordHash = await bcrypt.hash(password, 12)
+    } else if (passwordOption === 'generate') {
+      // Generate a temporary password
+      generatedPassword = crypto.randomBytes(8).toString('hex')
+      passwordHash = await bcrypt.hash(generatedPassword, 12)
+    } else if (passwordOption === 'invitation' || sendInvitation) {
+      // Generate invitation token
       inviteToken = crypto.randomBytes(32).toString('hex')
       inviteExpiry = new Date()
       inviteExpiry.setDate(inviteExpiry.getDate() + 7) // 7 days expiration
@@ -122,6 +143,7 @@ async function handleCreateUser(req: NextApiRequest, res: NextApiResponse) {
         email,
         role,
         isActive,
+        passwordHash,
         inviteToken,
         inviteExpiry,
         updatedAt: new Date()
@@ -148,10 +170,20 @@ async function handleCreateUser(req: NextApiRequest, res: NextApiResponse) {
       // The invitation email sending would be implemented here
     }
 
+    let message = 'User created successfully'
+    if (passwordOption === 'invitation' || sendInvitation) {
+      message = 'User created and invitation sent'
+    } else if (passwordOption === 'generate') {
+      message = `User created with temporary password: ${generatedPassword}`
+    }
+
     return res.status(201).json({
       success: true,
-      data: { user },
-      message: sendInvitation ? 'User created and invitation sent' : 'User created successfully'
+      data: { 
+        user,
+        ...(generatedPassword && { temporaryPassword: generatedPassword })
+      },
+      message
     })
   } catch (error) {
     console.error('Create user error:', error)

@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]'
 import { prisma } from '../../../../src/lib/prisma'
+import bcrypt from 'bcryptjs'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -63,7 +64,7 @@ async function handleGetUser(req: NextApiRequest, res: NextApiResponse, id: stri
 }
 
 async function handleUpdateUser(req: NextApiRequest, res: NextApiResponse, id: string) {
-  const { firstName, lastName, email, role, isActive, linkedAttendantId } = req.body
+  const { firstName, lastName, email, role, isActive, linkedAttendantId, newPassword, sendResetEmail } = req.body
 
   try {
     // Handle attendant linking/unlinking
@@ -83,6 +84,12 @@ async function handleUpdateUser(req: NextApiRequest, res: NextApiResponse, id: s
       }
     }
 
+    // Handle password change if provided
+    let passwordHash: string | undefined = undefined
+    if (newPassword) {
+      passwordHash = await bcrypt.hash(newPassword, 12)
+    }
+
     const user = await prisma.users.update({
       where: { id },
       data: {
@@ -91,6 +98,7 @@ async function handleUpdateUser(req: NextApiRequest, res: NextApiResponse, id: s
         ...(email && { email }),
         ...(role && { role }),
         ...(typeof isActive === 'boolean' && { isActive }),
+        ...(passwordHash && { passwordHash }),
         updatedAt: new Date()
       },
       include: {
@@ -104,9 +112,16 @@ async function handleUpdateUser(req: NextApiRequest, res: NextApiResponse, id: s
       }
     })
 
+    // TODO: Send password change notification email if sendResetEmail is true
+    if (newPassword && sendResetEmail) {
+      console.log(`Password changed for user ${user.email}, notification email should be sent`)
+      // Email notification would be implemented here
+    }
+
     return res.status(200).json({
       success: true,
-      data: { user }
+      data: { user },
+      message: newPassword ? 'User updated and password changed' : 'User updated successfully'
     })
   } catch (error) {
     console.error('Update user error:', error)
