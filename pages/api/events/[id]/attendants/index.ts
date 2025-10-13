@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 async function handleGetEventAttendants(req: NextApiRequest, res: NextApiResponse, eventId: string, event: any) {
   try {
     // APEX GUARDIAN FIX: Get attendants from event_attendant_associations (correct source of truth)
-    const eventAttendantAssociations = await prisma.event_attendant_associations.findMany({
+    const eventAttendantAssociations = await prisma.event_attendants.findMany({
       where: {
         eventId: eventId
       },

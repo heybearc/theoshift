@@ -48,9 +48,9 @@ model attendants {
   formsOfService                Json                             @default("[]")
   isActive                      Boolean                          @default(true)
   users                         users?                           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event_attendant_associations  event_attendant_associations[]
-  event_keyman_assignments      event_attendant_associations[]   @relation("EventKeymanRelation")
-  event_overseer_assignments    event_attendant_associations[]   @relation("EventOverseerRelation")
+  event_attendants              event_attendants[]
+  event_keyman_assignments      event_attendants[]               @relation("EventKeymanRelation")
+  event_overseer_assignments    event_attendants[]               @relation("EventOverseerRelation")
   position_assignments          position_assignments[]
   keyman_assignments            position_assignments[]           @relation("KeymanRelation")
   overseer_assignments          position_assignments[]           @relation("OverseerRelation")
@@ -94,7 +94,7 @@ model email_configurations {
   updatedAt          DateTime
 }
 
-model event_attendant_associations {
+model event_attendants {
   id                    String      @id
   eventId               String
   userId                String?
@@ -172,7 +172,7 @@ model events {
   attendantoverseerassistants  Json?                            @default("[]")
   assignments                  assignments[]
   count_sessions               count_sessions[]
-  event_attendant_associations event_attendant_associations[]
+  event_attendants             event_attendants[]
   event_positions              event_positions[]
   lanyard_settings             lanyard_settings?
   oversight_assignments        oversight_assignments[]
@@ -276,7 +276,7 @@ model users {
   sessions                     Session[]
   assignments                  assignments[]
   attendants                   attendants?
-  event_attendant_associations event_attendant_associations[]
+  event_attendants             event_attendants[]
   oversight_assignments        oversight_assignments[]
   assigned_positions           position_assignments[]           @relation("AssignedByUser")
   assigned_position_oversight  position_oversight_assignments[] @relation("AssignedByUser")

@@ -1446,7 +1446,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     // APEX GUARDIAN FIX: Get event-specific attendants from event_attendant_associations
     // This is the correct source of truth for event attendants
-    const eventAttendantAssociations = await prisma.event_attendant_associations.findMany({
+    const eventAttendantAssociations = await prisma.event_attendants.findMany({
       where: {
         eventId: id as string
       },
@@ -1487,7 +1487,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       .map(assoc => assoc.attendants!);
 
     // Get event-attendant associations for oversight assignments
-    const eventAssociations = await prisma.event_attendant_associations.findMany({
+    const eventAssociations = await prisma.event_attendants.findMany({
       where: {
         eventId: id as string
       },

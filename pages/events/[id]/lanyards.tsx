@@ -961,7 +961,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             }
           }
         },
-        event_attendant_associations: {
+        event_attendants: {
           include: {
             attendants: {
               select: {
@@ -1014,7 +1014,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     })
 
     // Transform attendants data from event_attendant_associations
-    const attendants = eventData.event_attendant_associations
+    const attendants = eventData.event_attendants
       ?.filter(association => association.attendants?.isActive)
       ?.map(association => ({
         id: association.id,
