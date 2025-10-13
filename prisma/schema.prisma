@@ -56,6 +56,7 @@ model attendants {
   overseer_assignments          position_assignments[]           @relation("OverseerRelation")
   position_keyman_assignments   position_oversight_assignments[] @relation("KeymanAssignments")
   position_overseer_assignments position_oversight_assignments[] @relation("OverseerAssignments")
+  document_publications         document_publications[]
 }
 
 model count_sessions {
@@ -178,6 +179,7 @@ model events {
   oversight_assignments        oversight_assignments[]
   position_oversight           position_oversight_assignments[]
   positions                    positions[]
+  event_documents              event_documents[]
 }
 
 model lanyard_settings {
@@ -423,6 +425,49 @@ model position_oversight_assignments {
   @@index([keymanId], map: "idx_position_oversight_keyman")
   @@index([overseerId], map: "idx_position_oversight_overseer")
   @@index([positionId], map: "idx_position_oversight_position")
+}
+
+model event_documents {
+  id              String                @id @default(cuid())
+  eventId         String
+  title           String
+  description     String?
+  fileName        String
+  fileUrl         String
+  fileType        String
+  fileSize        Int
+  uploadedBy      String
+  uploadedAt      DateTime              @default(now())
+  publishedTo     String                @default("none") // 'none', 'all', 'individual'
+  publishedCount  Int                   @default(0)
+  publishedAt     DateTime?
+  isActive        Boolean               @default(true)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  
+  // Relations
+  events          events                @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  publications    document_publications[]
+  
+  @@index([eventId], map: "idx_event_documents_event")
+  @@index([uploadedBy], map: "idx_event_documents_uploader")
+}
+
+model document_publications {
+  id              String                @id @default(cuid())
+  documentId      String
+  attendantId     String
+  publishedAt     DateTime              @default(now())
+  viewedAt        DateTime?
+  downloadedAt    DateTime?
+  
+  // Relations
+  document        event_documents       @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  attendant       attendants            @relation(fields: [attendantId], references: [id], onDelete: Cascade)
+  
+  @@unique([documentId, attendantId])
+  @@index([documentId], map: "idx_document_publications_document")
+  @@index([attendantId], map: "idx_document_publications_attendant")
 }
 
 enum AssignmentStatus {

@@ -638,6 +638,18 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                 >
                   📊 Count Times
                 </Link>
+                <Link
+                  href={`/events/${event.id}/documents`}
+                  className="w-full flex items-center justify-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  📄 Documents
+                </Link>
+                <Link
+                  href={`/events/${event.id}/lanyards`}
+                  className="w-full flex items-center justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  🏷️ Lanyards
+                </Link>
                 <button
                   onClick={handleExportData}
                   className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
