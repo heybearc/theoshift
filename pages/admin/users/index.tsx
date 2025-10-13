@@ -14,7 +14,7 @@ interface User {
   isActive: boolean
   createdAt: string
   _count: {
-    attendants: number
+    assignments: number
   }
 }
 
@@ -256,7 +256,7 @@ export default function UsersPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user._count.attendants} assignments
+                          {user._count.assignments} assignments
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {new Date(user.createdAt).toLocaleDateString()}

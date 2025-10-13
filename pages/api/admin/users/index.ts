@@ -53,6 +53,13 @@ async function handleGetUsers(req: NextApiRequest, res: NextApiResponse) {
         where,
         skip,
         take: limitNum,
+        include: {
+          _count: {
+            select: {
+              assignments: true
+            }
+          }
+        },
         orderBy: { createdAt: 'desc' }
       }),
       prisma.users.count({ where })
