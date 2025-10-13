@@ -940,14 +940,32 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         },
         event_attendant_associations: {
           include: {
-            attendants: {
+            users: {
               select: {
                 id: true,
                 firstName: true,
                 lastName: true,
                 email: true,
                 phone: true,
-                isActive: true
+                role: true
+              }
+            }
+          }
+        },
+        positions: {
+          include: {
+            assignments: {
+              include: {
+                attendant: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    email: true,
+                    phone: true,
+                    role: true
+                  }
+                }
               }
             }
           }
@@ -990,21 +1008,26 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       return aNum - bNum
     })
 
-    // Transform attendants data from event_attendant_associations
+    // Transform attendants data
+    console.log('APEX DEBUG: event_attendant_associations:', eventData.event_attendant_associations?.length || 0)
+    console.log('APEX DEBUG: Raw associations:', JSON.stringify(eventData.event_attendant_associations?.slice(0, 2), null, 2))
+    
     const attendants = eventData.event_attendant_associations
-      ?.filter(association => association.attendants?.isActive)
+      ?.filter(association => association.users)
       ?.map(association => ({
         id: association.id,
         users: {
-          id: association.attendants!.id,
-          firstName: association.attendants!.firstName,
-          lastName: association.attendants!.lastName,
-          email: association.attendants!.email,
-          role: association.role || 'ATTENDANT',
-          phone: association.attendants!.phone
+          id: association.users!.id,
+          firstName: association.users!.firstName,
+          lastName: association.users!.lastName,
+          email: association.users!.email,
+          role: association.users!.role || 'ATTENDANT',
+          phone: association.users!.phone
         },
-        role: association.role || 'ATTENDANT'
+        role: association.users!.role || 'ATTENDANT'
       })) || []
+    
+    console.log('APEX DEBUG: Transformed attendants:', attendants.length)
 
     return {
       props: {

@@ -1444,47 +1444,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       status: eventData.status
     }
 
-    // APEX GUARDIAN FIX: Get event-specific attendants from event_attendant_associations
-    // This is the correct source of truth for event attendants
-    const eventAttendantAssociations = await prisma.event_attendant_associations.findMany({
+    // Get ALL active attendants (not just those with assignments)
+    const allAttendants = await prisma.attendants.findMany({
       where: {
-        eventId: id as string
-      },
-      include: {
-        attendants: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phone: true,
-            congregation: true,
-            formsOfService: true,
-            isActive: true,
-            createdAt: true,
-            userId: true,
-            availabilityStatus: true,
-            notes: true,
-            servingAs: true,
-            skills: true,
-            preferredDepartments: true,
-            unavailableDates: true,
-            totalAssignments: true,
-            totalHours: true,
-            updatedAt: true
-          }
-        }
+        isActive: true
       },
       orderBy: [
-        { attendants: { firstName: 'asc' } },
-        { attendants: { lastName: 'asc' } }
+        { firstName: 'asc' },
+        { lastName: 'asc' }
       ]
     });
-
-    // Transform to match expected format and filter active attendants
-    const allAttendants = eventAttendantAssociations
-      .filter(assoc => assoc.attendants?.isActive)
-      .map(assoc => assoc.attendants!);
 
     // Get event-attendant associations for oversight assignments
     const eventAssociations = await prisma.event_attendant_associations.findMany({
