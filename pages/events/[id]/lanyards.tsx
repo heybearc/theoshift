@@ -432,7 +432,12 @@ export default function EventLanyardsPage({ eventId, event, lanyards, attendants
             <div className="grid grid-cols-1 md:grid-cols-[200px,1fr] gap-2 items-center">
               <label className="font-semibold text-gray-700">Date:</label>
               <div className="print:border-b print:border-black print:min-h-[28px] print:pl-2">
-                {event?.startDate ? new Date(event.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                {event?.startDate ? new Date(event.startDate).toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric',
+                  timeZone: 'UTC'
+                }) : ''}
               </div>
             </div>
 
