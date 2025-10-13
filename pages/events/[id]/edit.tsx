@@ -26,6 +26,17 @@ interface EventFormData {
   capacity: string
   attendantsNeeded: string
   status: string
+  // APEX GUARDIAN: Oversight Management Fields
+  circuitOverseerName: string
+  circuitOverseerPhone: string
+  circuitOverseerEmail: string
+  assemblyOverseerName: string
+  assemblyOverseerPhone: string
+  assemblyOverseerEmail: string
+  attendantOverseerName: string
+  attendantOverseerPhone: string
+  attendantOverseerEmail: string
+  attendantOverseerAssistants: string // JSON string for form handling
 }
 
 interface Event {
@@ -43,6 +54,17 @@ interface Event {
   status: string
   createdAt: string
   updatedAt: string
+  // APEX GUARDIAN: Oversight Management Fields
+  circuitOverseerName?: string
+  circuitOverseerPhone?: string
+  circuitOverseerEmail?: string
+  assemblyOverseerName?: string
+  assemblyOverseerPhone?: string
+  assemblyOverseerEmail?: string
+  attendantOverseerName?: string
+  attendantOverseerPhone?: string
+  attendantOverseerEmail?: string
+  attendantOverseerAssistants?: any[] // JSONB array
 }
 
 interface EditEventPageProps {
@@ -67,7 +89,18 @@ export default function EditEventPage({ event }: EditEventPageProps) {
     location: event.location || '',
     capacity: event.capacity ? event.capacity.toString() : '',
     attendantsNeeded: event.attendantsNeeded ? event.attendantsNeeded.toString() : '',
-    status: event.status || 'UPCOMING'
+    status: event.status || 'UPCOMING',
+    // APEX GUARDIAN: Oversight Management Fields
+    circuitOverseerName: event.circuitOverseerName || '',
+    circuitOverseerPhone: event.circuitOverseerPhone || '',
+    circuitOverseerEmail: event.circuitOverseerEmail || '',
+    assemblyOverseerName: event.assemblyOverseerName || '',
+    assemblyOverseerPhone: event.assemblyOverseerPhone || '',
+    assemblyOverseerEmail: event.assemblyOverseerEmail || '',
+    attendantOverseerName: event.attendantOverseerName || '',
+    attendantOverseerPhone: event.attendantOverseerPhone || '',
+    attendantOverseerEmail: event.attendantOverseerEmail || '',
+    attendantOverseerAssistants: JSON.stringify(event.attendantOverseerAssistants || [])
   })
 
   const [errors, setErrors] = useState<Partial<EventFormData>>({})
@@ -174,7 +207,18 @@ export default function EditEventPage({ event }: EditEventPageProps) {
         location: formData.location,
         capacity: formData.capacity ? parseInt(formData.capacity) : undefined,
         attendantsNeeded: formData.attendantsNeeded ? parseInt(formData.attendantsNeeded) : undefined,
-        status: formData.status
+        status: formData.status,
+        // APEX GUARDIAN: Oversight Management Fields
+        circuitOverseerName: formData.circuitOverseerName || undefined,
+        circuitOverseerPhone: formData.circuitOverseerPhone || undefined,
+        circuitOverseerEmail: formData.circuitOverseerEmail || undefined,
+        assemblyOverseerName: formData.assemblyOverseerName || undefined,
+        assemblyOverseerPhone: formData.assemblyOverseerPhone || undefined,
+        assemblyOverseerEmail: formData.assemblyOverseerEmail || undefined,
+        attendantOverseerName: formData.attendantOverseerName || undefined,
+        attendantOverseerPhone: formData.attendantOverseerPhone || undefined,
+        attendantOverseerEmail: formData.attendantOverseerEmail || undefined,
+        attendantOverseerAssistants: formData.attendantOverseerAssistants ? JSON.parse(formData.attendantOverseerAssistants) : []
       }
 
       const response = await fetch(`/api/events/${eventId}`, {
@@ -522,6 +566,199 @@ export default function EditEventPage({ event }: EditEventPageProps) {
             </div>
           </div>
 
+          {/* APEX GUARDIAN: Oversight Management Section */}
+          <div className="bg-white shadow rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-6">Oversight Management</h3>
+            
+            {/* Circuit Overseer */}
+            <div className="mb-6">
+              <h4 className="text-md font-medium text-gray-800 mb-4 flex items-center">
+                <span className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                  <span className="text-white text-sm">🏛️</span>
+                </span>
+                Circuit Overseer
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label htmlFor="circuitOverseerName" className="block text-sm font-medium text-gray-700 mb-1">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="circuitOverseerName"
+                    name="circuitOverseerName"
+                    value={formData.circuitOverseerName}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Circuit Overseer Name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="circuitOverseerPhone" className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    id="circuitOverseerPhone"
+                    name="circuitOverseerPhone"
+                    value={formData.circuitOverseerPhone}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Phone Number"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="circuitOverseerEmail" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="circuitOverseerEmail"
+                    name="circuitOverseerEmail"
+                    value={formData.circuitOverseerEmail}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Email Address"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Assembly Overseer */}
+            <div className="mb-6">
+              <h4 className="text-md font-medium text-gray-800 mb-4 flex items-center">
+                <span className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center mr-3">
+                  <span className="text-white text-sm">🏢</span>
+                </span>
+                Assembly Overseer
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label htmlFor="assemblyOverseerName" className="block text-sm font-medium text-gray-700 mb-1">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="assemblyOverseerName"
+                    name="assemblyOverseerName"
+                    value={formData.assemblyOverseerName}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Assembly Overseer Name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="assemblyOverseerPhone" className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    id="assemblyOverseerPhone"
+                    name="assemblyOverseerPhone"
+                    value={formData.assemblyOverseerPhone}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Phone Number"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="assemblyOverseerEmail" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="assemblyOverseerEmail"
+                    name="assemblyOverseerEmail"
+                    value={formData.assemblyOverseerEmail}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Email Address"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Attendant Overseer */}
+            <div className="mb-6">
+              <h4 className="text-md font-medium text-gray-800 mb-4 flex items-center">
+                <span className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
+                  <span className="text-white text-sm">👥</span>
+                </span>
+                Attendant Overseer
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label htmlFor="attendantOverseerName" className="block text-sm font-medium text-gray-700 mb-1">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="attendantOverseerName"
+                    name="attendantOverseerName"
+                    value={formData.attendantOverseerName}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Attendant Overseer Name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="attendantOverseerPhone" className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    id="attendantOverseerPhone"
+                    name="attendantOverseerPhone"
+                    value={formData.attendantOverseerPhone}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Phone Number"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="attendantOverseerEmail" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="attendantOverseerEmail"
+                    name="attendantOverseerEmail"
+                    value={formData.attendantOverseerEmail}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Email Address"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Attendant Overseer Assistants */}
+            <div>
+              <h4 className="text-md font-medium text-gray-800 mb-4 flex items-center">
+                <span className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center mr-3">
+                  <span className="text-white text-sm">🤝</span>
+                </span>
+                Attendant Overseer Assistants
+              </h4>
+              <div>
+                <label htmlFor="attendantOverseerAssistants" className="block text-sm font-medium text-gray-700 mb-1">
+                  Assistants (JSON Format)
+                </label>
+                <textarea
+                  id="attendantOverseerAssistants"
+                  name="attendantOverseerAssistants"
+                  rows={3}
+                  value={formData.attendantOverseerAssistants}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder='[{&quot;name&quot;: &quot;Assistant Name&quot;, &quot;phone&quot;: &quot;555-0123&quot;, &quot;email&quot;: &quot;assistant@example.com&quot;}]'
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Enter assistants as JSON array. Example: [{'{'}"name": "John Doe", "phone": "555-0123", "email": "john@example.com"{'}'}]
+                </p>
+              </div>
+            </div>
+          </div>
 
           {/* Submit Buttons */}
           <div className="flex justify-end space-x-3">
@@ -589,6 +826,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Transform event data for frontend compatibility
+    const eventWithOversight = event as any // Type assertion for new oversight fields
     const transformedEvent = {
       id: event.id,
       name: event.name,
@@ -602,6 +840,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       capacity: event.capacity,
       attendantsNeeded: event.attendantsNeeded,
       status: event.status,
+      // APEX GUARDIAN: Oversight Management Fields
+      circuitOverseerName: eventWithOversight.circuitOverseerName,
+      circuitOverseerPhone: eventWithOversight.circuitOverseerPhone,
+      circuitOverseerEmail: eventWithOversight.circuitOverseerEmail,
+      assemblyOverseerName: eventWithOversight.assemblyOverseerName,
+      assemblyOverseerPhone: eventWithOversight.assemblyOverseerPhone,
+      assemblyOverseerEmail: eventWithOversight.assemblyOverseerEmail,
+      attendantOverseerName: eventWithOversight.attendantOverseerName,
+      attendantOverseerPhone: eventWithOversight.attendantOverseerPhone,
+      attendantOverseerEmail: eventWithOversight.attendantOverseerEmail,
+      attendantOverseerAssistants: eventWithOversight.attendantOverseerAssistants,
       createdAt: event.createdAt?.toISOString() || null,
       updatedAt: event.updatedAt?.toISOString() || null
     }

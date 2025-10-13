@@ -21,6 +21,17 @@ interface Event {
   status: string
   createdAt: string
   updatedAt: string
+  // APEX GUARDIAN: Oversight Management Fields
+  circuitOverseerName?: string
+  circuitOverseerPhone?: string
+  circuitOverseerEmail?: string
+  assemblyOverseerName?: string
+  assemblyOverseerPhone?: string
+  assemblyOverseerEmail?: string
+  attendantOverseerName?: string
+  attendantOverseerPhone?: string
+  attendantOverseerEmail?: string
+  attendantOverseerAssistants?: any[]
   event_attendant_associations: Array<{
     id: string
     users: {
@@ -545,25 +556,38 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
               <div className="space-y-3">
                 <div className="bg-white bg-opacity-60 rounded-lg p-3">
                   <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Circuit Overseer</div>
-                  <div className="text-sm font-semibold text-gray-900">Not Assigned</div>
+                  <div className="text-sm font-semibold text-gray-900">
+                    {event.circuitOverseerName || 'Not Assigned'}
+                  </div>
+                  {event.circuitOverseerPhone && (
+                    <div className="text-xs text-gray-600">📞 {event.circuitOverseerPhone}</div>
+                  )}
                 </div>
                 <div className="bg-white bg-opacity-60 rounded-lg p-3">
                   <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Assembly Overseer</div>
-                  <div className="text-sm font-semibold text-gray-900">Not Assigned</div>
+                  <div className="text-sm font-semibold text-gray-900">
+                    {event.assemblyOverseerName || 'Not Assigned'}
+                  </div>
+                  {event.assemblyOverseerPhone && (
+                    <div className="text-xs text-gray-600">📞 {event.assemblyOverseerPhone}</div>
+                  )}
                 </div>
                 <div className="bg-white bg-opacity-60 rounded-lg p-3">
-                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Department Overseers</div>
+                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Attendant Overseer</div>
                   <div className="text-sm font-semibold text-gray-900">
-                    {event._count.positions > 0 ? `${event._count.positions} Positions` : 'None Assigned'}
+                    {event.attendantOverseerName || 'Not Assigned'}
                   </div>
+                  {event.attendantOverseerPhone && (
+                    <div className="text-xs text-gray-600">📞 {event.attendantOverseerPhone}</div>
+                  )}
                 </div>
               </div>
               <div className="mt-4 pt-3 border-t border-yellow-200">
                 <Link
-                  href={`/events/${event.id}/attendants`}
+                  href={`/events/${event.id}/edit`}
                   className="text-xs text-yellow-700 hover:text-yellow-800 font-medium"
                 >
-                  📞 View Contact Information →
+                  ⚙️ Manage Oversight →
                 </Link>
               </div>
             </div>
