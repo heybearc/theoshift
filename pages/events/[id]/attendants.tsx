@@ -907,7 +907,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                       <th className="w-24 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                         Keyman
                       </th>
-                      <th className="w-20 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="w-20 px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
                       </th>
                       <th className="w-20 px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
@@ -1058,7 +1058,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             ))}
                           </select>
                         </td>
-                        <td className="px-3 py-3 whitespace-nowrap">
+                        <td className="px-2 py-3 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs rounded-full ${
                             attendant.isActive 
                               ? 'bg-green-100 text-green-800' 
