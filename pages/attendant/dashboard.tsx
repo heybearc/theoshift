@@ -80,7 +80,7 @@ export default function AttendantDashboard() {
     try {
       console.log('Loading dashboard...')
       // For now, use test data to bypass localStorage issues
-      const testAttendantId = 'paul-lewis-123'
+      const testAttendantId = '17eee495-4a14-4825-8760-d5efac609783' // Paul Lewis's real database ID
       const testEventId = 'd43d977b-c06e-446f-8c6d-05b407daf459'
       
       setSelectedEventId(testEventId)
