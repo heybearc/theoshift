@@ -608,3 +608,9 @@ export default function AttendantDashboard() {
     </>
   )
 }
+
+export async function getServerSideProps() {
+  return {
+    props: {}
+  }
+}

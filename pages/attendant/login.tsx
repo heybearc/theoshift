@@ -241,3 +241,9 @@ export default function AttendantLogin() {
     </>
   )
 }
+
+export async function getServerSideProps() {
+  return {
+    props: {}
+  }
+}
