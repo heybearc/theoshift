@@ -25,6 +25,8 @@ interface Attendant {
   isActive: boolean
   createdAt: string | null
   associationId: string
+  profileVerificationRequired?: boolean
+  profileVerifiedAt?: string | null
   overseerId?: string | null
   keymanId?: string | null
   overseer?: {
@@ -64,7 +66,8 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
     formsOfService: '',
     congregation: '',
     overseerId: null as string | null,
-    keymanId: null as string | null
+    keymanId: null as string | null,
+    pinAction: '' // 'auto-generate', 'reset', or ''
   })
   const [sortField, setSortField] = useState<string>('lastName')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
@@ -544,6 +547,43 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
           )
         }
 
+        // Handle bulk PIN operations
+        if (bulkEditData.pinAction !== '') {
+          console.log(`🔑 Bulk PIN operation for ${attendant.firstName} ${attendant.lastName}: ${bulkEditData.pinAction}`)
+          
+          let pin = ''
+          if (bulkEditData.pinAction === 'auto-generate' && attendant.phone) {
+            const digits = attendant.phone.replace(/\D/g, '')
+            if (digits.length >= 4) {
+              pin = digits.slice(-4)
+            }
+          } else if (bulkEditData.pinAction === 'reset') {
+            // Generate a random 4-digit PIN for reset
+            pin = Math.floor(1000 + Math.random() * 9000).toString()
+          }
+
+          if (pin) {
+            updates.push(
+              fetch('/api/attendant/set-pin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  attendantId: attendant.id,
+                  pin,
+                  autoGenerate: false
+                })
+              }).then(response => {
+                if (!response.ok) {
+                  console.error(`PIN update failed for ${attendant.firstName} ${attendant.lastName}:`, response.status)
+                  throw new Error(`PIN update failed`)
+                }
+                console.log(`✅ PIN updated for ${attendant.firstName} ${attendant.lastName}: ${pin}`)
+                return response
+              })
+            )
+          }
+        }
+
         // Handle oversight assignments separately
         const oversightData: any = {}
         if (bulkEditData.overseerId !== null) {
@@ -590,7 +630,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
       
       setShowBulkEditModal(false)
       setSelectedAttendants(new Set())
-      setBulkEditData({ isActive: '', formsOfService: '', congregation: '', overseerId: null, keymanId: null })
+      setBulkEditData({ isActive: '', formsOfService: '', congregation: '', overseerId: null, keymanId: null, pinAction: '' })
       
       // Preserve filter state and pagination in URL before reload
       try {
@@ -840,19 +880,11 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                         Overseer
                       </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                        Keyman
-                      </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        <button 
-                          onClick={() => handleSort('isActive')}
-                          className="flex items-center space-x-1 hover:text-gray-700"
-                        >
-                          <span>Status</span>
-                          {sortField === 'isActive' && (
-                            <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                          )}
-                        </button>
+                        Status
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                        Verification
                       </th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
@@ -1007,6 +1039,21 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                           }`}>
                             {attendant.isActive ? 'Active' : 'Inactive'}
                           </span>
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap hidden lg:table-cell">
+                          {attendant.profileVerificationRequired ? (
+                            <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                              ⚠️ Required
+                            </span>
+                          ) : attendant.profileVerifiedAt ? (
+                            <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                              ✅ Verified
+                            </span>
+                          ) : (
+                            <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
+                              ❌ Not Verified
+                            </span>
+                          )}
                         </td>
                         <td className="px-3 py-3 whitespace-nowrap text-xs font-medium">
                           <div className="flex flex-col sm:flex-row gap-1">
@@ -1431,6 +1478,24 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                       </div>
                     </div>
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      PIN Management
+                    </label>
+                    <select
+                      value={bulkEditData.pinAction}
+                      onChange={(e) => setBulkEditData({ ...bulkEditData, pinAction: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">No PIN Changes</option>
+                      <option value="auto-generate">Auto-Generate PINs (from phone)</option>
+                      <option value="reset">Reset All PINs</option>
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Auto-generate uses last 4 digits of phone number. Reset generates new PINs for all selected attendants.
+                    </p>
+                  </div>
                 </div>
 
                 <div className="flex justify-end space-x-3 mt-6">
@@ -1628,6 +1693,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         keymanId: association?.keymanId || null,
         overseer: association?.overseer || null,
         keyman: association?.keyman || null,
+        profileVerificationRequired: attendant.profileVerificationRequired || false,
+        profileVerifiedAt: attendant.profileVerifiedAt?.toISOString() || null,
         assignments: []
       });
     });
