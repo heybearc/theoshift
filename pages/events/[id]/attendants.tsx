@@ -1651,49 +1651,35 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       status: eventData.status
     }
 
-    // Use raw SQL to get attendants with verification data (bypassing Prisma client issues)
-    const attendantsRaw = await prisma.$queryRaw`
-      SELECT 
-        a.id,
-        a."firstName",
-        a."lastName", 
-        a.email,
-        a.phone,
-        a.congregation,
-        a."formsOfService",
-        a."isActive",
-        a."createdAt",
-        a."userId",
-        a."availabilityStatus",
-        a.notes,
-        a."servingAs",
-        a.skills,
-        a."preferredDepartments", 
-        a."unavailableDates",
-        a."totalAssignments",
-        a."totalHours",
-        a."updatedAt",
-        a."profileVerificationRequired",
-        a."profileVerifiedAt"
-      FROM event_attendants ea
-      JOIN attendants a ON ea."attendantId" = a.id
-      WHERE ea."eventId" = ${id as string}
-      AND ea."isActive" = true
-      AND a."isActive" = true
-      ORDER BY a."firstName" ASC, a."lastName" ASC
-    ` as any[];
-
-    // Transform raw SQL results to match expected format
-    const allAttendants = attendantsRaw.map(attendant => {
-      // Debug logging for Paul Lewis
-      if (attendant.firstName === 'Paul' && attendant.lastName === 'Lewis') {
-        console.log('SSR Paul Lewis verification data:', {
-          profileVerificationRequired: attendant.profileVerificationRequired,
-          profileVerifiedAt: attendant.profileVerifiedAt
-        });
-      }
-      return attendant;
+    // PROPER PRISMA IMPLEMENTATION - Get event attendants with verification data
+    const eventAttendantAssociations = await prisma.event_attendants.findMany({
+      where: {
+        eventId: id as string,
+        isActive: true
+      },
+      include: {
+        attendants_event_attendants_attendantIdToattendants: true
+      },
+      orderBy: [
+        { attendants_event_attendants_attendantIdToattendants: { firstName: 'asc' } },
+        { attendants_event_attendants_attendantIdToattendants: { lastName: 'asc' } }
+      ]
     });
+
+    // Transform to proper format with verification data
+    const allAttendants = eventAttendantAssociations
+      .filter(assoc => assoc.attendants_event_attendants_attendantIdToattendants?.isActive)
+      .map(assoc => {
+        const attendant = assoc.attendants_event_attendants_attendantIdToattendants!;
+        // Debug logging for Paul Lewis
+        if (attendant.firstName === 'Paul' && attendant.lastName === 'Lewis') {
+          console.log('SSR Paul Lewis verification data:', {
+            profileVerificationRequired: attendant.profileVerificationRequired,
+            profileVerifiedAt: attendant.profileVerifiedAt
+          });
+        }
+        return attendant;
+      });
 
     // Get event-attendant associations for oversight assignments
     const eventAssociations = await prisma.event_attendants.findMany({
