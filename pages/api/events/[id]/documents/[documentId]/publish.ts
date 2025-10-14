@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../../../auth/[...nextauth]'
 import { prisma } from '../../../../../../src/lib/prisma'
+import { randomUUID } from 'crypto'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -52,57 +53,53 @@ async function handlePublishDocument(req: NextApiRequest, res: NextApiResponse, 
     let publishedCount = 0
 
     if (publishType === 'all') {
-      // Get all attendants for this event
-      const eventAttendants = await prisma.event_attendants.findMany({
-        where: {
-          eventId: eventId
-        },
-        include: {
-          attendant: true
-        }
-      })
+      // Get all attendants for this event using raw query
+      const eventAttendants = await prisma.$queryRaw`
+        SELECT ea."attendantId", a."firstName", a."lastName"
+        FROM event_attendants ea
+        JOIN attendants a ON ea."attendantId" = a.id
+        WHERE ea."eventId" = ${eventId}
+        AND ea."isActive" = true
+      ` as any[]
 
-      const attendants = eventAttendants.map(ea => ea.attendant).filter(Boolean)
-      publishedCount = attendants.length
+      publishedCount = eventAttendants.length
 
       // Create document_publications records for all attendants
-      await prisma.document_publications.createMany({
-        data: attendants.map(attendant => ({
-          documentId: documentId,
-          attendantId: attendant.id,
-          publishedAt: new Date()
-        })),
-        skipDuplicates: true
-      })
+      for (const attendant of eventAttendants) {
+        await prisma.$executeRaw`
+          INSERT INTO document_publications (id, "documentId", "attendantId", "publishedAt")
+          VALUES (${randomUUID()}, ${documentId}, ${attendant.attendantId}, NOW())
+          ON CONFLICT ("documentId", "attendantId") DO NOTHING
+        `
+      }
+      
       console.log(`Published document ${documentId} to all ${publishedCount} attendants in event ${eventId}`)
     } else {
-      // Get event attendants and filter by provided IDs
-      const eventAttendants = await prisma.event_attendants.findMany({
-        where: {
-          eventId: eventId,
-          attendantId: { in: attendantIds }
-        },
-        include: {
-          attendant: true
-        }
-      })
+      // Verify attendants exist and are part of this event
+      const eventAttendants = await prisma.$queryRaw`
+        SELECT ea."attendantId", a."firstName", a."lastName"
+        FROM event_attendants ea
+        JOIN attendants a ON ea."attendantId" = a.id
+        WHERE ea."eventId" = ${eventId}
+        AND ea."attendantId" = ANY(${attendantIds})
+        AND ea."isActive" = true
+      ` as any[]
 
       if (eventAttendants.length !== attendantIds.length) {
         return res.status(400).json({ success: false, error: 'Some attendants are not part of this event' })
       }
 
-      const attendants = eventAttendants.map(ea => ea.attendant).filter(Boolean)
-      publishedCount = attendants.length
+      publishedCount = eventAttendants.length
 
       // Create document_publications records for selected attendants
-      await prisma.document_publications.createMany({
-        data: attendants.map(attendant => ({
-          documentId: documentId,
-          attendantId: attendant.id,
-          publishedAt: new Date()
-        })),
-        skipDuplicates: true
-      })
+      for (const attendant of eventAttendants) {
+        await prisma.$executeRaw`
+          INSERT INTO document_publications (id, "documentId", "attendantId", "publishedAt")
+          VALUES (${randomUUID()}, ${documentId}, ${attendant.attendantId}, NOW())
+          ON CONFLICT ("documentId", "attendantId") DO NOTHING
+        `
+      }
+      
       console.log(`Published document ${documentId} to ${publishedCount} selected attendants in event ${eventId}`)
     }
 
