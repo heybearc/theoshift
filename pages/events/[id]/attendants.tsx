@@ -1611,7 +1611,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
                     congregation: true,
                     formsOfService: true,
                     isActive: true,
-                    createdAt: true
+                    createdAt: true,
+                    profileVerificationRequired: true,
+                    profileVerifiedAt: true
                   }
                 },
                 overseer: {
@@ -1676,7 +1678,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             unavailableDates: true,
             totalAssignments: true,
             totalHours: true,
-            updatedAt: true
+            updatedAt: true,
+            profileVerificationRequired: true,
+            profileVerifiedAt: true
           }
         }
       },
