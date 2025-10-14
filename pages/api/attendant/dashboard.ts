@@ -13,47 +13,72 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // For Paul Lewis, return the actual published documents
-    let documents: any[] = []
-    
-    console.log('Dashboard API - attendantId:', attendantId, 'type:', typeof attendantId)
-    
-    if (attendantId === '17eee495-4a14-4825-8760-d5efac609783' || attendantId === 'paul-lewis-123') {
-      console.log('Paul Lewis detected - returning live documents')
-      // Paul Lewis - return his published documents
-      documents = [
-        {
-          id: "cmgplm21w000513oi9ekqjmhr",
-          title: "Assembly Hall Layout with Stations",
-          description: "Layout diagram showing all station positions",
-          fileName: "Willoughby Assembly Hall Layout with Stations.png",
-          fileSize: 278932,
-          fileType: "image/png",
-          fileUrl: "/uploads/documents/1760388082913_4bab16e62dee291d73d67c381ab48607.png",
-          publishedAt: "2025-10-14T16:09:08.923Z"
-        },
-        {
-          id: "cmgplihl1000313oiufwufdk4",
-          title: "Assembly Organization Guidelines",
-          description: "Official organization guidelines for assembly",
-          fileName: "S-330_s-Us_E.pdf",
-          fileSize: 330488,
-          fileType: "application/pdf",
-          fileUrl: "/uploads/documents/1760387916414_b86af0afa89811f21977001da54a4054.pdf",
-          publishedAt: "2025-10-14T16:09:20.659Z"
-        },
-        {
-          id: "cmgplgla0000113oim1u5idat",
-          title: "Operating Plan",
-          description: "Detailed operating plan for attendants",
-          fileName: "Attendant Operating Plan.pdf",
-          fileSize: 4852700,
-          fileType: "application/pdf",
-          fileUrl: "/uploads/documents/1760387827852_ddcea336977c83bdb8d1bd67dca75c0a.pdf",
-          publishedAt: "2025-10-14T16:09:33.007Z"
-        }
-      ]
+    // Get attendant information using proper Prisma
+    const attendant = await prisma.attendants.findUnique({
+      where: { id: attendantId as string }
+    })
+
+    if (!attendant) {
+      return res.status(404).json({ success: false, error: 'Attendant not found' })
     }
+
+    // Get published documents using proper Prisma queries
+    const publishedDocs = await prisma.document_publications.findMany({
+      where: {
+        attendantId: attendantId as string
+      },
+      include: {
+        document: true
+      },
+      orderBy: {
+        publishedAt: 'desc'
+      }
+    })
+
+    // Format documents for frontend
+    const documents = publishedDocs.map(pub => ({
+      id: pub.document.id,
+      title: pub.document.title,
+      description: pub.document.description,
+      fileName: pub.document.fileName,
+      fileSize: pub.document.fileSize,
+      fileType: pub.document.fileType,
+      fileUrl: pub.document.fileUrl,
+      publishedAt: pub.publishedAt.toISOString()
+    }))
+
+    // Get position assignments using proper Prisma
+    const positionAssignments = await prisma.position_assignments.findMany({
+      where: {
+        attendantId: attendantId as string,
+        eventId: eventId as string
+      },
+      include: {
+        position: true,
+        overseer: true,
+        keyman: true
+      }
+    })
+
+    // Format assignments
+    const assignments = positionAssignments.map(assignment => ({
+      id: assignment.id,
+      positionName: assignment.position?.name || 'Unknown Position',
+      startTime: assignment.startTime.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true 
+      }),
+      endTime: assignment.endTime.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true 
+      }),
+      location: assignment.position?.description || '',
+      instructions: assignment.notes,
+      overseer: assignment.overseer ? `${assignment.overseer.firstName} ${assignment.overseer.lastName}` : 'Darrell McCoy',
+      keyman: assignment.keyman ? `${assignment.keyman.firstName} ${assignment.keyman.lastName}` : 'Alex Zigler'
+    }))
 
     // For now, return test data for Paul Lewis with live documents
     return res.status(200).json({
