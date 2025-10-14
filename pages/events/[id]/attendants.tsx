@@ -913,7 +913,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                       <th className="w-20 px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                         Verification
                       </th>
-                      <th className="w-24 px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="w-28 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
@@ -1082,7 +1082,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             </span>
                           )}
                         </td>
-                        <td className="px-2 py-3 whitespace-nowrap text-sm font-medium">
+                        <td className="px-3 py-3 whitespace-nowrap text-sm font-medium">
                           <div className="relative inline-block text-left">
                             <button
                               onClick={() => toggleDropdown(attendant.id)}
