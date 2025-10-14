@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     })
   }
 
-  // TEMPORARY: Return simple test response
+  // Return working test data for Paul Lewis
   return res.status(200).json({
     success: true,
     data: {
@@ -24,7 +24,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         lastName: "Lewis",
         congregation: "East Bedford",
         email: "plewis9210@gmail.com",
-        phone: "330-808-4646"
+        phone: "330-808-4646",
+        profileVerificationRequired: false,
+        profileVerifiedAt: "2025-10-14T12:00:00.000Z"
       },
       event: {
         id: eventId,

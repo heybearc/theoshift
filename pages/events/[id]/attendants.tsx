@@ -830,10 +830,10 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="w-full divide-y divide-gray-200 table-fixed">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="w-8 px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <input
                           type="checkbox"
                           checked={selectedAttendants.size === attendants.length && attendants.length > 0}
@@ -841,7 +841,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
                       </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="w-40 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <button 
                           onClick={() => handleSort('lastName')}
                           className="flex items-center space-x-1 hover:text-gray-700"
@@ -852,7 +852,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                           )}
                         </button>
                       </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                      <th className="w-48 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                         <button 
                           onClick={() => handleSort('email')}
                           className="flex items-center space-x-1 hover:text-gray-700"
@@ -863,7 +863,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                           )}
                         </button>
                       </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                      <th className="w-32 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
                         <button 
                           onClick={() => handleSort('congregation')}
                           className="flex items-center space-x-1 hover:text-gray-700"
@@ -874,19 +874,19 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                           )}
                         </button>
                       </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                      <th className="w-36 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
                         Forms of Service
                       </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                      <th className="w-24 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                         Overseer
                       </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="w-20 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                      <th className="w-24 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                         Verification
                       </th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="w-20 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
@@ -910,11 +910,11 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             {attendant.email}
                           </div>
                         </td>
-                        <td className="px-3 py-3 whitespace-nowrap hidden sm:table-cell">
-                          <div className="text-sm text-gray-900">{attendant.email}</div>
+                        <td className="px-3 py-3 whitespace-nowrap hidden lg:table-cell">
+                          <div className="text-sm text-gray-900 truncate">{attendant.email}</div>
                         </td>
-                        <td className="px-3 py-3 whitespace-nowrap hidden md:table-cell">
-                          <div className="text-sm text-gray-900">{attendant.congregation || 'N/A'}</div>
+                        <td className="px-3 py-3 whitespace-nowrap hidden xl:table-cell">
+                          <div className="text-sm text-gray-900 truncate">{attendant.congregation || 'N/A'}</div>
                         </td>
                         <td className="px-3 py-3 whitespace-nowrap hidden lg:table-cell">
                           <div className="flex flex-wrap gap-1">
@@ -1054,6 +1054,30 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                               ❌ Not Verified
                             </span>
                           )}
+                        </td>
+                        <td className="px-2 py-3 whitespace-nowrap text-sm font-medium">
+                          <div className="flex flex-col space-y-1">
+                            <button
+                              onClick={() => handleSetPIN(attendant)}
+                              className="text-blue-600 hover:text-blue-900 text-xs px-1 py-1 border border-blue-300 rounded hover:bg-blue-50 transition-colors"
+                              title="Set PIN"
+                            >
+                              PIN
+                            </button>
+                            <button
+                              onClick={() => handleForceVerification(attendant)}
+                              className="text-orange-600 hover:text-orange-900 text-xs px-1 py-1 border border-orange-300 rounded hover:bg-orange-50 transition-colors"
+                              title="Force profile verification on next login"
+                            >
+                              Verify
+                            </button>
+                            <button
+                              onClick={() => handleEditAttendant(attendant)}
+                              className="text-indigo-600 hover:text-indigo-900 text-xs px-1 py-1 border border-indigo-300 rounded hover:bg-indigo-50 transition-colors"
+                            >
+                              Edit
+                            </button>
+                          </div>
                         </td>
                         <td className="px-3 py-3 whitespace-nowrap text-xs font-medium">
                           <div className="flex flex-col sm:flex-row gap-1">
