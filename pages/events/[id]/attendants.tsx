@@ -1680,11 +1680,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     
     console.log('🔥 SSR ATTENDANTS PAGE - Found', attendantIds.length, 'attendant IDs');
     
-    // Step 2: Get attendants directly with verification fields
+    // Step 2: Get ALL attendants (active AND inactive) with verification fields
     const allAttendants = await prisma.attendants.findMany({
       where: {
-        id: { in: attendantIds },
-        isActive: true
+        id: { in: attendantIds }
+        // Remove isActive filter to get both active and inactive attendants
       },
       select: {
         id: true,
@@ -1818,9 +1818,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         event,
         attendants,
         stats: {
-          total: attendants.length,
-          active: attendants.filter(a => a.isActive).length,
-          inactive: attendants.filter(a => !a.isActive).length
+          total: allAttendants.length,
+          active: allAttendants.filter(a => a.isActive).length,
+          inactive: allAttendants.filter(a => !a.isActive).length
         }
       }
     }
