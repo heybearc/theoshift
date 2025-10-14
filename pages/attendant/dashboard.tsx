@@ -91,8 +91,8 @@ export default function AttendantDashboard() {
       setAttendant(session.attendant)
       setSelectedEventId(eventId)
 
-      // Fetch dashboard data (using test endpoint temporarily)
-      const response = await fetch(`/api/attendant/dashboard-test?attendantId=${session.attendant.id}&eventId=${eventId}`)
+      // Fetch dashboard data (using fixed endpoint)
+      const response = await fetch(`/api/attendant/dashboard-fixed?attendantId=${session.attendant.id}&eventId=${eventId}`)
       const result = await response.json()
 
       if (result.success) {
