@@ -205,6 +205,52 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
     setShowAddModal(true)
   }
 
+  // Set PIN Handler
+  const handleSetPIN = async (attendant: Attendant) => {
+    let pin = ''
+    
+    // Auto-generate from phone if available
+    if (attendant.phone) {
+      const digits = attendant.phone.replace(/\D/g, '')
+      if (digits.length >= 4) {
+        pin = digits.slice(-4)
+        if (!confirm(`Auto-generate PIN "${pin}" from phone number for ${attendant.firstName} ${attendant.lastName}?`)) {
+          return
+        }
+      }
+    }
+    
+    // Manual entry if no phone or user declined auto-generate
+    if (!pin) {
+      pin = prompt(`Enter 4-digit PIN for ${attendant.firstName} ${attendant.lastName}:`) || ''
+      if (!pin || !/^\d{4}$/.test(pin)) {
+        if (pin) alert('PIN must be exactly 4 digits')
+        return
+      }
+    }
+
+    try {
+      const response = await fetch('/api/attendant/set-pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          attendantId: attendant.id,
+          pin,
+          autoGenerate: false
+        })
+      })
+
+      const result = await response.json()
+      if (result.success) {
+        alert(`PIN set successfully for ${attendant.firstName} ${attendant.lastName}: ${result.pin}\n\nPlease communicate this PIN to the attendant securely.`)
+      } else {
+        alert(`Failed to set PIN: ${result.error}`)
+      }
+    } catch (error) {
+      alert('Failed to set PIN. Please try again.')
+    }
+  }
+
   // Save Attendant Handler
   const handleSaveAttendant = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -944,6 +990,13 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                               className="text-blue-600 hover:text-blue-900 disabled:text-blue-400 text-xs"
                             >
                               Edit
+                            </button>
+                            <button 
+                              onClick={() => handleSetPIN(attendant)}
+                              disabled={loading}
+                              className="text-green-600 hover:text-green-900 disabled:text-green-400 text-xs"
+                            >
+                              Set PIN
                             </button>
                             <button 
                               onClick={() => handleRemoveAttendant(attendant)}

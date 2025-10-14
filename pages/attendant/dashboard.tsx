@@ -65,6 +65,8 @@ export default function AttendantDashboard() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const [showProfileVerification, setShowProfileVerification] = useState(false)
   const [profileData, setProfileData] = useState({ email: '', phone: '' })
+  const [isEditingProfile, setIsEditingProfile] = useState(false)
+  const [editProfileData, setEditProfileData] = useState({ email: '', phone: '' })
 
   useEffect(() => {
     loadDashboard()
@@ -134,6 +136,44 @@ export default function AttendantDashboard() {
     } catch (error) {
       console.error('Profile update failed:', error)
     }
+  }
+
+  const handleEditProfile = () => {
+    setEditProfileData({
+      email: dashboardData?.attendant.email || '',
+      phone: dashboardData?.attendant.phone || ''
+    })
+    setIsEditingProfile(true)
+  }
+
+  const handleSaveProfile = async () => {
+    try {
+      const response = await fetch(`/api/attendant/profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          attendantId: attendant?.id,
+          email: editProfileData.email,
+          phone: editProfileData.phone
+        })
+      })
+      
+      if (response.ok) {
+        setIsEditingProfile(false)
+        // Reload dashboard to get updated data
+        loadDashboard()
+      } else {
+        alert('Failed to update profile')
+      }
+    } catch (error) {
+      console.error('Profile update failed:', error)
+      alert('Failed to update profile')
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setIsEditingProfile(false)
+    setEditProfileData({ email: '', phone: '' })
   }
 
   const handleLogout = () => {
@@ -425,32 +465,86 @@ export default function AttendantDashboard() {
             <div className="space-y-6">
               {/* Personal Info */}
               <div className="bg-white shadow rounded-lg p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                  <span className="text-xl mr-2">👤</span>
-                  My Information
-                </h3>
-                <div className="space-y-3 text-sm">
-                  <div>
-                    <span className="text-gray-500">Name:</span>
-                    <p className="font-medium">{dashboardData.attendant.firstName} {dashboardData.attendant.lastName}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Congregation:</span>
-                    <p className="font-medium">{dashboardData.attendant.congregation}</p>
-                  </div>
-                  {dashboardData.attendant.email && (
-                    <div>
-                      <span className="text-gray-500">Email:</span>
-                      <p className="font-medium">{dashboardData.attendant.email}</p>
-                    </div>
-                  )}
-                  {dashboardData.attendant.phone && (
-                    <div>
-                      <span className="text-gray-500">Phone:</span>
-                      <p className="font-medium">{dashboardData.attendant.phone}</p>
-                    </div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-medium text-gray-900 flex items-center">
+                    <span className="text-xl mr-2">👤</span>
+                    My Information
+                  </h3>
+                  {!isEditingProfile && (
+                    <button
+                      onClick={handleEditProfile}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      Edit
+                    </button>
                   )}
                 </div>
+                
+                {isEditingProfile ? (
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-gray-500 text-sm">Name:</span>
+                      <p className="font-medium text-gray-400">{dashboardData.attendant.firstName} {dashboardData.attendant.lastName} (cannot be changed)</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 text-sm">Congregation:</span>
+                      <p className="font-medium text-gray-400">{dashboardData.attendant.congregation} (cannot be changed)</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-500 mb-1">Email:</label>
+                      <input
+                        type="email"
+                        value={editProfileData.email}
+                        onChange={(e) => setEditProfileData({ ...editProfileData, email: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="your.email@example.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-500 mb-1">Phone:</label>
+                      <input
+                        type="tel"
+                        value={editProfileData.phone}
+                        onChange={(e) => setEditProfileData({ ...editProfileData, phone: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="(555) 123-4567"
+                      />
+                    </div>
+                    <div className="flex space-x-2 pt-2">
+                      <button
+                        onClick={handleSaveProfile}
+                        className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={handleCancelEdit}
+                        className="px-4 py-2 bg-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-400"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <span className="text-gray-500">Name:</span>
+                      <p className="font-medium">{dashboardData.attendant.firstName} {dashboardData.attendant.lastName}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Congregation:</span>
+                      <p className="font-medium">{dashboardData.attendant.congregation}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Email:</span>
+                      <p className="font-medium">{dashboardData.attendant.email || <span className="text-gray-400">Not provided</span>}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Phone:</span>
+                      <p className="font-medium">{dashboardData.attendant.phone || <span className="text-gray-400">Not provided</span>}</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Oversight Contacts */}
