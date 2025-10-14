@@ -57,7 +57,7 @@ interface DashboardData {
   event: Event
   assignments: Assignment[]
   documents: Document[]
-  oversight: OversightContact[]
+  oversightContacts: OversightContact[]
 }
 
 export default function AttendantDashboard() {
@@ -373,7 +373,7 @@ export default function AttendantDashboard() {
                   </h2>
                 </div>
                 <div className="p-6">
-                  {dashboardData.assignments.length === 0 ? (
+                  {!dashboardData.assignments || dashboardData.assignments.length === 0 ? (
                     <div className="text-center py-8">
                       <div className="text-4xl mb-3">📝</div>
                       <p className="text-gray-600">No assignments yet</p>
@@ -383,7 +383,7 @@ export default function AttendantDashboard() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {dashboardData.assignments.map((assignment) => (
+                      {dashboardData.assignments?.map((assignment) => (
                         <div key={assignment.id} className="border border-gray-200 rounded-lg p-4">
                           <div className="flex items-start justify-between">
                             <div>
@@ -434,7 +434,7 @@ export default function AttendantDashboard() {
                   </h2>
                 </div>
                 <div className="p-6">
-                  {dashboardData.documents.length === 0 ? (
+                  {!dashboardData.documents || dashboardData.documents.length === 0 ? (
                     <div className="text-center py-8">
                       <div className="text-4xl mb-3">📄</div>
                       <p className="text-gray-600">No documents available</p>
@@ -444,7 +444,7 @@ export default function AttendantDashboard() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {dashboardData.documents.map((document) => (
+                      {dashboardData.documents?.map((document) => (
                         <div key={document.id} className="border border-gray-200 rounded-lg p-4">
                           <div className="flex items-start justify-between">
                             <div className="flex items-start space-x-3">
@@ -570,11 +570,11 @@ export default function AttendantDashboard() {
                   <span className="text-xl mr-2">👥</span>
                   My Oversight
                 </h3>
-                {dashboardData.oversight.length === 0 ? (
+                {!dashboardData.oversightContacts || dashboardData.oversightContacts.length === 0 ? (
                   <p className="text-sm text-gray-600">No oversight contacts assigned</p>
                 ) : (
                   <div className="space-y-4">
-                    {dashboardData.oversight.map((contact, index) => (
+                    {dashboardData.oversightContacts?.map((contact, index) => (
                       <div key={index} className="border-b border-gray-200 last:border-b-0 pb-3 last:pb-0">
                         <div className="text-sm">
                           <p className="font-medium text-gray-900">{contact.name}</p>
