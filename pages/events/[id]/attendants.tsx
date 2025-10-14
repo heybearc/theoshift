@@ -1651,49 +1651,49 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       status: eventData.status
     }
 
-    // APEX GUARDIAN FIX: Get event-specific attendants from event_attendant_associations
-    // This is the correct source of truth for event attendants
-    const eventAttendantAssociations = await prisma.event_attendants.findMany({
-      where: {
-        eventId: id as string
-      },
-      include: {
-        attendants: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-            phone: true,
-            congregation: true,
-            formsOfService: true,
-            isActive: true,
-            createdAt: true,
-            userId: true,
-            availabilityStatus: true,
-            notes: true,
-            servingAs: true,
-            skills: true,
-            preferredDepartments: true,
-            unavailableDates: true,
-            totalAssignments: true,
-            totalHours: true,
-            updatedAt: true,
-            profileVerificationRequired: true,
-            profileVerifiedAt: true
-          }
-        }
-      },
-      orderBy: [
-        { attendants: { firstName: 'asc' } },
-        { attendants: { lastName: 'asc' } }
-      ]
-    });
+    // Use raw SQL to get attendants with verification data (bypassing Prisma client issues)
+    const attendantsRaw = await prisma.$queryRaw`
+      SELECT 
+        a.id,
+        a."firstName",
+        a."lastName", 
+        a.email,
+        a.phone,
+        a.congregation,
+        a."formsOfService",
+        a."isActive",
+        a."createdAt",
+        a."userId",
+        a."availabilityStatus",
+        a.notes,
+        a."servingAs",
+        a.skills,
+        a."preferredDepartments", 
+        a."unavailableDates",
+        a."totalAssignments",
+        a."totalHours",
+        a."updatedAt",
+        a."profileVerificationRequired",
+        a."profileVerifiedAt"
+      FROM event_attendants ea
+      JOIN attendants a ON ea."attendantId" = a.id
+      WHERE ea."eventId" = ${id as string}
+      AND ea."isActive" = true
+      AND a."isActive" = true
+      ORDER BY a."firstName" ASC, a."lastName" ASC
+    ` as any[];
 
-    // Transform to match expected format and filter active attendants
-    const allAttendants = eventAttendantAssociations
-      .filter(assoc => assoc.attendants?.isActive)
-      .map(assoc => assoc.attendants!);
+    // Transform raw SQL results to match expected format
+    const allAttendants = attendantsRaw.map(attendant => {
+      // Debug logging for Paul Lewis
+      if (attendant.firstName === 'Paul' && attendant.lastName === 'Lewis') {
+        console.log('SSR Paul Lewis verification data:', {
+          profileVerificationRequired: attendant.profileVerificationRequired,
+          profileVerifiedAt: attendant.profileVerifiedAt
+        });
+      }
+      return attendant;
+    });
 
     // Get event-attendant associations for oversight assignments
     const eventAssociations = await prisma.event_attendants.findMany({
