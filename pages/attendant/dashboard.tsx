@@ -78,6 +78,7 @@ export default function AttendantDashboard() {
 
   const loadDashboard = async () => {
     try {
+      console.log('Loading dashboard...')
       // For now, use test data to bypass localStorage issues
       const testAttendantId = 'paul-lewis-123'
       const testEventId = 'd43d977b-c06e-446f-8c6d-05b407daf459'
@@ -85,10 +86,13 @@ export default function AttendantDashboard() {
       setSelectedEventId(testEventId)
 
       // Fetch dashboard data
+      console.log('Fetching dashboard data...')
       const response = await fetch(`/api/attendant/dashboard?attendantId=${testAttendantId}&eventId=${testEventId}`)
       const result = await response.json()
+      console.log('Dashboard API response:', result)
 
       if (result.success) {
+        console.log('Setting dashboard data...')
         setDashboardData(result.data)
         setAttendant(result.data.attendant)
         
@@ -108,8 +112,10 @@ export default function AttendantDashboard() {
         setError(result.error || 'Failed to load dashboard')
       }
     } catch (error) {
+      console.error('Dashboard loading error:', error)
       setError('An error occurred while loading your dashboard')
     } finally {
+      console.log('Dashboard loading complete, setting loading to false')
       setLoading(false)
     }
   }
@@ -199,11 +205,22 @@ export default function AttendantDashboard() {
   }
 
   const formatTime = (timeString: string) => {
-    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    })
+    // If the time string already includes AM/PM, return it as-is
+    if (timeString.includes('AM') || timeString.includes('PM')) {
+      return timeString
+    }
+    
+    // Otherwise, try to parse it as a 24-hour format
+    try {
+      return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      })
+    } catch (error) {
+      // If parsing fails, return the original string
+      return timeString
+    }
   }
 
   const formatFileSize = (bytes: number) => {
