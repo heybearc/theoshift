@@ -51,45 +51,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 async function handleGetEventAttendants(req: NextApiRequest, res: NextApiResponse, eventId: string, event: any) {
   try {
-    // Get attendants directly from attendants table with proper verification data
-    const attendantsWithAssignments = [
-      {
-        id: "17eee495-4a14-4825-8760-d5efac609783",
-        firstName: "Paul",
-        lastName: "Lewis", 
-        email: "plewis9210@gmail.com",
-        phone: "330-808-4646",
-        congregation: "East Bedford",
-        formsOfService: ["Elder"],
-        isActive: true,
-        profileVerificationRequired: false,
-        profileVerifiedAt: new Date("2025-10-14T16:08:44.067Z")
+    // Get attendants from event_attendants table with proper Prisma relations
+    const eventAttendants = await prisma.event_attendants.findMany({
+      where: {
+        eventId: eventId,
+        isActive: true
       },
-      {
-        id: "john-paul-id",
-        firstName: "John",
-        lastName: "Paul",
-        email: "jonpaul1914@gmail.com", 
-        phone: null,
-        congregation: "Chagrin Falls",
-        formsOfService: ["Ministerial Servant"],
-        isActive: true,
-        profileVerificationRequired: false,
-        profileVerifiedAt: null
+      include: {
+        attendants: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+            congregation: true,
+            formsOfService: true,
+            isActive: true,
+            profileVerificationRequired: true,
+            profileVerifiedAt: true,
+            createdAt: true,
+            updatedAt: true
+          }
+        }
       },
-      {
-        id: "paul-terry-id", 
-        firstName: "Paul",
-        lastName: "Terry",
-        email: "paulterry@gmail.com",
-        phone: null,
-        congregation: "South English",
-        formsOfService: ["Elder"],
-        isActive: true,
-        profileVerificationRequired: false,
-        profileVerifiedAt: null
-      }
-    ]
+      orderBy: [
+        { attendants: { firstName: 'asc' } },
+        { attendants: { lastName: 'asc' } }
+      ]
+    })
+
+    // Filter and map to get attendants with verification data
+    const attendantsWithAssignments = eventAttendants
+      .filter(ea => ea.attendants && ea.attendants.isActive)
+      .map(ea => ea.attendants!)
 
     return res.status(200).json({
       success: true,
