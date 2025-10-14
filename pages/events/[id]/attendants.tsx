@@ -61,15 +61,39 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
   const [editingAttendant, setEditingAttendant] = useState<Attendant | null>(null)
   const [importFile, setImportFile] = useState<File | null>(null)
   const [selectedAttendants, setSelectedAttendants] = useState<Set<string>>(new Set())
+  const [showBulkEdit, setShowBulkEdit] = useState(false)
   const [bulkEditData, setBulkEditData] = useState({
     isActive: '',
-    formsOfService: '',
     congregation: '',
+    formsOfService: '',
     overseerId: null as string | null,
     keymanId: null as string | null,
     pinAction: '' // 'auto-generate', 'reset', or ''
   })
+  const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set())
   const [sortField, setSortField] = useState<string>('lastName')
+  
+  // Helper functions for dropdown management
+  const toggleDropdown = (attendantId: string) => {
+    setOpenDropdowns(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(attendantId)) {
+        newSet.delete(attendantId)
+      } else {
+        newSet.clear() // Close all other dropdowns
+        newSet.add(attendantId)
+      }
+      return newSet
+    })
+  }
+  
+  const closeDropdown = (attendantId: string) => {
+    setOpenDropdowns(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(attendantId)
+      return newSet
+    })
+  }
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
   // Sort attendants based on current sort field and direction
@@ -1061,12 +1085,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                         <td className="px-2 py-3 whitespace-nowrap text-sm font-medium">
                           <div className="relative inline-block text-left">
                             <button
-                              onClick={() => {
-                                const dropdown = document.getElementById(`dropdown-${attendant.id}`)
-                                if (dropdown) {
-                                  dropdown.classList.toggle('hidden')
-                                }
-                              }}
+                              onClick={() => toggleDropdown(attendant.id)}
                               className="inline-flex items-center px-2 py-1 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                             >
                               Actions
@@ -1074,15 +1093,14 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                               </svg>
                             </button>
-                            <div
-                              id={`dropdown-${attendant.id}`}
-                              className="hidden absolute right-0 z-10 mt-1 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
-                            >
+                            {openDropdowns.has(attendant.id) && (
+                              <div className="absolute right-0 z-10 mt-1 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+                              >
                               <div className="py-1">
                                 <button
                                   onClick={() => {
                                     handleSetPIN(attendant)
-                                    document.getElementById(`dropdown-${attendant.id}`)?.classList.add('hidden')
+                                    closeDropdown(attendant.id)
                                   }}
                                   className="block w-full text-left px-3 py-1 text-xs text-blue-600 hover:bg-blue-50"
                                 >
@@ -1091,7 +1109,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                 <button
                                   onClick={() => {
                                     handleForceVerification(attendant)
-                                    document.getElementById(`dropdown-${attendant.id}`)?.classList.add('hidden')
+                                    closeDropdown(attendant.id)
                                   }}
                                   className="block w-full text-left px-3 py-1 text-xs text-orange-600 hover:bg-orange-50"
                                 >
@@ -1100,7 +1118,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                 <button
                                   onClick={() => {
                                     handleEditAttendant(attendant)
-                                    document.getElementById(`dropdown-${attendant.id}`)?.classList.add('hidden')
+                                    closeDropdown(attendant.id)
                                   }}
                                   className="block w-full text-left px-3 py-1 text-xs text-indigo-600 hover:bg-indigo-50"
                                 >
@@ -1109,14 +1127,15 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                 <button
                                   onClick={() => {
                                     handleRemoveAttendant(attendant)
-                                    document.getElementById(`dropdown-${attendant.id}`)?.classList.add('hidden')
+                                    closeDropdown(attendant.id)
                                   }}
                                   className="block w-full text-left px-3 py-1 text-xs text-red-600 hover:bg-red-50"
                                 >
                                   Remove
                                 </button>
                               </div>
-                            </div>
+                              </div>
+                            )}
                           </div>
                         </td>
                       </tr>
