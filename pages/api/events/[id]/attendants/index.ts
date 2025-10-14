@@ -58,7 +58,7 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
         isActive: true
       },
       include: {
-        attendants: {
+        attendants_event_attendants_attendantIdToattendants: {
           select: {
             id: true,
             firstName: true,
@@ -76,15 +76,15 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
         }
       },
       orderBy: [
-        { attendants: { firstName: 'asc' } },
-        { attendants: { lastName: 'asc' } }
+        { attendants_event_attendants_attendantIdToattendants: { firstName: 'asc' } },
+        { attendants_event_attendants_attendantIdToattendants: { lastName: 'asc' } }
       ]
     })
 
     // Filter and map to get attendants with verification data
     const attendantsWithAssignments = eventAttendants
-      .filter(ea => ea.attendants && ea.attendants.isActive)
-      .map(ea => ea.attendants!)
+      .filter(ea => ea.attendants_event_attendants_attendantIdToattendants && ea.attendants_event_attendants_attendantIdToattendants.isActive)
+      .map(ea => ea.attendants_event_attendants_attendantIdToattendants!)
 
     return res.status(200).json({
       success: true,
