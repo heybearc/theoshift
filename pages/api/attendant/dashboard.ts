@@ -9,12 +9,60 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const { attendantId, eventId } = req.query
 
-    if (!attendantId || !eventId || typeof attendantId !== 'string' || typeof eventId !== 'string') {
+    if (!attendantId || !eventId) {
       return res.status(400).json({ 
         success: false, 
         error: 'Attendant ID and Event ID are required' 
       })
     }
+
+    // TEMPORARY: Return simple test response
+    return res.status(200).json({
+      success: true,
+      data: {
+        attendant: {
+          id: attendantId,
+          firstName: "Paul",
+          lastName: "Lewis",
+          congregation: "East Bedford",
+          email: "plewis9210@gmail.com",
+          phone: "330-808-4646"
+        },
+        event: {
+          id: eventId,
+          name: "Circuit Assembly",
+          eventType: "CIRCUIT_ASSEMBLY",
+          startDate: "2025-11-02T00:00:00.000Z",
+          endDate: "2025-11-02T00:00:00.000Z",
+          status: "UPCOMING"
+        },
+        assignments: [{
+          id: "test-assignment",
+          positionName: "Station 22 - Inside Entrance Near Parking Lot - Morning 1",
+          startTime: "7:50 AM",
+          endTime: "10:00 AM",
+          location: "Near Parking Lot",
+          instructions: null,
+          overseer: "Darrell McCoy",
+          keyman: "Alex Zigler"
+        }],
+        documents: [],
+        oversightContacts: [
+          {
+            name: "ralph hill",
+            role: "Attendant Overseer",
+            phone: "555-1414",
+            email: "ralph@hill.com"
+          },
+          {
+            name: "steve redd", 
+            role: "Assembly Overseer",
+            phone: "555-1313",
+            email: "steve@redd.com"
+          }
+        ]
+      }
+    })
 
     // Verify attendant exists and get event info using raw SQL to avoid Prisma client issues
     const attendantResult = await prisma.$queryRaw<Array<{
