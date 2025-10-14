@@ -1576,9 +1576,11 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  console.log('🔥 SSR ATTENDANTS PAGE - STARTING')
   const session = await getServerSession(context.req, context.res, authOptions)
   
   if (!session) {
+    console.log('🔥 SSR ATTENDANTS PAGE - NO SESSION, REDIRECTING')
     return {
       redirect: {
         destination: '/auth/signin',
@@ -1666,6 +1668,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       ]
     });
 
+    console.log('🔥 SSR ATTENDANTS PAGE - Got', eventAttendantAssociations.length, 'attendant associations')
+    
     // Transform to proper format with verification data
     const allAttendants = eventAttendantAssociations
       .filter(assoc => assoc.attendants_event_attendants_attendantIdToattendants?.isActive)
@@ -1673,13 +1677,15 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         const attendant = assoc.attendants_event_attendants_attendantIdToattendants!;
         // Debug logging for Paul Lewis
         if (attendant.firstName === 'Paul' && attendant.lastName === 'Lewis') {
-          console.log('SSR Paul Lewis verification data:', {
+          console.log('🔥 SSR Paul Lewis verification data:', {
             profileVerificationRequired: attendant.profileVerificationRequired,
             profileVerifiedAt: attendant.profileVerifiedAt
           });
         }
         return attendant;
       });
+      
+    console.log('🔥 SSR ATTENDANTS PAGE - Processed', allAttendants.length, 'attendants');
 
     // Get event-attendant associations for oversight assignments
     const eventAssociations = await prisma.event_attendants.findMany({
