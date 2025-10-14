@@ -85,8 +85,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       SELECT 
         pa.id,
         p.name as "positionName",
-        ps.start_time as "startTime",
-        ps.end_time as "endTime",
+        ps."startTime" as "startTime",
+        ps."endTime" as "endTime",
         p.location,
         p.instructions,
         ps.name as "shiftName",
