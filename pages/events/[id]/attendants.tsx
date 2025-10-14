@@ -880,6 +880,9 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                       <th className="w-24 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                         Overseer
                       </th>
+                      <th className="w-24 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+                        Keyman
+                      </th>
                       <th className="w-20 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
                       </th>
@@ -937,7 +940,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             ))}
                           </div>
                         </td>
-                        <td className="px-3 py-3 whitespace-nowrap hidden md:table-cell">
+                        <td className="px-3 py-3 whitespace-nowrap hidden lg:table-cell">
                           <select
                             value={attendant.overseerId || ''}
                             onChange={async (e) => {
@@ -984,7 +987,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             ))}
                           </select>
                         </td>
-                        <td className="px-3 py-3 whitespace-nowrap hidden md:table-cell">
+                        <td className="px-3 py-3 whitespace-nowrap hidden lg:table-cell">
                           <select
                             value={attendant.keymanId || ''}
                             onChange={async (e) => {
@@ -1056,59 +1059,64 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                           )}
                         </td>
                         <td className="px-2 py-3 whitespace-nowrap text-sm font-medium">
-                          <div className="flex flex-col space-y-1">
+                          <div className="relative inline-block text-left">
                             <button
-                              onClick={() => handleSetPIN(attendant)}
-                              className="text-blue-600 hover:text-blue-900 text-xs px-1 py-1 border border-blue-300 rounded hover:bg-blue-50 transition-colors"
-                              title="Set PIN"
+                              onClick={() => {
+                                const dropdown = document.getElementById(`dropdown-${attendant.id}`)
+                                if (dropdown) {
+                                  dropdown.classList.toggle('hidden')
+                                }
+                              }}
+                              className="inline-flex items-center px-2 py-1 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                             >
-                              PIN
+                              Actions
+                              <svg className="ml-1 h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                              </svg>
                             </button>
-                            <button
-                              onClick={() => handleForceVerification(attendant)}
-                              className="text-orange-600 hover:text-orange-900 text-xs px-1 py-1 border border-orange-300 rounded hover:bg-orange-50 transition-colors"
-                              title="Force profile verification on next login"
+                            <div
+                              id={`dropdown-${attendant.id}`}
+                              className="hidden absolute right-0 z-10 mt-1 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
                             >
-                              Verify
-                            </button>
-                            <button
-                              onClick={() => handleEditAttendant(attendant)}
-                              className="text-indigo-600 hover:text-indigo-900 text-xs px-1 py-1 border border-indigo-300 rounded hover:bg-indigo-50 transition-colors"
-                            >
-                              Edit
-                            </button>
-                          </div>
-                        </td>
-                        <td className="px-3 py-3 whitespace-nowrap text-xs font-medium">
-                          <div className="flex flex-col sm:flex-row gap-1">
-                            <button 
-                              onClick={() => handleEditAttendant(attendant)}
-                              disabled={loading}
-                              className="text-blue-600 hover:text-blue-900 disabled:text-blue-400 text-xs"
-                            >
-                              Edit
-                            </button>
-                            <button 
-                              onClick={() => handleSetPIN(attendant)}
-                              disabled={loading}
-                              className="text-green-600 hover:text-green-900 disabled:text-green-400 text-xs"
-                            >
-                              Set PIN
-                            </button>
-                            <button 
-                              onClick={() => handleForceVerification(attendant)}
-                              disabled={loading}
-                              className="text-purple-600 hover:text-purple-900 disabled:text-purple-400 text-xs"
-                            >
-                              Force Verify
-                            </button>
-                            <button 
-                              onClick={() => handleRemoveAttendant(attendant)}
-                              disabled={loading}
-                              className="text-red-600 hover:text-red-900 disabled:text-red-400 text-xs"
-                            >
-                              Remove
-                            </button>
+                              <div className="py-1">
+                                <button
+                                  onClick={() => {
+                                    handleSetPIN(attendant)
+                                    document.getElementById(`dropdown-${attendant.id}`)?.classList.add('hidden')
+                                  }}
+                                  className="block w-full text-left px-3 py-1 text-xs text-blue-600 hover:bg-blue-50"
+                                >
+                                  Set PIN
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    handleForceVerification(attendant)
+                                    document.getElementById(`dropdown-${attendant.id}`)?.classList.add('hidden')
+                                  }}
+                                  className="block w-full text-left px-3 py-1 text-xs text-orange-600 hover:bg-orange-50"
+                                >
+                                  Force Verify
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    handleEditAttendant(attendant)
+                                    document.getElementById(`dropdown-${attendant.id}`)?.classList.add('hidden')
+                                  }}
+                                  className="block w-full text-left px-3 py-1 text-xs text-indigo-600 hover:bg-indigo-50"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    handleRemoveAttendant(attendant)
+                                    document.getElementById(`dropdown-${attendant.id}`)?.classList.add('hidden')
+                                  }}
+                                  className="block w-full text-left px-3 py-1 text-xs text-red-600 hover:bg-red-50"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </td>
                       </tr>
