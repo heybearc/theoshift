@@ -54,6 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           fileName: "assembly-instructions.pdf",
           fileSize: 245760,
           fileType: "application/pdf",
+          fileUrl: "/api/documents/doc-1/download",
           publishedAt: "2025-10-14T10:00:00.000Z"
         },
         {
@@ -63,21 +64,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           fileName: "emergency-procedures.pdf",
           fileSize: 189440,
           fileType: "application/pdf",
+          fileUrl: "/api/documents/doc-2/download",
           publishedAt: "2025-10-14T09:30:00.000Z"
+        },
+        {
+          id: "doc-3",
+          title: "Station 22 Specific Instructions",
+          description: "Detailed instructions for Station 22 attendants",
+          fileName: "station-22-instructions.pdf",
+          fileSize: 156320,
+          fileType: "application/pdf",
+          fileUrl: "/api/documents/doc-3/download",
+          publishedAt: "2025-10-14T08:15:00.000Z"
+        },
+        {
+          id: "doc-4",
+          title: "Assembly Schedule",
+          description: "Complete schedule for the Circuit Assembly",
+          fileName: "assembly-schedule.pdf",
+          fileSize: 298760,
+          fileType: "application/pdf",
+          fileUrl: "/api/documents/doc-4/download",
+          publishedAt: "2025-10-14T07:45:00.000Z"
         }
       ],
       oversightContacts: [
         {
-          name: "ralph hill",
-          role: "Attendant Overseer",
-          phone: "555-1414",
-          email: "ralph@hill.com"
+          name: "Darrell McCoy",
+          role: "Position Overseer",
+          phone: "330-555-0123",
+          email: "darrell.mccoy@example.com"
         },
         {
-          name: "steve redd", 
-          role: "Assembly Overseer",
-          phone: "555-1313",
-          email: "steve@redd.com"
+          name: "Alex Zigler", 
+          role: "Position Keyman",
+          phone: "330-555-0124",
+          email: "alex.zigler@example.com"
         }
       ]
     }
