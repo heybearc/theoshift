@@ -77,7 +77,9 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
             unavailableDates: true,
             totalAssignments: true,
             totalHours: true,
-            updatedAt: true
+            updatedAt: true,
+            profileVerificationRequired: true,
+            profileVerifiedAt: true
           }
         }
       },
@@ -103,6 +105,8 @@ async function handleGetEventAttendants(req: NextApiRequest, res: NextApiRespons
         congregation: attendant.congregation,
         formsOfService: attendant.formsOfService,
         isActive: attendant.isActive,
+        profileVerificationRequired: attendant.profileVerificationRequired,
+        profileVerifiedAt: attendant.profileVerifiedAt,
         // Note: Position assignments are now separate from attendant data
         // They can be fetched separately if needed via positions API
         assignments: []
