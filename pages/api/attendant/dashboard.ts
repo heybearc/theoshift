@@ -16,7 +16,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // For Paul Lewis, return the actual published documents
     let documents: any[] = []
     
+    console.log('Dashboard API - attendantId:', attendantId, 'type:', typeof attendantId)
+    
     if (attendantId === '17eee495-4a14-4825-8760-d5efac609783') {
+      console.log('Paul Lewis detected - returning live documents')
       // Paul Lewis - return his published documents
       documents = [
         {
