@@ -258,7 +258,7 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
 
     try {
       const url = editingAttendant 
-        ? `/api/events/${eventId}/attendants/${editingAttendant.associationId}`
+        ? `/api/events/${eventId}/attendants/${editingAttendant.id}`
         : `/api/events/${eventId}/attendants`
       
       const method = editingAttendant ? 'PUT' : 'POST'
