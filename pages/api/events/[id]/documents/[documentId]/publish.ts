@@ -53,41 +53,57 @@ async function handlePublishDocument(req: NextApiRequest, res: NextApiResponse, 
 
     if (publishType === 'all') {
       // Get all attendants for this event
-      const attendants = await prisma.attendants.findMany({
+      const eventAttendants = await prisma.event_attendants.findMany({
         where: {
-          event_attendants: {
-            some: {
-              eventId: eventId
-            }
-          }
+          eventId: eventId
+        },
+        include: {
+          attendant: true
         }
       })
 
+      const attendants = eventAttendants.map(ea => ea.attendant).filter(Boolean)
       publishedCount = attendants.length
 
-      // TODO: Create document_publications records for all attendants
-      console.log(`Publishing document ${documentId} to all ${publishedCount} attendants in event ${eventId}`)
+      // Create document_publications records for all attendants
+      await prisma.document_publications.createMany({
+        data: attendants.map(attendant => ({
+          documentId: documentId,
+          attendantId: attendant.id,
+          publishedAt: new Date()
+        })),
+        skipDuplicates: true
+      })
+      console.log(`Published document ${documentId} to all ${publishedCount} attendants in event ${eventId}`)
     } else {
-      // Verify attendants exist and are part of this event
-      const attendants = await prisma.attendants.findMany({
+      // Get event attendants and filter by provided IDs
+      const eventAttendants = await prisma.event_attendants.findMany({
         where: {
-          id: { in: attendantIds },
-          event_attendants: {
-            some: {
-              eventId: eventId
-            }
-          }
+          eventId: eventId,
+          attendantId: { in: attendantIds }
+        },
+        include: {
+          attendant: true
         }
       })
 
-      if (attendants.length !== attendantIds.length) {
+      if (eventAttendants.length !== attendantIds.length) {
         return res.status(400).json({ success: false, error: 'Some attendants are not part of this event' })
       }
 
+      const attendants = eventAttendants.map(ea => ea.attendant).filter(Boolean)
       publishedCount = attendants.length
 
-      // TODO: Create document_publications records for selected attendants
-      console.log(`Publishing document ${documentId} to ${publishedCount} selected attendants in event ${eventId}`)
+      // Create document_publications records for selected attendants
+      await prisma.document_publications.createMany({
+        data: attendants.map(attendant => ({
+          documentId: documentId,
+          attendantId: attendant.id,
+          publishedAt: new Date()
+        })),
+        skipDuplicates: true
+      })
+      console.log(`Published document ${documentId} to ${publishedCount} selected attendants in event ${eventId}`)
     }
 
     // TODO: Update document record with publish status

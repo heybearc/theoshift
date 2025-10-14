@@ -46,7 +46,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         overseer: "Darrell McCoy",
         keyman: "Alex Zigler"
       }],
-      documents: [],
+      documents: [
+        {
+          id: "doc-1",
+          title: "Assembly Instructions",
+          description: "Important instructions for all attendants",
+          fileName: "assembly-instructions.pdf",
+          fileSize: 245760,
+          fileType: "application/pdf",
+          publishedAt: "2025-10-14T10:00:00.000Z"
+        },
+        {
+          id: "doc-2", 
+          title: "Emergency Procedures",
+          description: "Emergency contact information and procedures",
+          fileName: "emergency-procedures.pdf",
+          fileSize: 189440,
+          fileType: "application/pdf",
+          publishedAt: "2025-10-14T09:30:00.000Z"
+        }
+      ],
       oversightContacts: [
         {
           name: "ralph hill",
