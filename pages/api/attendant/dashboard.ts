@@ -16,44 +16,131 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
     }
 
-    // Verify attendant exists and is part of this event
-    const attendant = await prisma.attendants.findFirst({
-      where: {
-        id: attendantId,
-        event_attendants: {
-          some: {
-            eventId: eventId
-          }
-        }
-      },
-      include: {
-        event_attendants: {
-          where: {
-            eventId: eventId
-          },
-          include: {
-            events: true
-          }
-        }
-      }
-    })
+    // Verify attendant exists and get event info using raw SQL to avoid Prisma client issues
+    const attendantResult = await prisma.$queryRaw<Array<{
+      id: string
+      firstName: string
+      lastName: string
+      congregation: string
+      email: string | null
+      phone: string | null
+      profileVerificationRequired: boolean
+      profileVerifiedAt: Date | null
+    }>>`
+      SELECT id, "firstName", "lastName", congregation, email, phone, 
+             "profileVerificationRequired", "profileVerifiedAt"
+      FROM attendants 
+      WHERE id = ${attendantId}
+    `
 
-    if (!attendant || attendant.event_attendants.length === 0) {
+    if (!attendantResult || attendantResult.length === 0) {
       return res.status(404).json({ 
         success: false, 
-        error: 'Attendant not found or not assigned to this event' 
+        error: 'Attendant not found' 
       })
     }
 
-    const event = attendant.event_attendants[0].events
+    const attendant = attendantResult[0]
+
+    // Get event info
+    const event = await prisma.events.findUnique({
+      where: { id: eventId }
+    })
+
+    if (!event) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Event not found' 
+      })
+    }
+
+    // Verify attendant is assigned to this event
+    const eventAssignmentCheck = await prisma.$queryRaw<Array<{ count: number }>>`
+      SELECT COUNT(*) as count
+      FROM event_attendants 
+      WHERE "attendantId" = ${attendantId} AND "eventId" = ${eventId}
+    `
+
+    if (!eventAssignmentCheck[0] || eventAssignmentCheck[0].count === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Attendant not assigned to this event' 
+      })
+    }
 
     // Get attendant's assignments for this event
-    // TODO: Implement when assignment system is ready
-    const assignments = []
+    const assignmentsResult = await prisma.$queryRaw<Array<{
+      id: string
+      positionName: string
+      startTime: string | null
+      endTime: string | null
+      location: string | null
+      instructions: string | null
+      shiftName: string | null
+    }>>`
+      SELECT 
+        pa.id,
+        p.name as "positionName",
+        ps.start_time as "startTime",
+        ps.end_time as "endTime",
+        p.location,
+        p.instructions,
+        ps.name as "shiftName"
+      FROM position_assignments pa
+      JOIN positions p ON pa."positionId" = p.id
+      LEFT JOIN position_shifts ps ON pa."shiftId" = ps.id
+      WHERE pa."attendantId" = ${attendantId} 
+        AND p."eventId" = ${eventId}
+        AND pa."isActive" = true
+      ORDER BY ps.sequence ASC, p.name ASC
+    `
+
+    const assignments = assignmentsResult.map(assignment => ({
+      id: assignment.id,
+      positionName: assignment.positionName + (assignment.shiftName ? ` - ${assignment.shiftName}` : ''),
+      startTime: assignment.startTime || 'TBD',
+      endTime: assignment.endTime || 'TBD',
+      location: assignment.location,
+      instructions: assignment.instructions
+    }))
 
     // Get documents published to this attendant for this event
-    // TODO: Implement when document publishing database is ready
-    const documents = []
+    const documentsResult = await prisma.$queryRaw<Array<{
+      id: string
+      title: string
+      fileName: string
+      fileUrl: string
+      fileType: string
+      fileSize: number
+      publishedAt: Date
+      viewedAt: Date | null
+    }>>`
+      SELECT 
+        ed.id,
+        ed.title,
+        ed."fileName",
+        ed."fileUrl",
+        ed."fileType",
+        ed."fileSize",
+        dp."publishedAt",
+        dp."viewedAt"
+      FROM document_publications dp
+      JOIN event_documents ed ON dp."documentId" = ed.id
+      WHERE dp."attendantId" = ${attendantId} 
+        AND ed."eventId" = ${eventId}
+      ORDER BY dp."publishedAt" DESC
+    `
+
+    const documents = documentsResult.map(doc => ({
+      id: doc.id,
+      title: doc.title,
+      fileName: doc.fileName,
+      fileUrl: doc.fileUrl,
+      fileType: doc.fileType,
+      fileSize: doc.fileSize,
+      publishedAt: doc.publishedAt.toISOString(),
+      isNew: !doc.viewedAt
+    }))
 
     // Get oversight contacts for this attendant/event
     // TODO: Implement when oversight system is ready
@@ -81,7 +168,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           lastName: attendant.lastName,
           congregation: attendant.congregation,
           email: attendant.email,
-          phone: attendant.phone
+          phone: attendant.phone,
+          profileVerificationRequired: attendant.profileVerificationRequired,
+          profileVerifiedAt: attendant.profileVerifiedAt?.toISOString()
         },
         event: {
           id: event.id,

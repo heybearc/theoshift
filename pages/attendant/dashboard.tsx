@@ -8,8 +8,10 @@ interface Attendant {
   firstName: string
   lastName: string
   congregation: string
-  email?: string
-  phone?: string
+  email: string
+  phone: string
+  profileVerificationRequired?: boolean
+  profileVerifiedAt?: string
 }
 
 interface Event {
@@ -94,9 +96,11 @@ export default function AttendantDashboard() {
       if (result.success) {
         setDashboardData(result.data)
         
-        // Check if this is first login (no profileVerified flag in localStorage)
+        // Check if profile verification is required (admin-forced OR first login)
         const hasVerified = localStorage.getItem('profileVerified')
-        if (!hasVerified) {
+        const adminForced = result.data.attendant.profileVerificationRequired
+        
+        if (adminForced || !hasVerified) {
           // Pre-fill with existing data
           setProfileData({
             email: result.data.attendant.email || '',

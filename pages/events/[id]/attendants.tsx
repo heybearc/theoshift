@@ -251,6 +251,32 @@ export default function EventAttendantsPage({ eventId, event, attendants, stats 
     }
   }
 
+  // Force Profile Verification Handler
+  const handleForceVerification = async (attendant: Attendant) => {
+    if (!confirm(`Force profile verification for ${attendant.firstName} ${attendant.lastName}?\n\nThis will require them to verify their contact information on next login.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/attendant/force-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          attendantId: attendant.id
+        })
+      })
+
+      const result = await response.json()
+      if (result.success) {
+        alert(`Profile verification required for ${attendant.firstName} ${attendant.lastName}.\n\nThey will see a verification popup on their next login.`)
+      } else {
+        alert(`Failed to set verification requirement: ${result.error}`)
+      }
+    } catch (error) {
+      alert('Failed to set verification requirement. Please try again.')
+    }
+  }
+
   // Save Attendant Handler
   const handleSaveAttendant = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -997,6 +1023,13 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                               className="text-green-600 hover:text-green-900 disabled:text-green-400 text-xs"
                             >
                               Set PIN
+                            </button>
+                            <button 
+                              onClick={() => handleForceVerification(attendant)}
+                              disabled={loading}
+                              className="text-purple-600 hover:text-purple-900 disabled:text-purple-400 text-xs"
+                            >
+                              Force Verify
                             </button>
                             <button 
                               onClick={() => handleRemoveAttendant(attendant)}

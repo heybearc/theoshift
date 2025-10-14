@@ -13,15 +13,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ success: false, error: 'Attendant ID is required' })
     }
 
-    // Update attendant profile
-    await prisma.attendants.update({
-      where: { id: attendantId },
-      data: {
-        email: email || '',
-        phone: phone || '',
-        updatedAt: new Date()
-      }
-    })
+    // Update attendant profile and clear verification requirement
+    await prisma.$executeRaw`
+      UPDATE attendants 
+      SET email = ${email || ''}, 
+          phone = ${phone || ''}, 
+          "profileVerificationRequired" = false,
+          "profileVerifiedAt" = NOW(),
+          "updatedAt" = NOW()
+      WHERE id = ${attendantId}
+    `
 
     return res.status(200).json({
       success: true,
