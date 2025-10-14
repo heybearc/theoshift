@@ -68,15 +68,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
     }
 
-    // Get attendant's assignments for this event
+    // Get assignments for this attendant in this event using raw SQL
     const assignmentsResult = await prisma.$queryRaw<Array<{
       id: string
       positionName: string
-      startTime: string | null
-      endTime: string | null
+      startTime: Date | null
+      endTime: Date | null
       location: string | null
       instructions: string | null
       shiftName: string | null
+      overseerFirstName: string | null
+      overseerLastName: string | null
+      keymanFirstName: string | null
+      keymanLastName: string | null
     }>>`
       SELECT 
         pa.id,
@@ -85,10 +89,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ps.end_time as "endTime",
         p.location,
         p.instructions,
-        ps.name as "shiftName"
+        ps.name as "shiftName",
+        overseer."firstName" as "overseerFirstName",
+        overseer."lastName" as "overseerLastName",
+        keyman."firstName" as "keymanFirstName",
+        keyman."lastName" as "keymanLastName"
       FROM position_assignments pa
       JOIN positions p ON pa."positionId" = p.id
       LEFT JOIN position_shifts ps ON pa."shiftId" = ps.id
+      LEFT JOIN attendants overseer ON p."overseerId" = overseer.id
+      LEFT JOIN attendants keyman ON p."keymanId" = keyman.id
       WHERE pa."attendantId" = ${attendantId} 
         AND p."eventId" = ${eventId}
         AND pa."isActive" = true
@@ -101,7 +111,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       startTime: assignment.startTime || 'TBD',
       endTime: assignment.endTime || 'TBD',
       location: assignment.location,
-      instructions: assignment.instructions
+      instructions: assignment.instructions,
+      overseer: assignment.overseerFirstName && assignment.overseerLastName 
+        ? `${assignment.overseerFirstName} ${assignment.overseerLastName}` 
+        : null,
+      keyman: assignment.keymanFirstName && assignment.keymanLastName 
+        ? `${assignment.keymanFirstName} ${assignment.keymanLastName}` 
+        : null
     }))
 
     // Get documents published to this attendant for this event

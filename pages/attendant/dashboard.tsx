@@ -30,6 +30,8 @@ interface Assignment {
   endTime: string
   location?: string
   instructions?: string
+  overseer?: string
+  keyman?: string
 }
 
 interface Document {
@@ -402,6 +404,23 @@ export default function AttendantDashboard() {
                                 <p className="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">
                                   {assignment.instructions}
                                 </p>
+                              )}
+                              {(assignment.overseer || assignment.keyman) && (
+                                <div className="mt-3 pt-3 border-t border-gray-100">
+                                  <p className="text-xs text-gray-500 mb-1">Position Oversight:</p>
+                                  <div className="flex flex-wrap gap-3 text-sm">
+                                    {assignment.overseer && (
+                                      <span className="text-blue-600">
+                                        👤 Overseer: {assignment.overseer}
+                                      </span>
+                                    )}
+                                    {assignment.keyman && (
+                                      <span className="text-green-600">
+                                        🔑 Keyman: {assignment.keyman}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
                               )}
                             </div>
                           </div>
