@@ -1068,7 +1068,14 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                           </span>
                         </td>
                         <td className="px-3 py-3 whitespace-nowrap hidden md:table-cell">
-                          {attendant.profileVerificationRequired ? (
+                          {/* DEBUG: Show raw data for Paul Lewis */}
+                          {attendant.firstName === 'Paul' && attendant.lastName === 'Lewis' ? (
+                            <div>
+                              <div>Required: {String(attendant.profileVerificationRequired)}</div>
+                              <div>VerifiedAt: {attendant.profileVerifiedAt || 'null'}</div>
+                              <div>Logic Result: {attendant.profileVerificationRequired ? 'REQUIRED' : attendant.profileVerifiedAt ? 'VERIFIED' : 'NOT_VERIFIED'}</div>
+                            </div>
+                          ) : attendant.profileVerificationRequired ? (
                             <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
                               ⚠️ Required
                             </span>
