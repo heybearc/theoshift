@@ -1125,8 +1125,14 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
         
         console.log(`🎯 Starting TWO-PASS assignment strategy...`)
         
-        // Sort shifts by time to spread assignments evenly
+        // CRITICAL FIX: Sort shifts by POSITION first, then by time
+        // This ensures each position gets filled completely before moving to next position
         const sortedShifts = [...unfilledShifts].sort((a, b) => {
+          // First sort by position number
+          const posNumDiff = (a.position.positionNumber || 0) - (b.position.positionNumber || 0)
+          if (posNumDiff !== 0) return posNumDiff
+          
+          // Then sort by time within same position
           const aTime = a.shift.startTime || '00:00'
           const bTime = b.shift.startTime || '00:00'
           return aTime.localeCompare(bTime)
@@ -1258,6 +1264,20 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
             
             // STRICT: Only assign to attendants with exactly 1 shift (for their 2nd shift)
             if (attendantCurrentAssignments.length !== 1) {
+              attendantIndex++
+              attempts++
+              continue
+            }
+            
+            // CRITICAL FIX: Check if attendant already has a shift at this position
+            // We want to spread attendants across different positions, not double up on same position
+            const existingAssignmentsAtThisPosition = positions
+              .filter(p => p.id === shiftInfo.position.id)
+              .flatMap(p => p.assignments || [])
+              .filter(a => a.attendant?.id === attendant.id)
+            
+            if (existingAssignmentsAtThisPosition.length > 0) {
+              // Skip - attendant already has a shift at this position
               attendantIndex++
               attempts++
               continue

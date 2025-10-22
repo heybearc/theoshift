@@ -68,17 +68,17 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse, eventId: str
     include: {
       position_counts: {
         include: {
-          event_positions: {
+          position: {
             select: {
               id: true,
               positionNumber: true,
-              positionName: true,
-              department: true
+              name: true,
+              area: true
             }
           }
         },
         orderBy: {
-          event_positions: {
+          position: {
             positionNumber: 'asc'
           }
         }
@@ -140,12 +140,12 @@ async function handlePut(req: NextApiRequest, res: NextApiResponse, eventId: str
     include: {
       position_counts: {
         include: {
-          event_positions: {
+          position: {
             select: {
               id: true,
               positionNumber: true,
-              positionName: true,
-              department: true
+              name: true,
+              area: true
             }
           }
         }

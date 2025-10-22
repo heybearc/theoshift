@@ -55,3 +55,4 @@ data/exports/
 .coverage
 htmlcov/
 node_modules
+.next/
