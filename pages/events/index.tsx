@@ -1,10 +1,12 @@
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
+import { useSession } from 'next-auth/react'
 import { authOptions } from '../api/auth/[...nextauth]'
-import AdminLayout from '../../components/AdminLayout'
+import EventLayout from '../../components/EventLayout'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { format, parseISO } from 'date-fns'
 
 interface Event {
   id: string
@@ -21,9 +23,9 @@ interface Event {
   status: string
   createdAt: string
   _count: {
-    event_attendant_associations: number
+    event_attendants: number
     assignments: number
-    event_positions: number
+    positions: number
   }
 }
 
@@ -43,6 +45,7 @@ interface EventsResponse {
 }
 
 export default function EventsPage() {
+  const { data: session, status: sessionStatus } = useSession()
   const router = useRouter()
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
@@ -76,12 +79,21 @@ export default function EventsPage() {
         sortOrder
       })
 
-      const response = await fetch(`/api/admin/events?${params}`)
+      const response = await fetch(`/api/events?${params}`)
+      
+      // Handle authentication errors
+      if (response.status === 401) {
+        setLoading(false)
+        router.push('/auth/signin')
+        return
+      }
+
       const data: EventsResponse = await response.json()
 
       if (data.success) {
         setEvents(data.data.events)
         setPagination(data.data.pagination)
+        setError('')
       } else {
         setError('Failed to fetch events')
       }
@@ -103,14 +115,48 @@ export default function EventsPage() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
+    if (!dateString) return 'No date'
+    try {
+      // Use date-fns for consistent SSR/client formatting
+      return format(parseISO(dateString), 'MMMM d, yyyy')
+    } catch {
+      return 'Invalid date'
+    }
   }
 
   const formatTime = (timeString: string) => {
-    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    })
+    try {
+      // Use date-fns for consistent time formatting
+      const [hours, minutes] = timeString.split(':')
+      const date = new Date(2000, 0, 1, parseInt(hours), parseInt(minutes))
+      return format(date, 'h:mm a')
+    } catch {
+      return timeString
+    }
+  }
+
+  const handleDeleteEvent = async (eventId: string, eventName: string) => {
+    if (!confirm(`Are you sure you want to delete "${eventName}"? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/events/${eventId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        // Refresh the events list
+        fetchEvents()
+        alert('Event deleted successfully')
+      } else {
+        const error = await response.json()
+        alert(`Failed to delete event: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Delete error:', error)
+      alert('Failed to delete event')
+    }
   }
 
   const getStatusBadge = (status: string) => {
@@ -125,41 +171,44 @@ export default function EventsPage() {
 
   const getEventTypeLabel = (type: string) => {
     const typeLabels = {
-      ASSEMBLY: 'Assembly',
-      CONVENTION: 'Convention',
-      CIRCUIT_OVERSEER_VISIT: 'CO Visit',
+      CIRCUIT_ASSEMBLY: 'Circuit Assembly',
+      REGIONAL_CONVENTION: 'Regional Convention',
       SPECIAL_EVENT: 'Special Event',
-      MEETING: 'Meeting',
-      MEMORIAL: 'Memorial',
       OTHER: 'Other'
     }
     return typeLabels[type as keyof typeof typeLabels] || type
   }
 
   return (
-    <AdminLayout>
+    <EventLayout 
+      title="Events Management"
+      breadcrumbs={[
+        { label: 'Events', href: '/events' }
+      ]}
+    >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Events Management</h1>
               <p className="mt-2 text-sm text-gray-600">
                 Manage events, assignments, and attendant scheduling
               </p>
             </div>
-            <Link
-              href="/admin/events/create"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-            >
-              ➕ Create Event
-            </Link>
+            {session?.user?.role === 'ADMIN' && (
+              <Link
+                href="/events/create"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors min-h-[44px] touch-manipulation flex items-center justify-center"
+              >
+                ➕ Create Event
+              </Link>
+            )}
           </div>
         </div>
 
         {/* Filters */}
         <div className="bg-white shadow rounded-lg p-6 mb-6">
-          <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
               <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
                 Search
@@ -170,7 +219,7 @@ export default function EventsPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search events..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base min-h-[44px]"
               />
             </div>
             <div>
@@ -181,15 +230,12 @@ export default function EventsPage() {
                 id="eventType"
                 value={eventType}
                 onChange={(e) => setEventType(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base min-h-[44px]"
               >
                 <option value="">All Types</option>
-                <option value="ASSEMBLY">Assembly</option>
-                <option value="CONVENTION">Convention</option>
-                <option value="CIRCUIT_OVERSEER_VISIT">CO Visit</option>
+                <option value="CIRCUIT_ASSEMBLY">Circuit Assembly</option>
+                <option value="REGIONAL_CONVENTION">Regional Convention</option>
                 <option value="SPECIAL_EVENT">Special Event</option>
-                <option value="MEETING">Meeting</option>
-                <option value="MEMORIAL">Memorial</option>
                 <option value="OTHER">Other</option>
               </select>
             </div>
@@ -201,13 +247,14 @@ export default function EventsPage() {
                 id="status"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base min-h-[44px]"
               >
                 <option value="">All Statuses</option>
-                <option value="DRAFT">Draft</option>
-                <option value="PUBLISHED">Published</option>
-                <option value="CANCELLED">Cancelled</option>
+                <option value="UPCOMING">Upcoming</option>
+                <option value="CURRENT">Current</option>
                 <option value="COMPLETED">Completed</option>
+                <option value="ARCHIVED">Archived</option>
+                <option value="CANCELLED">Cancelled</option>
               </select>
             </div>
             <div>
@@ -218,7 +265,7 @@ export default function EventsPage() {
                 id="sortBy"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base min-h-[44px]"
               >
                 <option value="startDate">Start Date</option>
                 <option value="name">Name</option>
@@ -230,7 +277,7 @@ export default function EventsPage() {
             <div className="flex items-end">
               <button
                 type="submit"
-                className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-medium transition-colors min-h-[44px] touch-manipulation"
               >
                 🔍 Search
               </button>
@@ -256,7 +303,7 @@ export default function EventsPage() {
             <div className="p-8 text-center">
               <p className="text-gray-500">No events found</p>
               <Link
-                href="/admin/events/create"
+                href="/events/create"
                 className="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
               >
                 Create First Event
@@ -329,26 +376,40 @@ export default function EventsPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <div className="flex space-x-2">
                             <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                              {event._count.assignments} assigned
+                              {event._count?.event_attendants || 0} assigned
                             </span>
                             <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                              {event._count.event_positions} positions
+                              {event._count?.positions || 0} positions
                             </span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                          <Link
-                            href={`/admin/events/${event.id}`}
-                            className="text-blue-600 hover:text-blue-900 transition-colors"
-                          >
-                            📋 Manage
-                          </Link>
-                          <Link
-                            href={`/admin/events/${event.id}/edit`}
-                            className="text-green-600 hover:text-green-900 transition-colors"
-                          >
-                            ✏️ Edit
-                          </Link>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <Link
+                              href={`/events/${event.id}`}
+                              className="text-blue-600 hover:text-blue-900 transition-colors min-h-[44px] flex items-center touch-manipulation"
+                            >
+                              📋 Manage
+                            </Link>
+                            {session?.user?.role && ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(session.user.role) && (
+                              <>
+                                <Link
+                                  href={`/events/${event.id}/edit`}
+                                  className="text-green-600 hover:text-green-900 transition-colors min-h-[44px] flex items-center touch-manipulation"
+                                >
+                                  ✏️ Edit
+                                </Link>
+                                {session.user.role === 'ADMIN' && (
+                                  <button
+                                    onClick={() => handleDeleteEvent(event.id, event.name)}
+                                    className="text-red-600 hover:text-red-900 transition-colors min-h-[44px] flex items-center touch-manipulation"
+                                  >
+                                    🗑️ Delete
+                                  </button>
+                                )}
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -363,21 +424,21 @@ export default function EventsPage() {
                     <div className="text-sm text-gray-700">
                       Showing page {pagination.page} of {pagination.pages} ({pagination.total} total events)
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex gap-2">
                       <button
                         onClick={() => fetchEvents(pagination.page - 1)}
                         disabled={!pagination.hasPrev}
-                        className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
+                        className="px-4 py-3 text-sm bg-gray-200 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 min-h-[44px] touch-manipulation"
                       >
                         Previous
                       </button>
-                      <span className="px-3 py-1 text-sm bg-blue-600 text-white rounded">
+                      <span className="px-4 py-3 text-sm bg-blue-600 text-white rounded min-h-[44px] flex items-center">
                         {pagination.page}
                       </span>
                       <button
                         onClick={() => fetchEvents(pagination.page + 1)}
                         disabled={!pagination.hasNext}
-                        className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
+                        className="px-4 py-3 text-sm bg-gray-200 text-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 min-h-[44px] touch-manipulation"
                       >
                         Next
                       </button>
@@ -392,7 +453,7 @@ export default function EventsPage() {
         {/* Quick Actions */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
           <Link
-            href="/admin/events/create"
+            href="/events/create"
             className="flex flex-col items-center space-y-2 p-4 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-colors"
           >
             <span className="text-2xl">➕</span>
@@ -421,7 +482,7 @@ export default function EventsPage() {
           </Link>
         </div>
       </div>
-    </AdminLayout>
+    </EventLayout>
   )
 }
 
@@ -437,9 +498,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
+  // Redirect to the event select page (this page is redundant)
   return {
-    props: {
-      session,
+    redirect: {
+      destination: '/events/select',
+      permanent: false,
     },
   }
 }

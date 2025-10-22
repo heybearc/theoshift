@@ -40,7 +40,7 @@
       "container": 132,
       "ip": "10.92.3.22",
       "port": 3001,
-      "url": "https://jw-production.cloudigan.net"
+      "url": "https://attendant.cloudigan.net"
     },
     "database": {
       "container": 131,

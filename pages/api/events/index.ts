@@ -2,21 +2,24 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]'
 import { prisma } from '../../../src/lib/prisma'
+import { getUserEvents } from '../../../src/lib/eventAccess'
 import { z } from 'zod'
+import crypto from 'crypto'
 
 // Validation schema for event creation/update
 const eventSchema = z.object({
   name: z.string().min(1, 'Event name is required').max(255),
   description: z.string().optional(),
-  eventType: z.enum(['ASSEMBLY', 'CONVENTION', 'CIRCUIT_OVERSEER_VISIT', 'SPECIAL_EVENT', 'MEETING', 'MEMORIAL', 'OTHER']),
+  eventType: z.enum(['CIRCUIT_ASSEMBLY', 'REGIONAL_CONVENTION', 'SPECIAL_EVENT', 'OTHER']),
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid start date'),
   endDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid end date'),
-  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid start time format'),
-  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid end time format').optional(),
+  startTime: z.string(),
+  endTime: z.string().optional(),
   location: z.string().min(1, 'Location is required').max(500),
+  // Note: capacity and attendantsNeeded are validated but not stored in DB (could use settings field)
   capacity: z.number().int().positive().optional(),
   attendantsNeeded: z.number().int().min(0).optional(),
-  status: z.enum(['DRAFT', 'PUBLISHED', 'CANCELLED', 'COMPLETED']).default('DRAFT'),
+  status: z.enum(['ARCHIVED', 'UPCOMING', 'CURRENT', 'COMPLETED', 'CANCELLED']).default('UPCOMING'),
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -26,21 +29,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
-  // Check if user has admin or overseer role
+  // Get user information
   const user = await prisma.users.findUnique({
     where: { email: session.user.email! },
     select: { id: true, role: true }
   })
 
-  if (!user || !['ADMIN', 'OVERSEER'].includes(user.role)) {
-    return res.status(403).json({ error: 'Insufficient permissions' })
+  if (!user) {
+    return res.status(403).json({ error: 'User not found' })
   }
+
+  // Allow all authenticated users to view events
+  // Only ADMIN and OVERSEER can create events (handled in POST method)
 
   try {
     switch (req.method) {
       case 'GET':
-        return await handleGet(req, res)
+        return await handleGet(req, res, user.id)
       case 'POST':
+        // Only ADMIN and OVERSEER can create events
+        if (!['ADMIN', 'OVERSEER'].includes(user.role)) {
+          return res.status(403).json({ error: 'Insufficient permissions to create events' })
+        }
         return await handlePost(req, res, user.id)
       default:
         res.setHeader('Allow', ['GET', 'POST'])
@@ -52,7 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
-async function handleGet(req: NextApiRequest, res: NextApiResponse) {
+async function handleGet(req: NextApiRequest, res: NextApiResponse, userId: string) {
   const {
     page = '1',
     limit = '10',
@@ -63,12 +73,37 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
     sortOrder = 'desc'
   } = req.query
 
+  // Get events user has access to via permissions
+  const userEvents = await getUserEvents(userId)
+  const eventIds = userEvents.map(e => e.id)
+
+  // If user has no event permissions, return empty list
+  if (eventIds.length === 0) {
+    return res.status(200).json({
+      success: true,
+      data: {
+        events: [],
+        currentEvent: null,
+        pagination: {
+          page: 1,
+          limit: parseInt(limit as string) || 10,
+          total: 0,
+          pages: 0,
+          hasNext: false,
+          hasPrev: false
+        }
+      }
+    })
+  }
+
   const pageNum = parseInt(page as string)
   const limitNum = parseInt(limit as string)
   const skip = (pageNum - 1) * limitNum
 
-  // Build where clause for filtering
-  const where: any = {}
+  // Build where clause for filtering - only include events user has access to
+  const where: any = {
+    id: { in: eventIds }
+  }
   
   if (search) {
     where.OR = [
@@ -87,7 +122,7 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
   }
 
   // Get events with pagination
-  const [events, total] = await Promise.all([
+  const [events, total, userPermissions] = await Promise.all([
     prisma.events.findMany({
       where,
       skip,
@@ -98,30 +133,85 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
       include: {
         _count: {
           select: {
-            event_attendant_associations: true,
-            assignments: true,
-            event_positions: true
+            event_attendants: true,
+            positions: true
           }
         }
       }
     }),
-    prisma.events.count({ where })
+    prisma.events.count({ where }),
+    prisma.event_permissions.findMany({
+      where: {
+        userId,
+        eventId: { in: eventIds }
+      },
+      select: {
+        eventId: true,
+        role: true,
+        scopeType: true
+      }
+    })
   ])
 
+  // Create a map of event permissions for quick lookup
+  const permissionsMap = new Map(
+    userPermissions.map(p => [p.eventId, { role: p.role, scopeType: p.scopeType }])
+  )
+
   const totalPages = Math.ceil(total / limitNum)
+
+  // Check if we should include current event detection
+  const includeStats = req.query.includeStats === 'true'
+  let currentEvent: typeof events[0] | undefined = undefined
+  
+  if (includeStats) {
+    // Find current event (event that's happening now)
+    const now = new Date()
+    currentEvent = events.find(event => {
+      const start = new Date(event.startDate)
+      const end = new Date(event.endDate)
+      return now >= start && now <= end
+    })
+  }
 
   return res.status(200).json({
     success: true,
     data: {
-      id: crypto.randomUUID(),
-      events,
+      events: events.map(event => {
+        const permission = permissionsMap.get(event.id)
+        return {
+          id: event.id,
+          name: event.name,
+          description: event.description,
+          eventType: event.eventType,
+          location: event.location,
+          venue: event.venue,
+          status: event.status,
+          startDate: event.startDate?.toISOString() || null,
+          endDate: event.endDate?.toISOString() || null,
+          startTime: event.startTime,
+          endTime: event.endTime,
+          createdAt: event.createdAt?.toISOString() || null,
+          updatedAt: event.updatedAt?.toISOString() || null,
+          attendantsCount: event._count?.event_attendants || 0,
+          positionsCount: event._count?.positions || 0,
+          userRole: permission?.role || 'VIEWER',
+          userScopeType: permission?.scopeType || null
+        }
+      }),
+      currentEvent: currentEvent ? {
+        ...currentEvent,
+        status: currentEvent.status,
+        attendantsCount: currentEvent._count?.event_attendants || 0,
+        positionsCount: currentEvent._count?.positions || 0
+      } : null,
       pagination: {
-        page: pageNum,
-        limit: limitNum,
-        total,
-        pages: totalPages,
-        hasNext: pageNum < totalPages,
-        hasPrev: pageNum > 1
+        page: parseInt(page as string) || 1,
+        limit: parseInt(limit as string) || 10,
+        total: total,
+        pages: Math.ceil(total / limitNum),
+        hasNext: skip + limitNum < total,
+        hasPrev: skip > 0
       }
     }
   })
@@ -130,6 +220,7 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
 async function handlePost(req: NextApiRequest, res: NextApiResponse, userId: string) {
   // Validate request body
   const validation = eventSchema.safeParse(req.body)
+  
   if (!validation.success) {
     return res.status(400).json({
       error: 'Validation failed',
@@ -140,24 +231,26 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, userId: str
   const data = validation.data
 
   // Additional validation: end date must be >= start date
-  const startDate = new Date(data.startDate)
-  const endDate = new Date(data.endDate)
-  
-  if (endDate < startDate) {
+  // Compare as strings to avoid timezone issues with DATE fields
+  if (data.endDate < data.startDate) {
     return res.status(400).json({
       error: 'End date must be on or after start date'
     })
   }
 
-  // Create event
+  // Create event - convert date strings to Date at local midnight
+  const eventId = crypto.randomUUID()
+  
   const event = await prisma.events.create({
     data: {
-      id: crypto.randomUUID(),
+      id: eventId,
       name: data.name,
       description: data.description,
       eventType: data.eventType as any,
-      startDate: startDate,
-      endDate: endDate,
+      startDate: new Date(data.startDate + 'T00:00:00'),
+      endDate: new Date(data.endDate + 'T00:00:00'),
+      startTime: data.startTime,
+      endTime: data.endTime,
       location: data.location,
       status: data.status as any,
       createdBy: userId,
@@ -166,17 +259,46 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, userId: str
     include: {
       _count: {
         select: {
-          event_attendant_associations: true,
-          assignments: true,
-          event_positions: true
+          event_attendants: true,
+          positions: true
         }
       }
     }
   })
 
+  // Grant OWNER permission to the creator
+  await prisma.event_permissions.create({
+    data: {
+      id: crypto.randomUUID(),
+      userId,
+      eventId,
+      role: 'OWNER',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+  })
+
   return res.status(201).json({
     success: true,
-    data: event,
+    data: {
+      ...event,
+      userRole: 'OWNER',
+      userScopeType: null
+    },
     message: 'Event created successfully'
   })
+}
+
+function getEventStatus(startDate: Date, endDate: Date): 'upcoming' | 'current' | 'past' {
+  const now = new Date()
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  
+  if (now < start) {
+    return 'upcoming'
+  } else if (now >= start && now <= end) {
+    return 'current'
+  } else {
+    return 'past'
+  }
 }

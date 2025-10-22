@@ -1,0 +1,200 @@
+import { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
+import { authOptions } from './api/auth/[...nextauth]'
+import HelpLayout from '../components/HelpLayout'
+
+export default function ReleaseNotes() {
+  const releases = [
+    {
+      version: "v2.1.2",
+      date: "2025-10-22",
+      type: "minor",
+      title: "Blue-Green Deployment & Production Stability",
+      description: "Implemented blue-green deployment strategy with enhanced version management and production stability improvements",
+      features: [
+        "🔄 Blue-Green Deployment - Zero-downtime deployment architecture",
+        "📊 Version Display - Real-time version visibility in UI footer",
+        "🎯 Version API Endpoint - Programmatic version checking at /api/version",
+        "🛡️ Production Database Isolation - Separate prod/staging databases",
+        "⚡ Enhanced Environment Management - Proper .env configuration handling",
+        "🔐 Improved Authentication Flow - Fixed session management issues",
+        "📱 Mobile-Responsive Footer - Version info accessible on all devices"
+      ],
+      fixes: [
+        "🔧 Fixed database credential management across environments",
+        "⚡ Resolved .env.production override issues",
+        "🛡️ Corrected password hash storage and validation",
+        "📊 Fixed Prisma client generation and caching",
+        "🔄 Eliminated environment configuration drift",
+        "🐛 Resolved PM2 environment variable loading",
+        "⚙️ Fixed database permissions for all tables"
+      ],
+      breaking: [],
+      notes: [
+        "Green environment (Container 134) now serves production traffic",
+        "Blue environment (Container 132) available for development/testing",
+        "Production database (jw_attendant_scheduler_prod) isolated from staging",
+        "Version number displayed in footer of all admin pages",
+        "Foundation for continuous deployment pipeline established",
+        "Zero data loss during deployment transition"
+      ]
+    },
+    {
+      version: 'v1.0.0-MVP',
+      date: '2025-10-19',
+      type: 'major',
+      title: 'Initial MVP Release',
+      description: 'First production-ready release of JW Attendant Scheduler',
+      features: [
+        '🔐 Complete authentication system with role-based access',
+        '👥 User management with invitation system',
+        '📅 Event creation and management',
+        '📋 Position and assignment management',
+        '⏱️ Count times recording',
+        '👤 Attendant personal dashboard',
+        '📧 Email notifications and invitations',
+        '🛡️ Security hardening and error handling',
+        '📚 Help documentation system',
+        '🎨 Professional UI/UX design'
+      ],
+      fixes: [
+        '🐛 Fixed invitation email URL generation',
+        '🔧 Resolved environment variable loading issues',
+        '⚡ Improved performance and stability',
+        '🧹 Cleaned up unused code and files'
+      ],
+      breaking: [],
+      notes: [
+        'This is the first production release of JW Attendant Scheduler',
+        'All core functionality is implemented and tested',
+        'System is ready for production deployment',
+        'Future updates will maintain backward compatibility'
+      ]
+    }
+  ]
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'major':
+        return 'bg-red-100 text-red-800'
+      case 'minor':
+        return 'bg-blue-100 text-blue-800'
+      case 'patch':
+        return 'bg-green-100 text-green-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  return (
+    <HelpLayout>
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">📋 Release Notes</h1>
+          <p className="text-gray-600">
+            Stay updated with the latest features, improvements, and fixes
+          </p>
+        </div>
+
+        <div className="space-y-8">
+          {releases.map((release) => (
+            <div key={release.version} className="bg-white border border-gray-200 rounded-lg p-6">
+              {/* Release Header */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <h2 className="text-2xl font-bold text-gray-900">{release.version}</h2>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(release.type)}`}>
+                    {release.type.toUpperCase()}
+                  </span>
+                </div>
+                <span className="text-sm text-gray-500">{release.date}</span>
+              </div>
+
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{release.title}</h3>
+              <p className="text-gray-600 mb-6">{release.description}</p>
+
+              {/* Features */}
+              {release.features.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="text-md font-semibold text-green-800 mb-3">✨ New Features</h4>
+                  <ul className="space-y-2">
+                    {release.features.map((feature, index) => (
+                      <li key={index} className="text-gray-700">{feature}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Fixes */}
+              {release.fixes.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="text-md font-semibold text-blue-800 mb-3">🔧 Bug Fixes & Improvements</h4>
+                  <ul className="space-y-2">
+                    {release.fixes.map((fix, index) => (
+                      <li key={index} className="text-gray-700">{fix}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Breaking Changes */}
+              {release.breaking.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="text-md font-semibold text-red-800 mb-3">⚠️ Breaking Changes</h4>
+                  <ul className="space-y-2">
+                    {release.breaking.map((change, index) => (
+                      <li key={index} className="text-gray-700">{change}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Notes */}
+              {release.notes.length > 0 && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <h4 className="text-md font-semibold text-yellow-800 mb-2">📝 Release Notes</h4>
+                  <ul className="space-y-1">
+                    {release.notes.map((note, index) => (
+                      <li key={index} className="text-yellow-700 text-sm">{note}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div className="mt-12 text-center">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">🔔 Stay Updated</h3>
+            <p className="text-gray-600 mb-4">
+              Want to be notified about new releases? Contact your administrator to be added to the update notifications.
+            </p>
+            <div className="text-sm text-gray-500">
+              <p>Current Version: v1.0.0-MVP</p>
+              <p>Last Updated: October 19, 2025</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </HelpLayout>
+  )
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getServerSession(context.req, context.res, authOptions)
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/auth/signin',
+        permanent: false,
+      },
+    }
+  }
+
+  return {
+    props: {},
+  }
+}

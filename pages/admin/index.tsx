@@ -14,7 +14,6 @@ interface AdminDashboardProps {
   stats: {
     totalUsers: number
     totalEvents: number
-    totalAttendants: number
   }
 }
 
@@ -67,6 +66,14 @@ export default function AdminDashboard({ user, stats }: AdminDashboardProps) {
       icon: '📧',
       color: 'bg-indigo-50 hover:bg-indigo-100 border-indigo-200',
       iconColor: 'text-indigo-600'
+    },
+    {
+      title: 'APEX Module Testing',
+      description: 'Comprehensive testing of all admin modules',
+      href: '/admin/test-modules',
+      icon: '🧪',
+      color: 'bg-cyan-50 hover:bg-cyan-100 border-cyan-200',
+      iconColor: 'text-cyan-600'
     }
   ]
 
@@ -112,8 +119,8 @@ export default function AdminDashboard({ user, stats }: AdminDashboardProps) {
               <span className="text-2xl">🎫</span>
             </div>
             <div className="ml-4">
-              <p className="text-2xl font-bold text-gray-900">{stats.totalAttendants}</p>
-              <p className="text-sm text-gray-600">Total Attendants</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.totalUsers + stats.totalEvents}</p>
+              <p className="text-sm text-gray-600">Total Records</p>
             </div>
           </div>
         </div>
@@ -164,10 +171,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { prisma } = require('../../src/lib/prisma')
   
   try {
-    const [totalUsers, totalEvents, totalAttendants] = await Promise.all([
+    const [totalUsers, totalEvents] = await Promise.all([
       prisma.users.count(),
       prisma.events.count(),
-      prisma.attendants.count(),
     ])
 
     return {
@@ -181,7 +187,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         stats: {
           totalUsers,
           totalEvents,
-          totalAttendants,
         },
       },
     }
@@ -200,7 +205,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         stats: {
           totalUsers: 0,
           totalEvents: 0,
-          totalAttendants: 0,
         },
       },
     }

@@ -29,11 +29,22 @@ export default function ApiStatusPage() {
   const fetchApiStatus = async () => {
     try {
       setError('')
-      const response = await fetch('/api/admin/api-status')
+      // Use comprehensive module testing
+      const response = await fetch('/api/admin/test-all-modules')
       const data = await response.json()
 
       if (data.success) {
-        setEndpoints(data.data.endpoints)
+        // Convert module test results to endpoint format
+        const endpointData = data.data.modules.map((module: any) => ({
+          name: module.module,
+          url: module.endpoint,
+          method: module.method || 'GET',
+          status: module.status,
+          responseTime: module.responseTime,
+          lastChecked: new Date().toISOString(),
+          description: module.details?.message || `${module.module} API endpoint`
+        }))
+        setEndpoints(endpointData)
         setLastUpdated(new Date())
       } else {
         setError(data.error || 'Failed to fetch API status')
@@ -73,6 +84,8 @@ export default function ApiStatusPage() {
   }
 
   const getMethodColor = (method: string) => {
+    if (!method) return 'bg-gray-100 text-gray-800'
+    
     switch (method.toUpperCase()) {
       case 'GET':
         return 'bg-blue-100 text-blue-800'

@@ -18,22 +18,43 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const session = await getServerSession(context.req, context.res, authOptions)
     
-    if (session && session.user?.role === 'ADMIN') {
-      // User is signed in as admin, redirect to admin dashboard
-      return {
-        redirect: {
-          destination: '/admin',
-          permanent: false,
-        },
-      }
-    } else {
-      // User is not signed in or not admin, redirect to sign in
+    if (!session) {
+      // User is not signed in, redirect to sign in
       return {
         redirect: {
           destination: '/auth/signin',
           permanent: false,
         },
       }
+    }
+
+    // CRITICAL: Separate attendants from admin/overseer/keyman users
+    if (session.user?.role === 'ATTENDANT') {
+      // Attendants go to their own portal
+      return {
+        redirect: {
+          destination: '/attendant/dashboard',
+          permanent: false,
+        },
+      }
+    }
+
+    // Admin, Overseer, Assistant Overseer, Keyman go to event selection
+    if (['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(session.user?.role || '')) {
+      return {
+        redirect: {
+          destination: '/events/select',
+          permanent: false,
+        },
+      }
+    }
+
+    // Unknown role - redirect to sign in
+    return {
+      redirect: {
+        destination: '/auth/signin',
+        permanent: false,
+      },
     }
   } catch (error) {
     // If there's any error with session checking, redirect to sign in

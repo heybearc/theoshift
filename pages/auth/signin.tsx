@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { signIn, getSession } from 'next-auth/react'
-import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
+import { GetServerSideProps } from 'next'
+import Link from 'next/link'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
@@ -25,7 +26,8 @@ export default function SignIn() {
       if (result?.error) {
         setError('Invalid credentials')
       } else {
-        router.push('/admin')
+        // Redirect based on user role - will be handled by middleware
+        router.push('/')
       }
     } catch (error) {
       setError('An error occurred')
@@ -46,7 +48,7 @@ export default function SignIn() {
               </svg>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-            <p className="text-gray-600">Sign in to JW Attendant Scheduler Admin</p>
+            <p className="text-gray-600">Sign in to JW Attendant Scheduler</p>
           </div>
 
           {/* Form */}
@@ -63,7 +65,7 @@ export default function SignIn() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-gray-50 focus:bg-white"
-                  placeholder="admin@jwscheduler.local"
+                  placeholder="Enter your email address"
                 />
               </div>
 
@@ -108,26 +110,27 @@ export default function SignIn() {
                   Signing in...
                 </>
               ) : (
-                'Sign In to Admin'
+                'Sign In'
               )}
             </button>
           </form>
 
-          {/* Development Credentials */}
+          {/* Access Links */}
           <div className="mt-8 pt-6 border-t border-gray-200">
-            <div className="bg-blue-50 rounded-lg p-4">
-              <div className="flex items-start">
-                <svg className="h-5 w-5 text-blue-400 mt-0.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                  <h3 className="text-sm font-semibold text-blue-800 mb-1">Development Access</h3>
-                  <div className="text-sm text-blue-700 space-y-1">
-                    <p><span className="font-medium">Email:</span> admin@jwscheduler.local</p>
-                    <p><span className="font-medium">Password:</span> admin123</p>
-                  </div>
-                </div>
-              </div>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/request-access"
+                className="text-center text-sm text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                Need access? Request an invitation
+              </Link>
+              <span className="hidden sm:inline text-gray-300">•</span>
+              <Link
+                href="/attendant/login"
+                className="text-center text-sm text-green-600 hover:text-green-800 transition-colors"
+              >
+                Attendant Login
+              </Link>
             </div>
           </div>
         </div>
@@ -135,7 +138,7 @@ export default function SignIn() {
         {/* Footer */}
         <div className="text-center">
           <p className="text-white/80 text-sm">
-            Powered by WMACS • Stable Technology Stack
+            JW Attendant Scheduler • Secure Event Management System
           </p>
         </div>
       </div>
@@ -149,7 +152,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   if (session) {
     return {
       redirect: {
-        destination: '/admin',
+        destination: '/',
         permanent: false,
       },
     }

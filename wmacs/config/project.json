@@ -1,0 +1,19 @@
+{
+  "name": "jw-attendant-scheduler",
+  "version": "2.1.2-integrated",
+  "type": "nextjs",
+  "framework": "next",
+  "database": "postgresql",
+  "deployment": {
+    "strategy": "staging-first",
+    "validation": true,
+    "rollback": true
+  },
+  "features": [
+    "feedback-system",
+    "help-documentation", 
+    "file-uploads",
+    "user-comments",
+    "admin-management"
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "mcpServers": {
+    "enhanced-jw-mcp-cicd": {
+      "command": "/opt/homebrew/bin/node",
+      "args": ["/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-server-ops/enhanced-jw-mcp-cicd.cjs"]
+    },
+    "enhanced-ldc-mcp-cicd": {
+      "command": "/opt/homebrew/bin/node",
+      "args": ["/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-server-ops/enhanced-ldc-mcp-cicd.js"]
+    },
+    "federation-coordinator-cicd": {
+      "command": "/opt/homebrew/bin/node",
+      "args": ["/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-server-ops/federation-coordinator-cicd.js"]
+    }
+  },
+  "creditOptimization": {
+    "enabled": true,
+    "targetSavings": "60-80%",
+    "features": [
+      "operation_batching",
+      "response_caching",
+      "query_optimization",
+      "project_routing",
+      "conflict_prevention",
+      "cicd_automation",
+      "container_separation",
+      "deployment_optimization",
+      "ssh_connection_pooling",
+      "real_infrastructure_management"
+    ]
+  },
+  "apexGuardianSystem": {
+    "version": "2.0.0",
+    "cicdCapabilities": {
+      "realDeployments": true,
+      "containerSeparation": true,
+      "githubRunnerManagement": true,
+      "resourceOptimization": true,
+      "intelligentRouting": true
+    },
+    "infrastructureTargets": {
+      "jwStaging": "10.92.3.24:3001",
+      "jwProduction": "10.92.3.22:3001",
+      "ldcStaging": "10.92.3.25:3001",
+      "ldcProduction": "10.92.3.23:3001",
+      "database": "10.92.3.21:5432"
+    }
+  }
+}

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# 🛡️ WMACS GUARDIAN: Clean Staging Deployment Script
+# 🛡️ APEX GUARDIAN: Clean Staging Deployment Script
 # Following CASCADE RULES - Artifact-based deployment only
 
 set -e
 
-echo "🛡️ WMACS GUARDIAN: CLEAN STAGING DEPLOYMENT"
+echo "🛡️ APEX GUARDIAN: CLEAN STAGING DEPLOYMENT"
 echo "Following CASCADE RULES - No direct server modifications"
 echo "=========================================="
 
@@ -21,7 +21,7 @@ print_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 print_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-# WMACS Guardian Rule Validation
+# APEX Guardian Rule Validation
 print_status "Validating CASCADE RULE compliance..."
 
 # Check we're in project root
@@ -88,6 +88,9 @@ fi
 # Deploy via rsync (artifact-based deployment)
 print_status "Syncing clean artifact to staging server..."
 rsync -av --delete \
+    --exclude='.env' \
+    --exclude='.env.local' \
+    --exclude='.env.staging' \
     .wmacs-deploy-temp/ \
     root@10.92.3.24:/opt/jw-attendant-scheduler/
 
@@ -97,24 +100,40 @@ ssh root@10.92.3.24 << 'REMOTE_SCRIPT'
 set -e
 cd /opt/jw-attendant-scheduler
 
+echo "🔧 Setting up environment..."
+# Ensure .env.staging exists and create symlink
+if [ ! -f .env.staging ]; then
+    echo "Creating .env.staging..."
+    cat > .env.staging << 'EOF'
+NODE_ENV=production
+PORT=3001
+DATABASE_URL=postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/jw_attendant_scheduler_staging
+NEXTAUTH_URL=https://jw-staging.cloudigan.net
+NEXTAUTH_SECRET=staging-secret-2024-secure-fqdn
+NEXTAUTH_DEBUG=true
+EOF
+fi
+ln -sf .env.staging .env
+
 echo "🔧 Installing dependencies..."
 npm ci --production
 
 echo "🏗️ Building application..."
 npm run build
 
-echo "🔄 Restarting application..."
+echo " Restarting application..."
 # Kill any existing processes on port 3001
 pkill -f "next.*3001" || true
 sleep 2
 
-# Start application in background
-nohup npm start -- --port 3001 > /var/log/jw-attendant-scheduler.log 2>&1 &
+# Export DATABASE_URL and start Next.js in production mode
+export DATABASE_URL='postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/jw_attendant_scheduler_staging'
+PORT=3001 nohup npm start > /dev/null 2>&1 &> /var/log/jw-attendant-scheduler.log 2>&1 &
 
-echo "⏳ Waiting for startup..."
+echo " Waiting for startup..."
 sleep 5
 
-echo "✅ Deployment completed"
+echo " Deployment completed"
 REMOTE_SCRIPT
 
 # Step 5: Verify deployment (CASCADE RULE)
@@ -146,4 +165,4 @@ fi
 
 # Cleanup
 rm -rf .wmacs-deploy-temp
-print_success "🛡️ WMACS GUARDIAN: Clean deployment completed successfully"
+print_success "🛡️ APEX GUARDIAN: Clean deployment completed successfully"

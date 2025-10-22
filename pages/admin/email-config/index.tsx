@@ -186,6 +186,8 @@ export default function EmailConfigPage() {
                         <li>Generate a new app password for "Mail"</li>
                         <li>Use that 16-character password below</li>
                       </ol>
+                      <p className="mt-3 font-semibold text-red-700">⚠️ IMPORTANT: Remove ALL spaces from the app password!</p>
+                      <p className="text-xs">Gmail shows: "abcd efgh ijkl mnop" → Enter: "abcdefghijklmnop"</p>
                     </div>
                   </div>
                 </div>
@@ -210,12 +212,12 @@ export default function EmailConfigPage() {
                   </label>
                   <input
                     type="password"
-                    placeholder="16-character app password"
+                    placeholder="16-character app password (no spaces)"
                     value={config.gmailAppPassword}
-                    onChange={(e) => setConfig({...config, gmailAppPassword: e.target.value})}
+                    onChange={(e) => setConfig({...config, gmailAppPassword: e.target.value.replace(/\s/g, '')})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Not your regular Gmail password</p>
+                  <p className="text-xs text-red-600 mt-1 font-medium">⚠️ Spaces will be automatically removed</p>
                 </div>
               </div>
             </div>

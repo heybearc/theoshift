@@ -34,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       select: { id: true, role: true }
     })
 
-    if (!user || !['admin', 'overseer'].includes(user.role)) {
+    if (!user || !['ADMIN', 'OVERSEER', 'admin', 'overseer'].includes(user.role)) {
       return res.status(403).json({ error: 'Insufficient permissions' })
     }
 

@@ -8,7 +8,12 @@ import { z } from 'zod'
 const lanyardUpdateSchema = z.object({
   badgeNumber: z.string().min(1).max(50).optional(),
   status: z.enum(['AVAILABLE', 'CHECKED_OUT', 'LOST', 'DAMAGED']).optional(),
-  notes: z.string().optional()
+  notes: z.string().nullable().optional(),
+  isCheckedOut: z.boolean().optional(),
+  checkedOutTo: z.string().nullable().optional(),
+  attendantId: z.string().nullable().optional(),  // Store attendant ID for dynamic lookup
+  checkedOutAt: z.string().nullable().optional(),
+  checkedInAt: z.string().nullable().optional()
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

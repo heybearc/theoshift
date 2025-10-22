@@ -66,10 +66,11 @@ export async function withAdminAuth(handler: (session: any) => Promise<NextRespo
 }
 
 /**
- * Overseer+ wrapper (ADMIN, OVERSEER, ASSISTANT_OVERSEER)
+ * Overseer+ wrapper (ADMIN, OVERSEER, ASSISTANT_OVERSEER, KEYMAN)
+ * KEYMAN role included as they assist with event management and oversight
  */
 export async function withOverseerAuth(handler: (session: any) => Promise<NextResponse>) {
   return withSimpleAuth(handler, { 
-    requireRole: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER'] 
+    requireRole: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'] 
   })
 }
