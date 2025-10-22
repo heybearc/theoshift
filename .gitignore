@@ -56,3 +56,5 @@ data/exports/
 htmlcov/
 node_modules
 .next/
+.env.production
+.env.local
