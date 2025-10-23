@@ -505,6 +505,249 @@ Next.js production server (`next start`) doesn't automatically load `.env` file,
 
 ---
 
+### HIGH PRIORITY: Attendant Notification System
+**ID**: FEATURE-003  
+**Priority**: High  
+**Status**: Backlog  
+**Created**: 2025-10-23  
+**Component**: Attendant Dashboard / Notifications  
+**Estimated Effort**: 2-3 weeks (phased approach)  
+
+#### Description:
+Implement a comprehensive notification system to alert attendants about important updates including schedule changes, new documents, count sessions, and oversight messages.
+
+#### Business Value:
+- **Improved Communication**: Attendants stay informed of changes without manual coordination
+- **Reduced No-Shows**: Timely notifications about assignment changes
+- **Better Engagement**: Attendants aware of new documents and resources
+- **Time Savings**: Reduces manual phone calls and text messages from coordinators
+
+#### Proposed Implementation (Phased):
+
+**Phase 1: In-App Notifications (2-3 days)**
+- Add "Recent Updates" card to attendant dashboard
+- Display badge count on dashboard header/icon
+- Track `lastSeenAt` timestamp for each attendant
+- Show updates since last visit:
+  - Assignment created/updated
+  - New document published
+  - Count session scheduled
+  - Oversight message posted
+- Implement notification types:
+  - `ASSIGNMENT_CREATED`
+  - `ASSIGNMENT_UPDATED`
+  - `DOCUMENT_PUBLISHED`
+  - `COUNT_SESSION_SCHEDULED`
+  - `OVERSIGHT_MESSAGE`
+
+**Phase 2: Email Notifications (1 week)**
+- Integrate with existing nodemailer setup
+- Send emails for critical updates:
+  - Assignment changes (immediate)
+  - New documents (daily digest option)
+  - Count sessions (24-hour advance notice)
+- User preferences for notification frequency:
+  - Immediate
+  - Daily digest
+  - Weekly summary
+  - Disabled
+- Email templates:
+  - Professional HTML templates
+  - Plain text fallback
+  - Unsubscribe link
+
+**Phase 3: SMS/Text Notifications (1 week)**
+- Integrate Twilio or similar service
+- Critical updates only:
+  - Last-minute assignment changes
+  - Urgent oversight messages
+  - Event cancellations
+- Opt-in based with phone number verification
+- Cost tracking and limits
+- User preferences for SMS notifications
+
+**Phase 4: Advanced Features (Future)**
+- Push notifications (PWA)
+- Notification preferences per category
+- Quiet hours configuration
+- Notification history/archive
+- Mark as read/unread
+- Notification grouping/threading
+
+#### Database Schema Changes:
+
+```sql
+-- Notifications table
+CREATE TABLE notifications (
+  id TEXT PRIMARY KEY,
+  attendantId TEXT NOT NULL,
+  eventId TEXT NOT NULL,
+  type TEXT NOT NULL, -- ASSIGNMENT_CREATED, DOCUMENT_PUBLISHED, etc.
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  actionUrl TEXT, -- Link to relevant page
+  isRead BOOLEAN DEFAULT FALSE,
+  createdAt TIMESTAMP DEFAULT NOW(),
+  readAt TIMESTAMP,
+  metadata JSON, -- Additional context (assignmentId, documentId, etc.)
+  FOREIGN KEY (attendantId) REFERENCES attendants(id),
+  FOREIGN KEY (eventId) REFERENCES events(id)
+);
+
+-- Notification preferences
+CREATE TABLE notification_preferences (
+  id TEXT PRIMARY KEY,
+  attendantId TEXT NOT NULL UNIQUE,
+  emailEnabled BOOLEAN DEFAULT TRUE,
+  emailFrequency TEXT DEFAULT 'immediate', -- immediate, daily, weekly, disabled
+  smsEnabled BOOLEAN DEFAULT FALSE,
+  smsPhone TEXT,
+  quietHoursStart TIME,
+  quietHoursEnd TIME,
+  preferences JSON, -- Per-category preferences
+  FOREIGN KEY (attendantId) REFERENCES attendants(id)
+);
+
+-- Notification delivery log
+CREATE TABLE notification_deliveries (
+  id TEXT PRIMARY KEY,
+  notificationId TEXT NOT NULL,
+  channel TEXT NOT NULL, -- email, sms, in-app
+  status TEXT NOT NULL, -- sent, delivered, failed, bounced
+  sentAt TIMESTAMP,
+  deliveredAt TIMESTAMP,
+  error TEXT,
+  FOREIGN KEY (notificationId) REFERENCES notifications(id)
+);
+```
+
+#### API Endpoints:
+
+```typescript
+// Get notifications for attendant
+GET /api/attendant/notifications
+  ?unreadOnly=true
+  &limit=20
+  &offset=0
+
+// Mark notification as read
+PUT /api/attendant/notifications/:id/read
+
+// Mark all as read
+PUT /api/attendant/notifications/mark-all-read
+
+// Get notification preferences
+GET /api/attendant/notification-preferences
+
+// Update notification preferences
+PUT /api/attendant/notification-preferences
+
+// Admin: Send notification to attendants
+POST /api/admin/notifications/send
+  body: {
+    attendantIds: string[],
+    type: string,
+    title: string,
+    message: string,
+    actionUrl?: string
+  }
+```
+
+#### UI Components:
+
+1. **Dashboard "Recent Updates" Card**
+   - Last 5 notifications
+   - "View All" link
+   - Unread count badge
+
+2. **Notification Bell Icon** (Header)
+   - Badge with unread count
+   - Dropdown with recent notifications
+   - "Mark all as read" button
+
+3. **Notifications Page** (`/attendant/notifications`)
+   - Full list with pagination
+   - Filter by type
+   - Search notifications
+   - Bulk actions (mark as read, delete)
+
+4. **Notification Preferences Page** (`/attendant/settings/notifications`)
+   - Email preferences
+   - SMS opt-in
+   - Quiet hours
+   - Per-category settings
+
+#### Notification Triggers:
+
+**Automatic Triggers:**
+- Assignment created → Notify assigned attendant
+- Assignment updated → Notify attendant if time/location changed
+- Assignment deleted → Notify attendant
+- Document published → Notify all event attendants
+- Count session created → Notify attendants with assignments during that time
+- Oversight message → Notify specific attendants or groups
+
+**Manual Triggers:**
+- Admin "Send Notification" button
+- Bulk notification to filtered attendants
+- Event-wide announcements
+
+#### User Stories:
+
+1. **As an attendant**, I want to see a notification when my assignment changes so I know my updated schedule
+2. **As an attendant**, I want email notifications for important updates so I don't miss changes
+3. **As an attendant**, I want to control notification frequency so I'm not overwhelmed
+4. **As a coordinator**, I want to send announcements to all attendants so everyone stays informed
+5. **As an overseer**, I want to notify my assigned attendants about important information
+
+#### Acceptance Criteria:
+
+**Phase 1 (In-App):**
+- [ ] Notifications table created in database
+- [ ] Recent Updates card on attendant dashboard
+- [ ] Unread count badge displayed
+- [ ] Notifications created when assignments change
+- [ ] Notifications created when documents published
+- [ ] Mark as read functionality
+- [ ] Link to relevant pages from notifications
+
+**Phase 2 (Email):**
+- [ ] Email templates created
+- [ ] Notification preferences table
+- [ ] Email sent for assignment changes
+- [ ] Daily digest option working
+- [ ] Unsubscribe functionality
+- [ ] Email delivery tracking
+
+**Phase 3 (SMS):**
+- [ ] Twilio integration configured
+- [ ] SMS opt-in flow
+- [ ] Phone number verification
+- [ ] SMS sent for critical updates only
+- [ ] Cost tracking implemented
+
+#### Technical Considerations:
+
+- **Performance**: Index on `attendantId`, `isRead`, `createdAt`
+- **Scalability**: Consider job queue for email/SMS (Bull/BullMQ)
+- **Privacy**: GDPR compliance for notification data
+- **Testing**: Mock email/SMS in development
+- **Monitoring**: Track delivery rates, bounce rates
+- **Rate Limiting**: Prevent notification spam
+
+#### Dependencies:
+- Existing nodemailer setup (already in place)
+- Twilio account (Phase 3)
+- Job queue system (recommended for Phase 2+)
+
+#### Risks & Mitigation:
+- **Email deliverability**: Use reputable SMTP service, implement SPF/DKIM
+- **SMS costs**: Set daily limits, require opt-in, critical updates only
+- **Notification fatigue**: User preferences, quiet hours, digest options
+- **Spam concerns**: Rate limiting, unsubscribe links, preference center
+
+---
+
 ## 📈 Success Metrics
 
 - **User Adoption**: 90%+ of events using position assignment feature
@@ -516,12 +759,16 @@ Next.js production server (`next start`) doesn't automatically load `.env` file,
 
 ## 📝 Backlog Management Notes
 
-**Last Updated**: 2025-10-16
+**Last Updated**: 2025-10-23
 
 **Sources Consolidated**:
 - `docs/roadmap/attendant-module-enhancements.md` - Migrated all features
-- Today's session - Added enhanced filtering feature
+- 2025-10-16 session - Added enhanced filtering feature
+- 2025-10-23 session - Added attendant notification system (FEATURE-003)
 - Infrastructure fixes - Documented resolved technical debt
+
+**Recent Additions**:
+- **FEATURE-003**: Attendant Notification System - Comprehensive 3-phase notification implementation with in-app, email, and SMS capabilities
 
 **Deprecated Documents**:
 - `TODO_IMMEDIATE.md` - Empty, can be removed
