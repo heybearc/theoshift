@@ -986,7 +986,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         },
         event_attendants: {
           include: {
-            attendants: {
+            attendant: {
               select: {
                 id: true,
                 firstName: true,
@@ -999,7 +999,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           }
         }
       }
-    })
+    }) as any
     
     if (!eventData) {
       console.log('🔍 LANYARDS: Event not found')
@@ -1061,9 +1061,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     // Transform attendants data from event_attendant_associations
     const attendants = eventData.event_attendants
-      ?.filter(association => association?.attendants?.isActive && association.attendants.id)
+      ?.filter(association => association?.attendant?.isActive && association.attendant.id)
       ?.map(association => {
-        const att = association.attendants!
+        const att = association.attendant!
         return {
           id: association.id,
           users: {
