@@ -6,6 +6,33 @@ import HelpLayout from '../components/HelpLayout'
 export default function ReleaseNotes() {
   const releases = [
     {
+      version: 'v2.2.0',
+      date: '2025-10-25',
+      type: 'minor',
+      title: 'Event Announcements System',
+      description: 'New announcement system for event communication with attendants',
+      features: [
+        '📢 Event Announcements - Create and manage announcements for events',
+        '🎨 Announcement Types - INFO, WARNING, and URGENT priority levels',
+        '📅 Date Range Support - Schedule announcements with start/end dates',
+        '👁️ Attendant Dashboard Integration - Announcements display automatically',
+        '✖️ Dismissible Banners - Attendants can dismiss announcements',
+        '🎯 Permission-Based Management - Only admins/overseers can create announcements',
+        '🌐 Timezone-Aware Display - Proper date handling across timezones'
+      ],
+      fixes: [
+        '🔧 Fixed attendant authentication for viewing announcements',
+        '📅 Corrected date display timezone issues using date-fns',
+        '🔐 Improved API authentication for attendant sessions'
+      ],
+      breaking: [],
+      notes: [
+        'Announcements appear on attendant dashboard when active and within date range',
+        'Admins and overseers can manage announcements from event detail page',
+        'Announcement data stored in shared database'
+      ]
+    },
+    {
       version: 'v2.1.2',
       date: '2025-10-22',
       type: 'minor',
@@ -205,8 +232,8 @@ export default function ReleaseNotes() {
               Want to be notified about new releases? Contact your administrator to be added to the update notifications.
             </p>
             <div className="text-sm text-gray-500">
-              <p>Current Version: v2.1.2</p>
-              <p>Last Updated: October 22, 2025</p>
+              <p>Current Version: v2.2.0</p>
+              <p>Last Updated: October 25, 2025</p>
             </div>
           </div>
         </div>

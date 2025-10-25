@@ -212,6 +212,86 @@ export default function EventManagementPage({ userRole }: EventManagementProps) 
             </div>
           </div>
 
+          {/* Announcements */}
+          {(userRole === 'ADMIN' || userRole === 'OVERSEER' || userRole === 'ASSISTANT_OVERSEER' || userRole === 'KEYMAN') && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">📢 Event Announcements</h2>
+              
+              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Creating and Managing Announcements</h3>
+                
+                <p className="text-gray-600 mb-4">
+                  Announcements allow you to communicate important information to attendants. They appear as banners 
+                  on the attendant dashboard when active.
+                </p>
+
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Announcement Types</h4>
+                    <ul className="space-y-2 text-sm text-gray-600">
+                      <li className="flex items-start">
+                        <span className="text-blue-500 mr-2">ℹ️</span>
+                        <div>
+                          <strong>INFO:</strong> General information (e.g., arrival times, parking instructions)
+                        </div>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-yellow-500 mr-2">⚠️</span>
+                        <div>
+                          <strong>WARNING:</strong> Important notices that require attention
+                        </div>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-red-500 mr-2">🚨</span>
+                        <div>
+                          <strong>URGENT:</strong> Critical information requiring immediate action
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">How to Create an Announcement</h4>
+                    <ol className="space-y-2 text-sm text-gray-600 list-decimal list-inside">
+                      <li>Navigate to the event detail page</li>
+                      <li>Click the "📢 Announcements" button</li>
+                      <li>Click "+ New Announcement"</li>
+                      <li>Enter title and message</li>
+                      <li>Select announcement type (INFO, WARNING, or URGENT)</li>
+                      <li>Optionally set start and end dates</li>
+                      <li>Click "Create" to publish</li>
+                    </ol>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Date Ranges</h4>
+                    <p className="text-sm text-gray-600">
+                      Set start and end dates to control when announcements are visible. Announcements will only 
+                      appear to attendants during the specified date range. Leave dates blank to show indefinitely.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Managing Announcements</h4>
+                    <ul className="space-y-2 text-sm text-gray-600">
+                      <li>• <strong>Edit:</strong> Update title, message, type, or dates</li>
+                      <li>• <strong>Deactivate:</strong> Hide announcement without deleting it</li>
+                      <li>• <strong>Delete:</strong> Permanently remove announcement</li>
+                      <li>• <strong>Reactivate:</strong> Make inactive announcements visible again</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <strong>💡 Tip:</strong> Announcements are visible to all attendants assigned to the event. 
+                    Use them for important communications like arrival times, parking changes, or safety reminders.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Best Practices */}
           <div className="bg-green-50 border border-green-200 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-green-900 mb-4">✅ Best Practices</h2>
