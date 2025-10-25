@@ -1,0 +1,99 @@
+import { useState } from 'react'
+
+interface Announcement {
+  id: string
+  title: string
+  message: string
+  type: 'INFO' | 'WARNING' | 'URGENT'
+  createdAt: string
+}
+
+interface AnnouncementBannerProps {
+  announcements: Announcement[]
+}
+
+export default function AnnouncementBanner({ announcements }: AnnouncementBannerProps) {
+  const [dismissed, setDismissed] = useState<Set<string>>(new Set())
+
+  if (announcements.length === 0) {
+    return null
+  }
+
+  const visibleAnnouncements = announcements.filter(a => !dismissed.has(a.id))
+
+  if (visibleAnnouncements.length === 0) {
+    return null
+  }
+
+  const handleDismiss = (id: string) => {
+    setDismissed(prev => new Set([...prev, id]))
+  }
+
+  const getTypeStyles = (type: string) => {
+    switch (type) {
+      case 'URGENT':
+        return {
+          bg: 'bg-red-50',
+          border: 'border-red-300',
+          text: 'text-red-900',
+          icon: '🚨',
+          titleColor: 'text-red-800'
+        }
+      case 'WARNING':
+        return {
+          bg: 'bg-yellow-50',
+          border: 'border-yellow-300',
+          text: 'text-yellow-900',
+          icon: '⚠️',
+          titleColor: 'text-yellow-800'
+        }
+      default: // INFO
+        return {
+          bg: 'bg-blue-50',
+          border: 'border-blue-300',
+          text: 'text-blue-900',
+          icon: 'ℹ️',
+          titleColor: 'text-blue-800'
+        }
+    }
+  }
+
+  return (
+    <div className="space-y-3 mb-6">
+      {visibleAnnouncements.map((announcement) => {
+        const styles = getTypeStyles(announcement.type)
+        
+        return (
+          <div
+            key={announcement.id}
+            className={`${styles.bg} border ${styles.border} rounded-lg p-4 ${styles.text} relative`}
+          >
+            <button
+              onClick={() => handleDismiss(announcement.id)}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 transition-colors"
+              aria-label="Dismiss announcement"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            <div className="flex items-start pr-8">
+              <div className="text-2xl mr-3 flex-shrink-0">
+                {styles.icon}
+              </div>
+              <div className="flex-1">
+                <h3 className={`font-semibold text-lg mb-1 ${styles.titleColor}`}>
+                  {announcement.title}
+                </h3>
+                <p className="text-sm whitespace-pre-wrap">
+                  {announcement.message}
+                </p>
+              </div>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
