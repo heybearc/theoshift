@@ -21,7 +21,9 @@ export default function AnnouncementBanner({ eventId }: AnnouncementBannerProps)
     const fetchAnnouncements = async () => {
       try {
         console.log('🔔 Fetching announcements for event:', eventId)
-        const response = await fetch(`/api/events/${eventId}/announcements`)
+        const response = await fetch(`/api/events/${eventId}/announcements`, {
+          credentials: 'include'
+        })
         console.log('🔔 Response status:', response.status)
         if (response.ok) {
           const data = await response.json()
