@@ -20,17 +20,29 @@ export default function AnnouncementBanner({ eventId }: AnnouncementBannerProps)
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
+        console.log('🔔 Fetching announcements for event:', eventId)
         const response = await fetch(`/api/events/${eventId}/announcements`)
+        console.log('🔔 Response status:', response.status)
         if (response.ok) {
           const data = await response.json()
+          console.log('🔔 Raw announcements:', data)
           // Filter to only active announcements within date range
           const now = new Date()
+          console.log('🔔 Current time:', now)
           const active = data.filter((a: any) => {
+            console.log('🔔 Checking announcement:', a.title, {
+              isActive: a.isActive,
+              startDate: a.startDate,
+              endDate: a.endDate,
+              startCheck: a.startDate ? new Date(a.startDate) <= now : true,
+              endCheck: a.endDate ? new Date(a.endDate) >= now : true
+            })
             if (!a.isActive) return false
             if (a.startDate && new Date(a.startDate) > now) return false
             if (a.endDate && new Date(a.endDate) < now) return false
             return true
           })
+          console.log('🔔 Active announcements after filter:', active)
           setAnnouncements(active)
         }
       } catch (error) {
