@@ -57,15 +57,24 @@ export default function AnnouncementBanner({ eventId }: AnnouncementBannerProps)
     fetchAnnouncements()
   }, [eventId])
 
-  if (loading || announcements.length === 0) {
+  if (loading) {
+    console.log('🔔 Still loading announcements...')
+    return null
+  }
+
+  if (announcements.length === 0) {
+    console.log('🔔 No announcements to display')
     return null
   }
 
   const visibleAnnouncements = announcements.filter(a => !dismissed.has(a.id))
 
   if (visibleAnnouncements.length === 0) {
+    console.log('🔔 All announcements dismissed')
     return null
   }
+
+  console.log('🔔 RENDERING BANNER with', visibleAnnouncements.length, 'announcements')
 
   const handleDismiss = (id: string) => {
     setDismissed(prev => new Set([...prev, id]))
