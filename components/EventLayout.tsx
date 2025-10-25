@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import packageJson from '../package.json'
 
 interface EventLayoutProps {
   children: ReactNode
@@ -212,7 +213,7 @@ export default function EventLayout({
             </Link>
           </div>
           <div className="text-center text-xs text-gray-500 mt-2">
-            JW Attendant Scheduler v1.0.0-MVP • Secure Event Management System
+            JW Attendant Scheduler v{packageJson.version} • Secure Event Management System
           </div>
         </div>
       </footer>
