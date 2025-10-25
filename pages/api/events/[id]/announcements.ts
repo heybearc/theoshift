@@ -34,20 +34,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
-  const user = await prisma.users.findUnique({
-    where: { email: session.user.email! },
-    select: { id: true, role: true }
-  })
-
-  if (!user) {
-    return res.status(401).json({ error: 'User not found' })
-  }
-
   try {
     switch (req.method) {
       case 'GET':
+        // Anyone with a valid session can view announcements (including attendants)
         return await handleGet(req, res, eventId)
       case 'POST':
+        // Only users with proper roles can create announcements
+        const user = await prisma.users.findUnique({
+          where: { email: session.user.email! },
+          select: { id: true, role: true }
+        })
+
+        if (!user) {
+          return res.status(401).json({ error: 'User not found' })
+        }
+
         if (!['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(user.role)) {
           return res.status(403).json({ error: 'Insufficient permissions' })
         }
