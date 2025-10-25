@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface Announcement {
   id: string
@@ -9,13 +9,41 @@ interface Announcement {
 }
 
 interface AnnouncementBannerProps {
-  announcements: Announcement[]
+  eventId: string
 }
 
-export default function AnnouncementBanner({ announcements }: AnnouncementBannerProps) {
+export default function AnnouncementBanner({ eventId }: AnnouncementBannerProps) {
+  const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
+  const [loading, setLoading] = useState(true)
 
-  if (announcements.length === 0) {
+  useEffect(() => {
+    const fetchAnnouncements = async () => {
+      try {
+        const response = await fetch(`/api/events/${eventId}/announcements`)
+        if (response.ok) {
+          const data = await response.json()
+          // Filter to only active announcements within date range
+          const now = new Date()
+          const active = data.filter((a: any) => {
+            if (!a.isActive) return false
+            if (a.startDate && new Date(a.startDate) > now) return false
+            if (a.endDate && new Date(a.endDate) < now) return false
+            return true
+          })
+          setAnnouncements(active)
+        }
+      } catch (error) {
+        console.error('Failed to fetch announcements:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchAnnouncements()
+  }, [eventId])
+
+  if (loading || announcements.length === 0) {
     return null
   }
 

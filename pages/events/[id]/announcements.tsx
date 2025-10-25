@@ -5,6 +5,7 @@ import EventLayout from '../../../components/EventLayout'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
+import { format, parseISO } from 'date-fns'
 
 interface Announcement {
   id: string
@@ -216,10 +217,10 @@ export default function EventAnnouncementsPage({ eventId, event, announcements, 
                     <p className="text-gray-700 whitespace-pre-wrap mb-3">{announcement.message}</p>
                     <div className="text-sm text-gray-500 space-y-1">
                       {announcement.startDate && (
-                        <p>📅 Start: {new Date(announcement.startDate).toLocaleDateString()}</p>
+                        <p>📅 Start: {format(parseISO(announcement.startDate.split('T')[0]), 'MM/dd/yyyy')}</p>
                       )}
                       {announcement.endDate && (
-                        <p>📅 End: {new Date(announcement.endDate).toLocaleDateString()}</p>
+                        <p>📅 End: {format(parseISO(announcement.endDate.split('T')[0]), 'MM/dd/yyyy')}</p>
                       )}
                       <p>Created by {announcement.users.firstName} {announcement.users.lastName}</p>
                     </div>
