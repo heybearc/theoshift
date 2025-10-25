@@ -485,7 +485,7 @@ export default function AttendantDashboard() {
         </div>
 
         {/* Announcements Banner */}
-        {selectedEventId && <AnnouncementBanner eventId={selectedEventId} />}
+        {dashboardData?.event?.id && <AnnouncementBanner eventId={dashboardData.event.id} />}
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
