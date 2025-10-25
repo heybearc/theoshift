@@ -27,19 +27,18 @@ const server = new Server(
 );
 
 // Configuration
-const STATE_FILE = '/tmp/jw-deployment-state.json';
 const BLUE_IP = '10.92.3.22';
 const GREEN_IP = '10.92.3.24';
 const HAPROXY_IP = '10.92.3.26';
 const DB_IP = '10.92.3.21';
 
-// Get current deployment state
+// Get current deployment state from HAProxy
 async function getDeploymentState() {
   try {
-    const data = await fs.readFile(STATE_FILE, 'utf8');
-    return JSON.parse(data);
+    const { stdout } = await execAsync(`ssh haproxy "/usr/local/bin/jw-deployment-state.sh get"`);
+    return JSON.parse(stdout);
   } catch (error) {
-    // Initialize state if not exists
+    // Fallback to default state
     return {
       prod: 'blue',
       standby: 'green',
@@ -49,9 +48,14 @@ async function getDeploymentState() {
   }
 }
 
-// Save deployment state
+// Save deployment state to HAProxy
 async function saveDeploymentState(state) {
-  await fs.writeFile(STATE_FILE, JSON.stringify(state, null, 2));
+  try {
+    await execAsync(`ssh haproxy "/usr/local/bin/jw-deployment-state.sh set ${state.prod} ${state.standby}"`);
+  } catch (error) {
+    console.error('Failed to save state:', error.message);
+    throw error;
+  }
 }
 
 // Check server health
