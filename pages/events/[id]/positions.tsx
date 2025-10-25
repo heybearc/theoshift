@@ -3425,7 +3425,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     console.log('🔍 Step 9: Oversight data fetched, count:', oversightData.length)
 
     // Attach oversight data to positions and rename position_assignments to assignments for client compatibility
-    const positionsWithOversight = eventData!.positions.map((position: any) => {
+    const positionsWithOversight = (eventData as any)!.positions.map((position: any) => {
       const positionOversight = oversightData
         .filter((oversight: any) => oversight.positionId === position.id)
         .map((oversight: any) => ({
@@ -3434,13 +3434,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
           keyman: oversight.keyman
         }))
       
-      // Assignments are already correctly named from the query
-      const transformedAssignments = position.assignments || []
-      
+      // Assignments and shifts are already correctly named from the schema
       return {
         ...position,
-        assignments: transformedAssignments,
-        shifts: position.shifts,
         oversight: positionOversight
       }
     })

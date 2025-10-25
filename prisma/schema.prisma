@@ -8,6 +8,61 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Account {
+  id                String  @id
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  users             users   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  users        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model announcements {
+  id        String    @id
+  eventId   String
+  title     String
+  message   String
+  type      String?   @default("INFO")
+  isActive  Boolean?  @default(true)
+  startDate DateTime? @db.Timestamp(6)
+  endDate   DateTime? @db.Timestamp(6)
+  createdBy String
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
+  updatedAt DateTime? @default(now()) @db.Timestamp(6)
+  users     users     @relation(fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  events    events    @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([endDate], map: "announcements_enddate_idx")
+  @@index([eventId], map: "announcements_eventid_idx")
+  @@index([isActive], map: "announcements_isactive_idx")
+  @@index([startDate], map: "announcements_startdate_idx")
+}
+
 model assignments {
   id              String           @id
   eventId         String
@@ -27,71 +82,40 @@ model assignments {
   users           users            @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// CONSOLIDATED MODEL: All attendant data is now event-scoped
-model event_attendants {
-  id                          String      @id
-  eventId                     String
-  userId                      String?     // Optional link to user account
-  
-  // Personal Information (consolidated from attendants table)
-  firstName                   String
-  lastName                    String
-  email                       String
-  phone                       String?
-  congregation                String
-  
-  // Availability & Status
-  isActive                    Boolean     @default(true)
-  isAvailable                 Boolean     @default(true)
-  availabilityStatus          String?     @default("AVAILABLE")
-  
-  // Service Information
-  formsOfService              Json        @default("[]")
-  servingAs                   Json?       @default("[]")
-  skills                      Json?
-  preferredDepartments        Json?
-  unavailableDates            Json?
-  
-  // Event-Specific Data
-  role                        UserRole    @default(ATTENDANT)
-  assignedDepartments         Json?
-  assignedStationRanges       Json?
-  
-  // Authentication
-  pinHash                     String?
-  profileVerificationRequired Boolean     @default(false)
-  profileVerifiedAt           DateTime?
-  
-  // Statistics
-  totalAssignments            Int         @default(0)
-  totalHours                  Float       @default(0)
-  
-  // Metadata
-  notes                       String?
-  createdAt                   DateTime    @default(now())
-  updatedAt                   DateTime    @updatedAt
-  
-  // Relations
-  events                      events      @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  users                       users?      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Position assignments now reference event_attendants directly
-  position_assignments        position_assignments[]
-  keyman_assignments          position_assignments[]           @relation("KeymanRelation")
-  overseer_assignments        position_assignments[]           @relation("OverseerRelation")
-  
-  // Oversight assignments
-  position_keyman             position_oversight_assignments[] @relation("KeymanAssignments")
-  position_overseer           position_oversight_assignments[] @relation("OverseerAssignments")
-  
-  // Document publications
-  document_publications       document_publications[]
-
-  @@unique([eventId, userId])
-  @@unique([eventId, email])  // Prevent duplicate emails per event
-  @@index([eventId])
-  @@index([email])
-  @@index([eventId, isActive])
+model attendants {
+  id                                                                                    String                           @id
+  userId                                                                                String?                          @unique
+  firstName                                                                             String
+  lastName                                                                              String
+  email                                                                                 String
+  phone                                                                                 String?
+  availabilityStatus                                                                    String?                          @default("AVAILABLE")
+  isAvailable                                                                           Boolean                          @default(true)
+  notes                                                                                 String?
+  servingAs                                                                             Json?                            @default("[]")
+  skills                                                                                Json?
+  preferredDepartments                                                                  Json?
+  unavailableDates                                                                      Json?
+  totalAssignments                                                                      Int                              @default(0)
+  totalHours                                                                            Float                            @default(0)
+  createdAt                                                                             DateTime                         @default(now())
+  updatedAt                                                                             DateTime
+  congregation                                                                          String
+  formsOfService                                                                        Json                             @default("[]")
+  isActive                                                                              Boolean                          @default(true)
+  pinHash                                                                               String?
+  profileVerificationRequired                                                           Boolean                          @default(false)
+  profileVerifiedAt                                                                     DateTime?
+  users                                                                                 users?                           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document_publications                                                                 document_publications[]
+  event_attendants                                                                       event_attendants[]               @relation("event_attendants_attendantIdToattendants")
+  event_attendants_event_attendants_keymanIdToattendants                                event_attendants[]               @relation("event_attendants_keymanIdToattendants")
+  event_attendants_event_attendants_overseerIdToattendants                              event_attendants[]               @relation("event_attendants_overseerIdToattendants")
+  position_assignments_position_assignments_attendantIdToattendants                     position_assignments[]           @relation("position_assignments_attendantIdToattendants")
+  position_assignments_position_assignments_keymanIdToattendants                        position_assignments[]           @relation("position_assignments_keymanIdToattendants")
+  position_assignments_position_assignments_overseerIdToattendants                      position_assignments[]           @relation("position_assignments_overseerIdToattendants")
+  position_oversight_assignments_position_oversight_assignments_keyman_idToattendants   position_oversight_assignments[] @relation("position_oversight_assignments_keyman_idToattendants")
+  position_oversight_assignments_position_oversight_assignments_overseer_idToattendants position_oversight_assignments[] @relation("position_oversight_assignments_overseer_idToattendants")
 }
 
 model count_sessions {
@@ -113,6 +137,21 @@ model count_sessions {
   @@unique([eventId, sessionName])
 }
 
+model document_publications {
+  id              String          @id
+  documentId      String
+  attendantId     String
+  publishedAt     DateTime        @default(now())
+  viewedAt        DateTime?
+  downloadedAt    DateTime?
+  attendants      attendants      @relation(fields: [attendantId], references: [id], onDelete: Cascade)
+  event_documents event_documents @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, attendantId])
+  @@index([attendantId], map: "idx_document_publications_attendant")
+  @@index([documentId], map: "idx_document_publications_document")
+}
+
 model email_configurations {
   id                 String   @id
   smtpServer         String
@@ -130,176 +169,270 @@ model email_configurations {
   updatedAt          DateTime
 }
 
+model event_attendants {
+  id                                                  String      @id
+  eventId                                             String
+  userId                                              String?
+  role                                                UserRole    @default(ATTENDANT)
+  isActive                                            Boolean     @default(true)
+  assignedDepartments                                 Json?
+  assignedStationRanges                               Json?
+  createdAt                                           DateTime    @default(now())
+  updatedAt                                           DateTime
+  attendantId                                         String?
+  keymanId                                            String?
+  overseerId                                          String?
+  attendant                                           attendants? @relation("event_attendants_attendantIdToattendants", fields: [attendantId], references: [id], onDelete: Cascade)
+  events                                              events      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  keyman                                              attendants? @relation("event_attendants_keymanIdToattendants", fields: [keymanId], references: [id])
+  overseer                                            attendants? @relation("event_attendants_overseerIdToattendants", fields: [overseerId], references: [id])
+  users                                               users?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, attendantId])
+  @@unique([eventId, userId])
+}
+
+model event_documents {
+  id                    String                  @id
+  eventId               String
+  title                 String
+  description           String?
+  fileName              String
+  fileUrl               String
+  fileType              String
+  fileSize              Int
+  uploadedBy            String
+  uploadedAt            DateTime                @default(now())
+  publishedTo           String                  @default("none")
+  publishedCount        Int                     @default(0)
+  publishedAt           DateTime?
+  isActive              Boolean                 @default(true)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime
+  document_publications document_publications[]
+  events                events                  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId], map: "idx_event_documents_event")
+  @@index([uploadedBy], map: "idx_event_documents_uploader")
+}
+
+model event_permissions {
+  id        String              @id
+  userId    String
+  eventId   String
+  role      EventPermissionRole @default(VIEWER)
+  scopeType EventScopeType?
+  scopeIds  Json?
+  createdAt DateTime            @default(now())
+  updatedAt DateTime
+  events    events              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  users     users               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([eventId])
+  @@index([eventId, role])
+  @@index([userId])
+}
+
 model event_positions {
-  id                   String            @id
+  id                   String        @id
   eventId              String
   positionNumber       Int
   positionName         String
   description          String?
   department           String?
-  isActive             Boolean           @default(true)
-  isAllDay             Boolean           @default(false)
-  isLeadershipPosition Boolean           @default(false)
-  requiresExperience   Boolean           @default(false)
-  maxAttendants        Int               @default(1)
-  minAttendants        Int               @default(1)
+  isActive             Boolean       @default(true)
+  isAllDay             Boolean       @default(false)
+  isLeadershipPosition Boolean       @default(false)
+  requiresExperience   Boolean       @default(false)
+  maxAttendants        Int           @default(1)
+  minAttendants        Int           @default(1)
   tags                 Json?
   instructions         String?
-  createdAt            DateTime          @default(now())
+  createdAt            DateTime      @default(now())
   updatedAt            DateTime
   assignments          assignments[]
-  events               events            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  events               events        @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@unique([eventId, positionNumber])
 }
 
 model events {
-  id                           String                           @id
-  name                         String
-  description                  String?
-  startDate                    DateTime
-  endDate                      DateTime
-  location                     String?
-  status                       EventStatus                      @default(UPCOMING)
-  type                         EventType                        @default(CIRCUIT_ASSEMBLY)
-  maxAttendants                Int?
-  registrationDeadline         DateTime?
-  isPublic                     Boolean                          @default(false)
-  settings                     Json?
-  createdAt                    DateTime                         @default(now())
-  updatedAt                    DateTime
-  createdBy                    String?
-  assignments                  assignments[]
-  count_sessions               count_sessions[]
-  event_attendants             event_attendants[]
-  event_positions              event_positions[]
-  lanyards                     lanyards[]
-  position_assignments         position_assignments[]
+  id                             String                           @id
+  name                           String
+  description                    String?
+  status                         EventStatus                      @default(UPCOMING)
+  startDate                      DateTime                         @db.Date
+  endDate                        DateTime                         @db.Date
+  location                       String?
+  venue                          String?
+  isActive                       Boolean                          @default(true)
+  settings                       Json?
+  createdAt                      DateTime                         @default(now())
+  updatedAt                      DateTime
+  createdBy                      String?
+  startTime                      String?
+  endTime                        String?
+  eventType                      EventType                        @default(CIRCUIT_ASSEMBLY)
+  attendantsNeeded               Int?
+  capacity                       Int?
+  assemblyoverseeremail          String?
+  assemblyoverseername           String?
+  assemblyoverseerphone          String?
+  attendantoverseerassistants    Json?                            @default("[]")
+  attendantoverseeremail         String?
+  attendantoverseername          String?
+  attendantoverseerphone         String?
+  circuitoverseeremail           String?
+  circuitoverseername            String?
+  circuitoverseerphone           String?
+  announcements                  announcements[]
+  assignments                    assignments[]
+  count_sessions                 count_sessions[]
+  event_attendants               event_attendants[]
+  event_documents                event_documents[]
+  event_permissions              event_permissions[]
+  event_positions                event_positions[]
+  lanyard_settings               lanyard_settings?
+  oversight_assignments          oversight_assignments[]
   position_oversight_assignments position_oversight_assignments[]
-  positions                    positions[]
-  users                        users?                           @relation(fields: [createdBy], references: [id])
-  event_documents              event_documents[]
-  event_permissions            event_permissions[]
+  positions                      positions[]
+}
 
-  @@index([startDate])
-  @@index([status])
-  @@index([createdBy])
+model feedback {
+  id                   String                 @id
+  type                 FeedbackType
+  title                String
+  description          String
+  priority             FeedbackPriority       @default(MEDIUM)
+  status               FeedbackStatus         @default(NEW)
+  submittedBy          String
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime
+  users                users                  @relation(fields: [submittedBy], references: [id], onDelete: Cascade)
+  feedback_attachments feedback_attachments[]
+  feedback_comments    feedback_comments[]
+}
+
+model feedback_attachments {
+  id         String   @id
+  feedbackId String
+  filename   String
+  filePath   String
+  fileSize   Int
+  mimeType   String
+  createdAt  DateTime @default(now())
+  feedback   feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+}
+
+model feedback_comments {
+  id         String   @id
+  feedbackId String
+  authorId   String
+  content    String
+  createdAt  DateTime @default(now())
+  users      users    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  feedback   feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+}
+
+model lanyard_settings {
+  id                String     @id
+  eventId           String     @unique
+  totalLanyards     Int
+  availableLanyards Int
+  isActive          Boolean    @default(true)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime
+  events            events     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  lanyards          lanyards[]
 }
 
 model lanyards {
-  id        String        @id
-  eventId   String
-  number    Int
-  color     String?
-  status    LanyardStatus @default(AVAILABLE)
-  issuedTo  String?
-  issuedAt  DateTime?
-  returnedAt DateTime?
-  notes     String?
-  createdAt DateTime      @default(now())
-  updatedAt DateTime
-  events    events        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  id               String           @id
+  lanyardSettingId String
+  badgeNumber      String
+  isCheckedOut     Boolean          @default(false)
+  checkedOutTo     String?
+  checkedOutAt     DateTime?
+  checkedInAt      DateTime?
+  status           LanyardStatus    @default(AVAILABLE)
+  notes            String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime
+  lanyard_settings lanyard_settings @relation(fields: [lanyardSettingId], references: [id], onDelete: Cascade)
 
-  @@unique([eventId, number])
+  @@unique([lanyardSettingId, badgeNumber])
 }
 
-// Updated to reference event_attendants instead of attendants
+model oversight_assignments {
+  id             String          @id
+  eventId        String
+  userId         String
+  departmentId   String?
+  stationRangeId String?
+  oversightLevel OversightLevel
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime
+  events         events          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  station_ranges station_ranges? @relation(fields: [stationRangeId], references: [id])
+  users          users           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model position_assignments {
-  id           String            @id
-  positionId   String
-  eventId      String
-  attendantId  String            // Now references event_attendants.id
-  role         PositionRole      @default(ATTENDANT)
-  shiftId      String?
-  shiftStart   DateTime?
-  shiftEnd     DateTime?
-  status       AssignmentStatus  @default(ASSIGNED)
-  notes        String?
-  assignedBy   String?
-  assignedAt   DateTime?         @default(now())
-  createdAt    DateTime?         @default(now()) @db.Timestamp(6)
-  updatedAt    DateTime?         @default(now()) @updatedAt @db.Timestamp(6)
-  overseerId   String?
-  keymanId     String?
-  
-  // Relations now point to event_attendants
-  attendant    event_attendants  @relation(fields: [attendantId], references: [id], onDelete: Cascade)
-  keyman       event_attendants? @relation("KeymanRelation", fields: [keymanId], references: [id])
-  overseer     event_attendants? @relation("OverseerRelation", fields: [overseerId], references: [id])
-  
-  assignedByUser users?          @relation("AssignedByUser", fields: [assignedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  event        events            @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  position     positions         @relation(fields: [positionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                                                      String           @id
+  positionId                                              String
+  shiftId                                                 String?
+  attendantId                                             String
+  role                                                    PositionRole
+  overseerId                                              String?
+  keymanId                                                String?
+  assignedAt                                              DateTime         @default(now())
+  assignedBy                                              String?
+  users      users?           @relation(fields: [assignedBy], references: [id])
+  attendant  attendants       @relation("position_assignments_attendantIdToattendants", fields: [attendantId], references: [id], onDelete: Cascade)
+  keyman     attendants?      @relation("position_assignments_keymanIdToattendants", fields: [keymanId], references: [id])
+  overseer   attendants?      @relation("position_assignments_overseerIdToattendants", fields: [overseerId], references: [id])
+  positions  positions        @relation("PositionToAssignments", fields: [positionId], references: [id], onDelete: Cascade)
+  shift      position_shifts? @relation("ShiftToAssignments", fields: [shiftId], references: [id], onDelete: Cascade)
 
-  @@unique([positionId, attendantId])
-  @@index([eventId], map: "idx_position_assignments_event")
-  @@index([attendantId], map: "idx_position_assignments_attendant")
-  @@index([positionId], map: "idx_position_assignments_position")
-}
-
-model positions {
-  id                           String                           @id
-  eventId                      String
-  positionNumber               Int
-  name                         String
-  area                         String?
-  description                  String?
-  isActive                     Boolean                          @default(true)
-  isAllDay                     Boolean                          @default(false)
-  isLeadershipPosition         Boolean                          @default(false)
-  requiresExperience           Boolean                          @default(false)
-  experienceLevel              ExperienceLevel?
-  maxAttendants                Int                              @default(1)
-  minAttendants                Int                              @default(1)
-  tags                         Json?
-  instructions                 String?
-  shifts                       Json?
-  createdAt                    DateTime                         @default(now())
-  updatedAt                    DateTime
-  events                       events                           @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  position_assignments         position_assignments[]
-  position_counts              position_counts[]
-  position_oversight_assignments position_oversight_assignments[]
-
-  @@unique([eventId, positionNumber])
-  @@index([eventId], map: "idx_positions_event")
-  @@index([area], map: "idx_positions_area")
+  @@unique([positionId, shiftId, attendantId])
+  @@index([attendantId])
+  @@index([overseerId, keymanId])
+  @@index([positionId, shiftId])
+  @@index([role])
 }
 
 model position_counts {
   id             String         @id
-  sessionId      String
+  countSessionId String
   positionId     String
-  count          Int            @default(0)
+  attendeeCount  Int?
   notes          String?
-  countedAt      DateTime?
   countedBy      String?
+  countedAt      DateTime       @default(now())
   createdAt      DateTime       @default(now())
   updatedAt      DateTime
-  count_sessions count_sessions @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  position       positions      @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  count_sessions count_sessions @relation(fields: [countSessionId], references: [id], onDelete: Cascade)
+  position       positions      @relation("PositionToCounts", fields: [positionId], references: [id], onDelete: Cascade)
 
-  @@unique([sessionId, positionId])
+  @@unique([countSessionId, positionId])
 }
 
-// Updated to reference event_attendants instead of attendants
 model position_oversight_assignments {
-  id         String            @id
-  positionId String            @map("position_id")
-  eventId    String            @map("event_id")
-  overseerId String?           @map("overseer_id")  // Now references event_attendants.id
-  keymanId   String?           @map("keyman_id")    // Now references event_attendants.id
-  assignedBy String?           @map("assigned_by")
-  createdAt  DateTime?         @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt  DateTime?         @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
-  
-  // Relations now point to event_attendants
-  keyman     event_attendants? @relation("KeymanAssignments", fields: [keymanId], references: [id], onUpdate: NoAction)
-  overseer   event_attendants? @relation("OverseerAssignments", fields: [overseerId], references: [id], onUpdate: NoAction)
-  
-  assignedByUser users?        @relation("AssignedByUser", fields: [assignedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  event      events            @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  position   positions         @relation(fields: [positionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                                                                String      @id @default(dbgenerated("(gen_random_uuid())::text"))
+  positionId                                                        String      @map("position_id")
+  eventId                                                           String      @map("event_id")
+  overseerId                                                        String?     @map("overseer_id")
+  keymanId                                                          String?     @map("keyman_id")
+  assignedBy                                                        String?     @map("assigned_by")
+  createdAt                                                         DateTime?   @default(now()) @db.Timestamp(6) @map("created_at")
+  updatedAt                                                         DateTime?   @default(now()) @db.Timestamp(6) @map("updated_at")
+  users                                                             users?      @relation(fields: [assignedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  events                                                            events      @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  keyman                                                            attendants? @relation("position_oversight_assignments_keyman_idToattendants", fields: [keymanId], references: [id], onUpdate: NoAction)
+  overseer                                                          attendants? @relation("position_oversight_assignments_overseer_idToattendants", fields: [overseerId], references: [id], onUpdate: NoAction)
+  positions                                                         positions   @relation("PositionToOversight", fields: [positionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([positionId, eventId])
   @@index([eventId], map: "idx_position_oversight_event")
@@ -308,131 +441,114 @@ model position_oversight_assignments {
   @@index([positionId], map: "idx_position_oversight_position")
 }
 
-model event_documents {
-  id             String                  @id @default(cuid())
-  eventId        String
-  title          String
-  description    String?
-  fileName       String
-  fileUrl        String
-  fileType       String
-  fileSize       Int
-  uploadedBy     String
-  uploadedAt     DateTime                @default(now())
-  publishedTo    String                  @default("none")
-  publishedCount Int                     @default(0)
-  publishedAt    DateTime?
-  isActive       Boolean                 @default(true)
-  createdAt      DateTime                @default(now())
-  updatedAt      DateTime                @updatedAt
-  publications   document_publications[]
-  events         events                  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+model position_shifts {
+  id                   String                 @id
+  positionId           String
+  isAllDay             Boolean                @default(false)
+  createdAt            DateTime               @default(now())
+  endTime              String?
+  name                 String
+  sequence             Int
+  startTime            String?
+  position_assignments position_assignments[] @relation("ShiftToAssignments")
+  positions            positions              @relation("PositionToShifts", fields: [positionId], references: [id], onDelete: Cascade)
 
-  @@index([eventId], map: "idx_event_documents_event")
-  @@index([uploadedBy], map: "idx_event_documents_uploader")
+  @@index([positionId])
+  @@index([positionId, sequence])
 }
 
-// Updated to reference event_attendants instead of attendants
-model document_publications {
-  id           String           @id @default(cuid())
-  documentId   String
-  attendantId  String           // Now references event_attendants.id
-  publishedAt  DateTime         @default(now())
-  viewedAt     DateTime?
-  downloadedAt DateTime?
-  
-  // Relations now point to event_attendants
-  attendant    event_attendants @relation(fields: [attendantId], references: [id], onDelete: Cascade)
-  document     event_documents  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+model positions {
+  id                             String                           @id
+  eventId                        String
+  positionNumber                 Int
+  name                           String
+  description                    String?
+  area                           String?
+  sequence                       Int
+  isActive                       Boolean                          @default(true)
+  createdAt                      DateTime                         @default(now())
+  updatedAt                      DateTime
+  assignments                    position_assignments[]           @relation("PositionToAssignments")
+  counts                         position_counts[]                @relation("PositionToCounts")
+  oversight                      position_oversight_assignments[] @relation("PositionToOversight")
+  shifts                         position_shifts[]                @relation("PositionToShifts")
+  events                         events                           @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
-  @@unique([documentId, attendantId])
-  @@index([documentId], map: "idx_document_publications_document")
-  @@index([attendantId], map: "idx_document_publications_attendant")
+  @@unique([eventId, positionNumber])
+  @@index([eventId, isActive])
+  @@index([eventId, sequence])
 }
 
-model feedback {
-  id          String                 @id @default(cuid())
-  type        FeedbackType
-  title       String
-  description String
-  priority    FeedbackPriority       @default(MEDIUM)
-  status      FeedbackStatus         @default(NEW)
-  submittedBy String
-  createdAt   DateTime               @default(now())
-  updatedAt   DateTime               @updatedAt
-  user        users                  @relation(fields: [submittedBy], references: [id], onDelete: Cascade)
-  attachments feedback_attachments[]
-  comments    feedback_comments[]
+model shift_templates {
+  id               String   @id
+  name             String
+  description      String?
+  shifts           Json
+  isSystemTemplate Boolean  @default(false)
+  createdBy        String?
+  createdAt        DateTime @default(now())
+  users            users?   @relation(fields: [createdBy], references: [id])
 
-  @@map("feedback")
+  @@index([isSystemTemplate])
 }
 
-model feedback_attachments {
-  id         String   @id @default(cuid())
-  feedbackId String
-  filename   String
-  filePath   String
-  fileSize   Int
-  mimeType   String
-  createdAt  DateTime @default(now())
-  feedback   feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
-
-  @@map("feedback_attachments")
+model station_ranges {
+  id                    String                  @id
+  departmentId          String
+  name                  String
+  startStation          Int
+  endStation            Int
+  description           String?
+  isActive              Boolean                 @default(true)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime
+  oversight_assignments oversight_assignments[]
 }
 
-model feedback_comments {
-  id         String   @id @default(cuid())
-  feedbackId String
-  authorId   String
-  content    String
-  createdAt  DateTime @default(now())
-  author     users    @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  feedback   feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
-
-  @@map("feedback_comments")
-}
-
-model event_permissions {
-  id        String              @id @default(uuid())
-  userId    String
-  eventId   String
-  role      EventPermissionRole @default(VIEWER)
-  scopeType EventScopeType?
-  scopeIds  Json?
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
-  event     events              @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user      users               @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, eventId])
-  @@index([userId])
-  @@index([eventId])
-  @@index([eventId, role])
+model system_settings {
+  id        String   @id
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  createdBy String?
+  updatedBy String?
 }
 
 model users {
-  id                              String                           @id @default(cuid())
-  firstName                       String
-  lastName                        String
-  email                           String                           @unique
-  role                            UserRole                         @default(ATTENDANT)
-  isActive                        Boolean                          @default(true)
-  lastLogin                       DateTime?
-  createdAt                       DateTime                         @default(now())
-  updatedAt                       DateTime                         @updatedAt
-  assignments                     assignments[]
-  event_attendants                event_attendants[]
-  events                          events[]
-  position_assignments_assigned   position_assignments[]           @relation("AssignedByUser")
-  position_oversight_assigned     position_oversight_assignments[] @relation("AssignedByUser")
-  feedback                        feedback[]
-  feedback_comments               feedback_comments[]
-  event_permissions               event_permissions[]
-
-  @@map("users")
+  id                             String                           @id
+  email                          String                           @unique
+  firstName                      String
+  lastName                       String
+  phone                          String?
+  isActive                       Boolean                          @default(true)
+  role                           UserRole                         @default(ATTENDANT)
+  passwordHash                   String?
+  inviteToken                    String?                          @unique
+  inviteExpiry                   DateTime?
+  lastLogin                      DateTime?
+  createdAt                      DateTime                         @default(now())
+  updatedAt                      DateTime
+  createdBy                      String?
+  name                           String?
+  image                          String?
+  emailVerified                  DateTime?
+  congregation                   String?
+  Account                        Account[]
+  Session                        Session[]
+  announcements                  announcements[]
+  assignments                    assignments[]
+  attendants                     attendants?
+  event_attendants               event_attendants[]
+  event_permissions              event_permissions[]
+  feedback                       feedback[]
+  feedback_comments              feedback_comments[]
+  oversight_assignments          oversight_assignments[]
+  position_assignments           position_assignments[]
+  position_oversight_assignments position_oversight_assignments[]
+  shift_templates                shift_templates[]
 }
 
-// Enums remain the same
 enum AssignmentStatus {
   ASSIGNED
   CONFIRMED
@@ -467,6 +583,20 @@ enum DocumentCategory {
   OTHER
 }
 
+enum EventPermissionRole {
+  OWNER
+  MANAGER
+  OVERSEER
+  KEYMAN
+  VIEWER
+}
+
+enum EventScopeType {
+  DEPARTMENT
+  STATION_RANGE
+  POSITION
+}
+
 enum EventStatus {
   UPCOMING
   CURRENT
@@ -489,6 +619,26 @@ enum ExperienceLevel {
   EXPERT
 }
 
+enum FeedbackPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum FeedbackStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum FeedbackType {
+  BUG
+  ENHANCEMENT
+  FEATURE
+}
+
 enum LanyardStatus {
   AVAILABLE
   CHECKED_OUT
@@ -504,50 +654,16 @@ enum OversightLevel {
   STATION_OVERSEER
 }
 
-enum UserRole {
-  ADMIN
-  OVERSEER
-  ASSISTANT_OVERSEER
-  KEYMAN
-  ATTENDANT
-}
-
 enum PositionRole {
   OVERSEER
   KEYMAN
   ATTENDANT
 }
 
-enum FeedbackType {
-  BUG
-  ENHANCEMENT
-  FEATURE
-}
-
-enum FeedbackPriority {
-  LOW
-  MEDIUM
-  HIGH
-  URGENT
-}
-
-enum FeedbackStatus {
-  NEW
-  IN_PROGRESS
-  RESOLVED
-  CLOSED
-}
-
-enum EventPermissionRole {
-  OWNER
-  MANAGER
+enum UserRole {
+  ADMIN
   OVERSEER
+  ASSISTANT_OVERSEER
   KEYMAN
-  VIEWER
-}
-
-enum EventScopeType {
-  DEPARTMENT
-  STATION_RANGE
-  POSITION
+  ATTENDANT
 }

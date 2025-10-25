@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '../../../src/lib/prisma'
+import { format } from 'date-fns'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -28,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         attendantId: attendantId as string
       },
       include: {
-        document: true
+        event_documents: true
       },
       orderBy: {
         publishedAt: 'desc'
@@ -37,13 +38,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Format documents for frontend
     const documents = publishedDocs.map(pub => ({
-      id: pub.document.id,
-      title: pub.document.title,
-      description: pub.document.description,
-      fileName: pub.document.fileName,
-      fileSize: pub.document.fileSize,
-      fileType: pub.document.fileType,
-      fileUrl: pub.document.fileUrl,
+      id: pub.event_documents.id,
+      title: pub.event_documents.title,
+      description: pub.event_documents.description,
+      fileName: pub.event_documents.fileName,
+      fileSize: pub.event_documents.fileSize,
+      fileType: pub.event_documents.fileType,
+      fileUrl: pub.event_documents.fileUrl,
       publishedAt: pub.publishedAt.toISOString()
     }))
 
@@ -68,12 +69,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const positionAssignments = await prisma.position_assignments.findMany({
       where: {
         attendantId: attendantId as string,
-        position: {
+        positions: {
           eventId: eventId as string
         }
       },
       include: {
-        position: {
+        positions: {
           select: {
             id: true,
             name: true,
@@ -117,9 +118,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       return {
         id: assignment.id,
-        positionId: assignment.position.id,
-        positionName: assignment.position.name,
-        location: assignment.position.area || undefined,
+        positionId: assignment.positions.id,
+        positionName: assignment.positions.name,
+        location: assignment.positions.area || undefined,
         startTime: isAllDay ? 'All Day' : (assignment.shift?.startTime || shiftName || ''),
         endTime: isAllDay ? '' : (assignment.shift?.endTime || ''),
         instructions: undefined,
@@ -177,8 +178,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const activeCountSessions = await prisma.count_sessions.findMany({
       where: {
         eventId: eventId as string,
-        status: 'ACTIVE',
-        isActive: true
+        status: 'ACTIVE'
       },
       select: {
         id: true,
@@ -187,8 +187,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         status: true
       },
       orderBy: {
-        countTime: 'desc'
+        countTime: 'asc'
       }
+    })
+
+    // Get active announcements for this event
+    const now = new Date()
+    const announcements = await prisma.announcements.findMany({
+      where: {
+        eventId: eventId as string,
+        isActive: true,
+        OR: [
+          { startDate: null },
+          { startDate: { lte: now } }
+        ],
+        AND: [
+          {
+            OR: [
+              { endDate: null },
+              { endDate: { gte: now } }
+            ]
+          }
+        ]
+      },
+      select: {
+        id: true,
+        title: true,
+        message: true,
+        type: true,
+        createdAt: true
+      },
+      orderBy: [
+        { type: 'desc' }, // URGENT first
+        { createdAt: 'desc' }
+      ]
     })
 
     return res.status(200).json({
@@ -208,8 +240,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           id: event.id,
           name: event.name,
           eventType: event.eventType,
-          startDate: event.startDate?.toISOString(),
-          endDate: event.endDate?.toISOString(),
+          startDate: event.startDate ? format(event.startDate, 'yyyy-MM-dd') : null,
+          endDate: event.endDate ? format(event.endDate, 'yyyy-MM-dd') : null,
           status: event.status
         },
         assignments,
@@ -218,6 +250,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           sessionName: session.sessionName,
           countTime: session.countTime.toISOString(),
           status: session.status
+        })),
+        announcements: announcements.map(ann => ({
+          id: ann.id,
+          title: ann.title,
+          message: ann.message,
+          type: ann.type,
+          createdAt: ann.createdAt.toISOString()
         })),
         documents: documents.length > 0 ? documents : [
           // Fallback test documents if no published documents found

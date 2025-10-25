@@ -1831,14 +1831,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     
     // Then, add assignment info for those who have assignments
     eventData.positions?.forEach(position => {
-      position.position_assignments?.forEach(assignment => {
-        const attendantData = assignment.attendants_position_assignments_attendantIdToattendants
+      position.assignments?.forEach(assignment => {
+        const attendantData = assignment.attendants_assignments_attendantIdToattendants
         if (attendantData && attendantMap.has(attendantData.id)) {
           const attendant = attendantMap.get(attendantData.id);
           
           // Update oversight info if this is an oversight assignment (but don't override association data)
-          const overseerData = assignment.attendants_position_assignments_overseerIdToattendants
-          const keymanData = assignment.attendants_position_assignments_keymanIdToattendants
+          const overseerData = assignment.attendants_assignments_overseerIdToattendants
+          const keymanData = assignment.attendants_assignments_keymanIdToattendants
           
           if (assignment.role === 'OVERSEER' && overseerData && !attendant.overseerId) {
             attendant.overseerId = overseerData.id;
