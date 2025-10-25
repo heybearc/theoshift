@@ -754,6 +754,12 @@ export default function EventDetailsPage({ event, canEdit, canDelete, canManageC
                   📄 Documents
                 </Link>
                 <Link
+                  href={`/events/${event.id}/announcements`}
+                  className="w-full flex items-center justify-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  📢 Announcements
+                </Link>
+                <Link
                   href={`/events/${event.id}/lanyards`}
                   className="w-full flex items-center justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors"
                 >
