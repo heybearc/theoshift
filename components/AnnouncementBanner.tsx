@@ -26,8 +26,11 @@ export default function AnnouncementBanner({ eventId }: AnnouncementBannerProps)
         })
         console.log('🔔 Response status:', response.status)
         if (response.ok) {
-          const data = await response.json()
-          console.log('🔔 Raw announcements:', data)
+          const result = await response.json()
+          console.log('🔔 Raw response:', result)
+          // Extract announcements array from response
+          const data = result.data || result
+          console.log('🔔 Announcements array:', data)
           // Filter to only active announcements within date range
           const now = new Date()
           console.log('🔔 Current time:', now)
@@ -48,7 +51,11 @@ export default function AnnouncementBanner({ eventId }: AnnouncementBannerProps)
           setAnnouncements(active)
         }
       } catch (error) {
-        console.error('Failed to fetch announcements:', error)
+        console.error('🔔 Failed to fetch announcements:', error)
+        console.error('🔔 Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          type: error instanceof TypeError ? 'TypeError' : typeof error
+        })
       } finally {
         setLoading(false)
       }
