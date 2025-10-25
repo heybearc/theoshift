@@ -4,6 +4,7 @@ import { useSession, signOut } from 'next-auth/react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { format, parseISO } from 'date-fns'
+import AnnouncementBanner from '../../components/AnnouncementBanner'
 
 interface Attendant {
   id: string
@@ -62,6 +63,14 @@ interface CountSession {
   status: string
 }
 
+interface Announcement {
+  id: string
+  title: string
+  message: string
+  type: 'INFO' | 'WARNING' | 'URGENT'
+  createdAt: string
+}
+
 interface DashboardData {
   attendant: Attendant
   event: Event
@@ -69,6 +78,7 @@ interface DashboardData {
   documents: Document[]
   oversightContacts: OversightContact[]
   activeCountSessions?: CountSession[]
+  announcements?: Announcement[]
 }
 
 export default function AttendantDashboard() {
@@ -315,10 +325,26 @@ export default function AttendantDashboard() {
 
   const formatDate = (dateString: string) => {
     try {
-      // Use date-fns for consistent SSR/client formatting
-      return format(parseISO(dateString), 'MMM d, yyyy')
+      // Parse yyyy-MM-dd format directly to avoid timezone issues
+      const [year, month, day] = dateString.split('-').map(Number)
+      const date = new Date(year, month - 1, day)
+      return format(date, 'MMM d, yyyy')
     } catch {
       return 'Invalid date'
+    }
+  }
+
+  const formatDateRange = (startDate: string, endDate: string) => {
+    try {
+      const start = formatDate(startDate)
+      const end = formatDate(endDate)
+      // If dates are the same, show only one date
+      if (start === end) {
+        return start
+      }
+      return `${start} - ${end}`
+    } catch {
+      return 'Invalid date range'
     }
   }
 
@@ -515,9 +541,14 @@ export default function AttendantDashboard() {
               {dashboardData.event.name}
             </p>
             <p className="text-sm text-gray-500">
-              {formatDate(dashboardData.event.startDate)} - {formatDate(dashboardData.event.endDate)}
+              {formatDateRange(dashboardData.event.startDate, dashboardData.event.endDate)}
             </p>
           </div>
+
+          {/* Announcements Banner */}
+          {dashboardData.announcements && dashboardData.announcements.length > 0 && (
+            <AnnouncementBanner announcements={dashboardData.announcements} />
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
@@ -889,7 +920,7 @@ export default function AttendantDashboard() {
                 <div className="text-xs text-blue-700 space-y-1">
                   <p><strong>Type:</strong> {dashboardData.event.eventType}</p>
                   <p><strong>Status:</strong> {dashboardData.event.status}</p>
-                  <p><strong>Dates:</strong> {formatDate(dashboardData.event.startDate)} - {formatDate(dashboardData.event.endDate)}</p>
+                  <p><strong>Dates:</strong> {formatDateRange(dashboardData.event.startDate, dashboardData.event.endDate)}</p>
                 </div>
               </div>
             </div>

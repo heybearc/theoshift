@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Fetch real feedback from database
       const feedback = await prisma.feedback.findMany({
         include: {
-          user: {
+          users: {
             select: {
               id: true,
               firstName: true,
@@ -24,10 +24,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               role: true
             }
           },
-          attachments: true,
-          comments: {
+          feedback_attachments: true,
+          feedback_comments: {
             include: {
-              author: {
+              users: {
                 select: {
                   firstName: true,
                   lastName: true,
@@ -54,19 +54,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         priority: item.priority.toLowerCase(),
         status: item.status.toLowerCase().replace('_', '_'),
         submittedBy: {
-          name: `${item.user.firstName} ${item.user.lastName}`,
-          email: item.user.email,
-          role: item.user.role
+          name: `${item.users.firstName} ${item.users.lastName}`,
+          email: item.users.email,
+          role: item.users.role
         },
         submittedAt: item.createdAt.toISOString(),
         updatedAt: item.updatedAt.toISOString(),
-        comments: item.comments.map(comment => ({
+        comments: item.feedback_comments.map(comment => ({
           id: comment.id,
           content: comment.content,
-          author: `${comment.author.firstName} ${comment.author.lastName}`,
+          author: `${comment.users.firstName} ${comment.users.lastName}`,
           createdAt: comment.createdAt.toISOString()
         })),
-        attachments: item.attachments.map(attachment => ({
+        attachments: item.feedback_attachments.map(attachment => ({
           id: attachment.id,
           filename: attachment.filename,
           url: attachment.filePath,

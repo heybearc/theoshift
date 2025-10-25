@@ -110,7 +110,7 @@ export default function HelpLayout({ children, title }: HelpLayoutProps) {
       <footer className="bg-white border-t border-gray-200 mt-12">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="text-center text-sm text-gray-500">
-            <p>JW Attendant Scheduler v1.0.0-MVP</p>
+            <p>JW Attendant Scheduler v2.1.2</p>
             <p className="mt-1">Secure Event Management System</p>
           </div>
         </div>

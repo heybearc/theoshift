@@ -13,7 +13,6 @@ interface CountSession {
   countTime: string
   notes?: string
   status: string
-  isActive: boolean
   createdAt: string
   position_counts: Array<{
     id: string
@@ -38,7 +37,6 @@ interface Event {
 
 interface CountStats {
   total: number
-  active: number
   completed: number
 }
 
@@ -71,6 +69,31 @@ export default function EventCountTimesPage({ eventId, event, countSessions, can
     }
     
     router.reload() // Refresh page to show updated data
+  }
+
+  const deleteCountSession = async (sessionId: string, sessionName: string) => {
+    if (!confirm(`Are you sure you want to delete "${sessionName}"? This will also delete all position counts for this session.`)) {
+      return
+    }
+
+    setLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch(`/api/events/${eventId}/count-sessions/${sessionId}`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete count session')
+      }
+
+      router.reload() // Refresh page to show updated data
+    } catch (err: any) {
+      setError(err.message)
+      setLoading(false)
+    }
   }
 
   if (loading) {
@@ -205,6 +228,15 @@ export default function EventCountTimesPage({ eventId, event, countSessions, can
                       >
                         View Details
                       </Link>
+                      {canManageContent && (
+                        <button
+                          onClick={() => deleteCountSession(session.id, session.sessionName)}
+                          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm transition-colors"
+                          title="Delete count session"
+                        >
+                          🗑️ Delete
+                        </button>
+                      )}
                     </div>
                   </div>
                   {session.position_counts.length > 0 && (
@@ -328,7 +360,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       countTime: session.countTime?.toISOString() || null,
       notes: session.notes,
       status: session.status,
-      isActive: session.isActive,
       createdAt: session.createdAt?.toISOString() || null,
       position_counts: session.position_counts.map(count => ({
         id: count.id,
@@ -359,7 +390,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         canManageContent,
         stats: {
           total: countSessions.length,
-          active: countSessions.filter(s => s.isActive).length,
           completed: countSessions.filter(s => s.status === 'COMPLETED').length
         }
       }

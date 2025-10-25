@@ -138,7 +138,7 @@ export default function SignIn() {
         {/* Footer */}
         <div className="text-center">
           <p className="text-white/80 text-sm">
-            JW Attendant Scheduler • Secure Event Management System
+            JW Attendant Scheduler v2.1.2 • Secure Event Management System
           </p>
         </div>
       </div>

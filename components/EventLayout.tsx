@@ -212,7 +212,7 @@ export default function EventLayout({
             </Link>
           </div>
           <div className="text-center text-xs text-gray-500 mt-2">
-            JW Attendant Scheduler v1.0.0-MVP • Secure Event Management System
+            JW Attendant Scheduler v2.1.2 • Secure Event Management System
           </div>
         </div>
       </footer>

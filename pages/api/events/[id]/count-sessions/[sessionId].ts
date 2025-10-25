@@ -46,8 +46,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
         return await handlePut(req, res, eventId, sessionId)
       case 'DELETE':
-        // Only ADMIN can delete count sessions
-        if (user.role !== 'ADMIN') {
+        // Only ADMIN, OVERSEER, and ASSISTANT_OVERSEER can delete count sessions
+        if (!['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER'].includes(user.role)) {
           return res.status(403).json({ error: 'Insufficient permissions' })
         }
         return await handleDelete(req, res, eventId, sessionId)

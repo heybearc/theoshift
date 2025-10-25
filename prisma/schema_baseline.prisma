@@ -42,27 +42,6 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model announcements {
-  id        String    @id
-  eventId   String
-  title     String
-  message   String
-  type      String?   @default("INFO")
-  isActive  Boolean?  @default(true)
-  startDate DateTime? @db.Timestamp(6)
-  endDate   DateTime? @db.Timestamp(6)
-  createdBy String
-  createdAt DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt DateTime? @default(now()) @db.Timestamp(6)
-  users     users     @relation(fields: [createdBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  events    events    @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([endDate], map: "announcements_enddate_idx")
-  @@index([eventId], map: "announcements_eventid_idx")
-  @@index([isActive], map: "announcements_isactive_idx")
-  @@index([startDate], map: "announcements_startdate_idx")
-}
-
 model assignments {
   id              String           @id
   eventId         String
@@ -108,7 +87,7 @@ model attendants {
   profileVerifiedAt                                                                     DateTime?
   users                                                                                 users?                           @relation(fields: [userId], references: [id], onDelete: Cascade)
   document_publications                                                                 document_publications[]
-  event_attendants                                                                       event_attendants[]               @relation("event_attendants_attendantIdToattendants")
+  event_attendants_event_attendants_attendantIdToattendants                             event_attendants[]               @relation("event_attendants_attendantIdToattendants")
   event_attendants_event_attendants_keymanIdToattendants                                event_attendants[]               @relation("event_attendants_keymanIdToattendants")
   event_attendants_event_attendants_overseerIdToattendants                              event_attendants[]               @relation("event_attendants_overseerIdToattendants")
   position_assignments_position_assignments_attendantIdToattendants                     position_assignments[]           @relation("position_assignments_attendantIdToattendants")
@@ -182,10 +161,10 @@ model event_attendants {
   attendantId                                         String?
   keymanId                                            String?
   overseerId                                          String?
-  attendant                                           attendants? @relation("event_attendants_attendantIdToattendants", fields: [attendantId], references: [id], onDelete: Cascade)
+  attendants_event_attendants_attendantIdToattendants attendants? @relation("event_attendants_attendantIdToattendants", fields: [attendantId], references: [id], onDelete: Cascade)
   events                                              events      @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  keyman                                              attendants? @relation("event_attendants_keymanIdToattendants", fields: [keymanId], references: [id])
-  overseer                                            attendants? @relation("event_attendants_overseerIdToattendants", fields: [overseerId], references: [id])
+  attendants_event_attendants_keymanIdToattendants    attendants? @relation("event_attendants_keymanIdToattendants", fields: [keymanId], references: [id])
+  attendants_event_attendants_overseerIdToattendants  attendants? @relation("event_attendants_overseerIdToattendants", fields: [overseerId], references: [id])
   users                                               users?      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([eventId, attendantId])
@@ -286,7 +265,6 @@ model events {
   circuitoverseeremail           String?
   circuitoverseername            String?
   circuitoverseerphone           String?
-  announcements                  announcements[]
   assignments                    assignments[]
   count_sessions                 count_sessions[]
   event_attendants               event_attendants[]
@@ -389,12 +367,12 @@ model position_assignments {
   keymanId                                                String?
   assignedAt                                              DateTime         @default(now())
   assignedBy                                              String?
-  users      users?           @relation(fields: [assignedBy], references: [id])
-  attendant  attendants       @relation("position_assignments_attendantIdToattendants", fields: [attendantId], references: [id], onDelete: Cascade)
-  keyman     attendants?      @relation("position_assignments_keymanIdToattendants", fields: [keymanId], references: [id])
-  overseer   attendants?      @relation("position_assignments_overseerIdToattendants", fields: [overseerId], references: [id])
-  positions  positions        @relation("PositionToAssignments", fields: [positionId], references: [id], onDelete: Cascade)
-  shift      position_shifts? @relation("ShiftToAssignments", fields: [shiftId], references: [id], onDelete: Cascade)
+  users                                                   users?           @relation(fields: [assignedBy], references: [id])
+  attendants_position_assignments_attendantIdToattendants attendants       @relation("position_assignments_attendantIdToattendants", fields: [attendantId], references: [id], onDelete: Cascade)
+  attendants_position_assignments_keymanIdToattendants    attendants?      @relation("position_assignments_keymanIdToattendants", fields: [keymanId], references: [id])
+  attendants_position_assignments_overseerIdToattendants  attendants?      @relation("position_assignments_overseerIdToattendants", fields: [overseerId], references: [id])
+  positions                                               positions        @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  position_shifts                                         position_shifts? @relation(fields: [shiftId], references: [id], onDelete: Cascade)
 
   @@unique([positionId, shiftId, attendantId])
   @@index([attendantId])
@@ -414,31 +392,31 @@ model position_counts {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime
   count_sessions count_sessions @relation(fields: [countSessionId], references: [id], onDelete: Cascade)
-  position       positions      @relation("PositionToCounts", fields: [positionId], references: [id], onDelete: Cascade)
+  positions      positions      @relation(fields: [positionId], references: [id], onDelete: Cascade)
 
   @@unique([countSessionId, positionId])
 }
 
 model position_oversight_assignments {
   id                                                                String      @id @default(dbgenerated("(gen_random_uuid())::text"))
-  positionId                                                        String      @map("position_id")
-  eventId                                                           String      @map("event_id")
-  overseerId                                                        String?     @map("overseer_id")
-  keymanId                                                          String?     @map("keyman_id")
-  assignedBy                                                        String?     @map("assigned_by")
-  createdAt                                                         DateTime?   @default(now()) @db.Timestamp(6) @map("created_at")
-  updatedAt                                                         DateTime?   @default(now()) @db.Timestamp(6) @map("updated_at")
-  users                                                             users?      @relation(fields: [assignedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  events                                                            events      @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  keyman                                                            attendants? @relation("position_oversight_assignments_keyman_idToattendants", fields: [keymanId], references: [id], onUpdate: NoAction)
-  overseer                                                          attendants? @relation("position_oversight_assignments_overseer_idToattendants", fields: [overseerId], references: [id], onUpdate: NoAction)
-  positions                                                         positions   @relation("PositionToOversight", fields: [positionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  position_id                                                       String
+  event_id                                                          String
+  overseer_id                                                       String?
+  keyman_id                                                         String?
+  assigned_by                                                       String?
+  created_at                                                        DateTime?   @default(now()) @db.Timestamp(6)
+  updated_at                                                        DateTime?   @default(now()) @db.Timestamp(6)
+  users                                                             users?      @relation(fields: [assigned_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  events                                                            events      @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  attendants_position_oversight_assignments_keyman_idToattendants   attendants? @relation("position_oversight_assignments_keyman_idToattendants", fields: [keyman_id], references: [id], onUpdate: NoAction)
+  attendants_position_oversight_assignments_overseer_idToattendants attendants? @relation("position_oversight_assignments_overseer_idToattendants", fields: [overseer_id], references: [id], onUpdate: NoAction)
+  positions                                                         positions   @relation(fields: [position_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@unique([positionId, eventId])
-  @@index([eventId], map: "idx_position_oversight_event")
-  @@index([keymanId], map: "idx_position_oversight_keyman")
-  @@index([overseerId], map: "idx_position_oversight_overseer")
-  @@index([positionId], map: "idx_position_oversight_position")
+  @@unique([position_id, event_id])
+  @@index([event_id], map: "idx_position_oversight_event")
+  @@index([keyman_id], map: "idx_position_oversight_keyman")
+  @@index([overseer_id], map: "idx_position_oversight_overseer")
+  @@index([position_id], map: "idx_position_oversight_position")
 }
 
 model position_shifts {
@@ -450,8 +428,8 @@ model position_shifts {
   name                 String
   sequence             Int
   startTime            String?
-  position_assignments position_assignments[] @relation("ShiftToAssignments")
-  positions            positions              @relation("PositionToShifts", fields: [positionId], references: [id], onDelete: Cascade)
+  position_assignments position_assignments[]
+  positions            positions              @relation(fields: [positionId], references: [id], onDelete: Cascade)
 
   @@index([positionId])
   @@index([positionId, sequence])
@@ -468,10 +446,10 @@ model positions {
   isActive                       Boolean                          @default(true)
   createdAt                      DateTime                         @default(now())
   updatedAt                      DateTime
-  assignments                    position_assignments[]           @relation("PositionToAssignments")
-  counts                         position_counts[]                @relation("PositionToCounts")
-  oversight                      position_oversight_assignments[] @relation("PositionToOversight")
-  shifts                         position_shifts[]                @relation("PositionToShifts")
+  position_assignments           position_assignments[]
+  position_counts                position_counts[]
+  position_oversight_assignments position_oversight_assignments[]
+  position_shifts                position_shifts[]
   events                         events                           @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@unique([eventId, positionNumber])
@@ -536,7 +514,6 @@ model users {
   congregation                   String?
   Account                        Account[]
   Session                        Session[]
-  announcements                  announcements[]
   assignments                    assignments[]
   attendants                     attendants?
   event_attendants               event_attendants[]

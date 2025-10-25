@@ -955,7 +955,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const sessionsTracked = countSessions.length
     
     // Get current session tally (most recent active session)
-    const currentSession = countSessions.find(s => s.status === 'ACTIVE' && s.isActive)
+    const currentSession = countSessions.find(s => s.status === 'ACTIVE')
     const currentSessionTally = currentSession
       ? currentSession.position_counts.reduce((sum, count) => sum + (count.attendeeCount || 0), 0)
       : null
