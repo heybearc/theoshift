@@ -72,6 +72,125 @@ lrwxrwxrwx 1 root root  12 Sep 30 21:51 .env -> .env.staging
 
 ---
 
+## 🔧 Infrastructure & DevOps
+
+### HIGH PRIORITY: Health Check API Endpoint
+**ID**: INFRA-001  
+**Priority**: High  
+**Status**: Backlog  
+**Created**: 2025-10-25  
+**Component**: API / Infrastructure  
+**Estimated Effort**: 30 minutes  
+
+#### Description:
+Create a `/api/health` endpoint for the Next.js application to support automated health checks, monitoring, and blue-green deployment orchestration.
+
+#### Requirements:
+1. **Endpoint**: `GET /api/health`
+2. **Response Format**:
+   ```json
+   {
+     "status": "healthy",
+     "timestamp": "2025-10-25T12:00:00.000Z",
+     "version": "1.0.0",
+     "environment": "production",
+     "database": "connected",
+     "uptime": 3600
+   }
+   ```
+3. **Health Checks**:
+   - Database connectivity
+   - Application uptime
+   - Environment configuration
+   - Memory usage (optional)
+
+#### Use Cases:
+- Blue-green deployment MCP server health checks
+- HAProxy backend health monitoring
+- Automated deployment validation
+- Infrastructure monitoring systems
+- Load balancer health probes
+
+#### Implementation:
+- Create `pages/api/health.ts`
+- Test database connection with Prisma
+- Return appropriate HTTP status codes (200 = healthy, 503 = unhealthy)
+- Add caching to prevent database overload
+
+#### Acceptance Criteria:
+- [ ] Endpoint returns 200 when application is healthy
+- [ ] Endpoint returns 503 when database is unreachable
+- [ ] Response includes all required fields
+- [ ] Response time < 100ms
+- [ ] Works on both BLUE and GREEN servers
+- [ ] Integrated with blue-green MCP server
+
+---
+
+### MEDIUM PRIORITY: Blue-Green Deployment Feedback Integration
+**ID**: INFRA-002  
+**Priority**: Medium  
+**Status**: Backlog  
+**Created**: 2025-10-25  
+**Component**: Blue-Green Deployment / Feedback System  
+**Estimated Effort**: 2-4 hours  
+
+#### Description:
+Integrate the blue-green deployment system with the existing feedback system to capture deployment-related feedback, issues, and user reports during and after traffic switches.
+
+#### Requirements:
+1. **Deployment Feedback Category**:
+   - Add "Deployment Issue" category to feedback system
+   - Capture deployment context (which server, when switched)
+   - Link feedback to specific deployment events
+
+2. **Automated Feedback Collection**:
+   - Prompt for feedback after traffic switch
+   - Monitor error rates post-deployment
+   - Capture user-reported issues during rollout
+
+3. **Deployment Metrics**:
+   - Track error rates before/after switch
+   - Monitor user feedback sentiment
+   - Alert on spike in negative feedback
+   - Integration with rollback decisions
+
+4. **MCP Server Integration**:
+   - `switch_traffic` tool checks recent feedback
+   - Warning if negative feedback spike detected
+   - Option to abort switch based on feedback
+   - Post-switch feedback summary
+
+#### Use Cases:
+- Detect deployment issues quickly
+- User-reported problems during rollout
+- Automated rollback triggers
+- Deployment quality metrics
+- Continuous improvement feedback loop
+
+#### Implementation Ideas:
+- Add deployment context to feedback submissions
+- Create deployment feedback dashboard
+- Email notifications for deployment feedback
+- Integration with MCP server tools
+- Feedback-based rollback automation
+
+#### Acceptance Criteria:
+- [ ] Feedback system includes deployment category
+- [ ] Deployment events logged with timestamps
+- [ ] Feedback linked to deployment events
+- [ ] MCP server checks feedback before switch
+- [ ] Dashboard shows deployment feedback metrics
+- [ ] Alerts on negative feedback spikes
+
+#### Related Systems:
+- Existing feedback system (`pages/api/admin/feedback/`)
+- Blue-green MCP server (`mcp-blue-green/server.js`)
+- HAProxy traffic switching
+- Monitoring and alerting
+
+---
+
 ## 📋 Feature Requests
 
 ### MEDIUM PRIORITY: Enhanced Attendant Filtering
@@ -516,11 +635,15 @@ Next.js production server (`next start`) doesn't automatically load `.env` file,
 
 ## 📝 Backlog Management Notes
 
-**Last Updated**: 2025-10-16
+**Last Updated**: 2025-10-25
+
+**Recent Additions**:
+- **INFRA-001**: Health Check API Endpoint (High Priority) - Required for blue-green deployment
+- **INFRA-002**: Blue-Green Deployment Feedback Integration (Medium Priority) - Enhance deployment quality
 
 **Sources Consolidated**:
 - `docs/roadmap/attendant-module-enhancements.md` - Migrated all features
-- Today's session - Added enhanced filtering feature
+- Blue-green deployment implementation - Added infrastructure items
 - Infrastructure fixes - Documented resolved technical debt
 
 **Deprecated Documents**:
