@@ -951,6 +951,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const totalShiftsNeeded = eventPositions.reduce((total, position) => {
       return total + (position.shifts.length > 0 ? position.shifts.length : 1)
     }, 0)
+    
+    console.log('🔍 FILL RATE DEBUG:', {
+      totalPositions: eventPositions.length,
+      totalAssignments,
+      totalShiftsNeeded,
+      fillRate: totalShiftsNeeded > 0 ? Math.round((totalAssignments / totalShiftsNeeded) * 100) : 0
+    })
 
     // Get count statistics
     const countSessions = await prisma.count_sessions.findMany({
