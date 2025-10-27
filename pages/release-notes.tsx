@@ -259,7 +259,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const filenames = fs.readdirSync(releasesDir)
   
   const releases = filenames
-    .filter(f => f.endsWith('.md'))
+    .filter(f => f.endsWith('.md') && f !== 'TEMPLATE.md')
     .map(filename => {
       const filePath = path.join(releasesDir, filename)
       const fileContents = fs.readFileSync(filePath, 'utf8')
