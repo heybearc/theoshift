@@ -6,6 +6,31 @@ import HelpLayout from '../components/HelpLayout'
 export default function ReleaseNotes() {
   const releases = [
     {
+      version: 'v2.2.1',
+      date: '2025-10-27',
+      type: 'patch',
+      title: 'Critical Bug Fixes & Health Monitoring',
+      description: 'Critical bug fixes for assignment operations and new health monitoring endpoint',
+      features: [
+        '🏥 Health Check Endpoint - New /api/health endpoint for MCP multi-app orchestration',
+        '📊 Application Monitoring - Returns app status, database connectivity, and basic stats',
+        '🔌 Future-Ready API - /api/events/[id]/positions endpoint for client-side state management'
+      ],
+      fixes: [
+        '🐛 Fixed 500 Internal Server Error when removing attendant from assignment',
+        '🐛 Fixed 500 Internal Server Error when adding attendant to assignment',
+        '🔧 Corrected Prisma schema relationship from "position" to "positions"',
+        '📋 Fixed attendant dashboard position data loading',
+        '⚡ Updated all position relationship references across API endpoints'
+      ],
+      breaking: [],
+      notes: [
+        'All Prisma includes updated to use correct relationship name',
+        'Health endpoint compatible with MCP server orchestration',
+        'Fully backward compatible - no breaking changes'
+      ]
+    },
+    {
       version: 'v2.2.0',
       date: '2025-10-25',
       type: 'minor',
@@ -232,8 +257,8 @@ export default function ReleaseNotes() {
               Want to be notified about new releases? Contact your administrator to be added to the update notifications.
             </p>
             <div className="text-sm text-gray-500">
-              <p>Current Version: v2.2.0</p>
-              <p>Last Updated: October 25, 2025</p>
+              <p>Current Version: v{process.env.npm_package_version || '2.2.1'}</p>
+              <p>Last Updated: October 27, 2025</p>
             </div>
           </div>
         </div>
