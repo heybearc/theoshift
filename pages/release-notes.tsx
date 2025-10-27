@@ -2,9 +2,26 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from './api/auth/[...nextauth]'
 import HelpLayout from '../components/HelpLayout'
+import fs from 'fs'
+import path from 'path'
+import matter from 'gray-matter'
+import { marked } from 'marked'
 
-export default function ReleaseNotes() {
-  const releases = [
+interface Release {
+  version: string
+  date: string
+  type: string
+  title: string
+  description: string
+  content: string
+}
+
+interface ReleaseNotesProps {
+  releases: Release[]
+}
+
+export default function ReleaseNotes({ releases }: ReleaseNotesProps) {
+  const oldReleases = [
     {
       version: 'v2.2.1',
       date: '2025-10-27',
@@ -156,7 +173,7 @@ export default function ReleaseNotes() {
         'Future updates will maintain backward compatibility'
       ]
     }
-  ]
+  ] // Keep for reference but not used
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -187,7 +204,7 @@ export default function ReleaseNotes() {
               {/* Release Header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <h2 className="text-2xl font-bold text-gray-900">{release.version}</h2>
+                  <h2 className="text-2xl font-bold text-gray-900">v{release.version}</h2>
                   <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(release.type)}`}>
                     {release.type.toUpperCase()}
                   </span>
@@ -198,53 +215,11 @@ export default function ReleaseNotes() {
               <h3 className="text-lg font-semibold text-gray-800 mb-2">{release.title}</h3>
               <p className="text-gray-600 mb-6">{release.description}</p>
 
-              {/* Features */}
-              {release.features.length > 0 && (
-                <div className="mb-6">
-                  <h4 className="text-md font-semibold text-green-800 mb-3">✨ New Features</h4>
-                  <ul className="space-y-2">
-                    {release.features.map((feature, index) => (
-                      <li key={index} className="text-gray-700">{feature}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Fixes */}
-              {release.fixes.length > 0 && (
-                <div className="mb-6">
-                  <h4 className="text-md font-semibold text-blue-800 mb-3">🔧 Bug Fixes & Improvements</h4>
-                  <ul className="space-y-2">
-                    {release.fixes.map((fix, index) => (
-                      <li key={index} className="text-gray-700">{fix}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Breaking Changes */}
-              {release.breaking.length > 0 && (
-                <div className="mb-6">
-                  <h4 className="text-md font-semibold text-red-800 mb-3">⚠️ Breaking Changes</h4>
-                  <ul className="space-y-2">
-                    {release.breaking.map((change, index) => (
-                      <li key={index} className="text-gray-700">{change}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Notes */}
-              {release.notes.length > 0 && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <h4 className="text-md font-semibold text-yellow-800 mb-2">📝 Release Notes</h4>
-                  <ul className="space-y-1">
-                    {release.notes.map((note, index) => (
-                      <li key={index} className="text-yellow-700 text-sm">{note}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {/* Markdown Content */}
+              <div 
+                className="prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: release.content }}
+              />
             </div>
           ))}
         </div>
@@ -279,7 +254,36 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
+  // Read markdown files from release-notes directory
+  const releasesDir = path.join(process.cwd(), 'release-notes')
+  const filenames = fs.readdirSync(releasesDir)
+  
+  const releases = filenames
+    .filter(f => f.endsWith('.md'))
+    .map(filename => {
+      const filePath = path.join(releasesDir, filename)
+      const fileContents = fs.readFileSync(filePath, 'utf8')
+      const { data, content } = matter(fileContents)
+      
+      return {
+        version: data.version,
+        date: data.date,
+        type: data.type,
+        title: data.title,
+        description: data.description,
+        content: marked(content)
+      }
+    })
+    .sort((a, b) => {
+      // Sort by version number (descending)
+      const versionA = a.version.replace(/[^0-9.]/g, '')
+      const versionB = b.version.replace(/[^0-9.]/g, '')
+      return versionB.localeCompare(versionA, undefined, { numeric: true })
+    })
+
   return {
-    props: {},
+    props: {
+      releases
+    },
   }
 }
