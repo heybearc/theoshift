@@ -514,7 +514,10 @@ export default function EventDetailsPage({ event, canEdit, canDelete, canManageC
                 </div>
                 <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
                   <div className="text-2xl font-bold text-orange-600">
-                    {event.attendantsNeeded ? Math.round((event._count.assignments / event.attendantsNeeded) * 100) : 0}%
+                    {(() => {
+                      const totalNeeded = (event as any).totalShiftsNeeded || event._count.positions || 1
+                      return totalNeeded > 0 ? Math.round((event._count.assignments / totalNeeded) * 100) : 0
+                    })()}%
                   </div>
                   <div className="text-sm text-orange-600 font-medium">Fill Rate</div>
                 </div>
@@ -544,7 +547,10 @@ export default function EventDetailsPage({ event, canEdit, canDelete, canManageC
               {/* Readiness Indicator */}
               <div className="flex items-center justify-center p-4 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100">
                 {(() => {
-                  const fillRate = event.attendantsNeeded ? (event._count.assignments / event.attendantsNeeded) * 100 : 0
+                  // Calculate fill rate based on totalShiftsNeeded or positions
+                  const totalNeeded = (event as any).totalShiftsNeeded || event._count.positions || 1
+                  const fillRate = (event._count.assignments / totalNeeded) * 100
+                  
                   if (fillRate >= 100) {
                     return (
                       <div className="flex items-center text-green-700">
@@ -930,7 +936,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // Query through positions first to avoid relation name issues
     const eventPositions = await prisma.positions.findMany({
       where: { eventId: id as string },
-      select: { id: true }
+      include: {
+        shifts: true
+      }
     })
     const positionIds = eventPositions.map(p => p.id)
     const totalAssignments = await prisma.position_assignments.count({
@@ -938,6 +946,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         positionId: { in: positionIds }
       }
     })
+    
+    // Calculate total shifts needed (positions with shifts = sum of shifts, positions without = 1 per position)
+    const totalShiftsNeeded = eventPositions.reduce((total, position) => {
+      return total + (position.shifts.length > 0 ? position.shifts.length : 1)
+    }, 0)
 
     // Get count statistics
     const countSessions = await prisma.count_sessions.findMany({
@@ -986,6 +999,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       endDate: event.endDate ? format(event.endDate, 'yyyy-MM-dd') : null,
       createdAt: event.createdAt?.toISOString() || null,
       updatedAt: event.updatedAt?.toISOString() || null,
+      totalShiftsNeeded,
       _count: {
         event_attendants: event.event_attendants?.length || 0,
         assignments: totalAssignments,
