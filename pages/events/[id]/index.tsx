@@ -516,7 +516,8 @@ export default function EventDetailsPage({ event, canEdit, canDelete, canManageC
                   <div className="text-2xl font-bold text-orange-600">
                     {(() => {
                       const totalNeeded = (event as any).totalShiftsNeeded || event._count.positions || 1
-                      return totalNeeded > 0 ? Math.round((event._count.assignments / totalNeeded) * 100) : 0
+                      const fillRate = totalNeeded > 0 ? (event._count.assignments / totalNeeded) * 100 : 0
+                      return Math.min(100, Math.round(fillRate))
                     })()}%
                   </div>
                   <div className="text-sm text-orange-600 font-medium">Fill Rate</div>
@@ -549,7 +550,7 @@ export default function EventDetailsPage({ event, canEdit, canDelete, canManageC
                 {(() => {
                   // Calculate fill rate based on totalShiftsNeeded or positions
                   const totalNeeded = (event as any).totalShiftsNeeded || event._count.positions || 1
-                  const fillRate = (event._count.assignments / totalNeeded) * 100
+                  const fillRate = Math.min(100, (event._count.assignments / totalNeeded) * 100)
                   
                   if (fillRate >= 100) {
                     return (
