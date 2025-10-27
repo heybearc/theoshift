@@ -7,11 +7,10 @@ import { z } from 'zod'
 // Validation schema for lanyard updates
 const lanyardUpdateSchema = z.object({
   badgeNumber: z.string().min(1).max(50).optional(),
-  status: z.enum(['AVAILABLE', 'CHECKED_OUT', 'LOST', 'DAMAGED']).optional(),
+  status: z.enum(['AVAILABLE', 'CHECKED_OUT', 'LOST', 'DAMAGED', 'RETIRED']).optional(),
   notes: z.string().nullable().optional(),
   isCheckedOut: z.boolean().optional(),
   checkedOutTo: z.string().nullable().optional(),
-  attendantId: z.string().nullable().optional(),  // Store attendant ID for dynamic lookup
   checkedOutAt: z.string().nullable().optional(),
   checkedInAt: z.string().nullable().optional()
 })
