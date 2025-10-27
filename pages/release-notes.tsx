@@ -232,7 +232,6 @@ export default function ReleaseNotes({ releases }: ReleaseNotesProps) {
               Want to be notified about new releases? Contact your administrator to be added to the update notifications.
             </p>
             <div className="text-sm text-gray-500">
-              <p>Current Version: v{process.env.npm_package_version || '2.2.1'}</p>
               <p>Last Updated: October 27, 2025</p>
             </div>
           </div>
