@@ -14,7 +14,6 @@ interface Lanyard {
   notes?: string
   isCheckedOut: boolean
   checkedOutTo?: string
-  attendantId?: string  // Store attendant ID for dynamic lookup
   checkedOutAt?: string
   checkedInAt?: string
   createdAt: string
@@ -201,9 +200,8 @@ export default function EventLanyardsPage({ eventId, event, lanyards, attendants
           status: 'CHECKED_OUT',
           isCheckedOut: true,
           checkedOutTo: attendantName,
-          attendantId: selectedAttendant.users.id,  // Store attendant ID for dynamic lookup
           checkedOutAt: new Date().toISOString(),
-          notes: selectedAttendant.users.phone || ''  // Keep as fallback, but will use dynamic lookup
+          notes: selectedAttendant.users.phone || ''
         }),
       })
 
@@ -230,7 +228,6 @@ export default function EventLanyardsPage({ eventId, event, lanyards, attendants
           status: 'AVAILABLE',
           isCheckedOut: false,
           checkedOutTo: null,
-          attendantId: null,  // Clear attendant ID on check-in
           checkedOutAt: null,
           checkedInAt: new Date().toISOString(),
           notes: null
@@ -1045,7 +1042,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         notes: lanyard.notes,
         isCheckedOut: lanyard.isCheckedOut,
         checkedOutTo: lanyard.checkedOutTo,
-        attendantId: (lanyard as any).attendantId || null,
         checkedOutAt: lanyard.checkedOutAt?.toISOString() || null,
         checkedInAt: lanyard.checkedInAt?.toISOString() || null,
         createdAt: lanyard.createdAt?.toISOString() || null,
