@@ -266,7 +266,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       
       return {
         version: data.version,
-        date: data.date,
+        date: typeof data.date === 'string' ? data.date : data.date?.toISOString?.()?.split('T')[0] || '',
         type: data.type,
         title: data.title,
         description: data.description,
