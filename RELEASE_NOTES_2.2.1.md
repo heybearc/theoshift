@@ -1,0 +1,125 @@
+# Release Notes - v2.2.1
+
+**Release Date:** October 27, 2025  
+**Type:** Patch Release (Bug Fixes)
+
+---
+
+## 🐛 Bug Fixes
+
+### Critical Fixes
+- **Fixed 500 Internal Server Error when removing attendant from assignment**
+  - Corrected Prisma schema relationship from `position` to `positions`
+  - File: `pages/api/events/[id]/assignments/[assignmentId].ts`
+  
+- **Fixed 500 Internal Server Error when adding attendant to assignment**
+  - Updated all position relationship references in assignments API
+  - File: `pages/api/events/[id]/assignments.ts`
+
+- **Fixed attendant dashboard position data loading**
+  - Corrected position assignment references
+  - File: `pages/api/attendant/dashboard.ts`
+
+### Infrastructure Improvements
+- **Added multi-application health check endpoint**
+  - New endpoint: `/api/health`
+  - Compatible with MCP server orchestration
+  - Returns application status, database connectivity, and basic stats
+  - File: `pages/api/health.ts`
+
+---
+
+## 🔧 Technical Details
+
+### Database Schema Fixes
+All Prisma includes updated to use correct relationship name:
+```typescript
+// Before (incorrect)
+include: { position: true }
+
+// After (correct)
+include: { positions: true }
+```
+
+### Health Check Response
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-10-27T15:00:00.000Z",
+  "app": "JW Attendant Scheduler",
+  "version": "2.2.1",
+  "database": {
+    "connected": true,
+    "users": 45,
+    "events": 12
+  },
+  "uptime": 3600
+}
+```
+
+---
+
+## 📦 Deployment Notes
+
+### Blue-Green Deployment
+- Deployed to Blue environment (10.92.3.22:3001) for testing
+- Ready for traffic switch after validation
+- Green environment (10.92.3.24:3001) will be updated after Blue validation
+
+### Breaking Changes
+None - fully backward compatible
+
+### Migration Required
+No database migrations needed
+
+---
+
+## ✅ Validation Checklist
+
+- [x] Remove attendant functionality working
+- [x] Add attendant functionality working
+- [x] Health endpoint responding correctly
+- [x] Dashboard loading attendant data
+- [x] No TypeScript compilation errors
+- [x] Build successful on Blue environment
+
+---
+
+## 🔄 Upgrade Instructions
+
+### For Blue-Green Deployment:
+1. Code already deployed to Blue (Container 132/133)
+2. Validate functionality on Blue
+3. Switch traffic from Green to Blue via HAProxy
+4. Deploy same code to Green
+5. Validate Green environment
+6. Ready for rollback if needed
+
+### For Direct Deployment:
+```bash
+git pull origin production-gold-standard
+npm install
+npx prisma generate
+npm run build
+pm2 restart jw-attendant
+```
+
+---
+
+## 🐛 Known Issues
+
+- Scroll position resets to top after page actions (SSR limitation)
+  - Planned fix in v2.3.0 with client-side state management
+
+---
+
+## 👥 Contributors
+
+- Cascade AI Assistant
+- Cory (Project Lead)
+
+---
+
+## 📞 Support
+
+For issues or questions, contact the development team or check the project documentation.

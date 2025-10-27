@@ -44,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const assignment = await prisma.position_assignments.findUnique({
           where: { id: assignmentId },
           include: {
-            position: true,
+            positions: true,
             attendant: {
               select: {
                 firstName: true,
@@ -59,12 +59,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(404).json({ error: 'Assignment not found' })
         }
 
-        if (assignment.position.eventId !== eventId) {
+        if (assignment.positions.eventId !== eventId) {
           console.error(`❌ Assignment ${assignmentId} does not belong to event ${eventId}`)
           return res.status(400).json({ error: 'Assignment does not belong to this event' })
         }
 
-        console.log(`📋 Removing ${assignment.attendant.firstName} ${assignment.attendant.lastName} from position ${assignment.position.name}`)
+        console.log(`📋 Removing ${assignment.attendant.firstName} ${assignment.attendant.lastName} from position ${assignment.positions.name}`)
 
         // Delete the assignment
         await prisma.position_assignments.delete({

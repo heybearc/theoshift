@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       case 'GET':
         const assignments = await prisma.position_assignments.findMany({
           where: { 
-            position: { 
+            positions: { 
               eventId: eventId 
             } 
           },
@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 lastName: true
               }
             },
-            position: {
+            positions: {
               select: {
                 id: true,
                 name: true
@@ -79,7 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Get the shift details for time conflict checking
         const targetShift = await (prisma as any).position_shifts.findUnique({
           where: { id: validatedData.shiftId },
-          include: { position: true }
+          include: { positions: true }
         })
         
         if (!targetShift) {
@@ -145,7 +145,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           
           if (conflictingAssignments.length > 0) {
             const conflicts = conflictingAssignments.map((assignment: any) => ({
-              positionName: assignment.position?.name || assignment.shift?.position?.name,
+              positionName: assignment.positions?.name || assignment.shift?.positions?.name,
               shiftName: assignment.shift?.name,
               startTime: assignment.shift?.startTime,
               endTime: assignment.shift?.endTime
