@@ -136,6 +136,7 @@ async function handlePut(req: NextApiRequest, res: NextApiResponse, eventId: str
       ...(data.countTime && { countTime: new Date(data.countTime) }),
       ...(data.notes !== undefined && { notes: data.notes }),
       ...(data.status && { status: data.status }),
+      ...(data.isActive !== undefined && { isActive: data.isActive }),
       updatedAt: new Date()
     },
     include: {
