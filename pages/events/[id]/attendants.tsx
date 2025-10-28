@@ -1254,10 +1254,10 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                 </svg>
                               </button>
                             {openDropdowns.has(attendant.id) && (
-                              <div className="absolute right-0 z-50 mt-1 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 origin-top-right"
+                              <div className="absolute z-50 mt-1 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
                                 style={{ 
-                                  bottom: 'auto',
                                   top: '100%',
+                                  right: '0',
                                   maxHeight: '300px',
                                   overflowY: 'auto'
                                 }}
