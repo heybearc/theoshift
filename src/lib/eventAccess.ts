@@ -12,12 +12,27 @@ export interface EventPermission {
 /**
  * Check if user has access to an event with at least the required role
  * Returns the permission object if access is granted, null otherwise
+ * ADMIN users automatically have OWNER access to all events
  */
 export async function checkEventAccess(
   userId: string,
   eventId: string,
   requiredRole: EventPermissionRole = 'VIEWER'
 ): Promise<EventPermission | null> {
+  // Check if user is ADMIN - they have automatic OWNER access to all events
+  const user = await prisma.users.findUnique({
+    where: { id: userId },
+    select: { role: true }
+  })
+
+  if (user?.role === 'ADMIN') {
+    return {
+      role: 'OWNER',
+      scopeType: null,
+      scopeIds: undefined
+    }
+  }
+
   const permission = await prisma.event_permissions.findUnique({
     where: { userId_eventId: { userId, eventId } }
   })
@@ -197,9 +212,42 @@ export async function canManageDocuments(
 
 /**
  * Get all events a user has access to
+ * ADMIN users get access to all events automatically
  */
 export async function getUserEvents(userId: string) {
   try {
+    // Check if user is ADMIN - they get all events
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+      select: { role: true }
+    })
+
+    if (user?.role === 'ADMIN') {
+      const allEvents = await prisma.events.findMany({
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          status: true,
+          startDate: true,
+          endDate: true,
+          eventType: true,
+          location: true,
+          venue: true
+        },
+        orderBy: {
+          startDate: 'desc'
+        }
+      })
+
+      return allEvents.map((event: any) => ({
+        ...event,
+        userRole: 'OWNER',
+        scopeType: null,
+        scopeIds: null
+      }))
+    }
+
     const permissions = await (prisma as any).event_permissions.findMany({
       where: { userId },
       include: {
