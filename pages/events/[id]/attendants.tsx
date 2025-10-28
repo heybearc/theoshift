@@ -1101,9 +1101,9 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-gray-200" style={{ position: 'relative' }}>
                     {paginatedAttendants.map((attendant) => (
-                      <tr key={attendant.id} className="hover:bg-gray-50">
+                      <tr key={attendant.id} className="hover:bg-gray-50" style={{ position: 'relative' }}>
                         <td className="px-3 py-3 whitespace-nowrap">
                           <input
                             type="checkbox"
@@ -1309,6 +1309,8 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                     ))}
                   </tbody>
                 </table>
+                {/* Add space for dropdown at bottom */}
+                <div className="h-48"></div>
               </div>
             )}
           </div>
