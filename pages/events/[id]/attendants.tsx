@@ -1085,16 +1085,48 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                         </button>
                       </th>
                       <th className="w-28 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                        Overseer
+                        <button 
+                          onClick={() => handleSort('overseer')}
+                          className="flex items-center space-x-1 hover:text-gray-700"
+                        >
+                          <span>Overseer</span>
+                          {sortField === 'overseer' && (
+                            <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </button>
                       </th>
                       <th className="w-28 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                        Keyman
+                        <button 
+                          onClick={() => handleSort('keyman')}
+                          className="flex items-center space-x-1 hover:text-gray-700"
+                        >
+                          <span>Keyman</span>
+                          {sortField === 'keyman' && (
+                            <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </button>
                       </th>
                       <th className="w-48 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
-                        Forms of Service
+                        <button 
+                          onClick={() => handleSort('formsOfService')}
+                          className="flex items-center space-x-1 hover:text-gray-700"
+                        >
+                          <span>Forms of Service</span>
+                          {sortField === 'formsOfService' && (
+                            <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </button>
                       </th>
                       <th className="w-24 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
+                        <button 
+                          onClick={() => handleSort('isActive')}
+                          className="flex items-center space-x-1 hover:text-gray-700"
+                        >
+                          <span>Status</span>
+                          {sortField === 'isActive' && (
+                            <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                          )}
+                        </button>
                       </th>
                       <th className="w-28 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                         Verification
