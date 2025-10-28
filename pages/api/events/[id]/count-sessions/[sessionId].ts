@@ -103,9 +103,15 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse, eventId: str
 }
 
 async function handlePut(req: NextApiRequest, res: NextApiResponse, eventId: string, sessionId: string) {
+  console.log('🔍 COUNT SESSION UPDATE:', {
+    sessionId,
+    requestBody: req.body
+  })
+  
   // Validate request body
   const validation = updateCountSessionSchema.safeParse(req.body)
   if (!validation.success) {
+    console.log('❌ VALIDATION FAILED:', validation.error.errors)
     return res.status(400).json({
       error: 'Validation failed',
       details: validation.error.errors
@@ -113,6 +119,7 @@ async function handlePut(req: NextApiRequest, res: NextApiResponse, eventId: str
   }
 
   const data = validation.data
+  console.log('✅ VALIDATED DATA:', data)
 
   // Check if count session exists and belongs to event
   const existingSession = await prisma.count_sessions.findUnique({
@@ -128,17 +135,23 @@ async function handlePut(req: NextApiRequest, res: NextApiResponse, eventId: str
     return res.status(400).json({ error: 'Count session does not belong to this event' })
   }
 
+  // Build update data
+  const updateData: any = {
+    updatedAt: new Date()
+  }
+  
+  if (data.sessionName) updateData.sessionName = data.sessionName
+  if (data.countTime) updateData.countTime = new Date(data.countTime)
+  if (data.notes !== undefined) updateData.notes = data.notes
+  if (data.status) updateData.status = data.status
+  if (data.isActive !== undefined) updateData.isActive = data.isActive
+  
+  console.log('📝 UPDATE DATA:', updateData)
+  
   // Update count session
   const updatedSession = await prisma.count_sessions.update({
     where: { id: sessionId },
-    data: {
-      ...(data.sessionName && { sessionName: data.sessionName }),
-      ...(data.countTime && { countTime: new Date(data.countTime) }),
-      ...(data.notes !== undefined && { notes: data.notes }),
-      ...(data.status && { status: data.status }),
-      ...(data.isActive !== undefined && { isActive: data.isActive }),
-      updatedAt: new Date()
-    },
+    data: updateData,
     include: {
       position_counts: {
         include: {
