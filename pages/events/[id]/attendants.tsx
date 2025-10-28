@@ -146,10 +146,16 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
     search: string
     congregation: string
     isActive: 'all' | 'true' | 'false'
+    overseerId: string
+    keymanId: string
+    formsOfService: string[]
   }>({
     search: '',
     congregation: '',
-    isActive: 'all'
+    isActive: 'true', // Default to Active only
+    overseerId: '',
+    keymanId: '',
+    formsOfService: []
   })
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(20)
@@ -162,13 +168,16 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
       const urlParams = new URLSearchParams(window.location.search)
       const search = urlParams.get('search') || ''
       const congregation = urlParams.get('congregation') || ''
-      const isActive = (urlParams.get('isActive') as 'all' | 'true' | 'false') || 'all'
+      const isActive = (urlParams.get('isActive') as 'all' | 'true' | 'false') || 'true'
+      const overseerId = urlParams.get('overseerId') || ''
+      const keymanId = urlParams.get('keymanId') || ''
+      const formsOfService = urlParams.get('formsOfService')?.split(',').filter(Boolean) || []
       const page = parseInt(urlParams.get('page') || '1')
       const perPage = parseInt(urlParams.get('perPage') || '20')
       
       // Only update if there are actual URL parameters to restore
-      if (search || congregation || isActive !== 'all' || page !== 1 || perPage !== 20) {
-        setFilters({ search, congregation, isActive })
+      if (search || congregation || isActive !== 'true' || overseerId || keymanId || formsOfService.length > 0 || page !== 1 || perPage !== 20) {
+        setFilters({ search, congregation, isActive, overseerId, keymanId, formsOfService })
         setCurrentPage(page)
         setItemsPerPage(perPage)
       }
@@ -184,7 +193,10 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
       const url = new URL(window.location.href)
       if (filters.search) url.searchParams.set('search', filters.search)
       if (filters.congregation) url.searchParams.set('congregation', filters.congregation)
-      if (filters.isActive !== 'all') url.searchParams.set('isActive', filters.isActive)
+      if (filters.isActive !== 'true') url.searchParams.set('isActive', filters.isActive)
+      if (filters.overseerId) url.searchParams.set('overseerId', filters.overseerId)
+      if (filters.keymanId) url.searchParams.set('keymanId', filters.keymanId)
+      if (filters.formsOfService.length > 0) url.searchParams.set('formsOfService', filters.formsOfService.join(','))
       url.searchParams.set('page', currentPage.toString())
       url.searchParams.set('perPage', itemsPerPage.toString())
       window.location.href = url.toString()
@@ -223,7 +235,23 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
       (filters.isActive === 'true' && attendant.isActive) ||
       (filters.isActive === 'false' && !attendant.isActive)
     
-    return matchesSearch && matchesCongregation && matchesStatus
+    const matchesOverseer = filters.overseerId === '' ||
+      attendant.overseerId === filters.overseerId ||
+      (filters.overseerId === 'none' && !attendant.overseerId)
+    
+    const matchesKeyman = filters.keymanId === '' ||
+      attendant.keymanId === filters.keymanId ||
+      (filters.keymanId === 'none' && !attendant.keymanId)
+    
+    const matchesFormsOfService = filters.formsOfService.length === 0 ||
+      (Array.isArray(attendant.formsOfService) && 
+        filters.formsOfService.some(filterForm => 
+          attendant.formsOfService.some(attForm => 
+            attForm.toLowerCase().includes(filterForm.toLowerCase())
+          )
+        ))
+    
+    return matchesSearch && matchesCongregation && matchesStatus && matchesOverseer && matchesKeyman && matchesFormsOfService
   })
 
   const totalPages = itemsPerPage === -1 ? 1 : Math.ceil(filteredAttendants.length / itemsPerPage)
@@ -783,12 +811,62 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
 
         {/* Filters */}
         <div className="bg-white shadow rounded-lg p-4 sm:p-6 mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <h3 className="text-lg font-semibold mb-4">Filters</h3>
+          
+          {/* Active Filter Chips */}
+          {(filters.search || filters.congregation || filters.isActive !== 'true' || filters.overseerId || filters.keymanId || filters.formsOfService.length > 0) && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {filters.search && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                  Search: {filters.search}
+                  <button onClick={() => setFilters({ ...filters, search: '' })} className="ml-2 hover:text-blue-900">×</button>
+                </span>
+              )}
+              {filters.congregation && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                  Congregation: {filters.congregation}
+                  <button onClick={() => setFilters({ ...filters, congregation: '' })} className="ml-2 hover:text-blue-900">×</button>
+                </span>
+              )}
+              {filters.isActive === 'all' && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                  Status: All
+                  <button onClick={() => setFilters({ ...filters, isActive: 'true' })} className="ml-2 hover:text-blue-900">×</button>
+                </span>
+              )}
+              {filters.isActive === 'false' && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                  Status: Inactive
+                  <button onClick={() => setFilters({ ...filters, isActive: 'true' })} className="ml-2 hover:text-blue-900">×</button>
+                </span>
+              )}
+              {filters.overseerId && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-800">
+                  Overseer: {filters.overseerId === 'none' ? 'None' : attendants.find(a => a.id === filters.overseerId)?.firstName + ' ' + attendants.find(a => a.id === filters.overseerId)?.lastName}
+                  <button onClick={() => setFilters({ ...filters, overseerId: '' })} className="ml-2 hover:text-purple-900">×</button>
+                </span>
+              )}
+              {filters.keymanId && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                  Keyman: {filters.keymanId === 'none' ? 'None' : attendants.find(a => a.id === filters.keymanId)?.firstName + ' ' + attendants.find(a => a.id === filters.keymanId)?.lastName}
+                  <button onClick={() => setFilters({ ...filters, keymanId: '' })} className="ml-2 hover:text-green-900">×</button>
+                </span>
+              )}
+              {filters.formsOfService.map(form => (
+                <span key={form} className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800">
+                  {form}
+                  <button onClick={() => setFilters({ ...filters, formsOfService: filters.formsOfService.filter(f => f !== form) })} className="ml-2 hover:text-yellow-900">×</button>
+                </span>
+              ))}
+            </div>
+          )}
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
               <input
                 type="text"
-                placeholder="Search by name or email..."
+                placeholder="Name, email, phone..."
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base min-h-[44px]"
@@ -811,25 +889,90 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                 onChange={(e) => setFilters({ ...filters, isActive: e.target.value as 'all' | 'true' | 'false' })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base min-h-[44px]"
               >
+                <option value="true">Active Only</option>
                 <option value="all">All</option>
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
+                <option value="false">Inactive Only</option>
               </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Overseer</label>
+              <select
+                value={filters.overseerId}
+                onChange={(e) => setFilters({ ...filters, overseerId: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base min-h-[44px]"
+              >
+                <option value="">All Overseers</option>
+                <option value="none">No Overseer</option>
+                {attendants.filter(att => 
+                  att.isActive && 
+                  Array.isArray(att.formsOfService) && 
+                  att.formsOfService.some(form => form.toLowerCase().includes('overseer'))
+                ).map(overseer => (
+                  <option key={overseer.id} value={overseer.id}>
+                    {overseer.firstName} {overseer.lastName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Keyman</label>
+              <select
+                value={filters.keymanId}
+                onChange={(e) => setFilters({ ...filters, keymanId: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base min-h-[44px]"
+              >
+                <option value="">All Keymen</option>
+                <option value="none">No Keyman</option>
+                {attendants.filter(att => 
+                  att.isActive && 
+                  Array.isArray(att.formsOfService) && 
+                  att.formsOfService.some(form => form.toLowerCase().includes('keyman'))
+                ).map(keyman => (
+                  <option key={keyman.id} value={keyman.id}>
+                    {keyman.firstName} {keyman.lastName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Forms of Service</label>
+              <select
+                multiple
+                value={filters.formsOfService}
+                onChange={(e) => {
+                  const selected = Array.from(e.target.selectedOptions, option => option.value)
+                  setFilters({ ...filters, formsOfService: selected })
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+                size={4}
+              >
+                <option value="Elder">Elder</option>
+                <option value="Ministerial Servant">Ministerial Servant</option>
+                <option value="Exemplary">Exemplary</option>
+                <option value="Regular Pioneer">Regular Pioneer</option>
+                <option value="Overseer">Overseer</option>
+                <option value="Keyman">Keyman</option>
+                <option value="Other">Other</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
             </div>
             <div className="flex items-end">
               <button
-                onClick={() => setFilters({ search: '', congregation: '', isActive: 'all' })}
+                onClick={() => setFilters({ search: '', congregation: '', isActive: 'true', overseerId: '', keymanId: '', formsOfService: [] })}
                 className="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-md transition-colors min-h-[44px] touch-manipulation"
               >
-                Clear Filters
+                Clear All Filters
               </button>
             </div>
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Quick Filters */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          <button
+            onClick={() => setFilters({ ...filters, isActive: 'all' })}
+            className={`bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow text-left ${filters.isActive === 'all' ? 'ring-2 ring-blue-500' : ''}`}
+          >
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -845,9 +988,12 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                 </div>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          <button
+            onClick={() => setFilters({ ...filters, isActive: 'true' })}
+            className={`bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow text-left ${filters.isActive === 'true' ? 'ring-2 ring-green-500' : ''}`}
+          >
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -863,9 +1009,12 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                 </div>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          <button
+            onClick={() => setFilters({ ...filters, isActive: 'false' })}
+            className={`bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow text-left ${filters.isActive === 'false' ? 'ring-2 ring-red-500' : ''}`}
+          >
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -881,7 +1030,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                 </div>
               </div>
             </div>
-          </div>
+          </button>
         </div>
 
         {/* Attendants Table */}
