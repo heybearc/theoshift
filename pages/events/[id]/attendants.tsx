@@ -1245,7 +1245,19 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                           {canManageContent && (
                             <div className="relative inline-block text-left">
                               <button
-                                onClick={() => toggleDropdown(attendant.id)}
+                                id={`actions-btn-${attendant.id}`}
+                                onClick={(e) => {
+                                  toggleDropdown(attendant.id)
+                                  // Position dropdown after state update
+                                  setTimeout(() => {
+                                    const dropdown = document.getElementById(`dropdown-${attendant.id}`)
+                                    if (dropdown) {
+                                      const rect = e.currentTarget.getBoundingClientRect()
+                                      dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`
+                                      dropdown.style.left = `${rect.right - 192 + window.scrollX}px`
+                                    }
+                                  }, 0)
+                                }}
                                 className="inline-flex items-center px-2 py-1 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                               >
                                 Actions
@@ -1254,10 +1266,10 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                 </svg>
                               </button>
                             {openDropdowns.has(attendant.id) && (
-                              <div className="absolute z-50 mt-1 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+                              <div 
+                                id={`dropdown-${attendant.id}`}
+                                className="fixed z-50 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
                                 style={{ 
-                                  top: '100%',
-                                  right: '0',
                                   maxHeight: '300px',
                                   overflowY: 'auto'
                                 }}
