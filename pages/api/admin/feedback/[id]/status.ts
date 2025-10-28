@@ -51,11 +51,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const updatedFeedback = await prisma.feedback.update({
         where: { id },
         data: { 
-          status: upperStatus,
+          status: upperStatus as any,
           updatedAt: new Date()
         },
         include: {
-          user: {
+          users: {
             select: {
               firstName: true,
               lastName: true,

@@ -50,14 +50,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Create comment
+      const commentId = `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       const comment = await prisma.feedback_comments.create({
         data: {
+          id: commentId,
           feedbackId: id,
           authorId: user.id,
           content: content.trim()
         },
         include: {
-          author: {
+          users: {
             select: {
               firstName: true,
               lastName: true,
@@ -78,7 +80,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         data: {
           id: comment.id,
           content: comment.content,
-          author: `${comment.author.firstName} ${comment.author.lastName}`,
+          author: comment.users ? `${comment.users.firstName} ${comment.users.lastName}` : 'Unknown',
           createdAt: comment.createdAt.toISOString()
         }
       })
