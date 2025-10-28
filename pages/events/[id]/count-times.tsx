@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import EventLayout from '../../../components/EventLayout'
 import CreateCountSessionModal from '../../../components/CreateCountSessionModal'
+import EditCountSessionModal from '../../../components/EditCountSessionModal'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
@@ -55,8 +56,27 @@ export default function EventCountTimesPage({ eventId, event, countSessions, can
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [editingSession, setEditingSession] = useState<CountSession | null>(null)
 
   // APEX GUARDIAN: Client-side fetching removed - data now provided via SSR
+
+  const toggleSessionActive = async (sessionId: string, currentActive: boolean) => {
+    try {
+      const response = await fetch(`/api/events/${eventId}/count-sessions/${sessionId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !currentActive })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to toggle session status')
+      }
+      
+      router.reload()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    }
+  }
 
   const createCountSession = async (data: { sessionName: string; countTime: string; notes?: string }) => {
     const response = await fetch(`/api/events/${eventId}/count-sessions`, {
@@ -183,21 +203,40 @@ export default function EventCountTimesPage({ eventId, event, countSessions, can
                         Count Time: {new Date(session.countTime).toLocaleString()}
                       </p>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 flex-wrap gap-2">
                       <span className={`px-3 py-1 text-sm rounded-full ${
-                        session.status === 'ACTIVE' 
+                        session.isActive 
                           ? 'bg-green-100 text-green-800'
                           : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {session.status}
+                        {session.isActive ? 'ACTIVE' : 'INACTIVE'}
                       </span>
                       {canManageContent && (
-                        <Link
-                          href={`/events/${eventId}/count-times/${session.id}/enter-count`}
-                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm transition-colors"
-                        >
-                          📝 Enter Counts
-                        </Link>
+                        <>
+                          <button
+                            onClick={() => toggleSessionActive(session.id, session.isActive)}
+                            className={`px-3 py-1 text-sm rounded transition-colors ${
+                              session.isActive
+                                ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                                : 'bg-green-100 text-green-800 hover:bg-green-200'
+                            }`}
+                            title={session.isActive ? 'Deactivate session' : 'Activate session'}
+                          >
+                            {session.isActive ? '⏸️ Deactivate' : '▶️ Activate'}
+                          </button>
+                          <button
+                            onClick={() => setEditingSession(session)}
+                            className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                          >
+                            ✏️ Edit
+                          </button>
+                          <Link
+                            href={`/events/${eventId}/count-times/${session.id}/enter-count`}
+                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm transition-colors"
+                          >
+                            📝 Enter Counts
+                          </Link>
+                        </>
                       )}
                       <Link
                         href={`/events/${eventId}/count-times/${session.id}`}
@@ -257,6 +296,19 @@ export default function EventCountTimesPage({ eventId, event, countSessions, can
             isOpen={showCreateModal}
             onClose={() => setShowCreateModal(false)}
             onSubmit={createCountSession}
+          />
+        )}
+
+        {/* Edit Count Session Modal */}
+        {editingSession && (
+          <EditCountSessionModal
+            session={editingSession}
+            eventId={eventId}
+            onClose={() => setEditingSession(null)}
+            onSuccess={() => {
+              setEditingSession(null)
+              router.reload()
+            }}
           />
         )}
       </div>

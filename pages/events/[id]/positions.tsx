@@ -188,17 +188,26 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       }
     }
     
-    // Restore scroll position if it was saved
+    // Restore scroll position if it was saved recently (within 5 seconds)
     const savedScrollY = sessionStorage.getItem('positions_scroll_y')
     const savedScrollX = sessionStorage.getItem('positions_scroll_x')
-    if (savedScrollY && savedScrollX) {
-      // Use setTimeout to ensure DOM is fully rendered
-      setTimeout(() => {
-        window.scrollTo(parseInt(savedScrollX), parseInt(savedScrollY))
-        // Clear the saved position
+    const savedTimestamp = sessionStorage.getItem('positions_scroll_timestamp')
+    
+    if (savedScrollY && savedScrollX && savedTimestamp) {
+      const timeSinceSave = Date.now() - parseInt(savedTimestamp)
+      // Only restore if saved within last 5 seconds (prevents stale scroll positions)
+      if (timeSinceSave < 5000) {
+        // Use setTimeout to ensure DOM is fully rendered
+        setTimeout(() => {
+          window.scrollTo(parseInt(savedScrollX), parseInt(savedScrollY))
+          // Don't clear immediately - allow multiple refreshes to use same position
+        }, 100)
+      } else {
+        // Clear stale scroll position
         sessionStorage.removeItem('positions_scroll_y')
         sessionStorage.removeItem('positions_scroll_x')
-      }, 100)
+        sessionStorage.removeItem('positions_scroll_timestamp')
+      }
     }
   }, [eventId])
   const [shiftFormData, setShiftFormData] = useState({
@@ -249,7 +258,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
         setShowCreateModal(false)
         setEditingPosition(null)
         setFormData({ positionNumber: 1, name: '', area: '', description: '' })
-        reloadWithState() // Refresh page to show updated data
+        router.reload() // Refresh data without page reload
       } else {
         const error = await response.json()
         alert(error.error || 'Failed to save position')
@@ -283,7 +292,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       })
 
       if (response.ok) {
-        reloadWithState()
+        router.reload()
       } else {
         const error = await response.json()
         alert(`Failed to deactivate position: ${error.error}`)
@@ -385,10 +394,10 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
     }
   }
 
-  const handleBulkCreateSuccess = (result: any) => {
+  const handleBulkCreateSuccess = async (result: any) => {
     alert(`Successfully created ${result.created} positions`)
     setShowBulkCreator(false)
-    reloadWithState() // Refresh page to show updated data
+    router.reload() // Refresh page to show updated data
   }
 
   // APEX GUARDIAN: New Separated Bulk Operation Handlers
@@ -425,7 +434,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       }
       
       alert(`✅ Successfully updated ${successCount} of ${selectedPositions.size} positions`)
-      reloadWithState()
+      router.reload()
     } catch (error) {
       console.error('Bulk position update error:', error)
       alert('Failed to update positions')
@@ -478,7 +487,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
               `• Positions: ${result.data.positionsProcessed}\n` +
               `• Shifts Created: ${result.data.totalShiftsCreated}\n` +
               `• Template: ${result.data.templateType}`)
-        reloadWithState()
+        router.reload()
       } else {
         const error = await response.json()
         alert(`Failed to apply template: ${error.error || 'Unknown error'}`)
@@ -549,7 +558,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       }
       
       alert(`✅ Successfully created "${shiftName}" shift for ${successCount} of ${selectedPositions.size} positions`)
-      reloadWithState()
+      router.reload()
     } catch (error) {
       console.error('Custom shift creation error:', error)
       alert('Failed to create shifts')
@@ -585,7 +594,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
         alert(`✅ Oversight Assigned Successfully!\n\n` +
               `• Positions: ${result.data.summary.positionsProcessed}\n` +
               `• No shift dependency required`)
-        reloadWithState()
+        router.reload()
       } else {
         const error = await response.json()
         alert(`Failed to assign oversight: ${error.error || 'Unknown error'}`)
@@ -611,7 +620,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
 
       if (response.ok) {
         // Don't show alert - just reload to preserve scroll position
-        reloadWithState()
+        router.reload()
       } else {
         const error = await response.json()
         alert(`Failed to delete shift: ${error.error || 'Unknown error'}`)
@@ -654,7 +663,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       if (successCount > 0) {
         alert(`Successfully deleted ${successCount} position(s)${errorCount > 0 ? `. ${errorCount} failed.` : ''}`)
         setSelectedPositions(new Set())
-        reloadWithState()
+        router.reload()
       } else {
         alert('Failed to delete positions')
       }
@@ -676,7 +685,8 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       })
       
       if (response.ok) {
-        reloadWithState() // Refresh while preserving scroll position
+        // Refetch data without page reload - scroll position preserved automatically!
+        router.reload()
       } else {
         alert('Failed to remove assignment')
       }
@@ -1516,23 +1526,16 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
 
   // Helper function to reload page while preserving showInactive state
   const reloadWithState = () => {
-    // Force a hard reload but restore scroll position
+    // Store scroll position BEFORE any navigation
     const scrollY = window.scrollY
     const scrollX = window.scrollX
     
-    // Store scroll position in sessionStorage
     sessionStorage.setItem('positions_scroll_y', scrollY.toString())
     sessionStorage.setItem('positions_scroll_x', scrollX.toString())
+    sessionStorage.setItem('positions_scroll_timestamp', Date.now().toString())
     
-    const url = new URL(window.location.href)
-    if (showInactive) {
-      url.searchParams.set('showInactive', 'true')
-    } else {
-      url.searchParams.delete('showInactive')
-    }
-    
-    // Do a hard reload
-    window.location.href = url.toString()
+    // Use window.location.reload() to ensure sessionStorage persists
+    window.location.reload()
   }
 
   if (loading) {
@@ -1699,7 +1702,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                         if (response.ok) {
                           const result = await response.json()
                           alert(`✅ Cleared ${result.deletedCount} assignments`)
-                          reloadWithState()
+                          router.reload()
                         } else {
                           alert('Failed to clear assignments')
                         }
@@ -1729,7 +1732,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                       if (response.ok) {
                         const result = await response.json()
                         alert(`✅ Cleared ${result.deletedShifts} shifts and ${result.deletedAssignments} assignments`)
-                        reloadWithState()
+                        router.reload()
                       } else {
                         alert('Failed to clear shifts')
                       }
@@ -2230,7 +2233,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                                 body: JSON.stringify({ isActive: false }),
                               })
                               if (response.ok) {
-                                reloadWithState()
+                                router.reload()
                               } else {
                                 alert('Failed to deactivate position')
                               }
@@ -2252,7 +2255,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                                 body: JSON.stringify({ isActive: true }),
                               })
                               if (response.ok) {
-                                reloadWithState()
+                                router.reload()
                               } else {
                                 alert('Failed to activate position')
                               }
@@ -2312,7 +2315,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                                 body: JSON.stringify({ isActive: true }),
                               })
                               if (response.ok) {
-                                reloadWithState()
+                                router.reload()
                               } else {
                                 alert('Failed to activate position')
                               }
@@ -2343,7 +2346,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                                 
                                 if (response.ok) {
                                   alert(`Position "${position.name}" permanently deleted.`)
-                                  reloadWithState()
+                                  router.reload()
                                 } else {
                                   if (result.dependencies) {
                                     alert(

@@ -180,6 +180,44 @@ export default function EnterCountPage() {
     }
   }
 
+  const deleteCount = async (position: Position) => {
+    if (!confirm(`Are you sure you want to delete the count for ${position.name}? This will reset it to blank.`)) {
+      return
+    }
+
+    try {
+      setSubmittingPositions(prev => new Set(prev).add(position.id))
+      setError('')
+      
+      const response = await fetch(`/api/events/${eventId}/count-sessions/${sessionId}/counts/${position.id}`, {
+        method: 'DELETE'
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        setSuccess(`Count deleted for ${position.name}!`)
+        
+        // Refresh positions to show updated status
+        setTimeout(() => {
+          fetchData()
+          setSuccess('')
+        }, 1500)
+      } else {
+        setError(data.error || 'Failed to delete count')
+      }
+    } catch (err) {
+      setError('Error deleting count')
+      console.error('Error:', err)
+    } finally {
+      setSubmittingPositions(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(position.id)
+        return newSet
+      })
+    }
+  }
+
   if (loading) {
     return (
       <EventLayout 
@@ -294,17 +332,26 @@ export default function EnterCountPage() {
                               </p>
                             )}
                           </div>
-                          <button
-                            onClick={() => {
-                              setPositionCounts(prev => ({
-                                ...prev,
-                                [position.id]: position.currentCount?.toString() || ''
-                              }))
-                            }}
-                            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                          >
-                            Edit
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                setPositionCounts(prev => ({
+                                  ...prev,
+                                  [position.id]: position.currentCount?.toString() || ''
+                                }))
+                              }}
+                              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => deleteCount(position)}
+                              disabled={submittingPositions.has(position.id)}
+                              className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              🗑️ Delete
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ) : (
@@ -324,7 +371,7 @@ export default function EnterCountPage() {
                           />
                           <button
                             onClick={() => submitCount(position)}
-                            disabled={submittingPositions.has(position.id) || !positionCounts[position.id]}
+                            disabled={submittingPositions.has(position.id) || !positionCounts[position.id] || positionCounts[position.id].trim() === ''}
                             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
                           >
                             {submittingPositions.has(position.id) ? '...' : position.hasSubmitted ? 'Update' : 'Submit'}

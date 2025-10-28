@@ -8,8 +8,9 @@ import { z } from 'zod'
 const updateCountSessionSchema = z.object({
   sessionName: z.string().min(1).max(255).optional(),
   countTime: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid count time').optional(),
-  notes: z.string().optional(),
+  notes: z.string().nullable().optional(),
   status: z.enum(['ACTIVE', 'COMPLETED', 'CANCELLED']).optional(),
+  isActive: z.boolean().optional(),
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
