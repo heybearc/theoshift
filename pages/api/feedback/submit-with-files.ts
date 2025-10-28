@@ -22,21 +22,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'POST') {
     try {
+      console.log('🔍 FEEDBACK SUBMIT: Starting form parse')
+      
+      // Ensure upload directory exists FIRST
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'feedback')
+      console.log('📁 Upload directory:', uploadDir)
+      
+      if (!fs.existsSync(uploadDir)) {
+        console.log('📁 Creating upload directory...')
+        fs.mkdirSync(uploadDir, { recursive: true })
+      }
+
       // Parse form data including files
       const form = formidable({
-        uploadDir: path.join(process.cwd(), 'public', 'uploads', 'feedback'),
+        uploadDir: uploadDir,
         keepExtensions: true,
         maxFileSize: 10 * 1024 * 1024, // 10MB
         maxFiles: 5
       })
 
-      // Ensure upload directory exists
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'feedback')
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true })
-      }
-
+      console.log('📝 Parsing form data...')
       const [fields, files] = await form.parse(req)
+      console.log('✅ Form parsed successfully:', { fields: Object.keys(fields), files: Object.keys(files) })
 
       // Extract form fields
       const type = Array.isArray(fields.type) ? fields.type[0] : fields.type
@@ -129,10 +136,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       })
     } catch (error) {
-      console.error('Error submitting feedback with files:', error)
+      console.error('❌ Error submitting feedback with files:', error)
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
       return res.status(500).json({ 
         success: false, 
-        error: 'Failed to submit feedback' 
+        error: error instanceof Error ? error.message : 'Failed to submit feedback',
+        details: error instanceof Error ? error.stack : undefined
       })
     }
   }
