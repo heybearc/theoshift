@@ -87,7 +87,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           title: title.trim(),
           description: description.trim(),
           priority: (priority || 'MEDIUM').toUpperCase(),
-          submittedBy: user.id
+          submittedBy: user.id,
+          updatedAt: new Date()
         }
       })
 
