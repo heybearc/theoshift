@@ -33,10 +33,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           submittedBy: user.id
         },
         include: {
-          attachments: true,
-          comments: {
+          feedback_attachments: true,
+          feedback_comments: {
             include: {
-              author: {
+              users: {
                 select: {
                   firstName: true,
                   lastName: true,
@@ -64,13 +64,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         status: item.status.toLowerCase().replace('_', '_'),
         submittedAt: item.createdAt.toISOString(),
         updatedAt: item.updatedAt.toISOString(),
-        comments: item.comments.map(comment => ({
+        comments: (item.feedback_comments || []).map((comment: any) => ({
           id: comment.id,
           content: comment.content,
-          author: `${comment.author.firstName} ${comment.author.lastName}`,
+          author: comment.users ? `${comment.users.firstName} ${comment.users.lastName}` : 'Unknown',
           createdAt: comment.createdAt.toISOString()
         })),
-        attachments: item.attachments.map(attachment => ({
+        attachments: (item.feedback_attachments || []).map((attachment: any) => ({
           id: attachment.id,
           filename: attachment.filename,
           url: attachment.filePath,
