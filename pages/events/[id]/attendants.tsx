@@ -332,6 +332,7 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           attendantId: attendant.id,
+          eventId: eventId,
           pin,
           autoGenerate: false
         })

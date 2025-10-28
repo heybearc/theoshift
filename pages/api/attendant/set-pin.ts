@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../auth/[...nextauth]'
 import { prisma } from '../../../src/lib/prisma'
+import { canManageAttendants } from '../../../src/lib/eventAccess'
 import bcrypt from 'bcryptjs'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -10,13 +11,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Check admin authentication
+    // Check authentication
     const session = await getServerSession(req, res, authOptions)
-    if (!session || session.user.role !== 'ADMIN') {
-      return res.status(403).json({ success: false, error: 'Unauthorized' })
+    if (!session || !session.user) {
+      return res.status(401).json({ success: false, error: 'Unauthorized' })
     }
 
-    const { attendantId, pin, autoGenerate } = req.body
+    const { attendantId, eventId, pin, autoGenerate } = req.body
+
+    if (!eventId) {
+      return res.status(400).json({ success: false, error: 'Event ID is required' })
+    }
+
+    // Get current user
+    const user = await prisma.users.findUnique({
+      where: { email: session.user.email }
+    })
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' })
+    }
+
+    // Check if user can manage attendants (OVERSEER+ permission)
+    const canManage = await canManageAttendants(user.id, eventId)
+    if (!canManage) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'You do not have permission to set PINs. Requires OVERSEER+ role.' 
+      })
+    }
 
     if (!attendantId) {
       return res.status(400).json({ success: false, error: 'Attendant ID is required' })
