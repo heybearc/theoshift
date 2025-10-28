@@ -935,8 +935,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     // Get total position assignments for this event
     // Query through positions first to avoid relation name issues
+    // ONLY count active positions for fill rate calculation
     const eventPositions = await prisma.positions.findMany({
-      where: { eventId: id as string },
+      where: { 
+        eventId: id as string,
+        isActive: true
+      },
       include: {
         shifts: true
       }
