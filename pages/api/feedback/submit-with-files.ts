@@ -79,8 +79,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Create feedback record
+      const feedbackId = `feedback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       const feedback = await prisma.feedback.create({
         data: {
+          id: feedbackId,
           type: type.toUpperCase(),
           title: title.trim(),
           description: description.trim(),
@@ -107,8 +109,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           fs.renameSync(file.filepath, newPath)
 
           // Create attachment record
+          const attachmentId = `attachment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
           return prisma.feedback_attachments.create({
             data: {
+              id: attachmentId,
               feedbackId: feedback.id,
               filename: file.originalFilename || filename,
               filePath: `/uploads/feedback/${filename}`,
