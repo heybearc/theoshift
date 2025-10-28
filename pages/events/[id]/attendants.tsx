@@ -1248,12 +1248,14 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                 id={`actions-btn-${attendant.id}`}
                                 onClick={(e) => {
                                   toggleDropdown(attendant.id)
-                                  // Position dropdown after state update
+                                  // Position dropdown after state update - OPEN UPWARD
                                   setTimeout(() => {
                                     const dropdown = document.getElementById(`dropdown-${attendant.id}`)
                                     if (dropdown) {
                                       const rect = e.currentTarget.getBoundingClientRect()
-                                      dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`
+                                      // Open upward by positioning bottom of dropdown at top of button
+                                      dropdown.style.bottom = `${window.innerHeight - rect.top + window.scrollY - 4}px`
+                                      dropdown.style.top = 'auto'
                                       dropdown.style.left = `${rect.right - 192 + window.scrollX}px`
                                     }
                                   }, 0)
