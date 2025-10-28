@@ -1051,7 +1051,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             }}
                             className="text-xs border border-gray-300 rounded px-1 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                           >
-                            <option value="">No K</option>
+                            <option value="">No Keyman</option>
                             {attendants.filter(att => 
                               att.isActive && 
                               Array.isArray(att.formsOfService) && 
@@ -1319,7 +1319,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                         Forms of Service *
                       </label>
                       <div className="mt-2 space-y-2">
-                        {['Elder', 'Ministerial Servant', 'Regular Pioneer', 'Overseer', 'Keyman', 'Other Dept.'].map((service) => (
+                        {['Elder', 'Ministerial Servant', 'Exemplary', 'Regular Pioneer', 'Overseer', 'Keyman', 'Other Dept.'].map((service) => (
                           <label key={service} className="flex items-center">
                             <input
                               type="checkbox"
