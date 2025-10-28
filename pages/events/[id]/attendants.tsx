@@ -1050,7 +1050,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                 </button>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto overflow-y-visible">
                 <table className="w-full divide-y divide-gray-200 table-fixed">
                   <thead className="bg-gray-50">
                     <tr>
@@ -1254,7 +1254,13 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                 </svg>
                               </button>
                             {openDropdowns.has(attendant.id) && (
-                              <div className="absolute right-0 z-10 mt-1 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+                              <div className="absolute right-0 z-50 mt-1 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 origin-top-right"
+                                style={{ 
+                                  bottom: 'auto',
+                                  top: '100%',
+                                  maxHeight: '300px',
+                                  overflowY: 'auto'
+                                }}
                               >
                               <div className="py-1">
                                 <button
