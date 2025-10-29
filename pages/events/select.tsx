@@ -6,6 +6,8 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { format, parseISO } from 'date-fns'
+import ReleaseBanner from '../../components/ReleaseBanner'
+import packageJson from '../../package.json'
 
 interface Event {
   id: string
@@ -22,9 +24,10 @@ interface Event {
 
 interface EventSelectPageProps {
   events: Event[]
+  userLastSeenVersion?: string | null
 }
 
-export default function EventSelectPage({ events }: EventSelectPageProps) {
+export default function EventSelectPage({ events, userLastSeenVersion }: EventSelectPageProps) {
   const { data: session } = useSession()
   const router = useRouter()
   const [error, setError] = useState('')
@@ -99,6 +102,11 @@ export default function EventSelectPage({ events }: EventSelectPageProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700">
+      {/* Release Banner */}
+      <ReleaseBanner 
+        currentVersion={packageJson.version}
+        userLastSeenVersion={userLastSeenVersion}
+      />
       <div className="container mx-auto px-4 py-8">
         {/* Top Navigation */}
         <div className="flex justify-between items-center mb-4">
@@ -344,9 +352,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     positionsCount: event._count.positions
   }))
 
+  // Get user's lastSeenReleaseVersion
+  const currentUser = await prisma.users.findUnique({
+    where: { email: session.user.email },
+    select: { lastSeenReleaseVersion: true }
+  })
+
   return {
     props: {
-      events
+      events,
+      userLastSeenVersion: currentUser?.lastSeenReleaseVersion || null
     }
   }
 }
