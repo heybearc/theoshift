@@ -115,26 +115,18 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
   
-  // Reposition dropdowns on scroll/resize
+  // Close dropdowns on scroll (better UX than repositioning)
   useEffect(() => {
-    const repositionDropdowns = () => {
-      openDropdowns.forEach(attendantId => {
-        const button = document.getElementById(`actions-btn-${attendantId}`)
-        const dropdown = document.getElementById(`dropdown-${attendantId}`)
-        if (button && dropdown) {
-          const rect = button.getBoundingClientRect()
-          dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`
-          dropdown.style.left = `${rect.right - 192 + window.scrollX}px`
-        }
-      })
+    const handleScroll = () => {
+      if (openDropdowns.size > 0) {
+        closeAllDropdowns()
+      }
     }
     
-    window.addEventListener('scroll', repositionDropdowns, true)
-    window.addEventListener('resize', repositionDropdowns)
+    window.addEventListener('scroll', handleScroll, true)
     
     return () => {
-      window.removeEventListener('scroll', repositionDropdowns, true)
-      window.removeEventListener('resize', repositionDropdowns)
+      window.removeEventListener('scroll', handleScroll, true)
     }
   }, [openDropdowns])
   
@@ -1349,20 +1341,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             <div className="relative inline-block text-left">
                               <button
                                 id={`actions-btn-${attendant.id}`}
-                                onClick={(e) => {
-                                  // Capture rect before setTimeout (e.currentTarget becomes null in async)
-                                  const rect = e.currentTarget.getBoundingClientRect()
-                                  toggleDropdown(attendant.id)
-                                  // Position dropdown after state update
-                                  setTimeout(() => {
-                                    const dropdown = document.getElementById(`dropdown-${attendant.id}`)
-                                    if (dropdown) {
-                                      // Position below button, aligned to right edge
-                                      dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`
-                                      dropdown.style.left = `${rect.right - 192 + window.scrollX}px`
-                                    }
-                                  }, 0)
-                                }}
+                                onClick={() => toggleDropdown(attendant.id)}
                                 className="inline-flex items-center px-2 py-1 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                               >
                                 Actions
@@ -1373,7 +1352,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             {openDropdowns.has(attendant.id) && (
                               <div 
                                 id={`dropdown-${attendant.id}`}
-                                className="fixed z-50 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+                                className="absolute right-0 mt-1 z-50 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
                                 style={{ 
                                   maxHeight: '300px',
                                   overflowY: 'auto'
