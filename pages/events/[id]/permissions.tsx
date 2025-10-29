@@ -8,7 +8,7 @@ interface EventPermission {
   userId: string
   role: string
   scopeType: string | null
-  user: {
+  users: {
     firstName: string
     lastName: string
     email: string
@@ -279,9 +279,9 @@ export default function EventPermissionsPage() {
                 <div key={permission.id} className="px-6 py-4 flex items-center justify-between">
                   <div className="flex-1">
                     <div className="font-medium text-gray-900">
-                      {permission.user.firstName} {permission.user.lastName}
+                      {permission.users.firstName} {permission.users.lastName}
                     </div>
-                    <div className="text-sm text-gray-500">{permission.user.email}</div>
+                    <div className="text-sm text-gray-500">{permission.users.email}</div>
                   </div>
                   
                   <div className="flex items-center space-x-3">
