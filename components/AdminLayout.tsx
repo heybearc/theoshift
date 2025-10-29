@@ -3,14 +3,16 @@ import packageJson from "../package.json"
 import { useRouter } from 'next/router'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
+import ReleaseBanner from './ReleaseBanner'
 
 interface AdminLayoutProps {
   children: ReactNode
   title?: string
   breadcrumbs?: Array<{ label: string; href?: string }>
+  userLastSeenVersion?: string | null
 }
 
-export default function AdminLayout({ children, title, breadcrumbs = [] }: AdminLayoutProps) {
+export default function AdminLayout({ children, title, breadcrumbs = [], userLastSeenVersion }: AdminLayoutProps) {
   const router = useRouter()
   const { data: session } = useSession()
 
@@ -43,6 +45,12 @@ export default function AdminLayout({ children, title, breadcrumbs = [] }: Admin
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Release Banner */}
+      <ReleaseBanner 
+        currentVersion={packageJson.version}
+        userLastSeenVersion={userLastSeenVersion}
+      />
+      
       {/* Top Navigation Bar */}
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
