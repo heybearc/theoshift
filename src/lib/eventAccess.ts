@@ -184,14 +184,19 @@ export async function canDeleteEvent(
 
 /**
  * Check if user can manage event permissions (invite/remove users)
+ * ADMIN users automatically have permission
  */
 export async function canManagePermissions(
   userId: string,
   eventId: string
 ): Promise<boolean> {
   const permission = await checkEventAccess(userId, eventId, 'OWNER')
-  if (!permission) return false
+  if (!permission) {
+    console.log('❌ canManagePermissions: No permission found for user', userId, 'event', eventId)
+    return false
+  }
 
+  console.log('✅ canManagePermissions: User has role', permission.role)
   return permission.role === 'OWNER'
 }
 
