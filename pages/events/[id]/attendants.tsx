@@ -1311,13 +1311,12 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                   // Capture rect before setTimeout (e.currentTarget becomes null in async)
                                   const rect = e.currentTarget.getBoundingClientRect()
                                   toggleDropdown(attendant.id)
-                                  // Position dropdown after state update - OPEN UPWARD
+                                  // Position dropdown after state update
                                   setTimeout(() => {
                                     const dropdown = document.getElementById(`dropdown-${attendant.id}`)
                                     if (dropdown) {
-                                      // Open upward by positioning bottom of dropdown at top of button
-                                      dropdown.style.bottom = `${window.innerHeight - rect.top + window.scrollY - 4}px`
-                                      dropdown.style.top = 'auto'
+                                      // Position below button, aligned to right edge
+                                      dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`
                                       dropdown.style.left = `${rect.right - 192 + window.scrollX}px`
                                     }
                                   }, 0)
