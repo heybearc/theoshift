@@ -35,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const permissions = await prisma.event_permissions.findMany({
         where: { eventId },
         include: {
-          user: {
+          users: {
             select: {
               id: true,
               firstName: true,
@@ -46,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
         orderBy: [
           { role: 'asc' },
-          { user: { firstName: 'asc' } }
+          { users: { firstName: 'asc' } }
         ]
       })
 
@@ -102,7 +102,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           updatedAt: new Date()
         },
         include: {
-          user: {
+          users: {
             select: {
               id: true,
               firstName: true,
