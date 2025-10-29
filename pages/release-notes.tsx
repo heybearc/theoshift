@@ -23,6 +23,52 @@ interface ReleaseNotesProps {
 export default function ReleaseNotes({ releases }: ReleaseNotesProps) {
   const oldReleases = [
     {
+      version: 'v2.4.0',
+      date: '2025-10-28',
+      type: 'minor',
+      title: 'Enhanced Attendant Filtering & ADMIN Super-User Access',
+      description: 'Major improvements to attendant management with advanced filtering, colored badges, and full ADMIN access',
+      features: [
+        '🎯 Smart Default Filtering - Active attendants shown by default (solves 173 attendant clutter)',
+        '🔍 Advanced Multi-Filter System - Filter by Overseer, Keyman, and Forms of Service simultaneously',
+        '🎨 Colored Service Badges - Visual tags for Elder, MS, Overseer, Keyman, Exemplary, Pioneer',
+        '📊 Full Column Sorting - Sort by Name, Email, Overseer, Keyman, Forms of Service, Status',
+        '🏷️ Active Filter Chips - Visual indicators with × remove buttons for active filters',
+        '⚡ Quick Filter Cards - Click Total/Active/Inactive cards to filter instantly',
+        '🔐 ADMIN Super-User Access - ADMINs automatically have OWNER access to all events',
+        '🔑 Enhanced PIN Permissions - OVERSEER+ can now set PINs (matches phone update permissions)',
+        '✨ Improved Dropdown UX - Actions menu fully visible without scrolling',
+        '📝 Label Updates - "No K" changed to "No Keyman", "Exemplary" added to Forms of Service'
+      ],
+      fixes: [
+        '🐛 Fixed Actions dropdown cutoff issue on attendants page',
+        '🔧 Fixed Prisma relation name mismatch (user → users) in permissions API',
+        '⚡ Resolved permissions page access for all users',
+        '🎨 Fixed Forms of Service badge colors for new service types',
+        '📱 Improved responsive layout for Forms of Service column'
+      ],
+      breaking: [],
+      notes: [
+        'Default view now shows Active attendants only - use "Total" card to see all',
+        'ADMINs no longer need explicit event permissions - automatic OWNER access',
+        'PIN setting permission changed from ADMIN-only to OVERSEER+ for consistency',
+        'Forms of Service badges visible on XL screens, always visible on mobile',
+        'Multiple filters can be applied simultaneously for precise attendant lists'
+      ]
+    },
+    {
+      version: 'v2.3.1',
+      date: '2025-10-27',
+      type: 'patch',
+      title: 'Feedback System Fixes',
+      description: 'Critical fixes for feedback submission and admin management',
+      fixes: [
+        '🐛 Fixed feedback submission API endpoint',
+        '🔧 Fixed My Feedback page for users',
+        '⚡ Fixed admin feedback management interface'
+      ]
+    },
+    {
       version: 'v2.2.1',
       date: '2025-10-27',
       type: 'patch',
