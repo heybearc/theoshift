@@ -24,13 +24,15 @@ Simply say:
 
 ### Step 2: Generate Release Notes
 - Creates markdown file: `release-notes/v{version}.md`
+- **MUST follow TEMPLATE.md format** (user-friendly, no technical details)
+- Includes YAML frontmatter with version, date, type, title, description
 - Analyzes recent commits since last release
-- Categorizes changes:
-  - 🐛 Bug Fixes
-  - ✨ New Features
-  - 🔧 Improvements
-  - 📝 Other Changes
-- Includes version, date, and summary
+- Categorizes changes in user-friendly language:
+  - 🐛 Bug Fixes - What was broken and is now fixed (user perspective)
+  - ✨ New Features - What users can now do
+  - 🔧 Improvements - How the experience is better
+  - 📝 Notes - Any additional context for users
+- **AVOID:** IP addresses, file paths, technical jargon, deployment details
 
 ### Step 3: Commit and Push
 - Commits changes with message: `Release v{version}`
@@ -101,34 +103,49 @@ When ready, say "release" to switch traffic.
 
 ## Release Notes Template
 
-Automatically generated with this structure:
+**MUST follow this structure** (see `release-notes/TEMPLATE.md` for full guidelines):
 
 ```markdown
-# Release v{version}
-**Release Date:** {date}
+---
+version: X.Y.Z
+date: YYYY-MM-DD
+type: major|minor|patch
+title: Brief User-Friendly Title
+description: One sentence describing the main focus
+---
 
-## Summary
-{Auto-generated summary of changes}
+## 🐛 Bug Fixes (if any)
 
-## Changes
+- **Fixed [issue]** - User-friendly description of what was broken and is now fixed
+- **Resolved [problem]** - How this benefits users
 
-### 🐛 Bug Fixes
-- Fixed Actions dropdown positioning
-- Fixed feedback comment API errors
-- Fixed getBoundingClientRect null reference
+## ✨ New Features (if any)
 
-### ✨ New Features
-- Added click-outside dropdown detection
-- Added release notification banner
+- **Feature Name** - What users can now do
+- **Another Feature** - How this benefits users
 
-### 🔧 Improvements
-- Improved dropdown UX with scroll handling
-- Enhanced error messages
+## 🔧 Improvements (if any)
 
-### 📝 Other Changes
-- Updated documentation
-- Code cleanup
+- **Better [thing]** - How the experience is improved
+- **Enhanced [feature]** - What's better for users
+
+## 📝 Notes (optional)
+
+- Additional context or information users should know
+- Any actions users need to take
 ```
+
+### ✅ DO's (User-Focused):
+- "Fixed issue where removing attendants would fail"
+- "Improved dashboard loading speed"
+- "Added ability to export assignments to PDF"
+
+### ❌ DON'Ts (Technical Details):
+- NO IP addresses (10.92.3.22, Container 132, etc.)
+- NO file paths (pages/api/events/[id]/attendants.tsx)
+- NO technical jargon (Prisma, getBoundingClientRect, etc.)
+- NO deployment details (Blue/Green environments)
+- NO code references or database schema details
 
 ## Safety Features
 
