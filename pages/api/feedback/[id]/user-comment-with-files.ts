@@ -93,7 +93,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           content: content?.trim() || `[File attachment${Object.keys(files).length > 1 ? 's' : ''}]`
         },
         include: {
-          author: {
+          users: {
             select: {
               firstName: true,
               lastName: true,
@@ -153,7 +153,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         data: {
           id: comment.id,
           content: comment.content,
-          author: `${comment.author.firstName} ${comment.author.lastName}`,
+          author: `${comment.users.firstName} ${comment.users.lastName}`,
           createdAt: comment.createdAt.toISOString(),
           attachmentCount: validAttachments.length
         }
