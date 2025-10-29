@@ -79,7 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         where: { id: existingPermission.id },
         data: { role },
         include: {
-          user: {
+          users: {
             select: {
               id: true,
               firstName: true,
