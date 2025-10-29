@@ -15,9 +15,10 @@ interface AdminDashboardProps {
     totalUsers: number
     totalEvents: number
   }
+  userLastSeenVersion?: string | null
 }
 
-export default function AdminDashboard({ user, stats }: AdminDashboardProps) {
+export default function AdminDashboard({ user, stats, userLastSeenVersion }: AdminDashboardProps) {
   const adminModules = [
     {
       title: 'User Management',
@@ -78,7 +79,7 @@ export default function AdminDashboard({ user, stats }: AdminDashboardProps) {
   ]
 
   return (
-    <AdminLayout title="Admin Dashboard">
+    <AdminLayout title="Admin Dashboard" userLastSeenVersion={userLastSeenVersion}>
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white mb-8">
         <h2 className="text-2xl font-bold mb-2">Welcome back, {user.name}!</h2>
@@ -171,9 +172,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { prisma } = require('../../src/lib/prisma')
   
   try {
-    const [totalUsers, totalEvents] = await Promise.all([
+    const [totalUsers, totalEvents, currentUser] = await Promise.all([
       prisma.users.count(),
       prisma.events.count(),
+      prisma.users.findUnique({
+        where: { email: session.user.email },
+        select: { lastSeenReleaseVersion: true }
+      })
     ])
 
     return {
@@ -188,6 +193,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           totalUsers,
           totalEvents,
         },
+        userLastSeenVersion: currentUser?.lastSeenReleaseVersion || null,
       },
     }
   } catch (error) {
@@ -206,6 +212,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           totalUsers: 0,
           totalEvents: 0,
         },
+        userLastSeenVersion: null,
       },
     }
   }

@@ -23,6 +23,10 @@ class JWMCP {
       }
     );
 
+    this.creditSavings = {
+      batchedOperations: 0
+    };
+
     this.setupToolHandlers();
   }
 
@@ -37,57 +41,6 @@ class JWMCP {
       const { name, arguments: args } = request.params;
       return await this.handleToolCall(name, args || {});
     });
-  }
-
-  getTools() {
-    return [
-      {
-        name: 'jw_health_check',
-        description: 'Health check for JW Attendant Scheduler infrastructure',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            useCache: { type: 'boolean', default: true }
-          }
-        }
-      },
-      {
-        name: 'jw_event_operations',
-        description: 'Event management operations for JW Attendant Scheduler',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            operations: {
-              type: 'array',
-              items: { type: 'string' },
-              description: 'List of operations to perform'
-            }
-          }
-        }
-      },
-      {
-        name: 'jw_intelligent_deploy',
-        description: 'Intelligent deployment for JW Attendant Scheduler',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            target: { type: 'string', enum: ['staging', 'production'], default: 'staging' },
-            phases: { type: 'array', items: { type: 'string' } },
-            autoPromote: { type: 'boolean', default: false }
-          }
-        }
-      },
-      {
-        name: 'jw_application_restart',
-        description: 'Restart JW Attendant Scheduler application',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            force: { type: 'boolean', default: false }
-          }
-        }
-      }
-    ];
   }
 
   // Health check tool
