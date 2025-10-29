@@ -96,6 +96,48 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
       return newSet
     })
   }
+  
+  const closeAllDropdowns = () => {
+    setOpenDropdowns(new Set())
+  }
+  
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement
+      // Check if click is outside dropdown and button
+      if (!target.closest('[id^="dropdown-"]') && !target.closest('[id^="actions-btn-"]')) {
+        closeAllDropdowns()
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+  
+  // Reposition dropdowns on scroll/resize
+  useEffect(() => {
+    const repositionDropdowns = () => {
+      openDropdowns.forEach(attendantId => {
+        const button = document.getElementById(`actions-btn-${attendantId}`)
+        const dropdown = document.getElementById(`dropdown-${attendantId}`)
+        if (button && dropdown) {
+          const rect = button.getBoundingClientRect()
+          dropdown.style.top = `${rect.bottom + window.scrollY + 4}px`
+          dropdown.style.left = `${rect.right - 192 + window.scrollX}px`
+        }
+      })
+    }
+    
+    window.addEventListener('scroll', repositionDropdowns, true)
+    window.addEventListener('resize', repositionDropdowns)
+    
+    return () => {
+      window.removeEventListener('scroll', repositionDropdowns, true)
+      window.removeEventListener('resize', repositionDropdowns)
+    }
+  }, [openDropdowns])
+  
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
   // Sort attendants based on current sort field and direction
