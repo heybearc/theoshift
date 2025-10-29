@@ -1308,12 +1308,13 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                               <button
                                 id={`actions-btn-${attendant.id}`}
                                 onClick={(e) => {
+                                  // Capture rect before setTimeout (e.currentTarget becomes null in async)
+                                  const rect = e.currentTarget.getBoundingClientRect()
                                   toggleDropdown(attendant.id)
                                   // Position dropdown after state update - OPEN UPWARD
                                   setTimeout(() => {
                                     const dropdown = document.getElementById(`dropdown-${attendant.id}`)
                                     if (dropdown) {
-                                      const rect = e.currentTarget.getBoundingClientRect()
                                       // Open upward by positioning bottom of dropdown at top of button
                                       dropdown.style.bottom = `${window.innerHeight - rect.top + window.scrollY - 4}px`
                                       dropdown.style.top = 'auto'
