@@ -110,19 +110,41 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       const fileContents = fs.readFileSync(filePath, 'utf8')
       const { data, content } = matter(fileContents)
       
+      // Extract version from filename if not in frontmatter (e.g., v2.4.1.md -> 2.4.1)
+      const versionFromFilename = filename.replace(/^v/, '').replace(/\.md$/, '')
+      
+      // Parse markdown content for metadata if no frontmatter
+      let parsedData = data
+      if (!data.version) {
+        // Extract from markdown heading (e.g., "# Release v2.4.1")
+        const versionMatch = content.match(/^#\s+Release\s+v?(\d+\.\d+\.\d+)/m)
+        const dateMatch = content.match(/\*\*Release Date:\*\*\s+(.+)/m)
+        const summaryMatch = content.match(/##\s+Summary\s+([\s\S]+?)(?=\n##|\n###|$)/)
+        
+        parsedData = {
+          version: versionMatch?.[1] || versionFromFilename,
+          date: dateMatch?.[1] || '',
+          type: versionFromFilename.split('.')[2] === '0' 
+            ? (versionFromFilename.split('.')[1] === '0' ? 'major' : 'minor')
+            : 'patch',
+          title: `Release v${versionMatch?.[1] || versionFromFilename}`,
+          description: summaryMatch?.[1]?.trim() || 'Release notes'
+        }
+      }
+      
       return {
-        version: data.version,
-        date: typeof data.date === 'string' ? data.date : data.date?.toISOString?.()?.split('T')[0] || '',
-        type: data.type,
-        title: data.title,
-        description: data.description,
+        version: parsedData.version || versionFromFilename,
+        date: typeof parsedData.date === 'string' ? parsedData.date : parsedData.date?.toISOString?.()?.split('T')[0] || '',
+        type: parsedData.type || 'patch',
+        title: parsedData.title || `Release v${parsedData.version || versionFromFilename}`,
+        description: parsedData.description || '',
         content: marked(content)
       }
     })
     .sort((a, b) => {
       // Sort by version number (descending)
-      const versionA = a.version.replace(/[^0-9.]/g, '')
-      const versionB = b.version.replace(/[^0-9.]/g, '')
+      const versionA = (a.version || '').replace(/[^0-9.]/g, '')
+      const versionB = (b.version || '').replace(/[^0-9.]/g, '')
       return versionB.localeCompare(versionA, undefined, { numeric: true })
     })
 
