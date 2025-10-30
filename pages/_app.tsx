@@ -1,7 +1,15 @@
 import { SessionProvider } from 'next-auth/react'
 import type { AppProps } from 'next/app'
 import ErrorBoundary from '../components/ErrorBoundary'
+import { useActivityTracking } from '../src/hooks/useActivityTracking'
 import '../styles/globals.css'
+
+function AppContent({ Component, pageProps }: { Component: any; pageProps: any }) {
+  // Track user activity for session management
+  useActivityTracking()
+  
+  return <Component {...pageProps} />
+}
 
 export default function App({
   Component,
@@ -10,7 +18,7 @@ export default function App({
   return (
     <ErrorBoundary>
       <SessionProvider session={session}>
-        <Component {...pageProps} />
+        <AppContent Component={Component} pageProps={pageProps} />
       </SessionProvider>
     </ErrorBoundary>
   )
