@@ -166,6 +166,8 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set())
   const [showInactive, setShowInactive] = useState(false)
   const [showAvailableAttendants, setShowAvailableAttendants] = useState(false)
+  const [selectedOverseer, setSelectedOverseer] = useState<string>('all')
+  const [isExporting, setIsExporting] = useState(false)
 
   // Utility function to format 24-hour time to 12-hour format
   const formatTime12Hour = (time24: string) => {
@@ -697,6 +699,55 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
     } catch (error) {
       console.error('Error removing assignment:', error)
       alert('Failed to remove assignment')
+    }
+  }
+
+  // Export handlers
+  const handleExportPDF = async () => {
+    setIsExporting(true)
+    try {
+      const response = await fetch(`/api/export/positions-pdf?eventId=${eventId}&overseerFilter=${selectedOverseer !== 'all' ? selectedOverseer : ''}`)
+      
+      if (!response.ok) throw new Error('Export failed')
+      
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `positions-${event.name}-${new Date().toISOString().split('T')[0]}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('PDF export error:', error)
+      alert('Failed to export PDF')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const handleExportExcel = async () => {
+    setIsExporting(true)
+    try {
+      const response = await fetch(`/api/export/positions-excel?eventId=${eventId}&overseerFilter=${selectedOverseer !== 'all' ? selectedOverseer : ''}`)
+      
+      if (!response.ok) throw new Error('Export failed')
+      
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `positions-${event.name}-${new Date().toISOString().split('T')[0]}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Excel export error:', error)
+      alert('Failed to export Excel')
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -1497,6 +1548,17 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
     }
   }
 
+  // Filter positions by selected overseer
+  const getFilteredPositions = () => {
+    if (selectedOverseer === 'all') {
+      return positions
+    }
+    return positions.filter(position => {
+      const oversight = position.oversight && position.oversight.length > 0 ? position.oversight[0] : null
+      return oversight?.overseer?.id === selectedOverseer
+    })
+  }
+
   // Get unassigned attendants count (excluding leadership roles)
   const getUnassignedCount = () => {
     const assignedAttendantIds = new Set()
@@ -1662,6 +1724,46 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 >
                   ← Back to Event
                 </Link>
+
+                {/* Overseer Filter */}
+                <select
+                  value={selectedOverseer}
+                  onChange={(e) => setSelectedOverseer(e.target.value)}
+                  className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Overseers</option>
+                  {Array.from(new Set(
+                    positions
+                      .map(p => p.oversight?.[0]?.overseer)
+                      .filter(Boolean)
+                      .map(o => JSON.stringify({ id: o!.id, name: `${o!.firstName} ${o!.lastName}` }))
+                  )).map(overseerStr => {
+                    const overseer = JSON.parse(overseerStr)
+                    return (
+                      <option key={overseer.id} value={overseer.id}>
+                        {overseer.name}
+                      </option>
+                    )
+                  })}
+                </select>
+
+                {/* Export Buttons */}
+                <button
+                  onClick={handleExportPDF}
+                  disabled={isExporting}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  <span>📄</span>
+                  <span>{isExporting ? 'Exporting...' : 'PDF'}</span>
+                </button>
+                <button
+                  onClick={handleExportExcel}
+                  disabled={isExporting}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  <span>📊</span>
+                  <span>{isExporting ? 'Exporting...' : 'Excel'}</span>
+                </button>
                 
                 {/* Bulk Operations */}
                 {canManageContent && selectedPositions.size > 0 && (
@@ -1925,7 +2027,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
 
           {/* Positions Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {positions.filter(p => p.isActive).length === 0 ? (
+            {getFilteredPositions().filter(p => p.isActive).length === 0 ? (
               <div className="col-span-full bg-white rounded-lg shadow p-12 text-center">
                 <span className="text-6xl mb-4 block">📋</span>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No positions created</h3>
@@ -1948,7 +2050,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 )}
               </div>
             ) : (
-              positions.filter(p => showInactive ? true : p.isActive).map((position) => {
+              getFilteredPositions().filter(p => showInactive ? true : p.isActive).map((position) => {
                 // Calculate completion percentage for this position
                 const totalShifts = position.shifts?.length || 0
                 const assignedShifts = position.shifts?.filter(shift => {
