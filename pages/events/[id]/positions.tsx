@@ -706,21 +706,33 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   const handleExportPDF = async () => {
     setIsExporting(true)
     try {
-      const response = await fetch(`/api/export/positions-pdf?eventId=${eventId}&overseerFilter=${selectedOverseer !== 'all' ? selectedOverseer : ''}`)
+      const filtered = getFilteredPositions()
+      const response = await fetch('/api/export/positions-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId,
+          eventName: event.name,
+          positions: filtered,
+          overseerFilter: selectedOverseer !== 'all' ? selectedOverseer : null
+        })
+      })
       
-      if (!response.ok) throw new Error('Export failed')
-      
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `positions-${event.name}-${new Date().toISOString().split('T')[0]}.pdf`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `positions-${event.name.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+      } else {
+        alert('Failed to export PDF')
+      }
     } catch (error) {
-      console.error('PDF export error:', error)
+      console.error('Export error:', error)
       alert('Failed to export PDF')
     } finally {
       setIsExporting(false)
@@ -730,21 +742,33 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   const handleExportExcel = async () => {
     setIsExporting(true)
     try {
-      const response = await fetch(`/api/export/positions-excel?eventId=${eventId}&overseerFilter=${selectedOverseer !== 'all' ? selectedOverseer : ''}`)
+      const filtered = getFilteredPositions()
+      const response = await fetch('/api/export/positions-excel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId,
+          eventName: event.name,
+          positions: filtered,
+          overseerFilter: selectedOverseer !== 'all' ? selectedOverseer : null
+        })
+      })
       
-      if (!response.ok) throw new Error('Export failed')
-      
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `positions-${event.name}-${new Date().toISOString().split('T')[0]}.xlsx`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `positions-${event.name.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.xlsx`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+      } else {
+        alert('Failed to export Excel')
+      }
     } catch (error) {
-      console.error('Excel export error:', error)
+      console.error('Export error:', error)
       alert('Failed to export Excel')
     } finally {
       setIsExporting(false)
