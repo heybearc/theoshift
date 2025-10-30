@@ -157,4 +157,10 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 }
 
-export default NextAuth(authOptions)
+import { NextApiRequest, NextApiResponse } from 'next'
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log('[NEXTAUTH] Request received:', req.method, req.url)
+  console.log('[NEXTAUTH] Query params:', JSON.stringify(req.query))
+  return await NextAuth(req, res, authOptions)
+}
