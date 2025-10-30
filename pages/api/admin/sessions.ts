@@ -22,12 +22,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'GET') {
     try {
-      // Fetch all active sessions with user information
-      const sessions = await prisma.session.findMany({
+      // Check if user_activity table exists
+      const tableExists = await prisma.$queryRaw`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_name = 'user_activity'
+        );
+      `
+      
+      if (!tableExists || !(tableExists as any)[0]?.exists) {
+        console.log('[SESSIONS] user_activity table does not exist yet')
+        return res.status(200).json({
+          sessions: [],
+          total: 0,
+          timestamp: new Date().toISOString(),
+          message: 'Session tracking not available yet - migration pending'
+        })
+      }
+
+      // Fetch all active sessions from user_activity table
+      const sessions = await prisma.user_activity.findMany({
         where: {
-          expires: {
-            gt: new Date() // Only active (non-expired) sessions
-          }
+          isActive: true
         },
         include: {
           users: {
@@ -43,23 +59,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         },
         orderBy: {
-          expires: 'desc'
+          lastActivityAt: 'desc'
         }
       })
 
       // Transform sessions to include useful metadata
-      const activeSessions = sessions.map(s => ({
-        id: s.id,
-        userId: s.userId,
-        userName: s.users.name || `${s.users.firstName} ${s.users.lastName}`,
-        userEmail: s.users.email,
-        userRole: s.users.role,
-        isUserActive: s.users.isActive,
-        sessionToken: s.sessionToken.substring(0, 8) + '...', // Truncated for security
-        expires: s.expires,
-        isExpired: s.expires < new Date(),
-        daysUntilExpiry: Math.ceil((s.expires.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-      }))
+      const now = new Date()
+      const activeSessions = sessions.map(s => {
+        const minutesSinceActivity = Math.floor((now.getTime() - new Date(s.lastActivityAt).getTime()) / (1000 * 60))
+        const isOnline = minutesSinceActivity < 15 // Online if active within 15 minutes
+        
+        return {
+          id: s.id,
+          userId: s.userId,
+          userName: s.users.name || `${s.users.firstName} ${s.users.lastName}`,
+          userEmail: s.users.email,
+          userRole: s.users.role,
+          isUserActive: s.users.isActive,
+          sessionToken: s.sessionId.substring(0, 8) + '...', // Truncated for security
+          loginAt: s.loginAt,
+          lastActivityAt: s.lastActivityAt,
+          minutesSinceActivity,
+          isOnline,
+          ipAddress: s.ipAddress,
+          userAgent: s.userAgent,
+          // Calculate expiry based on 30 days from last activity
+          expires: new Date(new Date(s.lastActivityAt).getTime() + (30 * 24 * 60 * 60 * 1000)),
+          daysUntilExpiry: Math.ceil((new Date(s.lastActivityAt).getTime() + (30 * 24 * 60 * 60 * 1000) - now.getTime()) / (1000 * 60 * 60 * 24))
+        }
+      })
 
       return res.status(200).json({
         sessions: activeSessions,

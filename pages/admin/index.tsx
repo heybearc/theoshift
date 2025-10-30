@@ -195,16 +195,26 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { prisma } = require('../../src/lib/prisma')
   
   try {
-    const [totalUsers, totalEvents, activeSessions, currentUser] = await Promise.all([
+    // Check if user_activity table exists
+    const tableExists = await prisma.$queryRaw`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'user_activity'
+      );
+    `
+    
+    let activeSessions = 0
+    if (tableExists && (tableExists as any)[0]?.exists) {
+      activeSessions = await prisma.user_activity.count({
+        where: {
+          isActive: true
+        }
+      })
+    }
+
+    const [totalUsers, totalEvents, currentUser] = await Promise.all([
       prisma.users.count(),
       prisma.events.count(),
-      prisma.session.count({
-        where: {
-          expires: {
-            gt: new Date()
-          }
-        }
-      }),
       prisma.users.findUnique({
         where: { email: session.user.email },
         select: { lastSeenReleaseVersion: true }

@@ -16,8 +16,13 @@ interface SessionData {
   isExpired?: boolean
   daysUntilExpiry?: number
   createdAt?: string
-  lastUpdated?: string
+  lastActivityAt?: string
+  loginAt?: string
   daysSinceCreated?: number
+  minutesSinceActivity?: number
+  isOnline?: boolean
+  ipAddress?: string
+  userAgent?: string
 }
 
 interface SessionsResponse {
@@ -271,11 +276,20 @@ export default function SessionsManagement() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            session.isUserActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {session.isUserActive ? 'Active' : 'Inactive'}
-                          </span>
+                          <div className="flex flex-col">
+                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              session.isOnline ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {session.isOnline ? '🟢 Online' : '⚪ Idle'}
+                            </span>
+                            {session.minutesSinceActivity !== undefined && (
+                              <span className="text-xs text-gray-500 mt-1">
+                                {session.minutesSinceActivity < 1 ? 'Just now' : 
+                                 session.minutesSinceActivity < 60 ? `${session.minutesSinceActivity}m ago` :
+                                 `${Math.floor(session.minutesSinceActivity / 60)}h ago`}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
                           {session.sessionToken}
