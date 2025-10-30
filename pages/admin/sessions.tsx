@@ -1,0 +1,322 @@
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/router'
+import Head from 'next/head'
+import Link from 'next/link'
+
+interface SessionData {
+  id: string
+  userId: string
+  userName: string
+  userEmail: string
+  userRole: string
+  isUserActive: boolean
+  sessionToken: string
+  expires: string
+  isExpired: boolean
+  daysUntilExpiry: number
+}
+
+interface SessionsResponse {
+  sessions: SessionData[]
+  total: number
+  timestamp: string
+}
+
+export default function SessionsManagement() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [sessions, setSessions] = useState<SessionData[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [lastUpdated, setLastUpdated] = useState<string>('')
+  const [filterRole, setFilterRole] = useState<string>('all')
+  const [searchTerm, setSearchTerm] = useState('')
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+    }
+  }, [status, router])
+
+  const fetchSessions = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const response = await fetch('/api/admin/sessions')
+      if (!response.ok) {
+        if (response.status === 403) {
+          setError('Access denied - Admin privileges required')
+          return
+        }
+        throw new Error('Failed to fetch sessions')
+      }
+      const data: SessionsResponse = await response.json()
+      setSessions(data.sessions)
+      setLastUpdated(new Date(data.timestamp).toLocaleString())
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load sessions')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetchSessions()
+    }
+  }, [status])
+
+  if (status === 'loading' || loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading sessions...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error && error.includes('Access denied')) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <span className="text-6xl">🔒</span>
+          <h1 className="text-2xl font-bold text-gray-900 mt-4">Access Denied</h1>
+          <p className="text-gray-600 mt-2">{error}</p>
+          <Link href="/" className="mt-4 inline-block text-blue-600 hover:underline">
+            Return to Dashboard
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // Filter sessions
+  const filteredSessions = sessions.filter(s => {
+    const matchesRole = filterRole === 'all' || s.userRole === filterRole
+    const matchesSearch = searchTerm === '' || 
+      s.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.userEmail.toLowerCase().includes(searchTerm.toLowerCase())
+    return matchesRole && matchesSearch
+  })
+
+  // Get unique roles for filter
+  const roles = Array.from(new Set(sessions.map(s => s.userRole)))
+
+  // Group by role for stats
+  const statsByRole = roles.map(role => ({
+    role,
+    count: sessions.filter(s => s.userRole === role).length
+  }))
+
+  return (
+    <>
+      <Head>
+        <title>Session Management | JW Attendant Scheduler</title>
+      </Head>
+
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Session Management</h1>
+                <p className="text-gray-600 mt-2">
+                  Monitor and manage active user sessions
+                </p>
+              </div>
+              <div className="flex space-x-3">
+                <button
+                  onClick={fetchSessions}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+                >
+                  <span>🔄</span>
+                  <span>Refresh</span>
+                </button>
+                <Link
+                  href="/"
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  ← Back to Dashboard
+                </Link>
+              </div>
+            </div>
+            {lastUpdated && (
+              <p className="text-sm text-gray-500 mt-2">
+                Last updated: {lastUpdated}
+              </p>
+            )}
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Total Active Sessions</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">{sessions.length}</p>
+                </div>
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">👥</span>
+                </div>
+              </div>
+            </div>
+
+            {statsByRole.map(stat => (
+              <div key={stat.role} className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">{stat.role}s</p>
+                    <p className="text-3xl font-bold text-gray-900 mt-2">{stat.count}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                    <span className="text-2xl">
+                      {stat.role === 'ADMIN' ? '👑' : stat.role === 'OVERSEER' ? '📋' : '👤'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Filters */}
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Search by name or email
+                </label>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Filter by role
+                </label>
+                <select
+                  value={filterRole}
+                  onChange={(e) => setFilterRole(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Roles</option>
+                  {roles.map(role => (
+                    <option key={role} value={role}>{role}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Sessions Table */}
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      User
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Role
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Session Token
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Expires
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Days Left
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredSessions.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                        {searchTerm || filterRole !== 'all' ? 'No sessions match your filters' : 'No active sessions'}
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredSessions.map((session) => (
+                      <tr key={session.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{session.userName}</div>
+                            <div className="text-sm text-gray-500">{session.userEmail}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            session.userRole === 'ADMIN' ? 'bg-purple-100 text-purple-800' :
+                            session.userRole === 'OVERSEER' ? 'bg-blue-100 text-blue-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {session.userRole}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            session.isUserActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {session.isUserActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                          {session.sessionToken}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(session.expires).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`text-sm font-medium ${
+                            session.daysUntilExpiry < 7 ? 'text-red-600' :
+                            session.daysUntilExpiry < 14 ? 'text-yellow-600' :
+                            'text-green-600'
+                          }`}>
+                            {session.daysUntilExpiry} days
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Info Box */}
+          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <span className="text-2xl">ℹ️</span>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-blue-800">About Sessions</h3>
+                <div className="mt-2 text-sm text-blue-700">
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Sessions are automatically created when users log in</li>
+                    <li>Sessions typically expire after 30 days of inactivity</li>
+                    <li>Users can have multiple active sessions (different devices/browsers)</li>
+                    <li>Expired sessions are automatically cleaned up by the system</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}

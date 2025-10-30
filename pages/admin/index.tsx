@@ -14,6 +14,7 @@ interface AdminDashboardProps {
   stats: {
     totalUsers: number
     totalEvents: number
+    activeSessions: number
   }
   userLastSeenVersion?: string | null
 }
@@ -69,6 +70,14 @@ export default function AdminDashboard({ user, stats, userLastSeenVersion }: Adm
       iconColor: 'text-indigo-600'
     },
     {
+      title: 'Session Management',
+      description: 'Monitor and manage active user sessions',
+      href: '/admin/sessions',
+      icon: '🔐',
+      color: 'bg-orange-50 hover:bg-orange-100 border-orange-200',
+      iconColor: 'text-orange-600'
+    },
+    {
       title: 'APEX Module Testing',
       description: 'Comprehensive testing of all admin modules',
       href: '/admin/test-modules',
@@ -89,7 +98,7 @@ export default function AdminDashboard({ user, stats, userLastSeenVersion }: Adm
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
           <div className="flex items-center">
             <div className="p-2 bg-blue-50 rounded-lg">
@@ -125,6 +134,20 @@ export default function AdminDashboard({ user, stats, userLastSeenVersion }: Adm
             </div>
           </div>
         </div>
+        
+        <Link href="/admin/sessions">
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer">
+            <div className="flex items-center">
+              <div className="p-2 bg-orange-50 rounded-lg">
+                <span className="text-2xl">🔐</span>
+              </div>
+              <div className="ml-4">
+                <p className="text-2xl font-bold text-gray-900">{stats.activeSessions}</p>
+                <p className="text-sm text-gray-600">Active Sessions</p>
+              </div>
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Admin Modules */}
@@ -172,9 +195,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { prisma } = require('../../src/lib/prisma')
   
   try {
-    const [totalUsers, totalEvents, currentUser] = await Promise.all([
+    const [totalUsers, totalEvents, activeSessions, currentUser] = await Promise.all([
       prisma.users.count(),
       prisma.events.count(),
+      prisma.session.count({
+        where: {
+          expires: {
+            gt: new Date()
+          }
+        }
+      }),
       prisma.users.findUnique({
         where: { email: session.user.email },
         select: { lastSeenReleaseVersion: true }
@@ -192,6 +222,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         stats: {
           totalUsers,
           totalEvents,
+          activeSessions,
         },
         userLastSeenVersion: currentUser?.lastSeenReleaseVersion || null,
       },
@@ -211,6 +242,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         stats: {
           totalUsers: 0,
           totalEvents: 0,
+          activeSessions: 0,
         },
         userLastSeenVersion: null,
       },
