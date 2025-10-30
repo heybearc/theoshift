@@ -256,7 +256,7 @@ export async function getUserEvents(userId: string) {
     const permissions = await (prisma as any).event_permissions.findMany({
       where: { userId },
       include: {
-        event: {
+        events: {
           select: {
             id: true,
             name: true,
@@ -271,14 +271,14 @@ export async function getUserEvents(userId: string) {
         }
       },
       orderBy: {
-        event: {
+        events: {
           startDate: 'desc'
         }
       }
     })
 
     return permissions.map((p: any) => ({
-      ...p.event,
+      ...p.events,
       userRole: p.role,
       scopeType: p.scopeType,
       scopeIds: p.scopeIds
