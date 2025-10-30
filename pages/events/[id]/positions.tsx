@@ -3388,7 +3388,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                 </div>
 
                 <p className="text-sm text-gray-600 mb-4">
-                  These attendants are active and not currently assigned to any positions or serving in leadership roles (overseers/keymen).
+                  These attendants are active and not currently assigned to any positions or serving in oversight roles (overseers/keymen).
                 </p>
 
                 {(() => {
