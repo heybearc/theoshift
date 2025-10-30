@@ -322,24 +322,38 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
-  // Fetch events with counts
+  // Fetch events with proper permission filtering
   const { prisma } = await import('../../src/lib/prisma')
-  const eventsData = await prisma.events.findMany({
-    orderBy: {
-      startDate: 'desc'
-    },
-    include: {
-      _count: {
+  const { getUserEvents } = await import('../../src/lib/eventAccess')
+  
+  // Get events user has access to (respects permissions)
+  const userEvents = await getUserEvents(session.user.id)
+  
+  // Get counts for each event
+  const eventsWithCounts = await Promise.all(
+    userEvents.map(async (event: any) => {
+      const counts = await prisma.events.findUnique({
+        where: { id: event.id },
         select: {
-          event_attendants: true,
-          positions: true
+          _count: {
+            select: {
+              event_attendants: true,
+              positions: true
+            }
+          }
         }
+      })
+      
+      return {
+        ...event,
+        attendantsCount: counts?._count.event_attendants || 0,
+        positionsCount: counts?._count.positions || 0
       }
-    }
-  })
+    })
+  )
 
   // Transform events data
-  const events: Event[] = eventsData.map(event => ({
+  const events: Event[] = eventsWithCounts.map(event => ({
     id: event.id,
     name: event.name,
     description: event.description || undefined,
@@ -348,8 +362,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     endDate: event.endDate ? format(event.endDate, 'yyyy-MM-dd') : '',
     location: event.location || '',
     status: event.status,
-    attendantsCount: event._count.event_attendants,
-    positionsCount: event._count.positions
+    attendantsCount: event.attendantsCount,
+    positionsCount: event.positionsCount
   }))
 
   // Get user's lastSeenReleaseVersion
