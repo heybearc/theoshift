@@ -18,9 +18,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Get list of backups with details
+    // Get list of backups with details from NFS storage
     const { stdout: backupList } = await execAsync(
-      'ssh root@10.92.3.21 "ls -lh /mnt/backups/db-*.sql.gz 2>/dev/null | tail -10"'
+      'ssh root@10.92.3.21 "ls -lh /mnt/data/jw-attendant-backups/database/automated/db-jw-scheduler-*.sql.gz 2>/dev/null | tail -10"'
     )
 
     // Parse backup list

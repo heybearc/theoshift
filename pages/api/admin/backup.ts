@@ -23,9 +23,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       'ssh root@10.92.3.21 "/usr/local/bin/backup-jw-scheduler.sh"'
     )
 
-    // Get list of recent backups
+    // Get list of recent backups from NFS storage
     const { stdout: backupList } = await execAsync(
-      'ssh root@10.92.3.21 "ls -lh /mnt/backups/db-*.sql.gz | tail -10"'
+      'ssh root@10.92.3.21 "ls -lh /mnt/data/jw-attendant-backups/database/automated/db-jw-scheduler-*.sql.gz | tail -10"'
     )
 
     return res.status(200).json({
