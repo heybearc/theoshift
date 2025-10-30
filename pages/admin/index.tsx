@@ -143,7 +143,7 @@ export default function AdminDashboard({ user, stats, userLastSeenVersion }: Adm
               </div>
               <div className="ml-4">
                 <p className="text-2xl font-bold text-gray-900">{stats.activeSessions}</p>
-                <p className="text-sm text-gray-600">Active Users</p>
+                <p className="text-sm text-gray-600">Active Sessions</p>
               </div>
             </div>
           </div>
@@ -195,12 +195,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { prisma } = require('../../src/lib/prisma')
   
   try {
-    const [totalUsers, totalEvents, activeUsers, currentUser] = await Promise.all([
+    const [totalUsers, totalEvents, activeSessions, currentUser] = await Promise.all([
       prisma.users.count(),
       prisma.events.count(),
-      prisma.users.count({
+      prisma.session.count({
         where: {
-          isActive: true
+          expires: {
+            gt: new Date()
+          }
         }
       }),
       prisma.users.findUnique({
@@ -220,7 +222,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         stats: {
           totalUsers,
           totalEvents,
-          activeSessions: activeUsers,
+          activeSessions,
         },
         userLastSeenVersion: currentUser?.lastSeenReleaseVersion || null,
       },

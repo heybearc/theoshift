@@ -47,19 +47,19 @@ export default function SessionsManagement() {
     setLoading(true)
     setError('')
     try {
-      const response = await fetch('/api/admin/active-users')
+      const response = await fetch('/api/admin/sessions')
       if (!response.ok) {
         if (response.status === 403) {
           setError('Access denied - Admin privileges required')
           return
         }
-        throw new Error('Failed to fetch active users')
+        throw new Error('Failed to fetch sessions')
       }
       const data: SessionsResponse = await response.json()
-      setSessions(data.sessions || data.users || [])
+      setSessions(data.sessions || [])
       setLastUpdated(new Date(data.timestamp).toLocaleString())
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load active users')
+      setError(err instanceof Error ? err.message : 'Failed to load sessions')
     } finally {
       setLoading(false)
     }
@@ -118,7 +118,7 @@ export default function SessionsManagement() {
   return (
     <>
       <Head>
-        <title>Active Users | JW Attendant Scheduler</title>
+        <title>Session Management | JW Attendant Scheduler</title>
       </Head>
 
       <div className="min-h-screen bg-gray-50">
@@ -127,9 +127,9 @@ export default function SessionsManagement() {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Active Users</h1>
+                <h1 className="text-3xl font-bold text-gray-900">Session Management</h1>
                 <p className="text-gray-600 mt-2">
-                  Monitor active user accounts (JWT-based authentication)
+                  Monitor and manage active user sessions
                 </p>
               </div>
               <div className="flex space-x-3">
@@ -160,7 +160,7 @@ export default function SessionsManagement() {
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Total Active Users</p>
+                  <p className="text-sm font-medium text-gray-500">Total Active Sessions</p>
                   <p className="text-3xl font-bold text-gray-900 mt-2">{sessions.length}</p>
                 </div>
                 <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -212,7 +212,7 @@ export default function SessionsManagement() {
                 >
                   <option value="all">All Roles</option>
                   {roles.map(role => (
-                    <option key={role} value={role}>{role}</option>
+                    <option key={role} value={role}>{role === 'KEYMAN' ? 'KEYMEN' : role}S</option>
                   ))}
                 </select>
               </div>
@@ -235,13 +235,13 @@ export default function SessionsManagement() {
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Account Created
+                      Session Token
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Last Updated
+                      Expires
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Days Active
+                      Days Left
                     </th>
                   </tr>
                 </thead>
@@ -249,7 +249,7 @@ export default function SessionsManagement() {
                   {filteredSessions.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                        {searchTerm || filterRole !== 'all' ? 'No users match your filters' : 'No active users'}
+                        {searchTerm || filterRole !== 'all' ? 'No sessions match your filters' : 'No active sessions'}
                       </td>
                     </tr>
                   ) : (
@@ -277,15 +277,19 @@ export default function SessionsManagement() {
                             {session.isUserActive ? 'Active' : 'Inactive'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {session.createdAt ? new Date(session.createdAt).toLocaleDateString() : 'N/A'}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                          {session.sessionToken}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {session.lastUpdated ? new Date(session.lastUpdated).toLocaleDateString() : 'N/A'}
+                          {session.expires ? new Date(session.expires).toLocaleDateString() : 'N/A'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-sm font-medium text-blue-600">
-                            {session.daysSinceCreated || 0} days
+                          <span className={`text-sm font-medium ${
+                            (session.daysUntilExpiry || 0) < 7 ? 'text-red-600' :
+                            (session.daysUntilExpiry || 0) < 14 ? 'text-yellow-600' :
+                            'text-green-600'
+                          }`}>
+                            {session.daysUntilExpiry || 0} days
                           </span>
                         </td>
                       </tr>
@@ -303,14 +307,14 @@ export default function SessionsManagement() {
                 <span className="text-2xl">ℹ️</span>
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-blue-800">About JWT Authentication</h3>
+                <h3 className="text-sm font-medium text-blue-800">About Sessions</h3>
                 <div className="mt-2 text-sm text-blue-700">
                   <ul className="list-disc list-inside space-y-1">
-                    <li>This application uses JWT (JSON Web Token) authentication</li>
-                    <li>Sessions are stored in secure HTTP-only cookies, not in the database</li>
-                    <li>JWT tokens expire after 30 days of inactivity</li>
-                    <li>This page shows all active user accounts, not individual login sessions</li>
-                    <li>Users can have multiple concurrent logins (different devices/browsers)</li>
+                    <li>Sessions are automatically created when users log in</li>
+                    <li>Sessions expire after 30 days of inactivity</li>
+                    <li>Users can have multiple active sessions (different devices/browsers)</li>
+                    <li>Sessions are stored in the database for tracking and management</li>
+                    <li>Expired sessions are automatically cleaned up by the system</li>
                   </ul>
                 </div>
               </div>
