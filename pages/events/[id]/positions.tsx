@@ -121,6 +121,9 @@ interface Attendant {
     firstName: string
     lastName: string
   } | null
+  users?: {
+    role: string
+  } | null
 }
 
 interface EventPositionsProps {
@@ -1518,9 +1521,20 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       })
     })
     
-    // Also check attendants who have overseer/keyman roles assigned to them
+    // Also check attendants who have Overseer or Keyman in their forms of service
     attendants.forEach(att => {
-      if (att.overseerId || att.keymanId) {
+      const formsOfService = Array.isArray(att.formsOfService) 
+        ? att.formsOfService 
+        : typeof att.formsOfService === 'string' 
+          ? JSON.parse(att.formsOfService) 
+          : []
+      
+      if (formsOfService.includes('Overseer') || formsOfService.includes('Keyman')) {
+        leadershipAttendantIds.add(att.id)
+      }
+      
+      // Also check if user has OVERSEER or KEYMAN role
+      if (att.users?.role === 'OVERSEER' || att.users?.role === 'KEYMAN') {
         leadershipAttendantIds.add(att.id)
       }
     })
@@ -1556,9 +1570,20 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       })
     })
     
-    // Also check attendants who have overseer/keyman roles assigned to them
+    // Also check attendants who have Overseer or Keyman in their forms of service
     attendants.forEach(att => {
-      if (att.overseerId || att.keymanId) {
+      const formsOfService = Array.isArray(att.formsOfService) 
+        ? att.formsOfService 
+        : typeof att.formsOfService === 'string' 
+          ? JSON.parse(att.formsOfService) 
+          : []
+      
+      if (formsOfService.includes('Overseer') || formsOfService.includes('Keyman')) {
+        leadershipAttendantIds.add(att.id)
+      }
+      
+      // Also check if user has OVERSEER or KEYMAN role
+      if (att.users?.role === 'OVERSEER' || att.users?.role === 'KEYMAN') {
         leadershipAttendantIds.add(att.id)
       }
     })
@@ -3576,7 +3601,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
     console.log('🔍 Step 11: Fetching attendants data with event-specific oversight...')
     
-    // Get all active attendants
+    // Get all active attendants with their user role
     const allAttendants = await prisma.attendants.findMany({
       where: {
         isActive: true
@@ -3587,7 +3612,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         lastName: true,
         formsOfService: true,
         congregation: true,
-        isActive: true
+        isActive: true,
+        users: {
+          select: {
+            role: true
+          }
+        }
       },
       orderBy: [
         { firstName: 'asc' },
