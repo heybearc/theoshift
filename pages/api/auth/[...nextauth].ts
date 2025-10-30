@@ -158,8 +158,11 @@ export const authOptions: NextAuthOptions = {
 }
 
 import { NextApiRequest, NextApiResponse } from 'next'
+import fs from 'fs'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const logMsg = `[${new Date().toISOString()}] ${req.method} ${req.url} - Query: ${JSON.stringify(req.query)}\n`
+  fs.appendFileSync('/tmp/nextauth-debug.log', logMsg)
   console.log('[NEXTAUTH] Request received:', req.method, req.url)
   console.log('[NEXTAUTH] Query params:', JSON.stringify(req.query))
   return await NextAuth(req, res, authOptions)
