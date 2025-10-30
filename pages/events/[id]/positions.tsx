@@ -162,6 +162,7 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
   const [message, setMessage] = useState('')
   const [selectedPositions, setSelectedPositions] = useState<Set<string>>(new Set())
   const [showInactive, setShowInactive] = useState(false)
+  const [showAvailableAttendants, setShowAvailableAttendants] = useState(false)
 
   // Utility function to format 24-hour time to 12-hour format
   const formatTime12Hour = (time24: string) => {
@@ -1499,18 +1500,29 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
     const leadershipAttendantIds = new Set()
     
     positions.forEach(position => {
+      // Track assigned attendants
       position.assignments?.forEach(assignment => {
         if (assignment.attendant?.id) {
           assignedAttendantIds.add(assignment.attendant.id)
         }
-        // Track overseers and keymen separately
-        if (assignment.overseer?.id) {
-          leadershipAttendantIds.add(assignment.overseer.id)
+      })
+      
+      // Track overseers and keymen from oversight array
+      position.oversight?.forEach(oversight => {
+        if (oversight.overseer?.id) {
+          leadershipAttendantIds.add(oversight.overseer.id)
         }
-        if (assignment.keyman?.id) {
-          leadershipAttendantIds.add(assignment.keyman.id)
+        if (oversight.keyman?.id) {
+          leadershipAttendantIds.add(oversight.keyman.id)
         }
       })
+    })
+    
+    // Also check attendants who have overseer/keyman roles assigned to them
+    attendants.forEach(att => {
+      if (att.overseerId || att.keymanId) {
+        leadershipAttendantIds.add(att.id)
+      }
     })
     
     return attendants.filter(att => 
@@ -1518,6 +1530,44 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
       !assignedAttendantIds.has(att.id) && 
       !leadershipAttendantIds.has(att.id)
     ).length
+  }
+  
+  // Get list of unassigned attendants (excluding leadership roles)
+  const getUnassignedAttendants = () => {
+    const assignedAttendantIds = new Set()
+    const leadershipAttendantIds = new Set()
+    
+    positions.forEach(position => {
+      // Track assigned attendants
+      position.assignments?.forEach(assignment => {
+        if (assignment.attendant?.id) {
+          assignedAttendantIds.add(assignment.attendant.id)
+        }
+      })
+      
+      // Track overseers and keymen from oversight array
+      position.oversight?.forEach(oversight => {
+        if (oversight.overseer?.id) {
+          leadershipAttendantIds.add(oversight.overseer.id)
+        }
+        if (oversight.keyman?.id) {
+          leadershipAttendantIds.add(oversight.keyman.id)
+        }
+      })
+    })
+    
+    // Also check attendants who have overseer/keyman roles assigned to them
+    attendants.forEach(att => {
+      if (att.overseerId || att.keymanId) {
+        leadershipAttendantIds.add(att.id)
+      }
+    })
+    
+    return attendants.filter(att => 
+      att.isActive && 
+      !assignedAttendantIds.has(att.id) && 
+      !leadershipAttendantIds.has(att.id)
+    )
   }
 
   // Get session data
@@ -1817,11 +1867,15 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
               )
             })()}
             
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div
+              onClick={() => setShowAvailableAttendants(true)}
+              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer hover:border-purple-300"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-500">Available Attendants</p>
                   <p className="text-3xl font-bold text-gray-900">{getUnassignedCount()}</p>
+                  <p className="text-xs text-gray-400 mt-1">Click to view list</p>
                 </div>
                 <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                   <span className="text-2xl">👥</span>
@@ -3288,6 +3342,81 @@ export default function EventPositionsPage({ eventId, event, positions, attendan
                     <p className="text-sm text-gray-600">{assignmentProgress.message}</p>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Available Attendants Modal */}
+        {showAvailableAttendants && (
+          <div className="fixed inset-0 bg-gray-900 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+            <div className="relative mx-auto border w-full max-w-2xl shadow-2xl rounded-xl bg-white">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-2xl font-bold text-gray-900">Available Attendants</h3>
+                  <button
+                    onClick={() => setShowAvailableAttendants(false)}
+                    className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <p className="text-sm text-gray-600 mb-4">
+                  These attendants are active and not currently assigned to any positions or serving in leadership roles (overseers/keymen).
+                </p>
+
+                {(() => {
+                  const availableAttendants = getUnassignedAttendants()
+
+                  if (availableAttendants.length === 0) {
+                    return (
+                      <div className="text-center py-8 text-gray-500">
+                        <span className="text-4xl mb-2 block">🎉</span>
+                        <p>All attendants are currently assigned!</p>
+                      </div>
+                    )
+                  }
+
+                  return (
+                    <div className="max-h-96 overflow-y-auto">
+                      <div className="space-y-2">
+                        {availableAttendants.map((attendant, index) => (
+                          <div
+                            key={attendant.id}
+                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">
+                                {index + 1}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900">
+                                  {attendant.firstName} {attendant.lastName}
+                                </p>
+                                {attendant.congregation && (
+                                  <p className="text-sm text-gray-500">{attendant.congregation}</p>
+                                )}
+                              </div>
+                            </div>
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                              Available
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })()}
+
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={() => setShowAvailableAttendants(false)}
+                    className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
           </div>
