@@ -42,6 +42,23 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model user_activity {
+  id             String   @id @default(uuid())
+  userId         String
+  sessionId      String   @unique
+  loginAt        DateTime @default(now())
+  lastActivityAt DateTime @default(now())
+  logoutAt       DateTime?
+  ipAddress      String?
+  userAgent      String?
+  isActive       Boolean  @default(true)
+  users          users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isActive])
+  @@index([lastActivityAt])
+}
+
 model announcements {
   id        String    @id
   eventId   String
@@ -537,6 +554,7 @@ model users {
   congregation                   String?
   Account                        Account[]
   Session                        Session[]
+  user_activity                  user_activity[]
   announcements                  announcements[]
   assignments                    assignments[]
   attendants                     attendants?
