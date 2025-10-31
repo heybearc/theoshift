@@ -292,6 +292,136 @@ export default function EventManagementPage({ userRole }: EventManagementProps) 
             </div>
           )}
 
+          {/* Exporting Data */}
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">📄 Exporting Position Data</h2>
+            
+            <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Export to PDF</h3>
+              <p className="text-gray-600 mb-4">
+                Export your event positions to a professionally formatted PDF document. Perfect for printing
+                or sharing with your team.
+              </p>
+              
+              <div className="space-y-3">
+                <div>
+                  <h4 className="font-semibold text-gray-900">How to Export PDF:</h4>
+                  <ol className="list-decimal list-inside space-y-1 text-gray-600 ml-4">
+                    <li>Go to the event's Positions page</li>
+                    <li>Apply any filters you want (optional)</li>
+                    <li>Click the "📄 Export PDF" button in the header</li>
+                    <li>The PDF will download automatically</li>
+                  </ol>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-gray-900">What's Included:</h4>
+                  <ul className="list-disc list-inside space-y-1 text-gray-600 ml-4">
+                    <li>All position details and requirements</li>
+                    <li>Shift information and timing</li>
+                    <li>Assigned attendants</li>
+                    <li>Oversight assignments</li>
+                    <li>Color-coded sections for easy reading</li>
+                    <li>Professional formatting with proper page breaks</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Export to Excel</h3>
+              <p className="text-gray-600 mb-4">
+                Download position data as a fully formatted Excel (.xlsx) file. Great for further analysis,
+                record keeping, or importing into other systems.
+              </p>
+              
+              <div className="space-y-3">
+                <div>
+                  <h4 className="font-semibold text-gray-900">How to Export Excel:</h4>
+                  <ol className="list-decimal list-inside space-y-1 text-gray-600 ml-4">
+                    <li>Go to the event's Positions page</li>
+                    <li>Apply any filters you want (optional)</li>
+                    <li>Click the "📊 Export Excel" button in the header</li>
+                    <li>The Excel file will download automatically</li>
+                  </ol>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-gray-900">What's Included:</h4>
+                  <ul className="list-disc list-inside space-y-1 text-gray-600 ml-4">
+                    <li>Structured data in spreadsheet format</li>
+                    <li>Proper column headers</li>
+                    <li>All position and assignment information</li>
+                    <li>Easy to sort, filter, and analyze</li>
+                    <li>Compatible with Excel, Google Sheets, and other spreadsheet programs</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <h4 className="font-semibold text-blue-900 mb-2">💡 Export Tips</h4>
+              <ul className="space-y-2 text-sm text-blue-800">
+                <li>• <strong>Filter First:</strong> Apply filters before exporting to get only the data you need</li>
+                <li>• <strong>Overseer Reports:</strong> Filter by overseer, then export to create individual team reports</li>
+                <li>• <strong>PDF for Printing:</strong> Use PDF when you need to print or share a formatted document</li>
+                <li>• <strong>Excel for Analysis:</strong> Use Excel when you need to manipulate or analyze the data</li>
+                <li>• <strong>File Naming:</strong> Export files are automatically named with the event name and current date</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Event Permissions */}
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">🔐 Event Permissions</h2>
+            
+            <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Who Can See Events</h3>
+              <p className="text-gray-600 mb-4">
+                Not everyone can see all events. Access is controlled through the event permissions system.
+              </p>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-gray-900">Administrators</h4>
+                  <p className="text-gray-600">
+                    System administrators automatically have full access to all events without needing to be
+                    explicitly added. They can see, edit, and manage any event in the system.
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-gray-900">Overseers and Keymen</h4>
+                  <p className="text-gray-600">
+                    Overseers and Keymen only see events they've been given permission to access. If you don't
+                    see an event in your list, you haven't been added to that event's permissions yet.
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-gray-900">Managing Permissions</h4>
+                  <p className="text-gray-600 mb-2">
+                    Event creators and administrators can add users to events:
+                  </p>
+                  <ol className="list-decimal list-inside space-y-1 text-gray-600 ml-4">
+                    <li>Go to the event page</li>
+                    <li>Click "Permissions" in the navigation</li>
+                    <li>Click "Invite User"</li>
+                    <li>Select the user and assign their role</li>
+                    <li>Click "Add Permission"</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-900">
+                <strong>Note:</strong> If you need access to an event and don't see it in your list, contact
+                your system administrator or the event creator to request permission.
+              </p>
+            </div>
+          </div>
+
           {/* Best Practices */}
           <div className="bg-green-50 border border-green-200 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-green-900 mb-4">✅ Best Practices</h2>
