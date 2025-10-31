@@ -18,6 +18,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                       req.socket.remoteAddress || 
                       'unknown'
     const userAgent = req.headers['user-agent'] || 'unknown'
+    
+    // Detect which server node we're running on
+    const serverNode = process.env.SERVER_NODE || 
+                       (ipAddress === '10.92.3.22' ? 'BLUE' : 
+                        ipAddress === '10.92.3.24' ? 'GREEN' : 'UNKNOWN')
 
     // Check if table exists (graceful handling if migration not applied yet)
     const tableExists = await prisma.$queryRaw`
@@ -45,6 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           sessionId: newSessionId,
           ipAddress,
           userAgent,
+          serverNode,
           isActive: true
         }
       })

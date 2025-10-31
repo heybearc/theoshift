@@ -83,6 +83,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           isOnline,
           ipAddress: s.ipAddress,
           userAgent: s.userAgent,
+          serverNode: s.serverNode || 'UNKNOWN',
           // Calculate expiry based on 30 days from last activity
           expires: new Date(new Date(s.lastActivityAt).getTime() + (30 * 24 * 60 * 60 * 1000)),
           daysUntilExpiry: Math.ceil((new Date(s.lastActivityAt).getTime() + (30 * 24 * 60 * 60 * 1000) - now.getTime()) / (1000 * 60 * 60 * 24))

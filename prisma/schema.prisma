@@ -51,12 +51,14 @@ model user_activity {
   logoutAt       DateTime?
   ipAddress      String?
   userAgent      String?
+  serverNode     String?
   isActive       Boolean  @default(true)
   users          users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([isActive])
   @@index([lastActivityAt])
+  @@index([serverNode])
 }
 
 model announcements {

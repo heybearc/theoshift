@@ -240,6 +240,9 @@ export default function SessionsManagement() {
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Server
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Session Token
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -253,7 +256,7 @@ export default function SessionsManagement() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredSessions.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                      <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                         {searchTerm || filterRole !== 'all' ? 'No sessions match your filters' : 'No active sessions'}
                       </td>
                     </tr>
@@ -290,6 +293,15 @@ export default function SessionsManagement() {
                               </span>
                             )}
                           </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            (session as any).serverNode === 'BLUE' ? 'bg-blue-100 text-blue-800' :
+                            (session as any).serverNode === 'GREEN' ? 'bg-green-100 text-green-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {(session as any).serverNode || 'UNKNOWN'}
+                          </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
                           {session.sessionToken}
