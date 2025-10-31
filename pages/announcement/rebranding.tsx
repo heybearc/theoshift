@@ -110,7 +110,7 @@ export default function RebrandingAnnouncement() {
                 </div>
               </div>
               <div className="ml-4">
-                <h3 className="text-lg font-semibold text-gray-900">Now - December 2025</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Now - November 2025</h3>
                 <p className="text-gray-600">
                   Updated branding throughout the application. Both domains work identically.
                 </p>
@@ -124,7 +124,7 @@ export default function RebrandingAnnouncement() {
                 </div>
               </div>
               <div className="ml-4">
-                <h3 className="text-lg font-semibold text-gray-900">January - March 2026</h3>
+                <h3 className="text-lg font-semibold text-gray-900">November 2025</h3>
                 <p className="text-gray-600">
                   Terminology updates: "Attendant" becomes "Volunteer" throughout the app.
                 </p>
@@ -138,7 +138,7 @@ export default function RebrandingAnnouncement() {
                 </div>
               </div>
               <div className="ml-4">
-                <h3 className="text-lg font-semibold text-gray-900">April - June 2026</h3>
+                <h3 className="text-lg font-semibold text-gray-900">December 2025</h3>
                 <p className="text-gray-600">
                   New features! Support for multiple volunteer departments beyond attendants.
                 </p>
@@ -152,7 +152,7 @@ export default function RebrandingAnnouncement() {
                 </div>
               </div>
               <div className="ml-4">
-                <h3 className="text-lg font-semibold text-gray-900">July 2026</h3>
+                <h3 className="text-lg font-semibold text-gray-900">January 2026</h3>
                 <p className="text-gray-600">
                   Old domain redirects to new domain. Please update your bookmarks by then!
                 </p>
@@ -175,7 +175,7 @@ export default function RebrandingAnnouncement() {
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Will my bookmarks still work?</h3>
               <p className="text-gray-700">
-                Yes, for the next 6 months. After that, the old domain will automatically redirect to the new one. 
+                Yes, through the end of the year. After January 2026, the old domain will automatically redirect to the new one. 
                 We recommend updating your bookmarks to <code className="bg-gray-100 px-2 py-1 rounded">theoshift.com</code> when convenient.
               </p>
             </div>
@@ -191,7 +191,7 @@ export default function RebrandingAnnouncement() {
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">When will the new department features be available?</h3>
               <p className="text-gray-700">
-                We're planning to roll out multi-department support in Spring 2026. We'll announce details 
+                We're planning to roll out multi-department support in December 2025. We'll announce details 
                 as we get closer to the release date.
               </p>
             </div>
