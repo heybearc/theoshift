@@ -47,6 +47,12 @@ export default function HelpPage({ userRole }: HelpPageProps) {
       roles: ['ATTENDANT']
     },
     {
+      id: 'session-management',
+      title: '🔐 Session Management',
+      description: 'Monitor and manage active user sessions',
+      roles: ['ADMIN']
+    },
+    {
       id: 'email-config',
       title: '📧 Email Configuration',
       description: 'Setting up email notifications and invitations',
