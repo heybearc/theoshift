@@ -20,9 +20,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const userAgent = req.headers['user-agent'] || 'unknown'
     
     // Detect which server node we're running on
-    const serverNode = process.env.SERVER_NODE || 
-                       (ipAddress === '10.92.3.22' ? 'BLUE' : 
-                        ipAddress === '10.92.3.24' ? 'GREEN' : 'UNKNOWN')
+    // Check environment variable first, then try to detect from hostname
+    let serverNode = process.env.SERVER_NODE
+    if (!serverNode) {
+      try {
+        const os = require('os')
+        const hostname = os.hostname()
+        // Try to detect from hostname or network interfaces
+        const interfaces = os.networkInterfaces()
+        const addresses = Object.values(interfaces).flat().map((i: any) => i?.address).filter(Boolean)
+        
+        if (addresses.includes('10.92.3.22')) {
+          serverNode = 'BLUE'
+        } else if (addresses.includes('10.92.3.24')) {
+          serverNode = 'GREEN'
+        } else {
+          serverNode = 'UNKNOWN'
+        }
+      } catch (e) {
+        serverNode = 'UNKNOWN'
+      }
+    }
 
     // Check if table exists (graceful handling if migration not applied yet)
     const tableExists = await prisma.$queryRaw`
