@@ -1,6 +1,6 @@
 module.exports = {
   apps: [{
-    name: 'jw-attendant-green',
+    name: 'jw-attendant-blue',
     script: 'npm',
     args: 'start -- --port 3001',
     cwd: '/opt/jw-attendant-scheduler',
