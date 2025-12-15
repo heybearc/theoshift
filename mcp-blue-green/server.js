@@ -53,7 +53,7 @@ const APPS = {
     sshGreen: 'ldc-staging',
     path: '/opt/ldc-construction-tools/frontend',
     branchBlue: 'main',
-    branchGreen: 'dev',
+    branchGreen: 'green-development',
     pmBlue: 'ldc-production',
     pmGreen: 'ldc-production',
   },
