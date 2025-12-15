@@ -49,10 +49,11 @@ const APPS = {
     blueContainer: 133,
     greenContainer: 135,
     haproxyBackend: 'ldc',
-    sshBlue: 'ldctools-blue',
-    sshGreen: 'ldctools-green',
+    sshBlue: 'ldc',
+    sshGreen: 'ldc-staging',
     path: '/opt/ldc-construction-tools/frontend',
-    branch: 'main',
+    branchBlue: 'main',
+    branchGreen: 'dev',
     pmBlue: 'ldc-production',
     pmGreen: 'ldc-production',
   },
@@ -90,8 +91,12 @@ async function saveDeploymentState(state) {
 // Check server health
 async function checkHealth(ip, app) {
   try {
-    const { stdout } = await execAsync(`curl -s -o /dev/null -w "%{http_code}" http://${ip}:3001/api/health`);
-    return stdout.trim() === '200';
+    // LDC Tools returns 307 redirect on root, JW Attendant has /api/health
+    const endpoint = app === 'ldc-tools' ? '/' : '/api/health';
+    const { stdout } = await execAsync(`curl -s -o /dev/null -w "%{http_code}" http://${ip}:3001${endpoint}`);
+    const code = stdout.trim();
+    // 200 = healthy, 307 = redirect (LDC Tools root redirects to login)
+    return code === '200' || code === '307';
   } catch (error) {
     return false;
   }
@@ -262,21 +267,31 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // Step 1: Create backup (if requested)
       if (args.createBackup) {
         steps.push('Creating backup...');
-        await execAsync(`ssh root@${DB_IP} "/usr/local/bin/backup-jw-scheduler.sh"`);
-        await execAsync(`ssh ${standbyShortcut} "/usr/local/bin/backup-to-nfs.sh"`);
+        if (app === 'jw-attendant') {
+          await execAsync(`ssh root@${DB_IP} "/usr/local/bin/backup-jw-scheduler.sh"`);
+          await execAsync(`ssh ${standbyShortcut} "/usr/local/bin/backup-to-nfs.sh"`);
+        } else {
+          // LDC Tools - simple git stash backup
+          await execAsync(`ssh ${standbyShortcut} "cd ${appConfig.path} && git stash save 'pre-deploy-backup-$(date +%Y%m%d_%H%M%S)' 2>/dev/null || true"`);
+        }
         steps.push('✅ Backups created');
       }
 
       // Step 2: Pull from GitHub (if requested)
       if (args.pullGithub) {
         steps.push('Pulling latest code from GitHub...');
-        await execAsync(`ssh ${standbyShortcut} "cd ${appConfig.path} && git pull origin ${appConfig.branch}"`);
-        steps.push('✅ Code pulled successfully');
+        // Use branch-specific config if available, otherwise fall back to single branch
+        const branch = actualStandby === 'green' 
+          ? (appConfig.branchGreen || appConfig.branch)
+          : (appConfig.branchBlue || appConfig.branch);
+        await execAsync(`ssh ${standbyShortcut} "cd ${appConfig.path} && git fetch origin && git checkout ${branch} && git pull origin ${branch}"`);
+        steps.push(`✅ Code pulled from ${branch} branch`);
       }
 
       // Step 3: Install dependencies
       steps.push('Installing dependencies...');
-      await execAsync(`ssh ${standbyShortcut} "cd ${appConfig.path} && npm install"`);
+      const npmInstallFlag = app === 'ldc-tools' ? '--legacy-peer-deps' : '';
+      await execAsync(`ssh ${standbyShortcut} "cd ${appConfig.path} && npm install ${npmInstallFlag}"`);
       steps.push('✅ Dependencies installed');
 
       // Step 4: Run migrations (if requested)
