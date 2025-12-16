@@ -116,11 +116,14 @@ async function checkHealth(ip, app) {
 async function getHAProxyBackend(app) {
   try {
     const appConfig = APPS[app];
-    const { stdout } = await execAsync(`ssh root@${HAPROXY_IP} "grep 'use_backend ${appConfig.haproxyBackend}' /etc/haproxy/haproxy.cfg | head -1"`);
-    if (stdout.includes(`${appConfig.haproxyBackend}_blue`)) {
-      return 'blue';
-    } else if (stdout.includes(`${appConfig.haproxyBackend}_green`)) {
-      return 'green';
+    // Look for the main routing rule (use_backend X if is_appname)
+    const { stdout } = await execAsync(`ssh root@${HAPROXY_IP} "grep 'use_backend ${appConfig.haproxyBackend}.*if is_${appConfig.haproxyBackend === 'jw_attendant' ? 'jw_attendant' : 'ldc'}$' /etc/haproxy/haproxy.cfg | head -1"`);
+    // Check which backend is being used (the backend name comes right after use_backend)
+    const match = stdout.match(/use_backend\s+(\S+)/);
+    if (match) {
+      const backend = match[1];
+      if (backend.endsWith('_blue')) return 'blue';
+      if (backend.endsWith('_green')) return 'green';
     }
     return 'unknown';
   } catch (error) {
