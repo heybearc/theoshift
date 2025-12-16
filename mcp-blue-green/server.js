@@ -103,7 +103,7 @@ async function checkHealth(ip, app) {
   try {
     const appConfig = APPS[app];
     const endpoint = appConfig.healthEndpoint || '/api/health';
-    const port = app === 'jw-attendant' ? '8000' : '3001';
+    const port = '3001';  // Both apps use port 3001
     const { stdout } = await execAsync(`curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://${ip}:${port}${endpoint}`);
     const code = stdout.trim();
     return code === '200';
