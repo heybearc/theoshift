@@ -41,6 +41,7 @@ const APPS = {
     branch: 'production-gold-standard',
     pmBlue: 'jw-attendant-blue',
     pmGreen: 'jw-attendant',
+    healthEndpoint: '/api/health',
   },
   'ldc-tools': {
     name: 'LDC Tools',
@@ -52,21 +53,28 @@ const APPS = {
     sshBlue: 'ldc',
     sshGreen: 'ldc-staging',
     path: '/opt/ldc-construction-tools/frontend',
-    branchBlue: 'main',
-    branchGreen: 'green-development',
+    branch: 'main',  // Both use main branch
     pmBlue: 'ldc-production',
-    pmGreen: 'ldc-production',
+    pmGreen: 'ldc-staging',
+    healthEndpoint: '/api/auth/providers',
   },
 };
 
 const HAPROXY_IP = '10.92.3.26';
 const DB_IP = '10.92.3.21';
 
-// Get current deployment state from HAProxy
-async function getDeploymentState() {
+// Get current deployment state from HAProxy (per-app)
+async function getDeploymentState(app = 'jw-attendant') {
   try {
-    const { stdout } = await execAsync(`ssh haproxy "/usr/local/bin/jw-deployment-state.sh get"`);
-    return JSON.parse(stdout);
+    const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'jw-deployment-state.json';
+    const { stdout } = await execAsync(`ssh haproxy "cat /var/lib/haproxy/${stateFile} 2>/dev/null || echo '{}'"`);
+    const state = JSON.parse(stdout || '{}');
+    return {
+      prod: state.prod || 'blue',
+      standby: state.standby || 'green',
+      lastSwitch: state.lastSwitch || null,
+      switchCount: state.switchCount || 0,
+    };
   } catch (error) {
     // Fallback to default state
     return {
@@ -78,10 +86,12 @@ async function getDeploymentState() {
   }
 }
 
-// Save deployment state to HAProxy
-async function saveDeploymentState(state) {
+// Save deployment state to HAProxy (per-app)
+async function saveDeploymentState(state, app = 'jw-attendant') {
   try {
-    await execAsync(`ssh haproxy "/usr/local/bin/jw-deployment-state.sh set ${state.prod} ${state.standby}"`);
+    const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'jw-deployment-state.json';
+    const stateJson = JSON.stringify(state);
+    await execAsync(`ssh haproxy "echo '${stateJson}' > /var/lib/haproxy/${stateFile}"`);
   } catch (error) {
     console.error('Failed to save state:', error.message);
     throw error;
@@ -91,12 +101,12 @@ async function saveDeploymentState(state) {
 // Check server health
 async function checkHealth(ip, app) {
   try {
-    // LDC Tools returns 307 redirect on root, JW Attendant has /api/health
-    const endpoint = app === 'ldc-tools' ? '/' : '/api/health';
-    const { stdout } = await execAsync(`curl -s -o /dev/null -w "%{http_code}" http://${ip}:3001${endpoint}`);
+    const appConfig = APPS[app];
+    const endpoint = appConfig.healthEndpoint || '/api/health';
+    const port = app === 'jw-attendant' ? '8000' : '3001';
+    const { stdout } = await execAsync(`curl -s -o /dev/null -w "%{http_code}" --max-time 5 http://${ip}:${port}${endpoint}`);
     const code = stdout.trim();
-    // 200 = healthy, 307 = redirect (LDC Tools root redirects to login)
-    return code === '200' || code === '307';
+    return code === '200';
   } catch (error) {
     return false;
   }
@@ -202,7 +212,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const app = args.app || 'jw-attendant';
     const appConfig = APPS[app];
     const haproxyBackend = await getHAProxyBackend(app);
-    const state = await getDeploymentState();
+    const state = await getDeploymentState(app);
     
     // Determine actual PROD/STANDBY based on HAProxy
     const actualProd = haproxyBackend !== 'error' ? haproxyBackend : state.prod;
@@ -254,7 +264,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const app = args.app || 'jw-attendant';
     const appConfig = APPS[app];
     const haproxyBackend = await getHAProxyBackend(app);
-    const state = await getDeploymentState();
+    const state = await getDeploymentState(app);
     const actualProd = haproxyBackend !== 'error' ? haproxyBackend : state.prod;
     const actualStandby = actualProd === 'blue' ? 'green' : 'blue';
     const standbyIp = actualStandby === 'blue' ? appConfig.blueIp : appConfig.greenIp;
@@ -356,7 +366,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const app = args.app || 'jw-attendant';
     const appConfig = APPS[app];
     const haproxyBackend = await getHAProxyBackend(app);
-    const state = await getDeploymentState();
+    const state = await getDeploymentState(app);
     const actualProd = haproxyBackend !== 'error' ? haproxyBackend : state.prod;
     const actualStandby = actualProd === 'blue' ? 'green' : 'blue';
     
@@ -412,7 +422,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         lastSwitch: new Date().toISOString(),
         switchCount: state.switchCount + 1,
       };
-      await saveDeploymentState(newState);
+      await saveDeploymentState(newState, app);
 
       return {
         content: [
