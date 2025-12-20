@@ -101,8 +101,23 @@ export default function RebrandingAnnouncement() {
 
         {/* Timeline */}
         <section className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">📅 What's Coming Next?</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">📅 Migration Timeline</h2>
           <div className="space-y-6">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-green-100 text-green-600 font-bold">
+                  ✓
+                </div>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-green-900">✅ December 19, 2025 - COMPLETED</h3>
+                <p className="text-gray-600">
+                  <strong>Migration Complete!</strong> All systems moved to theoshift.com infrastructure. 
+                  Both old and new domains are currently working.
+                </p>
+              </div>
+            </div>
+
             <div className="flex items-start">
               <div className="flex-shrink-0">
                 <div className="flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 text-blue-600 font-bold">
@@ -110,9 +125,27 @@ export default function RebrandingAnnouncement() {
                 </div>
               </div>
               <div className="ml-4">
-                <h3 className="text-lg font-semibold text-gray-900">Now - November 2025</h3>
+                <h3 className="text-lg font-semibold text-gray-900">December 20, 2025 - January 31, 2026</h3>
                 <p className="text-gray-600">
-                  Updated branding throughout the application. Both domains work identically.
+                  <strong>Transition Period:</strong> Both domains work identically. Please update your bookmarks 
+                  to <code className="bg-gray-100 px-2 py-1 rounded">theoshift.com</code> during this time.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 text-yellow-600 font-bold">
+                  ⚠️
+                </div>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-yellow-900">⚠️ February 1, 2026 - DEADLINE</h3>
+                <p className="text-yellow-800 font-semibold">
+                  Old domain (attendant.cloudigan.net) will stop working. You MUST use theoshift.com after this date.
+                </p>
+                <p className="text-gray-600 mt-2">
+                  Update your bookmarks now to avoid losing access!
                 </p>
               </div>
             </div>
@@ -124,37 +157,9 @@ export default function RebrandingAnnouncement() {
                 </div>
               </div>
               <div className="ml-4">
-                <h3 className="text-lg font-semibold text-gray-900">November 2025</h3>
-                <p className="text-gray-600">
-                  Terminology updates: "Attendant" becomes "Volunteer" throughout the app.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-green-100 text-green-600 font-bold">
-                  3
-                </div>
-              </div>
-              <div className="ml-4">
-                <h3 className="text-lg font-semibold text-gray-900">December 2025</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Q1 2026</h3>
                 <p className="text-gray-600">
                   New features! Support for multiple volunteer departments beyond attendants.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <div className="flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 text-yellow-600 font-bold">
-                  4
-                </div>
-              </div>
-              <div className="ml-4">
-                <h3 className="text-lg font-semibold text-gray-900">January 2026</h3>
-                <p className="text-gray-600">
-                  Old domain redirects to new domain. Please update your bookmarks by then!
                 </p>
               </div>
             </div>
@@ -175,8 +180,11 @@ export default function RebrandingAnnouncement() {
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Will my bookmarks still work?</h3>
               <p className="text-gray-700">
-                Yes, through the end of the year. After January 2026, the old domain will automatically redirect to the new one. 
-                We recommend updating your bookmarks to <code className="bg-gray-100 px-2 py-1 rounded">theoshift.com</code> when convenient.
+                <strong className="text-yellow-700">⚠️ Important:</strong> The old domain (attendant.cloudigan.net) will work until <strong>January 31, 2026</strong>. 
+                After <strong>February 1, 2026</strong>, it will stop working completely.
+              </p>
+              <p className="text-gray-700 mt-2">
+                Please update your bookmarks to <code className="bg-gray-100 px-2 py-1 rounded">theoshift.com</code> as soon as possible to avoid losing access.
               </p>
             </div>
 
