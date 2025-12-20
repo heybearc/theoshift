@@ -1,11 +1,11 @@
 # Blue-Green Deployment - Complete Guide
-**JW Attendant Scheduler Production Deployment System**
+**Theocratic Shift Scheduler Production Deployment System**
 
 ---
 
 ## 🎯 **Overview**
 
-This guide covers the complete blue-green deployment system for JW Attendant Scheduler, including MCP server usage, state management, and deployment workflows.
+This guide covers the complete blue-green deployment system for Theocratic Shift Scheduler, including MCP server usage, state management, and deployment workflows.
 
 ---
 
@@ -29,7 +29,7 @@ This guide covers the complete blue-green deployment system for JW Attendant Sch
 ┌─────────────────────────────────────────────────────────┐
 │                    HAProxy (10.92.3.26)                 │
 │              Load Balancer + State Tracker              │
-│         https://attendant.cloudigan.net                 │
+│         https://theoshift.com                 │
 └─────────────────┬───────────────────────────────────────┘
                   │
          ┌────────┴────────┐
@@ -240,7 +240,7 @@ New STANDBY: BLUE (10.92.3.22)
 
 Switch #6 completed at 2025-10-25T12:30:00.000Z
 
-Production URL: https://attendant.cloudigan.net
+Production URL: https://theoshift.com
 HAProxy Stats: http://10.92.3.26:8404
 ```
 
@@ -394,16 +394,16 @@ Status: ❌ DOWN (health check failed)
 **Solutions:**
 ```bash
 # Check if server is running
-ssh jwa "pm2 list | grep jw-attendant"
-ssh jwg "pm2 list | grep jw-attendant"
+ssh green-theoshift "pm2 list | grep theoshift-green"
+ssh blue-theoshift "pm2 list | grep theoshift-green"
 
 # Check server response
 curl -I http://10.92.3.22:3001/
 curl -I http://10.92.3.24:3001/
 
 # Restart if needed
-ssh jwa "pm2 restart jw-attendant-blue"
-ssh jwg "pm2 restart jw-attendant"
+ssh green-theoshift "pm2 restart theoshift-blue"
+ssh blue-theoshift "pm2 restart theoshift-green"
 ```
 
 ---
@@ -453,12 +453,12 @@ fatal: Authentication failed
 **Solution:**
 ```bash
 # Verify git credentials on servers
-ssh jwa "cd /opt/jw-attendant-scheduler && git remote -v"
-ssh jwg "cd /opt/jw-attendant-scheduler && git remote -v"
+ssh green-theoshift "cd /opt/theoshift && git remote -v"
+ssh blue-theoshift "cd /opt/theoshift && git remote -v"
 
 # Test git pull
-ssh jwa "cd /opt/jw-attendant-scheduler && git pull origin production-gold-standard"
-ssh jwg "cd /opt/jw-attendant-scheduler && git pull origin production-gold-standard"
+ssh green-theoshift "cd /opt/theoshift && git pull origin production-gold-standard"
+ssh blue-theoshift "cd /opt/theoshift && git pull origin production-gold-standard"
 
 # If needed, update credentials (see GIT_CREDENTIALS_SETUP.md)
 ```
@@ -474,7 +474,7 @@ ssh jwg "cd /opt/jw-attendant-scheduler && git pull origin production-gold-stand
 **Solution:**
 ```bash
 # Test server manually
-cd /Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-blue-green
+cd /Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-blue-green
 /opt/homebrew/bin/node server.js
 
 # Check for errors
@@ -500,7 +500,7 @@ prox    # Proxmox host (10.92.0.5)
 
 ```
 # MCP Server
-/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-blue-green/server.js
+/Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-blue-green/server.js
 
 # State Tracking
 /var/lib/jw-deployment/state.json (on HAProxy)
@@ -513,23 +513,23 @@ prox    # Proxmox host (10.92.0.5)
 ~/.git-credentials (on Mac, BLUE, GREEN)
 
 # Application
-/opt/jw-attendant-scheduler/ (on BLUE and GREEN)
+/opt/theoshift/ (on BLUE and GREEN)
 ```
 
 ### **Key Commands**
 
 ```bash
 # Check PM2 status
-ssh jwa "pm2 list"
-ssh jwg "pm2 list"
+ssh green-theoshift "pm2 list"
+ssh blue-theoshift "pm2 list"
 
 # Restart application
-ssh jwa "pm2 restart jw-attendant-blue"
-ssh jwg "pm2 restart jw-attendant"
+ssh green-theoshift "pm2 restart theoshift-blue"
+ssh blue-theoshift "pm2 restart theoshift-green"
 
 # View logs
-ssh jwa "pm2 logs jw-attendant-blue --lines 50"
-ssh jwg "pm2 logs jw-attendant --lines 50"
+ssh green-theoshift "pm2 logs theoshift-blue --lines 50"
+ssh blue-theoshift "pm2 logs theoshift-green --lines 50"
 
 # Check HAProxy backend
 ssh haproxy "grep default_backend /etc/haproxy/haproxy.cfg | grep jw_attendant"
@@ -544,7 +544,7 @@ ssh postgres "sudo -u postgres psql -l"
 ### **URLs**
 
 ```
-Production: https://attendant.cloudigan.net
+Production: https://theoshift.com
 BLUE Direct: http://10.92.3.22:3001
 GREEN Direct: http://10.92.3.24:3001
 HAProxy Stats: http://10.92.3.26:8404
@@ -553,8 +553,8 @@ HAProxy Stats: http://10.92.3.26:8404
 ### **PM2 Process Names**
 
 ```
-BLUE: jw-attendant-blue
-GREEN: jw-attendant
+BLUE: theoshift-blue
+GREEN: theoshift-green
 ```
 
 ---

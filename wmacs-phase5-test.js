@@ -2,13 +2,13 @@
 
 /**
  * WMACS Guardian Phase 5 Testing Framework
- * JW Attendant Scheduler - Comprehensive System Validation
+ * Theocratic Shift Scheduler - Comprehensive System Validation
  */
 
 const https = require('https');
 const http = require('http');
 
-const BASE_URL = 'https://jw-staging.cloudigan.net';
+const BASE_URL = 'https://blue.theoshift.com';
 const STAGING_IP = 'http://10.92.3.24:3001';
 
 class WMACSPhase5Tester {
@@ -71,7 +71,7 @@ class WMACSPhase5Tester {
   async runPhase5Tests() {
     console.log('🛡️ WMACS Guardian Phase 5 Testing Framework');
     console.log('=' .repeat(60));
-    console.log('🎯 Target: JW Attendant Scheduler - Attendants Management System');
+    console.log('🎯 Target: Theocratic Shift Scheduler - Attendants Management System');
     console.log('🌐 Domain:', BASE_URL);
     console.log('🖥️  Staging IP:', STAGING_IP);
     console.log('');

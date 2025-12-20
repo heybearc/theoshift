@@ -74,7 +74,7 @@ export default function AttendantPINManagement({ attendants }: Props) {
   return (
     <>
       <Head>
-        <title>Attendant PIN Management | JW Attendant Scheduler</title>
+        <title>Attendant PIN Management | Theocratic Shift Scheduler</title>
       </Head>
 
       <div className="min-h-screen bg-gray-50">

@@ -120,15 +120,15 @@ class FederationCoordinatorCICD {
     const lowerDir = workingDirectory.toLowerCase();
 
     // Project detection logic
-    if (lowerCommand.includes('jw') || lowerCommand.includes('attendant') || lowerDir.includes('jw-attendant')) {
-      return 'jw-attendant-scheduler';
+    if (lowerCommand.includes('jw') || lowerCommand.includes('attendant') || lowerDir.includes('theoshift-green')) {
+      return 'theoshift';
     }
     if (lowerCommand.includes('ldc') || lowerCommand.includes('construction') || lowerDir.includes('ldc')) {
       return 'ldc-construction-tools';
     }
 
     // Default based on working directory
-    if (lowerDir.includes('jw-attendant-scheduler')) return 'jw-attendant-scheduler';
+    if (lowerDir.includes('theoshift')) return 'theoshift';
     if (lowerDir.includes('ldc-construction-tools')) return 'ldc-construction-tools';
 
     return 'unknown';
@@ -169,7 +169,7 @@ class FederationCoordinatorCICD {
         content: [
           {
             type: 'text',
-            text: `⚠️ Could not detect project from command: "${command}"\n\nAvailable projects:\n- jw-attendant-scheduler\n- ldc-construction-tools\n\nPlease specify project explicitly or run from project directory.`
+            text: `⚠️ Could not detect project from command: "${command}"\n\nAvailable projects:\n- theoshift\n- ldc-construction-tools\n\nPlease specify project explicitly or run from project directory.`
           }
         ]
       };
@@ -177,8 +177,8 @@ class FederationCoordinatorCICD {
 
     let deploymentResult = '';
 
-    if (project === 'jw-attendant-scheduler') {
-      deploymentResult = `🎯 Routing to JW MCP Server\n\n🚀 JW Attendant Scheduler Deployment\n- Environment: ${environment}\n- Features: ${features.length > 0 ? features.join(', ') : 'all'}\n- Container separation: enabled\n- Rollback: ${options.rollback ? 'enabled' : 'disabled'}\n\n✅ Deployment routed successfully to JW MCP`;
+    if (project === 'theoshift') {
+      deploymentResult = `🎯 Routing to JW MCP Server\n\n🚀 Theocratic Shift Scheduler Deployment\n- Environment: ${environment}\n- Features: ${features.length > 0 ? features.join(', ') : 'all'}\n- Container separation: enabled\n- Rollback: ${options.rollback ? 'enabled' : 'disabled'}\n\n✅ Deployment routed successfully to JW MCP`;
     } else if (project === 'ldc-construction-tools') {
       deploymentResult = `🎯 Routing to LDC MCP Server\n\n🚀 LDC Construction Tools Deployment\n- Environment: ${environment}\n- Phases: ${phases.length > 0 ? phases.join(', ') : 'all phases'}\n- Validation: ${options.validation !== false ? 'enabled' : 'disabled'}\n- Auto-promote: ${options.autoPromote ? 'enabled' : 'disabled'}\n\n✅ Deployment routed successfully to LDC MCP`;
     }
@@ -224,11 +224,11 @@ class FederationCoordinatorCICD {
   }
 
   async handleDeploymentStatus(args) {
-    const { projects = ['jw-attendant-scheduler', 'ldc-construction-tools'] } = args;
+    const { projects = ['theoshift', 'ldc-construction-tools'] } = args;
     
     const statusResults = projects.map(project => {
-      if (project === 'jw-attendant-scheduler') {
-        return `📱 JW Attendant Scheduler:\n  - Staging: healthy (event-centric architecture)\n  - Production: stable\n  - CI/CD: isolated container\n  - Last deploy: ${new Date().toISOString()}`;
+      if (project === 'theoshift') {
+        return `📱 Theocratic Shift Scheduler:\n  - Staging: healthy (event-centric architecture)\n  - Production: stable\n  - CI/CD: isolated container\n  - Last deploy: ${new Date().toISOString()}`;
       } else if (project === 'ldc-construction-tools') {
         return `🏗️ LDC Construction Tools:\n  - Phase 1: operational\n  - Phase 2: operational\n  - Staging: validated\n  - Production: ready\n  - Last deploy: ${new Date().toISOString()}`;
       }

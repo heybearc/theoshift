@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // WMACS Guardian: Production Deployment System
-// Deploy Next.js JW Attendant Scheduler to production LXC 132
+// Deploy Next.js Theocratic Shift Scheduler to production LXC 132
 
 const { exec } = require('child_process');
 const { promisify } = require('util');
@@ -10,10 +10,10 @@ const execAsync = promisify(exec);
 class WMACSProductionDeploy {
   constructor() {
     this.productionServer = '10.92.3.22'; // LXC 132
-    this.productionPath = '/opt/jw-attendant-nextjs';
+    this.productionPath = '/opt/theoshift-green-nextjs';
     this.productionPort = '8000';
     this.dbServer = '10.92.3.21'; // LXC 131
-    this.repoUrl = 'https://github.com/heybearc/jw-attendant-scheduler.git';
+    this.repoUrl = 'https://github.com/heybearc/theoshift.git';
     this.deploymentSteps = [];
   }
 
@@ -53,7 +53,7 @@ class WMACSProductionDeploy {
       this.logSuccess('Connected to production server');
       
       // Check if old Django service is running
-      const djangoCheck = await execAsync(`ssh root@${this.productionServer} "systemctl status jw-attendant || echo 'Service not found'"`);
+      const djangoCheck = await execAsync(`ssh root@${this.productionServer} "systemctl status theoshift-green || echo 'Service not found'"`);
       console.log('   Django service status:', djangoCheck.stdout.includes('active') ? 'RUNNING' : 'STOPPED');
       
       // Create production directory
@@ -109,7 +109,7 @@ class WMACSProductionDeploy {
     try {
       // Create production .env file
       const envConfig = `
-DATABASE_URL=postgresql://jw_scheduler:jw_password@${this.dbServer}:5432/jw_attendant_scheduler
+DATABASE_URL=postgresql://jw_scheduler:jw_password@${this.dbServer}:5432/theoshift_scheduler
 NEXTAUTH_SECRET=production-nextauth-secret-2024-secure
 NEXTAUTH_URL=http://${this.productionServer}:${this.productionPort}
 NODE_ENV=production
@@ -173,7 +173,7 @@ NEXTAUTH_DEBUG=false
       // Create systemd service file
       const serviceConfig = `
 [Unit]
-Description=JW Attendant Scheduler (Next.js)
+Description=Theocratic Shift Scheduler (Next.js)
 After=network.target
 
 [Service]
@@ -190,16 +190,16 @@ RestartSec=10
 WantedBy=multi-user.target
 `;
 
-      await execAsync(`ssh root@${this.productionServer} "cat > /etc/systemd/system/jw-attendant-nextjs.service << 'EOF'${serviceConfig}EOF"`);
+      await execAsync(`ssh root@${this.productionServer} "cat > /etc/systemd/system/theoshift-green-nextjs.service << 'EOF'${serviceConfig}EOF"`);
       this.logSuccess('Systemd service created');
       
       // Reload systemd and enable service
-      await execAsync(`ssh root@${this.productionServer} "systemctl daemon-reload && systemctl enable jw-attendant-nextjs"`);
+      await execAsync(`ssh root@${this.productionServer} "systemctl daemon-reload && systemctl enable theoshift-green-nextjs"`);
       this.logSuccess('Service enabled');
       
       // Stop old Django service if running
       try {
-        await execAsync(`ssh root@${this.productionServer} "systemctl stop jw-attendant"`);
+        await execAsync(`ssh root@${this.productionServer} "systemctl stop theoshift-green"`);
         this.logSuccess('Old Django service stopped');
       } catch (error) {
         console.log('   Old service not running or already stopped');
@@ -215,7 +215,7 @@ WantedBy=multi-user.target
     
     try {
       // Start the service
-      await execAsync(`ssh root@${this.productionServer} "systemctl start jw-attendant-nextjs"`);
+      await execAsync(`ssh root@${this.productionServer} "systemctl start theoshift-green-nextjs"`);
       this.logSuccess('Production service started');
       
       // Wait for service to initialize
@@ -223,7 +223,7 @@ WantedBy=multi-user.target
       await new Promise(resolve => setTimeout(resolve, 10000));
       
       // Check service status
-      const statusResult = await execAsync(`ssh root@${this.productionServer} "systemctl status jw-attendant-nextjs --no-pager"`);
+      const statusResult = await execAsync(`ssh root@${this.productionServer} "systemctl status theoshift-green-nextjs --no-pager"`);
       if (statusResult.stdout.includes('active (running)')) {
         this.logSuccess('Service is running');
       } else {
@@ -292,7 +292,7 @@ WantedBy=multi-user.target
     
     if (errorCount === 0) {
       console.log('\n🎉 PRODUCTION DEPLOYMENT SUCCESSFUL!');
-      console.log('✅ Next.js JW Attendant Scheduler deployed to production');
+      console.log('✅ Next.js Theocratic Shift Scheduler deployed to production');
       console.log(`✅ Service running on http://${this.productionServer}:${this.productionPort}`);
       console.log('✅ Database connectivity established');
       console.log('✅ API endpoints functional');
@@ -301,8 +301,8 @@ WantedBy=multi-user.target
       console.log('\n🔗 Production Access:');
       console.log(`   Web Interface: http://${this.productionServer}:${this.productionPort}`);
       console.log(`   Sign in with: admin@jwscheduler.local / admin123`);
-      console.log(`   Service: systemctl status jw-attendant-nextjs`);
-      console.log(`   Logs: journalctl -u jw-attendant-nextjs -f`);
+      console.log(`   Service: systemctl status theoshift-green-nextjs`);
+      console.log(`   Logs: journalctl -u theoshift-green-nextjs -f`);
       
     } else {
       console.log('\n⚠️  DEPLOYMENT ISSUES DETECTED');

@@ -1,10 +1,10 @@
 #!/bin/bash
-# JW Attendant Scheduler - Staging Deployment Script
+# Theocratic Shift Scheduler - Staging Deployment Script
 # Guarantees fresh build and proper restart
 
 set -e
 
-echo "🚀 Starting JW Attendant Scheduler Deployment to Staging"
+echo "🚀 Starting Theocratic Shift Scheduler Deployment to Staging"
 
 # Sync code to staging server
 echo "📦 Syncing code to staging server..."
@@ -14,23 +14,23 @@ rsync -avz --delete \
   --exclude '.env.local' \
   --exclude '.git' \
   -F /Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant \
-  /Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/ \
-  jws:/opt/jw-attendant-scheduler/
+  /Users/cory/Documents/Cloudy-Work/applications/theoshift/ \
+  jws:/opt/theoshift/
 
 # Build and restart on server
 echo "🔨 Building application..."
 ssh -F /Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant jws << 'ENDSSH'
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 rm -rf .next
 npm run build
 chmod +x start.sh
-pm2 delete jw-attendant || true
+pm2 delete theoshift-green || true
 pm2 start ecosystem.config.js
 pm2 save
 ENDSSH
 
 echo "✅ Deployment complete!"
-echo "🌐 Application running at: https://jw-staging.cloudigan.net"
+echo "🌐 Application running at: https://blue.theoshift.com"
 
 # Show status
 ssh -F /Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant jws 'pm2 list'

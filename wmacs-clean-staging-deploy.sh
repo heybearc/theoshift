@@ -68,7 +68,7 @@ cat > .wmacs-deploy-temp/.env.local << 'EOF'
 NODE_ENV=production
 PORT=3001
 NEXTAUTH_URL=http://10.92.3.24:3001
-DATABASE_URL=postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler
+DATABASE_URL=postgresql://theoshift_user:jw_password@10.92.3.21:5432/theoshift_scheduler
 NEXTAUTH_SECRET=staging-secret-2024-secure
 NEXTAUTH_DEBUG=true
 EOF
@@ -90,30 +90,30 @@ print_status "Syncing clean artifact to staging server..."
 rsync -av --delete \
     --exclude='.env' \
     --exclude='.env.local' \
-    --exclude='.env.staging' \
+    --exclude='.env.blue' \
     .wmacs-deploy-temp/ \
-    root@10.92.3.24:/opt/jw-attendant-scheduler/
+    root@10.92.3.24:/opt/theoshift/
 
 # Step 4: Remote deployment completion (minimal server operations)
 print_status "Completing deployment on staging server..."
 ssh root@10.92.3.24 << 'REMOTE_SCRIPT'
 set -e
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 
 echo "🔧 Setting up environment..."
-# Ensure .env.staging exists and create symlink
-if [ ! -f .env.staging ]; then
-    echo "Creating .env.staging..."
-    cat > .env.staging << 'EOF'
+# Ensure .env.blue exists and create symlink
+if [ ! -f .env.blue ]; then
+    echo "Creating .env.blue..."
+    cat > .env.blue << 'EOF'
 NODE_ENV=production
 PORT=3001
-DATABASE_URL=postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/jw_attendant_scheduler_staging
-NEXTAUTH_URL=https://jw-staging.cloudigan.net
+DATABASE_URL=postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/theoshift_scheduler_staging
+NEXTAUTH_URL=https://blue.theoshift.com
 NEXTAUTH_SECRET=staging-secret-2024-secure-fqdn
 NEXTAUTH_DEBUG=true
 EOF
 fi
-ln -sf .env.staging .env
+ln -sf .env.blue .env
 
 echo "🔧 Installing dependencies..."
 npm ci --production
@@ -127,8 +127,8 @@ pkill -f "next.*3001" || true
 sleep 2
 
 # Export DATABASE_URL and start Next.js in production mode
-export DATABASE_URL='postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/jw_attendant_scheduler_staging'
-PORT=3001 nohup npm start > /dev/null 2>&1 &> /var/log/jw-attendant-scheduler.log 2>&1 &
+export DATABASE_URL='postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/theoshift_scheduler_staging'
+PORT=3001 nohup npm start > /dev/null 2>&1 &> /var/log/theoshift.log 2>&1 &
 
 echo " Waiting for startup..."
 sleep 5
@@ -159,7 +159,7 @@ if curl -f -s http://10.92.3.24:3001 > /dev/null; then
     echo "  3. Validate user acceptance criteria"
 else
     print_error "❌ Staging deployment health check failed"
-    print_status "Check logs: ssh root@10.92.3.24 'tail -f /var/log/jw-attendant-scheduler.log'"
+    print_status "Check logs: ssh root@10.92.3.24 'tail -f /var/log/theoshift.log'"
     exit 1
 fi
 

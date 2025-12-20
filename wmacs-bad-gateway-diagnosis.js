@@ -43,7 +43,7 @@ class WMACSBadGatewayDiagnosis {
     console.log('🔧 Step 1: Checking Service Status');
     
     try {
-      const statusResult = await execAsync(`ssh root@${this.productionServer} "systemctl status jw-attendant-nextjs --no-pager"`);
+      const statusResult = await execAsync(`ssh root@${this.productionServer} "systemctl status theoshift-green-nextjs --no-pager"`);
       
       if (statusResult.stdout.includes('active (running)')) {
         console.log('   ✅ Service is running');
@@ -53,7 +53,7 @@ class WMACSBadGatewayDiagnosis {
       }
       
       // Check recent logs for errors
-      const logsResult = await execAsync(`ssh root@${this.productionServer} "journalctl -u jw-attendant-nextjs -n 10 --no-pager"`);
+      const logsResult = await execAsync(`ssh root@${this.productionServer} "journalctl -u theoshift-green-nextjs -n 10 --no-pager"`);
       if (logsResult.stdout.includes('error') || logsResult.stdout.includes('Error')) {
         console.log('   ⚠️  Errors found in logs:');
         console.log(logsResult.stdout);
@@ -205,15 +205,15 @@ class WMACSBadGatewayDiagnosis {
     
     console.log('\n📋 DIAGNOSIS SUMMARY:');
     console.log(`   🎯 Target: ${this.productionUrl}`);
-    console.log('   🔧 Service: jw-attendant-nextjs');
+    console.log('   🔧 Service: theoshift-green-nextjs');
     console.log(`   🌐 Port: ${this.productionPort}`);
     
     console.log('\n🛠️  POTENTIAL SOLUTIONS:');
-    console.log('   1. Restart the service: systemctl restart jw-attendant-nextjs');
+    console.log('   1. Restart the service: systemctl restart theoshift-green-nextjs');
     console.log('   2. Check firewall rules: ufw status');
     console.log('   3. Verify DNS resolution');
     console.log('   4. Check for proxy misconfigurations');
-    console.log('   5. Monitor logs: journalctl -u jw-attendant-nextjs -f');
+    console.log('   5. Monitor logs: journalctl -u theoshift-green-nextjs -f');
     
     console.log('\n🎯 IMMEDIATE ACTIONS:');
     console.log('   - If service is down: Restart it');
@@ -222,10 +222,10 @@ class WMACSBadGatewayDiagnosis {
     console.log('   - If resource issues: Free up memory/disk space');
     
     console.log('\n📞 SUPPORT INFORMATION:');
-    console.log('   - Service logs: journalctl -u jw-attendant-nextjs');
+    console.log('   - Service logs: journalctl -u theoshift-green-nextjs');
     console.log('   - Port status: ss -tlnp | grep 3001');
     console.log('   - Process status: ps aux | grep next');
-    console.log('   - System status: systemctl status jw-attendant-nextjs');
+    console.log('   - System status: systemctl status theoshift-green-nextjs');
   }
 }
 

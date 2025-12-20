@@ -2,12 +2,12 @@
 
 /**
  * Authentication Flow Validation Test
- * Validates proper authentication behavior for JW Attendant Scheduler
+ * Validates proper authentication behavior for Theocratic Shift Scheduler
  */
 
 const https = require('https');
 
-const BASE_URL = 'https://jw-staging.cloudigan.net';
+const BASE_URL = 'https://blue.theoshift.com';
 
 class AuthFlowValidator {
   constructor() {
@@ -68,7 +68,7 @@ class AuthFlowValidator {
     await this.test('Sign-in page is accessible', async () => {
       const response = await this.makeRequest(`${BASE_URL}/auth/signin`);
       return response.status === 200 && 
-             response.data.includes('JW Attendant Scheduler');
+             response.data.includes('Theocratic Shift Scheduler');
     });
 
     // Test 3: Attendants page requires authentication

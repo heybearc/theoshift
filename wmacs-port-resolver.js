@@ -29,13 +29,13 @@ async function resolvePortConflict() {
     
     // Step 4: Start application with proper environment
     console.log('\n🚀 Step 4: Starting application with WMACS Guardian protection');
-    const startCommand = `cd /opt/jw-attendant-scheduler/current && \\
-DATABASE_URL='postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/jw_attendant_scheduler_staging' \\
+    const startCommand = `cd /opt/theoshift/current && \\
+DATABASE_URL='postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/theoshift_scheduler_staging' \\
 JWT_SECRET=\\$(openssl rand -hex 32) \\
 NODE_ENV=production \\
-nohup npm start -- -p 3001 > /var/log/jw-attendant-scheduler.log 2>&1 &`;
+nohup npm start -- -p 3001 > /var/log/theoshift.log 2>&1 &`;
     
-    await guardian.executeCommand('10.92.3.24', startCommand, 'Start JW Attendant Scheduler application');
+    await guardian.executeCommand('10.92.3.24', startCommand, 'Start Theocratic Shift Scheduler application');
     
     // Step 5: Wait and verify startup
     console.log('\n⏳ Step 5: Waiting for application startup');
@@ -45,7 +45,7 @@ nohup npm start -- -p 3001 > /var/log/jw-attendant-scheduler.log 2>&1 &`;
     console.log('\n🏥 Step 6: Health check');
     await guardian.executeCommand('10.92.3.24', 'ps aux | grep "npm start" | grep -v grep || echo "No npm processes found"', 'Check if npm is running');
     await guardian.executeCommand('10.92.3.24', 'ss -tlnp | grep :3001 || echo "Port 3001 not listening"', 'Check if port 3001 is listening');
-    await guardian.executeCommand('10.92.3.24', 'tail -10 /var/log/jw-attendant-scheduler.log', 'Check application logs');
+    await guardian.executeCommand('10.92.3.24', 'tail -10 /var/log/theoshift.log', 'Check application logs');
     
     console.log('\n✅ WMACS Guardian: Port conflict resolution complete');
     
@@ -61,7 +61,7 @@ nohup npm start -- -p 3001 > /var/log/jw-attendant-scheduler.log 2>&1 &`;
     } catch (error) {
       console.log('⚠️  Application may still be starting up or have issues');
       console.log('   Checking logs for more details...');
-      await guardian.executeCommand('10.92.3.24', 'tail -20 /var/log/jw-attendant-scheduler.log', 'Get detailed startup logs');
+      await guardian.executeCommand('10.92.3.24', 'tail -20 /var/log/theoshift.log', 'Get detailed startup logs');
     }
     
   } catch (error) {
@@ -70,7 +70,7 @@ nohup npm start -- -p 3001 > /var/log/jw-attendant-scheduler.log 2>&1 &`;
     // Emergency recovery
     console.log('\n🚨 Emergency Recovery: Attempting alternative startup method');
     try {
-      await guardian.executeCommand('10.92.3.24', 'cd /opt/jw-attendant-scheduler/current && npm run dev -- -p 3001 &', 'Emergency dev mode startup');
+      await guardian.executeCommand('10.92.3.24', 'cd /opt/theoshift/current && npm run dev -- -p 3001 &', 'Emergency dev mode startup');
     } catch (recoveryError) {
       console.error('❌ Emergency recovery also failed:', recoveryError.message);
     }

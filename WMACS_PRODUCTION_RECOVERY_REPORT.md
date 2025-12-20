@@ -30,7 +30,7 @@ Cross-environment contamination due to:
 ### **Step 1: Environment Verification**
 ```bash
 # Checked environment variables
-ssh root@10.92.3.22 "cat /opt/jw-attendant-production-fixed/.env"
+ssh root@10.92.3.22 "cat /opt/theoshift-green-production-fixed/.env"
 # Result: NEXTAUTH_URL correctly set to production
 
 # Checked NextAuth providers endpoint
@@ -41,7 +41,7 @@ curl -s http://10.92.3.22:3001/api/auth/providers
 ### **Step 2: Contamination Detection**
 ```bash
 # Scanned for staging references in production
-ssh root@10.92.3.22 "grep -r '10.92.3.24' /opt/jw-attendant-production-fixed/"
+ssh root@10.92.3.22 "grep -r '10.92.3.24' /opt/theoshift-green-production-fixed/"
 # Result: 150+ staging references found in development scripts
 ```
 
@@ -77,7 +77,7 @@ ssh root@10.92.3.22 "grep -r '10.92.3.24' /opt/jw-attendant-production-fixed/"
 
 ### **✅ Production Service Status:**
 ```
-Service: jw-attendant-production.service
+Service: theoshift-green-production.service
 Status: Active (running)
 Port: 3001 (immutable compliance maintained)
 Memory: 81.1M
@@ -167,13 +167,13 @@ Response Time: Ready in 378ms
 
 ### **✅ Fully Operational:**
 - **Direct Access:** http://10.92.3.22:3001 ✅ Working
-- **Domain Access:** https://attendant.cloudigan.net ✅ Working
+- **Domain Access:** https://theoshift.com ✅ Working
 - **Authentication:** Production URLs only ✅ Clean
 - **Environment Isolation:** Complete separation ✅ Verified
 
 ### **🔧 User Instructions:**
 1. **Clear browser cache/cookies completely**
-2. **Access:** https://attendant.cloudigan.net or http://10.92.3.22:3001
+2. **Access:** https://theoshift.com or http://10.92.3.22:3001
 3. **Login:** admin@jwscheduler.local / admin123
 4. **Expected:** Successful login to production dashboard
 

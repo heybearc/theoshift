@@ -43,12 +43,12 @@ class WMACSRenderingGuardian {
     
     try {
       // Check staging next.config.js
-      const stagingConfig = await execAsync(`ssh jws "cd /opt/jw-attendant-scheduler && cat next.config.js 2>/dev/null || echo 'No next.config.js found'"`);
+      const stagingConfig = await execAsync(`ssh jws "cd /opt/theoshift && cat next.config.js 2>/dev/null || echo 'No next.config.js found'"`);
       console.log('   📋 Staging next.config.js:');
       console.log('     ', stagingConfig.stdout.trim());
       
       // Check production next.config.js
-      const productionConfig = await execAsync(`ssh root@${this.productionServer} "cd /opt/jw-attendant-nextjs && cat next.config.js 2>/dev/null || echo 'No next.config.js found'"`);
+      const productionConfig = await execAsync(`ssh root@${this.productionServer} "cd /opt/theoshift-green-nextjs && cat next.config.js 2>/dev/null || echo 'No next.config.js found'"`);
       console.log('   📋 Production next.config.js:');
       console.log('     ', productionConfig.stdout.trim());
       
@@ -69,12 +69,12 @@ class WMACSRenderingGuardian {
     
     try {
       // Check staging signin page component
-      const stagingSignin = await execAsync(`ssh jws "cd /opt/jw-attendant-scheduler && head -10 src/app/auth/signin/page.tsx"`);
+      const stagingSignin = await execAsync(`ssh jws "cd /opt/theoshift && head -10 src/app/auth/signin/page.tsx"`);
       console.log('   📋 Staging signin component:');
       console.log('     ', stagingSignin.stdout.trim().split('\n')[0]);
       
       // Check production signin page component
-      const productionSignin = await execAsync(`ssh root@${this.productionServer} "cd /opt/jw-attendant-nextjs && head -10 src/app/auth/signin/page.tsx"`);
+      const productionSignin = await execAsync(`ssh root@${this.productionServer} "cd /opt/theoshift-green-nextjs && head -10 src/app/auth/signin/page.tsx"`);
       console.log('   📋 Production signin component:');
       console.log('     ', productionSignin.stdout.trim().split('\n')[0]);
       
@@ -101,12 +101,12 @@ class WMACSRenderingGuardian {
     
     try {
       // Check staging build output for signin page
-      const stagingBuild = await execAsync(`ssh jws "cd /opt/jw-attendant-scheduler && npm run build 2>&1 | grep -A5 -B5 'auth/signin' || echo 'No signin route found in build'"`);
+      const stagingBuild = await execAsync(`ssh jws "cd /opt/theoshift && npm run build 2>&1 | grep -A5 -B5 'auth/signin' || echo 'No signin route found in build'"`);
       console.log('   📋 Staging build output:');
       console.log('     ', stagingBuild.stdout.trim());
       
       // Check production build output for signin page
-      const productionBuild = await execAsync(`ssh root@${this.productionServer} "cd /opt/jw-attendant-nextjs && npm run build 2>&1 | grep -A5 -B5 'auth/signin' || echo 'No signin route found in build'"`);
+      const productionBuild = await execAsync(`ssh root@${this.productionServer} "cd /opt/theoshift-green-nextjs && npm run build 2>&1 | grep -A5 -B5 'auth/signin' || echo 'No signin route found in build'"`);
       console.log('   📋 Production build output:');
       console.log('     ', productionBuild.stdout.trim());
       

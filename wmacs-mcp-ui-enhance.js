@@ -465,7 +465,7 @@ export default function AdminPage() {
       <div className="main-container">
         <div className="page-header">
           <h1 className="page-title">Admin Dashboard</h1>
-          <p className="page-subtitle">Complete administrative control for JW Attendant Scheduler</p>
+          <p className="page-subtitle">Complete administrative control for Theocratic Shift Scheduler</p>
         </div>
 
         {/* Statistics Cards */}
@@ -591,7 +591,7 @@ async function main() {
     await enhancer.enhanceAdminUI();
     console.log('\\n🎉 UI ENHANCEMENT SUCCESSFUL');
     console.log('🎨 Professional admin panel created with modern design');
-    console.log('🌐 Check the enhanced UI at: https://jw-staging.cloudigan.net/admin');
+    console.log('🌐 Check the enhanced UI at: https://blue.theoshift.com/admin');
     process.exit(0);
   } catch (error) {
     console.error('\\n❌ UI ENHANCEMENT FAILED');

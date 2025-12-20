@@ -7,7 +7,7 @@ set -e
 
 # Configuration
 APP_URL="http://10.92.3.24:3001"
-APP_DIR="/opt/jw-attendant-scheduler"
+APP_DIR="/opt/theoshift"
 LOG_FILE="/tmp/apex-502-fixer.log"
 MAX_RETRIES=3
 RETRY_DELAY=10
@@ -123,7 +123,7 @@ kill_node_processes() {
 
 # Start the application
 start_application() {
-    log "🚀 Starting JW Attendant Scheduler application"
+    log "🚀 Starting Theocratic Shift Scheduler application"
     
     # Start application in background
     ssh jws "cd $APP_DIR && PORT=3001 nohup npm run dev > /tmp/app.log 2>&1 &" 2>/dev/null

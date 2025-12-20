@@ -1,4 +1,4 @@
-# Apex Guardian System Migration Plan - JW Attendant Scheduler
+# Apex Guardian System Migration Plan - Theocratic Shift Scheduler
 
 **Upgrading from current CI/CD to improved Apex Guardian System**
 
@@ -23,7 +23,7 @@
    - No automated traffic management
 
 4. **❌ Self-Hosted Runner Complexity**
-   - Runs on Container 134 itself
+   - Runs on Container 134 (blue-theoshift) itself
    - Deployment script embedded in workflow
    - Hard to maintain
 
@@ -163,8 +163,8 @@
 
 ### **Old Workflow:**
 ```
-1. Push to staging → Auto-deploys to Container 134
-2. Push to main → Auto-deploys to Container 132 ❌
+1. Push to staging → Auto-deploys to Container 134 (blue-theoshift)
+2. Push to main → Auto-deploys to Container 132 (green-theoshift) ❌
 3. Manual HAProxy edit to switch traffic
 ```
 
@@ -311,7 +311,7 @@
 3. **Manual Deployment:**
    ```bash
    # Deploy manually if needed
-   ssh root@10.92.3.24 "cd /opt/jw-attendant-scheduler && git pull && npm run build && pm2 restart jw-attendant"
+   ssh root@10.92.3.24 "cd /opt/theoshift && git pull && npm run build && pm2 restart theoshift-green"
    ```
 
 ---

@@ -23,7 +23,7 @@ class MCPValidator {
 
         // Check actual package.json
         try {
-            const packageJson = execSync(`ssh ${this.serverHost} "cd /opt/jw-attendant-scheduler && cat package.json"`, { encoding: 'utf8' });
+            const packageJson = execSync(`ssh ${this.serverHost} "cd /opt/theoshift && cat package.json"`, { encoding: 'utf8' });
             const pkg = JSON.parse(packageJson);
             
             this.results.actual_state.technology = {
@@ -121,10 +121,10 @@ class MCPValidator {
 
         try {
             // Check for Django files
-            const djangoFiles = execSync(`ssh ${this.serverHost} "cd /opt/jw-attendant-scheduler && find . -name 'manage.py' -o -name 'settings.py' -o -name 'wsgi.py' -o -name 'asgi.py' 2>/dev/null | grep -v node_modules"`, { encoding: 'utf8' });
+            const djangoFiles = execSync(`ssh ${this.serverHost} "cd /opt/theoshift && find . -name 'manage.py' -o -name 'settings.py' -o -name 'wsgi.py' -o -name 'asgi.py' 2>/dev/null | grep -v node_modules"`, { encoding: 'utf8' });
             
             // Check for Next.js files
-            const nextFiles = execSync(`ssh ${this.serverHost} "cd /opt/jw-attendant-scheduler && ls -la pages/ components/ 2>/dev/null | wc -l"`, { encoding: 'utf8' });
+            const nextFiles = execSync(`ssh ${this.serverHost} "cd /opt/theoshift && ls -la pages/ components/ 2>/dev/null | wc -l"`, { encoding: 'utf8' });
 
             this.results.actual_state.structure = {
                 hasDjangoFiles: djangoFiles.trim().length > 0,

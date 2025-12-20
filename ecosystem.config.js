@@ -1,9 +1,9 @@
 module.exports = {
   apps: [{
-    name: 'jw-attendant',
+    name: 'theoshift-green',
     script: 'npm',
     args: 'start -- --port 3001',
-    cwd: '/opt/jw-attendant-scheduler',
+    cwd: '/opt/theoshift',
     instances: 1,
     autorestart: true,
     watch: false,

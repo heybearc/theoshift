@@ -60,9 +60,9 @@ class WMACSUATGuardian {
     console.log('\n🔍 UAT Test 2: Authentication Page Load');
     
     try {
-      const result = await execAsync(`ssh jws "curl -s '${this.testUrl}/auth/signin' | grep -o 'JW Attendant Scheduler' | head -1"`);
+      const result = await execAsync(`ssh jws "curl -s '${this.testUrl}/auth/signin' | grep -o 'Theocratic Shift Scheduler' | head -1"`);
       
-      if (result.stdout.trim() === 'JW Attendant Scheduler') {
+      if (result.stdout.trim() === 'Theocratic Shift Scheduler') {
         console.log('   ✅ Authentication page loads correctly');
       } else {
         console.log('   ❌ Authentication page load failed');
@@ -76,7 +76,7 @@ class WMACSUATGuardian {
     console.log('\n🔍 UAT Test 3: Database Connection');
     
     try {
-      const result = await execAsync(`ssh jws "cd /opt/jw-attendant-scheduler && PGPASSWORD=jw_password psql -h 10.92.3.21 -U jw_scheduler_staging -d jw_attendant_scheduler_staging -c 'SELECT COUNT(*) FROM users WHERE role = \\'ADMIN\\';' -t"`);
+      const result = await execAsync(`ssh jws "cd /opt/theoshift && PGPASSWORD=jw_password psql -h 10.92.3.21 -U jw_scheduler_staging -d theoshift_scheduler_staging -c 'SELECT COUNT(*) FROM users WHERE role = \\'ADMIN\\';' -t"`);
       
       const adminCount = result.stdout.trim();
       console.log(`   Admin users found: ${adminCount}`);

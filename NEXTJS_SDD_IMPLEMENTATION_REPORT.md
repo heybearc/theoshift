@@ -1,7 +1,7 @@
 # Next.js SDD Implementation Report
 
 ## 🎯 **Project Objective**
-Migrate JW Attendant Scheduler from Django to Next.js using Software-Defined Development (SDD) approach with multi-agent coordination, restricted to staging development only.
+Migrate Theocratic Shift Scheduler from Django to Next.js using Software-Defined Development (SDD) approach with multi-agent coordination, restricted to staging development only.
 
 ## ✅ **Completed Achievements**
 

@@ -37,7 +37,7 @@ async function testBulkImportAPI() {
   console.log('\n2. TESTING API ENDPOINT AVAILABILITY:')
   
   const options = {
-    hostname: 'jw-staging.cloudigan.net',
+    hostname: 'blue.theoshift.com',
     port: 443,
     path: '/api/events/d60272ad-9c14-4738-b201-20c29c4e59d5/attendants',
     method: 'PUT',

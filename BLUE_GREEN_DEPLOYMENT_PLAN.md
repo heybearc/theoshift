@@ -1,5 +1,5 @@
 # Blue-Green Deployment Plan
-**JW Attendant Scheduler - Implementation Complete**
+**Theocratic Shift Scheduler - Implementation Complete**
 
 ---
 
@@ -26,7 +26,7 @@ All phases of the blue-green deployment system have been successfully implemente
 - Simplified deployment process
 
 **Technical Details:**
-- Database: `jw_attendant_scheduler_staging` on Container 131
+- Database: `theoshift_scheduler_staging` on Container 131
 - Both servers use identical connection strings
 - No data migration needed (already consolidated)
 
@@ -171,7 +171,7 @@ All phases of the blue-green deployment system have been successfully implemente
 ┌─────────────────────────────────────────────────────────┐
 │                    HAProxy (10.92.3.26)                 │
 │              Load Balancer + State Tracker              │
-│         https://attendant.cloudigan.net                 │
+│         https://theoshift.com                 │
 └─────────────────┬───────────────────────────────────────┘
                   │
          ┌────────┴────────┐
@@ -253,8 +253,8 @@ All phases of the blue-green deployment system have been successfully implemente
 
 ```bash
 # Develop on GREEN (or local)
-ssh jwg
-cd /opt/jw-attendant-scheduler
+ssh blue-theoshift
+cd /opt/theoshift
 # make changes
 git add .
 git commit -m "feat: new feature"
@@ -392,7 +392,7 @@ All servers accessible via SSH shortcuts:
 
 ## 🎉 **Project Complete**
 
-The blue-green deployment system for JW Attendant Scheduler is **fully operational** and **production ready**.
+The blue-green deployment system for Theocratic Shift Scheduler is **fully operational** and **production ready**.
 
 **Key Achievements:**
 - ✅ All 5 phases complete

@@ -252,7 +252,7 @@ class WMACSGuardian {
       await this.timeout(2000);
       
       // Start application
-      const startCommand = `cd /opt/jw-attendant-scheduler/current && nohup npm start -- -p ${port} > /var/log/jw-attendant-scheduler.log 2>&1 &`;
+      const startCommand = `cd /opt/theoshift/current && nohup npm start -- -p ${port} > /var/log/theoshift.log 2>&1 &`;
       await this.executeCommand(`ssh root@10.92.3.${container} "${startCommand}"`);
       
       // Wait for startup

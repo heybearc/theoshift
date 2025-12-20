@@ -21,7 +21,7 @@ async function wmacsTroubleshootDatabase() {
 
   const transport = new StdioClientTransport({
     command: "node",
-    args: ["/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-server-ops/src/index.js"],
+    args: ["/Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-server-ops/src/index.js"],
   });
 
   try {
@@ -35,7 +35,7 @@ async function wmacsTroubleshootDatabase() {
       arguments: {
         host: "10.92.3.24",
         command: "ps aux | grep 'npm start' | grep -v grep",
-        reason: "Check if JW Attendant Scheduler application is currently running"
+        reason: "Check if Theocratic Shift Scheduler application is currently running"
       }
     });
     console.log('Process Status:', processCheck.content[0].text);
@@ -46,7 +46,7 @@ async function wmacsTroubleshootDatabase() {
       name: "ssh_command", 
       arguments: {
         host: "10.92.3.24",
-        command: "cd /opt/jw-attendant-scheduler/current && ls -la .env* || echo 'No .env files found'",
+        command: "cd /opt/theoshift/current && ls -la .env* || echo 'No .env files found'",
         reason: "Check for environment configuration files in current deployment"
       }
     });
@@ -59,7 +59,7 @@ async function wmacsTroubleshootDatabase() {
       arguments: {
         host: "10.92.3.24", 
         command: "pkill -f 'npm start' || echo 'No npm start processes found'",
-        reason: "Stop any existing JW Attendant Scheduler processes before restart"
+        reason: "Stop any existing Theocratic Shift Scheduler processes before restart"
       }
     });
     console.log('Stop Result:', stopProcess.content[0].text);
@@ -70,8 +70,8 @@ async function wmacsTroubleshootDatabase() {
       name: "ssh_command",
       arguments: {
         host: "10.92.3.24",
-        command: "cd /opt/jw-attendant-scheduler/current && DATABASE_URL='postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/jw_attendant_scheduler_staging' JWT_SECRET=$(openssl rand -hex 32) NODE_ENV=production nohup npm start -- -p 3001 > /var/log/jw-attendant-scheduler.log 2>&1 & echo 'Application started'",
-        reason: "Start JW Attendant Scheduler with correct staging database credentials"
+        command: "cd /opt/theoshift/current && DATABASE_URL='postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/theoshift_scheduler_staging' JWT_SECRET=$(openssl rand -hex 32) NODE_ENV=production nohup npm start -- -p 3001 > /var/log/theoshift.log 2>&1 & echo 'Application started'",
+        reason: "Start Theocratic Shift Scheduler with correct staging database credentials"
       }
     });
     console.log('Start Result:', startApp.content[0].text);
@@ -84,7 +84,7 @@ async function wmacsTroubleshootDatabase() {
       arguments: {
         host: "10.92.3.24",
         command: "ps aux | grep 'npm start' | grep -v grep",
-        reason: "Verify JW Attendant Scheduler application started successfully"
+        reason: "Verify Theocratic Shift Scheduler application started successfully"
       }
     });
     console.log('Process Verification:', verifyProcess.content[0].text);
@@ -96,7 +96,7 @@ async function wmacsTroubleshootDatabase() {
       arguments: {
         host: "10.92.3.24",
         command: "curl -s http://localhost:3001/api/auth/me || echo 'API test failed'",
-        reason: "Test JW Attendant Scheduler API endpoint to verify it's responding"
+        reason: "Test Theocratic Shift Scheduler API endpoint to verify it's responding"
       }
     });
     console.log('API Test Result:', apiTest.content[0].text);

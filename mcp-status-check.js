@@ -16,7 +16,7 @@ async function checkAndStartMCPServers() {
     },
     {
       name: 'wmacs-server-ops',
-      path: '/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-server-ops',
+      path: '/Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-server-ops',
       port: 3003
     }
   ];

@@ -164,7 +164,7 @@ export default function EventAttendantManagementPage({
   return (
     <div className="space-y-6">
       <Head>
-        <title>{eventInfo.eventName || eventName || 'Event'} - Attendants | JW Attendant Scheduler</title>
+        <title>{eventInfo.eventName || eventName || 'Event'} - Attendants | Theocratic Shift Scheduler</title>
       </Head>
 
       {/* Header */}

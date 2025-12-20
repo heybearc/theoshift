@@ -12,8 +12,8 @@ echo "=================================================="
 PROD_SERVER="jwa"
 STAGING_SERVER="jws"
 SSH_CONFIG="/Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant"
-PROJECT_PATH="/opt/jw-attendant-scheduler"
-BACKUP_DIR="/opt/backups/jw-attendant-$(date +%Y%m%d-%H%M%S)"
+PROJECT_PATH="/opt/theoshift"
+BACKUP_DIR="/opt/backups/theoshift-green-$(date +%Y%m%d-%H%M%S)"
 
 # Colors for output
 RED='\033[0;31m'
@@ -67,15 +67,15 @@ log_info "Step 5: Updating staging→production references..."
 # Update environment variables
 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "cd $PROJECT_PATH && 
     # Copy staging env as template
-    cp .env.staging .env.production
+    cp .env.blue .env.green
     
     # Update URLs and references
-    sed -i 's/jw-staging\\.cloudigan\\.net/attendant\\.cloudigan\\.net/g' .env.production
-    sed -i 's/staging/production/g' .env.production
-    sed -i 's/STAGING/PRODUCTION/g' .env.production
+    sed -i 's/jw-staging\\.cloudigan\\.net/attendant\\.cloudigan\\.net/g' .env.green
+    sed -i 's/staging/production/g' .env.green
+    sed -i 's/STAGING/PRODUCTION/g' .env.green
     
     # Use production env
-    cp .env.production .env
+    cp .env.green .env
     
     # Update any hardcoded staging references in code
     find . -name '*.tsx' -o -name '*.ts' -o -name '*.js' | xargs sed -i 's/jw-staging\\.cloudigan\\.net/attendant\\.cloudigan\\.net/g' || true
@@ -92,8 +92,8 @@ log_success "Build completed successfully"
 log_info "Step 7: Configuring production database..."
 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "cd $PROJECT_PATH &&
     # Ensure production database connection
-    echo 'DATABASE_URL=\"postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler\"' >> .env
-    echo 'NEXTAUTH_URL=\"https://attendant.cloudigan.net\"' >> .env
+    echo 'DATABASE_URL=\"postgresql://theoshift_user:jw_password@10.92.3.21:5432/theoshift_scheduler\"' >> .env
+    echo 'NEXTAUTH_URL=\"https://theoshift.com\"' >> .env
     echo 'NEXTAUTH_SECRET=\"production-secret-key-$(openssl rand -hex 32)\"' >> .env
 "
 log_success "Production database configured"
@@ -142,8 +142,8 @@ log_success "Bulk import feature confirmed"
 echo ""
 echo "🎉 APEX Guardian Production Deployment Complete!"
 echo "=================================================="
-log_success "Production URL: https://attendant.cloudigan.net"
-log_success "Admin Panel: https://attendant.cloudigan.net/admin"
+log_success "Production URL: https://theoshift.com"
+log_success "Admin Panel: https://theoshift.com/admin"
 log_success "Backup Location: $BACKUP_DIR"
 log_success "All staging references updated to production"
 log_success "6 Admin modules + bulk import deployed"
@@ -159,7 +159,7 @@ echo "- Health: ✅ Production health check passed"
 
 echo ""
 log_info "Next steps:"
-echo "1. Test admin login at https://attendant.cloudigan.net/admin"
+echo "1. Test admin login at https://theoshift.com/admin"
 echo "2. Verify bulk user import functionality"
 echo "3. Test email configuration"
 echo "4. Monitor production logs: ssh -F $SSH_CONFIG $PROD_SERVER 'tail -f $PROJECT_PATH/production.log'"

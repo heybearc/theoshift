@@ -17,7 +17,7 @@ interface EventLayoutProps {
 
 export default function EventLayout({ 
   children, 
-  title = 'JW Attendant Scheduler',
+  title = 'Theocratic Shift Scheduler',
   breadcrumbs = [],
   selectedEvent
 }: EventLayoutProps) {
@@ -72,7 +72,7 @@ export default function EventLayout({
               <Link href="/events/select" className="flex items-center">
                 <span className="text-2xl font-bold text-blue-600">📋</span>
                 <span className="ml-2 text-xl font-semibold text-gray-900">
-                  JW Attendant Scheduler
+                  Theocratic Shift Scheduler
                 </span>
               </Link>
               
@@ -213,7 +213,7 @@ export default function EventLayout({
             </Link>
           </div>
           <div className="text-center text-xs text-gray-500 mt-2">
-            JW Attendant Scheduler v{packageJson.version} • Secure Event Management System
+            Theocratic Shift Scheduler v{packageJson.version} • Secure Event Management System
           </div>
         </div>
       </footer>

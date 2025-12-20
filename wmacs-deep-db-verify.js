@@ -14,7 +14,7 @@ async function wmacsDatabaseVerification() {
   try {
     // Step 1: Verify admin user exists in staging database
     console.log('📋 Step 1: Checking if admin user exists in staging database');
-    const checkUserQuery = `ssh root@10.92.3.21 "psql -U jw_scheduler_staging -d jw_attendant_scheduler_staging -c \\"SELECT id, email, \\"firstName\\", \\"lastName\\", role, \\"passwordHash\\" FROM users WHERE email = 'admin@jwscheduler.local';\\" 2>/dev/null || echo 'Database query failed'"`;
+    const checkUserQuery = `ssh root@10.92.3.21 "psql -U jw_scheduler_staging -d theoshift_scheduler_staging -c \\"SELECT id, email, \\"firstName\\", \\"lastName\\", role, \\"passwordHash\\" FROM users WHERE email = 'admin@jwscheduler.local';\\" 2>/dev/null || echo 'Database query failed'"`;
     
     const { stdout: userCheck } = await execAsync(checkUserQuery);
     console.log('Admin User Query Result:');
@@ -22,12 +22,12 @@ async function wmacsDatabaseVerification() {
 
     // Step 2: Test database connection from staging server
     console.log('\n🔌 Step 2: Testing database connection from staging server');
-    const dbConnTest = `ssh root@10.92.3.24 "cd /opt/jw-attendant-scheduler/current && node -e \\"
+    const dbConnTest = `ssh root@10.92.3.24 "cd /opt/theoshift/current && node -e \\"
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: 'postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/jw_attendant_scheduler_staging'
+      url: 'postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/theoshift_scheduler_staging'
     }
   }
 });
@@ -73,13 +73,13 @@ testConnection();
 
     // Step 4: Test password verification
     console.log('\n🔐 Step 4: Testing password verification');
-    const passwordTest = `ssh root@10.92.3.24 "cd /opt/jw-attendant-scheduler/current && node -e \\"
+    const passwordTest = `ssh root@10.92.3.24 "cd /opt/theoshift/current && node -e \\"
 const bcrypt = require('bcrypt');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: 'postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/jw_attendant_scheduler_staging'
+      url: 'postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/theoshift_scheduler_staging'
     }
   }
 });
@@ -117,7 +117,7 @@ testPassword();
     console.log('\n🎯 Step 5: Testing live login attempt with monitoring');
     
     // Start log monitoring in background
-    const logMonitor = exec('ssh root@10.92.3.24 "tail -f /var/log/jw-attendant-scheduler.log"');
+    const logMonitor = exec('ssh root@10.92.3.24 "tail -f /var/log/theoshift.log"');
     
     setTimeout(async () => {
       try {

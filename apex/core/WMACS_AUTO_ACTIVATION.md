@@ -48,7 +48,7 @@ APEX_AUTO_DETECTION_RULES:
 **Memory Content:**
 ```
 APEX_AUTO_ACTIVATION_MEMORY:
-- Repository: jw-attendant-scheduler (APEX-enabled)
+- Repository: theoshift (APEX-enabled)
 - Auto-apply APEX Guardian rules to ALL interactions
 - Mandatory MCP operations for server tasks
 - Enforce deployment standards automatically

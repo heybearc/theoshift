@@ -48,7 +48,7 @@ export default function SignIn() {
               </svg>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-            <p className="text-gray-600">Sign in to JW Attendant Scheduler</p>
+            <p className="text-gray-600">Sign in to Theocratic Shift Scheduler</p>
           </div>
 
           {/* Form */}
@@ -138,7 +138,7 @@ export default function SignIn() {
         {/* Footer */}
         <div className="text-center">
           <p className="text-white/80 text-sm">
-            JW Attendant Scheduler • Secure Event Management System
+            Theocratic Shift Scheduler • Secure Event Management System
           </p>
         </div>
       </div>

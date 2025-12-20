@@ -70,7 +70,7 @@ description: One sentence describing the main focus of this release
 - "Corrected Prisma schema relationship from `position` to `positions`"
 - "File: `pages/api/events/[id]/assignments.ts`"
 - "Deployed to Blue environment (10.92.3.22:3001)"
-- "Container 132/133 updated"
+- "Container 132 (green-theoshift)/133 updated"
 - "Updated TypeScript interfaces"
 - "Refactored database queries"
 

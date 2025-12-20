@@ -98,8 +98,8 @@ async function fixAuthentication() {
     console.log('\n🛡️ AUTHENTICATION FIX COMPLETE')
     console.log('===============================')
     console.log('NEXT STEPS:')
-    console.log('1. Clear your browser cache and cookies for jw-staging.cloudigan.net')
-    console.log('2. Go to: https://jw-staging.cloudigan.net/auth/signin')
+    console.log('1. Clear your browser cache and cookies for blue.theoshift.com')
+    console.log('2. Go to: https://blue.theoshift.com/auth/signin')
     console.log('3. Log in with: admin@jwscheduler.local / admin123')
     console.log('4. Try accessing events again')
     

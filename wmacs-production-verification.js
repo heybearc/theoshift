@@ -115,7 +115,7 @@ class WMACSProductionVerification {
     console.log('\n⚙️  Testing Service Status');
     
     try {
-      const statusResult = await execAsync(`ssh root@${this.productionServer} "systemctl status jw-attendant-nextjs --no-pager"`);
+      const statusResult = await execAsync(`ssh root@${this.productionServer} "systemctl status theoshift-green-nextjs --no-pager"`);
       
       if (statusResult.stdout.includes('active (running)')) {
         console.log('   ✅ Production service is running');
@@ -124,7 +124,7 @@ class WMACSProductionVerification {
       }
       
       // Check logs for any errors
-      const logsResult = await execAsync(`ssh root@${this.productionServer} "journalctl -u jw-attendant-nextjs --no-pager -n 5"`);
+      const logsResult = await execAsync(`ssh root@${this.productionServer} "journalctl -u theoshift-green-nextjs --no-pager -n 5"`);
       console.log('   📋 Recent service logs:');
       console.log(logsResult.stdout.trim());
       
@@ -140,7 +140,7 @@ class WMACSProductionVerification {
     console.log('\n✅ PRODUCTION DEPLOYMENT COMPLETED:');
     console.log(`   🌐 URL: ${this.productionUrl}`);
     console.log(`   🖥️  Server: LXC 132 (${this.productionServer})`);
-    console.log('   🔧 Service: jw-attendant-nextjs (systemd)');
+    console.log('   🔧 Service: theoshift-green-nextjs (systemd)');
     console.log('   🗄️  Database: PostgreSQL on LXC 131 (10.92.3.21)');
     
     console.log('\n✅ TECHNICAL STACK DEPLOYED:');
@@ -173,7 +173,7 @@ class WMACSProductionVerification {
     console.log('   - 🔧 Systemd service management active');
     
     console.log('\n🎉 WMACS GUARDIAN MISSION ACCOMPLISHED!');
-    console.log('The JW Attendant Scheduler has been successfully');
+    console.log('The Theocratic Shift Scheduler has been successfully');
     console.log('migrated from Django to Next.js and deployed to production!');
   }
 }

@@ -141,7 +141,7 @@ export default function SystemOpsPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
             {backupInfo?.databases.map((db, idx) => (
               <div key={idx}>
-                <div className="text-gray-600">{db.name === 'jw_attendant_scheduler_prod' ? 'Prod DB' : 'Staging DB'}</div>
+                <div className="text-gray-600">{db.name === 'theoshift_scheduler_prod' ? 'Prod DB' : 'Staging DB'}</div>
                 <div className="font-medium">{db.size}</div>
               </div>
             ))}

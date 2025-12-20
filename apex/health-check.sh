@@ -10,7 +10,7 @@ echo "====================================="
 
 MASTER_DIR="/Users/cory/Documents/Cloudy-Work/shared/wmacs-guardian-system"
 PROJECTS=(
-    "/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler"
+    "/Users/cory/Documents/Cloudy-Work/applications/theoshift"
     "/Users/cory/Documents/Cloudy-Work/applications/ldc-construction-tools"
 )
 

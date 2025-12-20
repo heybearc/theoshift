@@ -61,7 +61,7 @@ export function createEmailTransporter() {
 export async function sendEmail(options: EmailOptions): Promise<void> {
   const transporter = createEmailTransporter();
   
-  const fromName = process.env.EMAIL_FROM_NAME || 'JW Attendant Scheduler';
+  const fromName = process.env.EMAIL_FROM_NAME || 'Theocratic Shift Scheduler';
   const fromEmail = process.env.EMAIL_FROM || process.env.SMTP_USER;
 
   const mailOptions = {
@@ -85,13 +85,13 @@ export function generateInvitationEmail(data: InvitationEmailData): string {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Welcome to JW Attendant Scheduler</title>
+      <title>Welcome to Theocratic Shift Scheduler</title>
     </head>
     <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f3f4f6;">
       <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
         <!-- Header -->
         <div style="background-color: #dc2626; color: white; padding: 30px 20px; text-align: center;">
-          <h1 style="margin: 0; font-size: 28px; font-weight: bold;">🛡️ JW Attendant Scheduler</h1>
+          <h1 style="margin: 0; font-size: 28px; font-weight: bold;">🛡️ Theocratic Shift Scheduler</h1>
           <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Welcome to the Team!</p>
         </div>
 
@@ -100,7 +100,7 @@ export function generateInvitationEmail(data: InvitationEmailData): string {
           <h2 style="color: #374151; margin: 0 0 20px 0;">Hello ${data.firstName}!</h2>
           
           <p style="color: #6b7280; line-height: 1.6; margin: 0 0 20px 0;">
-            You have been invited to join the JW Attendant Scheduler system. Your account has been created with the following details:
+            You have been invited to join the Theocratic Shift Scheduler system. Your account has been created with the following details:
           </p>
 
           <!-- Account Details -->
@@ -172,7 +172,7 @@ export function generateInvitationEmail(data: InvitationEmailData): string {
         <!-- Footer -->
         <div style="background-color: #374151; color: #d1d5db; padding: 20px; text-align: center;">
           <p style="margin: 0; font-size: 14px;">
-            JW Attendant Scheduler - Organizing Kingdom Hall Events
+            Theocratic Shift Scheduler - Organizing Kingdom Hall Events
           </p>
           <p style="margin: 10px 0 0 0; font-size: 12px; opacity: 0.8;">
             This email was sent automatically. Please do not reply to this email.
@@ -198,7 +198,7 @@ function getRoleDescription(role: string): string {
     case 'ATTENDANT':
       return 'You can view your assignments and participate in assigned Kingdom Hall events.';
     default:
-      return 'You have been granted access to the JW Attendant Scheduler system.';
+      return 'You have been granted access to the Theocratic Shift Scheduler system.';
   }
 }
 
@@ -206,14 +206,14 @@ function getRoleDescription(role: string): string {
 export async function sendInvitationEmail(data: InvitationEmailData): Promise<void> {
   const html = generateInvitationEmail(data);
   
-  const subject = `Welcome to JW Attendant Scheduler - Your Account is Ready!`;
+  const subject = `Welcome to Theocratic Shift Scheduler - Your Account is Ready!`;
   
   const text = `
-Welcome to JW Attendant Scheduler!
+Welcome to Theocratic Shift Scheduler!
 
 Hello ${data.firstName},
 
-You have been invited to join the JW Attendant Scheduler system.
+You have been invited to join the Theocratic Shift Scheduler system.
 
 Account Details:
 - Name: ${data.firstName} ${data.lastName}
@@ -234,7 +234,7 @@ Getting Started:
 
 If you need assistance, please contact your system administrator.
 
-JW Attendant Scheduler
+Theocratic Shift Scheduler
   `;
 
   await sendEmail({

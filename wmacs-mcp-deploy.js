@@ -21,13 +21,13 @@ class WMACsMCPDeploy {
           id: '134',
           ip: '10.92.3.24',
           port: '3001',
-          path: '/opt/jw-attendant-scheduler-staging'
+          path: '/opt/theoshift-staging'
         },
         'jw-production': {
           id: '132', 
           ip: '10.92.3.22',
           port: '3001',
-          path: '/opt/jw-attendant-scheduler-production'
+          path: '/opt/theoshift-production'
         }
       }
     };
@@ -89,7 +89,7 @@ class WMACsMCPDeploy {
       `ssh -i ~/.ssh/id_rsa root@${container.ip} "mkdir -p ${container.path}"`,
       
       // Clone/update repository (battle-tested approach)
-      `ssh -i ~/.ssh/id_rsa root@${container.ip} "cd /opt && rm -rf jw-attendant-scheduler-staging && git clone https://github.com/heybearc/jw-attendant-scheduler.git jw-attendant-scheduler-staging"`,
+      `ssh -i ~/.ssh/id_rsa root@${container.ip} "cd /opt && rm -rf theoshift-staging && git clone https://github.com/heybearc/theoshift.git theoshift-staging"`,
       
       // Switch to staging branch
       `ssh -i ~/.ssh/id_rsa root@${container.ip} "cd ${container.path} && git checkout staging && git pull origin staging"`,

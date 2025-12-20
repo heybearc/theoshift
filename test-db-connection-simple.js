@@ -1,4 +1,4 @@
-// Simple database connection test for JW Attendant Scheduler
+// Simple database connection test for Theocratic Shift Scheduler
 const { PrismaClient } = require('@prisma/client')
 
 async function testDatabaseConnection() {
@@ -7,7 +7,7 @@ async function testDatabaseConnection() {
   const prisma = new PrismaClient({
     datasources: {
       db: {
-        url: 'postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler'
+        url: 'postgresql://theoshift_user:jw_password@10.92.3.21:5432/theoshift_scheduler'
       }
     }
   })

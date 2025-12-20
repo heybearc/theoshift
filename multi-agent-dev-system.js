@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Multi-Agent Development System for JW Attendant Scheduler
+ * Multi-Agent Development System for Theocratic Shift Scheduler
  * Enables parallel development with health monitoring and coordination
  */
 

@@ -30,7 +30,7 @@ async function wmacsJwtSecretDebug() {
     // Step 3: Check if middleware logs appear
     console.log('\n📋 Step 3: Checking for middleware logs');
     await new Promise(resolve => setTimeout(resolve, 2000));
-    const middlewareLogs = await execAsync('ssh root@10.92.3.24 "tail -10 /var/log/jw-attendant-scheduler.log | grep MIDDLEWARE || echo \\"No middleware logs found\\""');
+    const middlewareLogs = await execAsync('ssh root@10.92.3.24 "tail -10 /var/log/theoshift.log | grep MIDDLEWARE || echo \\"No middleware logs found\\""');
     console.log('Middleware logs:');
     console.log(middlewareLogs.stdout);
 

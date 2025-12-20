@@ -5,11 +5,11 @@ description: Advanced User Management System with roles, invitations, and attend
 # Advanced User Management System
 
 ## Overview
-Comprehensive user management system supporting hierarchical roles, secure invitations, and attendant profile linking for JW Attendant Scheduler.
+Comprehensive user management system supporting hierarchical roles, secure invitations, and attendant profile linking for Theocratic Shift Scheduler.
 
 ## SSH Access
 ```bash
-/ssh-jw-attendant  # Staging server access
+/ssh-theoshift-green  # Staging server access
 ```
 
 ## User Role Hierarchy

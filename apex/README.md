@@ -30,7 +30,7 @@ apex-guardian-system/
 
 ## Projects Using APEX Guardian
 
-1. **JW Attendant Scheduler** - Container-based Django application
+1. **Theocratic Shift Scheduler** - Container-based Django application
 2. **LDC Construction Tools** - Next.js/FastAPI application
 3. **Future Projects** - Extensible to any development environment
 
@@ -98,7 +98,7 @@ module.exports = {
 
 The APEX Guardian system automatically adapts to different project environments:
 
-### JW Attendant Scheduler Environment
+### Theocratic Shift Scheduler Environment
 - Containers: 132 (production), 135 (staging)
 - Ports: 3001 (Django), 5432 (PostgreSQL)
 - Recovery: Django/Gunicorn process management
@@ -137,8 +137,8 @@ The APEX Guardian system automatically adapts to different project environments:
 
 2. **Update in All Projects**
    ```bash
-   # JW Attendant Scheduler
-   cd ~/Documents/Cloudy-Work/applications/jw-attendant-scheduler
+   # Theocratic Shift Scheduler
+   cd ~/Documents/Cloudy-Work/applications/theoshift
    git submodule update --remote apex
    
    # LDC Construction Tools

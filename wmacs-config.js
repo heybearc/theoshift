@@ -1,15 +1,15 @@
 module.exports = {
   project: {
-    name: 'jw-attendant-scheduler',
+    name: 'theoshift',
     framework: 'nextjs',
     version: '2.0.0-clean-slate',
-    description: 'JW Attendant Scheduler - Clean Next.js Implementation'
+    description: 'Theocratic Shift Scheduler - Clean Next.js Implementation'
   },
   
   deployment: {
     host: '10.92.3.24',
     port: 3001,
-    path: '/opt/jw-attendant-scheduler',
+    path: '/opt/theoshift',
     user: 'root',
     sshKey: '~/.ssh/id_rsa'
   },
@@ -17,7 +17,7 @@ module.exports = {
   database: {
     host: '10.92.3.21',
     port: 5432,
-    name: 'jw_attendant_scheduler_staging',
+    name: 'theoshift_scheduler_staging',
     user: 'jw_scheduler_staging'
   },
   

@@ -41,7 +41,7 @@ class WMACSDeploymentVerification {
     
     try {
       // Check if root page.tsx exists on server
-      const rootPageResult = await execAsync(`ssh ${this.stagingServer} "ls -la /opt/jw-attendant-scheduler/src/app/page.tsx"`);
+      const rootPageResult = await execAsync(`ssh ${this.stagingServer} "ls -la /opt/theoshift/src/app/page.tsx"`);
       if (rootPageResult.stdout.includes('page.tsx')) {
         this.logSuccess('Root page.tsx deployed to server');
       } else {
@@ -49,7 +49,7 @@ class WMACSDeploymentVerification {
       }
       
       // Check if dashboard page.tsx has the fix
-      const dashboardResult = await execAsync(`ssh ${this.stagingServer} "grep -n 'credentials.*include' /opt/jw-attendant-scheduler/src/app/dashboard/page.tsx"`);
+      const dashboardResult = await execAsync(`ssh ${this.stagingServer} "grep -n 'credentials.*include' /opt/theoshift/src/app/dashboard/page.tsx"`);
       if (dashboardResult.stdout.includes('credentials')) {
         this.logSuccess('Dashboard credentials fix deployed');
       } else {
@@ -57,7 +57,7 @@ class WMACSDeploymentVerification {
       }
       
       // Check file timestamps
-      const timestampResult = await execAsync(`ssh ${this.stagingServer} "stat -c '%Y %n' /opt/jw-attendant-scheduler/src/app/page.tsx /opt/jw-attendant-scheduler/src/app/dashboard/page.tsx"`);
+      const timestampResult = await execAsync(`ssh ${this.stagingServer} "stat -c '%Y %n' /opt/theoshift/src/app/page.tsx /opt/theoshift/src/app/dashboard/page.tsx"`);
       console.log('   File timestamps:', timestampResult.stdout.trim());
       
     } catch (error) {
@@ -92,8 +92,8 @@ class WMACSDeploymentVerification {
     
     try {
       // Test root page redirect
-      const rootResult = await execAsync(`ssh ${this.stagingServer} "curl -s '${this.baseUrl}/' | grep -o 'useSession\\|router.push\\|JW Attendant Scheduler' | head -2"`);
-      if (rootResult.stdout.includes('JW Attendant Scheduler')) {
+      const rootResult = await execAsync(`ssh ${this.stagingServer} "curl -s '${this.baseUrl}/' | grep -o 'useSession\\|router.push\\|Theocratic Shift Scheduler' | head -2"`);
+      if (rootResult.stdout.includes('Theocratic Shift Scheduler')) {
         this.logSuccess('Root page contains expected content');
       } else {
         this.logIssue('Root page content not as expected');

@@ -2,7 +2,7 @@
 
 ## 🔒 IMMUTABLE REFERENCE - DO NOT CHANGE
 
-**JW Attendant Scheduler Port Assignment:**
+**Theocratic Shift Scheduler Port Assignment:**
 - **PORT: 3001** (IMMUTABLE)
 - **Protocol: HTTP**
 - **Binding: 0.0.0.0:3001**
@@ -21,7 +21,7 @@
 
 ## 🚨 CRITICAL DEPLOYMENT RULE
 
-**ALL JW ATTENDANT SCHEDULER DEPLOYMENTS MUST USE PORT 3001**
+**ALL THEOCRATIC SHIFT SCHEDULER DEPLOYMENTS MUST USE PORT 3001**
 
 This includes:
 - ✅ Development environments

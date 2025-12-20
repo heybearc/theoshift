@@ -14,12 +14,12 @@ async function debugFrontendLogin() {
   try {
     // Step 1: Check if the application is actually serving the new code
     console.log('📋 Step 1: Checking deployment version and build info');
-    const { stdout: buildInfo } = await execAsync('ssh root@10.92.3.24 "cat /opt/jw-attendant-scheduler/current/.build-info 2>/dev/null || echo \'No build info found\'"');
+    const { stdout: buildInfo } = await execAsync('ssh root@10.92.3.24 "cat /opt/theoshift/current/.build-info 2>/dev/null || echo \'No build info found\'"');
     console.log('Build Info:', buildInfo.trim());
 
     // Step 2: Check if the frontend files were actually deployed
     console.log('\n🔍 Step 2: Checking if providers.tsx has the credentials fix');
-    const { stdout: providersCheck } = await execAsync('ssh root@10.92.3.24 "grep -n \'credentials.*include\' /opt/jw-attendant-scheduler/current/app/providers.tsx || echo \'Credentials fix not found\'"');
+    const { stdout: providersCheck } = await execAsync('ssh root@10.92.3.24 "grep -n \'credentials.*include\' /opt/theoshift/current/app/providers.tsx || echo \'Credentials fix not found\'"');
     console.log('Providers.tsx credentials fix:', providersCheck.trim());
 
     // Step 3: Check the actual login page being served
@@ -30,7 +30,7 @@ async function debugFrontendLogin() {
 
     // Step 4: Check if there are any JavaScript errors in the build
     console.log('\n🔧 Step 4: Checking for JavaScript build errors');
-    const { stdout: jsErrors } = await execAsync('ssh root@10.92.3.24 "find /opt/jw-attendant-scheduler/current/.next -name \'*.js\' -exec grep -l \'Error\\|error\\|undefined\' {} \\; 2>/dev/null | head -5 || echo \'No obvious JS errors found\'"');
+    const { stdout: jsErrors } = await execAsync('ssh root@10.92.3.24 "find /opt/theoshift/current/.next -name \'*.js\' -exec grep -l \'Error\\|error\\|undefined\' {} \\; 2>/dev/null | head -5 || echo \'No obvious JS errors found\'"');
     console.log('JavaScript errors:', jsErrors.trim());
 
     // Step 5: Test the login API directly from the server

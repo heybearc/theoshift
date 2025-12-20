@@ -36,7 +36,7 @@ let hasErrors = false;
 FORBIDDEN_KEYS.forEach(key => {
   if (content.includes(key)) {
     console.error(`❌ ERROR: Found "${key}" in ecosystem.config.js`);
-    console.error(`   Environment variables should be in .env.production, not ecosystem.config.js`);
+    console.error(`   Environment variables should be in .env.green, not ecosystem.config.js`);
     hasErrors = true;
   }
 });
@@ -44,14 +44,14 @@ FORBIDDEN_KEYS.forEach(key => {
 // Check for env object
 if (content.match(/env\s*:\s*{/)) {
   console.error(`❌ ERROR: Found "env:" object in ecosystem.config.js`);
-  console.error(`   Remove the env object and use .env.production instead`);
+  console.error(`   Remove the env object and use .env.green instead`);
   hasErrors = true;
 }
 
 if (hasErrors) {
   console.error('\n❌ Configuration validation FAILED');
   console.error('   Fix: Remove environment variables from ecosystem.config.js');
-  console.error('   All env vars should be in .env.production');
+  console.error('   All env vars should be in .env.green');
   process.exit(1);
 }
 

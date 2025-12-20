@@ -116,7 +116,7 @@ class WMACsMCPDiagnostic {
   async checkServerLogs(envConfig) {
     try {
       console.log('📋 Recent server logs:');
-      const logCommand = `ssh ${envConfig.ssh} "tail -20 /var/log/jw-attendant-scheduler.log"`;
+      const logCommand = `ssh ${envConfig.ssh} "tail -20 /var/log/theoshift.log"`;
       const result = await this.executeOperation(logCommand);
       
       if (result.stdout) {

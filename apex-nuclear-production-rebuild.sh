@@ -22,10 +22,10 @@ echo "PHASE 1: Nuclear Cleanup of Production"
 echo "======================================="
 
 ssh -F "$SSH_CONFIG" jwa "
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 
 echo 'Stopping all processes...'
-pm2 delete jw-attendant || true
+pm2 delete theoshift-green || true
 pkill -f 'node.*next' || true
 pkill -f 'npm.*start' || true
 
@@ -46,15 +46,15 @@ echo "==============================="
 
 # Copy exact files from staging
 echo "Copying configuration files from staging..."
-scp -F "$SSH_CONFIG" jws:/opt/jw-attendant-scheduler/pages/api/auth/\\[...nextauth\\].ts /tmp/staging-nextauth.ts
-scp -F "$SSH_CONFIG" jws:/opt/jw-attendant-scheduler/ecosystem.config.js /tmp/staging-ecosystem.js
-scp -F "$SSH_CONFIG" jws:/opt/jw-attendant-scheduler/start.sh /tmp/staging-start.sh
-scp -F "$SSH_CONFIG" jws:/opt/jw-attendant-scheduler/.env /tmp/staging-env
+scp -F "$SSH_CONFIG" jws:/opt/theoshift/pages/api/auth/\\[...nextauth\\].ts /tmp/staging-nextauth.ts
+scp -F "$SSH_CONFIG" jws:/opt/theoshift/ecosystem.config.js /tmp/staging-ecosystem.js
+scp -F "$SSH_CONFIG" jws:/opt/theoshift/start.sh /tmp/staging-start.sh
+scp -F "$SSH_CONFIG" jws:/opt/theoshift/.env /tmp/staging-env
 
 # Copy to production
-scp -F "$SSH_CONFIG" /tmp/staging-nextauth.ts jwa:/opt/jw-attendant-scheduler/pages/api/auth/\\[...nextauth\\].ts
-scp -F "$SSH_CONFIG" /tmp/staging-ecosystem.js jwa:/opt/jw-attendant-scheduler/ecosystem.config.js
-scp -F "$SSH_CONFIG" /tmp/staging-start.sh jwa:/opt/jw-attendant-scheduler/start.sh
+scp -F "$SSH_CONFIG" /tmp/staging-nextauth.ts jwa:/opt/theoshift/pages/api/auth/\\[...nextauth\\].ts
+scp -F "$SSH_CONFIG" /tmp/staging-ecosystem.js jwa:/opt/theoshift/ecosystem.config.js
+scp -F "$SSH_CONFIG" /tmp/staging-start.sh jwa:/opt/theoshift/start.sh
 
 echo "Staging baseline copied"
 
@@ -64,17 +64,17 @@ echo "PHASE 3: Update URLs for Production"
 echo "===================================="
 
 ssh -F "$SSH_CONFIG" jwa "
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 
 echo 'Creating production .env from staging template...'
 cat > .env << 'EOF'
 NODE_ENV=production
 PORT=3001
 HOSTNAME=0.0.0.0
-DATABASE_URL=postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/jw_attendant_scheduler_staging
-NEXTAUTH_URL=https://attendant.cloudigan.net
+DATABASE_URL=postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/theoshift_scheduler_staging
+NEXTAUTH_URL=https://theoshift.com
 NEXTAUTH_SECRET=production-nextauth-secret-2024
-UPLOAD_DIR=/opt/jw-attendant-scheduler/public/uploads
+UPLOAD_DIR=/opt/theoshift/public/uploads
 MAX_FILE_SIZE=10485760
 FEEDBACK_ENABLED=true
 EOF
@@ -82,9 +82,9 @@ EOF
 echo 'Creating production .env.local...'
 cat > .env.local << 'EOF'
 NODE_ENV=production
-NEXTAUTH_URL=https://attendant.cloudigan.net
+NEXTAUTH_URL=https://theoshift.com
 NEXTAUTH_SECRET=production-nextauth-secret-2024
-DATABASE_URL=postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/jw_attendant_scheduler_staging
+DATABASE_URL=postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/theoshift_scheduler_staging
 EOF
 
 echo 'Making start.sh executable...'
@@ -99,7 +99,7 @@ echo "PHASE 4: Fresh Install and Build"
 echo "================================="
 
 ssh -F "$SSH_CONFIG" jwa "
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 
 echo 'Fresh npm install...'
 npm install
@@ -116,7 +116,7 @@ echo "PHASE 5: Start with Staging Method"
 echo "==================================="
 
 ssh -F "$SSH_CONFIG" jwa "
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 
 echo 'Starting with PM2 using staging method...'
 pm2 start ecosystem.config.js
@@ -133,14 +133,14 @@ echo "==================="
 sleep 20
 
 ssh -F "$SSH_CONFIG" jwa "
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 
 echo 'Testing NextAuth providers:'
 curl -s http://localhost:3001/api/auth/providers | head -3
 
 echo ''
 echo 'Testing from external URL:'
-curl -s https://attendant.cloudigan.net/api/auth/providers | head -3
+curl -s https://theoshift.com/api/auth/providers | head -3
 
 echo ''
 echo 'Testing CSS:'
@@ -155,5 +155,5 @@ pm2 list
 echo ""
 echo "🎉 APEX GUARDIAN: Nuclear Rebuild Complete"
 echo "==========================================="
-echo "Production URL: https://attendant.cloudigan.net"
+echo "Production URL: https://theoshift.com"
 echo "Admin Login: admin@jwscheduler.local / AdminPass123!"

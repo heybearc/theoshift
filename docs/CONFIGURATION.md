@@ -4,14 +4,14 @@
 
 This application uses **two separate configuration systems**:
 
-1. **`.env.production`** - Application environment variables (secrets, URLs, etc.)
+1. **`.env.green`** - Application environment variables (secrets, URLs, etc.)
 2. **`ecosystem.config.js`** - PM2 process manager settings
 
 **CRITICAL:** These must remain separate. Never put environment variables in `ecosystem.config.js`.
 
 ---
 
-## Environment Variables (.env.production)
+## Environment Variables (.env.green)
 
 ### What Goes Here
 - Database URLs
@@ -24,9 +24,9 @@ This application uses **two separate configuration systems**:
 ```bash
 NODE_ENV=production
 DATABASE_URL="postgresql://user:pass@host:5432/db"
-NEXTAUTH_URL="https://attendant.cloudigan.net"
+NEXTAUTH_URL="https://theoshift.com"
 NEXTAUTH_SECRET="your-secret-here"
-UPLOAD_DIR="/opt/jw-attendant-scheduler/public/uploads"
+UPLOAD_DIR="/opt/theoshift/public/uploads"
 ```
 
 ### Important Notes
@@ -49,7 +49,7 @@ UPLOAD_DIR="/opt/jw-attendant-scheduler/public/uploads"
 ```javascript
 module.exports = {
   apps: [{
-    name: 'jw-attendant',
+    name: 'theoshift-green',
     script: 'npm',
     args: 'start -- --port 3001',
     instances: 1,
@@ -62,7 +62,7 @@ module.exports = {
 ### Important Notes
 - ✅ This file is in `.gitignore` (server-specific)
 - ✅ Use `ecosystem.config.template.js` as a starting point
-- ❌ **NEVER add `env:` object here** - use `.env.production` instead
+- ❌ **NEVER add `env:` object here** - use `.env.green` instead
 
 ---
 
@@ -96,9 +96,9 @@ This checks for:
    cp ecosystem.config.template.js ecosystem.config.js
    ```
 
-2. **Verify .env.production exists**
+2. **Verify .env.green exists**
    ```bash
-   ls -la .env.production
+   ls -la .env.green
    ```
 
 3. **Validate configuration**
@@ -119,17 +119,17 @@ This checks for:
 ### Authentication Fails
 **Symptom:** "Invalid credentials" error
 
-**Cause:** `NEXTAUTH_SECRET` mismatch between what's in `.env.production` and what was used to create password hashes
+**Cause:** `NEXTAUTH_SECRET` mismatch between what's in `.env.green` and what was used to create password hashes
 
 **Fix:**
-1. Check `.env.production` has correct `NEXTAUTH_SECRET`
+1. Check `.env.green` has correct `NEXTAUTH_SECRET`
 2. Ensure `ecosystem.config.js` has NO `env:` object
 3. Restart PM2: `pm2 restart all`
 
 ### Environment Variables Not Loading
 **Symptom:** App can't connect to database or other services
 
-**Cause:** `ecosystem.config.js` has `env:` object that's overriding `.env.production`
+**Cause:** `ecosystem.config.js` has `env:` object that's overriding `.env.green`
 
 **Fix:**
 1. Run `npm run validate-config`
@@ -141,14 +141,14 @@ This checks for:
 ## Best Practices
 
 ### ✅ DO
-- Keep all secrets in `.env.production`
+- Keep all secrets in `.env.green`
 - Use `ecosystem.config.template.js` as a starting point
 - Run `npm run validate-config` before deploying
 - Document any new environment variables
 
 ### ❌ DON'T
 - Put environment variables in `ecosystem.config.js`
-- Commit `.env.production` or `ecosystem.config.js` to git
+- Commit `.env.green` or `ecosystem.config.js` to git
 - Duplicate variables between files
 - Skip validation before deployment
 

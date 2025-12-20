@@ -29,7 +29,7 @@ async function wmacsFinalDiagnosis() {
 
     // Check if middleware.ts is being compiled
     console.log('\n🔨 Step 4: Check if middleware is compiled');
-    const middlewareCheck = await execAsync('ssh root@10.92.3.24 "find /opt/jw-attendant-scheduler/current -name \'*middleware*\' -type f"');
+    const middlewareCheck = await execAsync('ssh root@10.92.3.24 "find /opt/theoshift/current -name \'*middleware*\' -type f"');
     console.log('Middleware files:');
     console.log(middlewareCheck.stdout);
 

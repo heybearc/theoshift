@@ -121,7 +121,7 @@ async function testPositionsSystem() {
     console.log('\n🛡️ POSITIONS SYSTEM TEST COMPLETE')
     console.log('==================================')
     console.log('READY FOR TESTING:')
-    console.log(`1. Go to: https://jw-staging.cloudigan.net/events/${testEventId}/positions`)
+    console.log(`1. Go to: https://blue.theoshift.com/events/${testEventId}/positions`)
     console.log('2. Test individual position creation')
     console.log('3. Test bulk position creation with Circuit Assembly template')
     console.log('4. Verify positions appear in event details')

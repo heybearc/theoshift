@@ -11,7 +11,7 @@ const WMACSTerminalStabilizer = require('./wmacs-terminal-stabilizer.js');
 class WMACsCICDDeployment {
   constructor() {
     this.stabilizer = new WMACSTerminalStabilizer();
-    this.projectName = 'jw-attendant-scheduler';
+    this.projectName = 'theoshift';
     this.stagingContainer = '134';
     this.stagingIP = '10.92.3.24';
     this.productionContainer = '132';
@@ -80,7 +80,7 @@ class WMACsCICDDeployment {
       
       // Step 6: Database setup
       console.log('\n🗄️ Step 6: Database setup');
-      const dbUrl = `postgresql://jw_scheduler_staging:Cloudy_92!@${this.dbIP}:5432/jw_attendant_scheduler_staging`;
+      const dbUrl = `postgresql://jw_scheduler_staging:Cloudy_92!@${this.dbIP}:5432/theoshift_scheduler_staging`;
       
       await this.executeStableCommand(
         `ssh root@${this.stagingIP} "cd /opt/${this.projectName}/current && DATABASE_URL='${dbUrl}' npx prisma generate"`,

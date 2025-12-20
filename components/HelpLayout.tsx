@@ -33,7 +33,7 @@ export default function HelpLayout({ children, title }: HelpLayoutProps) {
                 </div>
                 <div className="ml-3">
                   <h1 className="text-lg font-semibold text-gray-900">
-                    {title || 'JW Attendant Scheduler'}
+                    {title || 'Theocratic Shift Scheduler'}
                   </h1>
                 </div>
               </Link>
@@ -111,7 +111,7 @@ export default function HelpLayout({ children, title }: HelpLayoutProps) {
       <footer className="bg-white border-t border-gray-200 mt-12">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <div className="text-center text-sm text-gray-500">
-            <p>JW Attendant Scheduler v{packageJson.version}</p>
+            <p>Theocratic Shift Scheduler v{packageJson.version}</p>
             <p className="mt-1">Secure Event Management System</p>
           </div>
         </div>

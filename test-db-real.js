@@ -7,7 +7,7 @@ async function testRealDatabaseConnection() {
   const prisma = new PrismaClient({
     datasources: {
       db: {
-        url: 'postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/jw_attendant_scheduler_staging'
+        url: 'postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/theoshift_scheduler_staging'
       }
     }
   })

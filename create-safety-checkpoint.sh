@@ -31,11 +31,11 @@ print_success "Git tag created: safe-$TIMESTAMP"
 print_status "Creating filesystem backup on staging server..."
 ssh jws "
     cd /opt
-    if [ -d jw-attendant-scheduler ]; then
-        cp -r jw-attendant-scheduler jw-attendant-scheduler.backup.$TIMESTAMP
-        echo 'Backup created: /opt/jw-attendant-scheduler.backup.$TIMESTAMP'
+    if [ -d theoshift ]; then
+        cp -r theoshift theoshift.backup.$TIMESTAMP
+        echo 'Backup created: /opt/theoshift.backup.$TIMESTAMP'
     else
-        echo 'ERROR: /opt/jw-attendant-scheduler not found'
+        echo 'ERROR: /opt/theoshift not found'
         exit 1
     fi
 "
@@ -67,7 +67,7 @@ fi
 print_status "Cleaning up old backups..."
 ssh jws "
     cd /opt
-    ls -t jw-attendant-scheduler.backup.* 2>/dev/null | tail -n +6 | xargs rm -rf 2>/dev/null || true
+    ls -t theoshift.backup.* 2>/dev/null | tail -n +6 | xargs rm -rf 2>/dev/null || true
     echo 'Old backups cleaned up (kept 5 most recent)'
 "
 
@@ -79,6 +79,6 @@ echo ""
 echo "ROLLBACK INSTRUCTIONS:"
 echo "- Emergency rollback: ./emergency-rollback.sh"
 echo "- Manual git rollback: git checkout tags/safe-$TIMESTAMP"
-echo "- Manual filesystem rollback: ssh jws 'mv /opt/jw-attendant-scheduler.backup.$TIMESTAMP /opt/jw-attendant-scheduler'"
+echo "- Manual filesystem rollback: ssh jws 'mv /opt/theoshift.backup.$TIMESTAMP /opt/theoshift'"
 echo ""
 echo "✅ You can now safely proceed with staging development"

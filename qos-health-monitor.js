@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * QOS Health Monitor for JW Attendant Scheduler Staging
+ * QOS Health Monitor for Theocratic Shift Scheduler Staging
  * Monitors staging server health and catches deployment issues
  */
 

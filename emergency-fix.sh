@@ -18,20 +18,20 @@ rsync -avz --timeout=30 \
   --exclude .git \
   --exclude .next \
   -e "ssh -F $SSH_CONFIG" \
-  ./ "$PROD_SERVER:/opt/jw-attendant-scheduler/"
+  ./ "$PROD_SERVER:/opt/theoshift/"
 
 # Step 3: Set up environment
 echo "3. Setting up production environment..."
 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 
 # Create proper .env
 cat > .env << 'EOF'
 NODE_ENV=production
 PORT=3001
 HOSTNAME=0.0.0.0
-DATABASE_URL=\"postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler\"
-NEXTAUTH_URL=\"https://attendant.cloudigan.net\"
+DATABASE_URL=\"postgresql://theoshift_user:jw_password@10.92.3.21:5432/theoshift_scheduler\"
+NEXTAUTH_URL=\"https://theoshift.com\"
 NEXTAUTH_SECRET=\"$(openssl rand -hex 32)\"
 EOF
 
@@ -41,7 +41,7 @@ echo 'Environment configured'
 # Step 4: Install and build
 echo "4. Installing dependencies and building..."
 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 
 # Install dependencies
 npm install
@@ -58,11 +58,11 @@ echo 'Build completed'
 # Step 5: Start with PM2
 echo "5. Starting with PM2..."
 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 
 # Start with PM2
-pm2 delete jw-attendant || true
-pm2 start npm --name 'jw-attendant' -- start
+pm2 delete theoshift-green || true
+pm2 start npm --name 'theoshift-green' -- start
 
 echo 'Application started'
 "
@@ -83,4 +83,4 @@ curl -I http://localhost:3001 2>/dev/null | head -3
 
 echo ""
 echo "🎯 Emergency fix complete!"
-echo "Test: https://attendant.cloudigan.net"
+echo "Test: https://theoshift.com"

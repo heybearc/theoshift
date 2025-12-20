@@ -8,7 +8,7 @@ SSH_CONFIG="/Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant"
 
 # Rebuild with proper CSS processing
 timeout 60 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
-    cd /opt/jw-attendant-scheduler
+    cd /opt/theoshift
     
     # Clean build cache
     rm -rf .next/

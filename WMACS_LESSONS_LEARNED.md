@@ -1,4 +1,4 @@
-# APEX LESSONS LEARNED - JW ATTENDANT SCHEDULER
+# APEX LESSONS LEARNED - THEOCRATIC SHIFT SCHEDULER
 ## Critical Development Insights & Rule Violations
 
 **📅 Date:** September 23, 2025  

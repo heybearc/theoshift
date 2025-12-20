@@ -1,5 +1,5 @@
 # Blue-Green Deployment MCP Server
-**One-Command Deployment for JW Attendant Scheduler**
+**One-Command Deployment for Theocratic Shift Scheduler**
 
 ---
 
@@ -17,14 +17,14 @@ This MCP server provides three powerful tools for blue-green deployment:
 
 ### **MCP Server Location:**
 ```
-/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-blue-green/
+/Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-blue-green/
 ```
 
 ### **Windsurf Configuration:**
 ```json
 "jw-blue-green-deployment": {
     "command": "node",
-    "args": ["/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-blue-green/server.js"],
+    "args": ["/Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-blue-green/server.js"],
     "env": {
         "NODE_ENV": "production"
     }
@@ -185,7 +185,7 @@ New STANDBY: BLUE (10.92.3.22)
 
 Switch #6 completed at 2025-10-25T12:30:00.000Z
 
-Production URL: https://attendant.cloudigan.net
+Production URL: https://theoshift.com
 HAProxy Stats: http://10.92.3.26:8404
 ```
 
@@ -222,7 +222,7 @@ Cascade: [Shows GREEN is PROD, BLUE is STANDBY]
 ## 🔧 **TECHNICAL DETAILS**
 
 ### **State Management:**
-- State file: `/tmp/jw-deployment-state.json`
+- State file: `/tmp/theoshift-deployment-state.json`
 - Tracks: current PROD, STANDBY, switch history
 - Syncs with HAProxy configuration
 
@@ -233,8 +233,8 @@ Cascade: [Shows GREEN is PROD, BLUE is STANDBY]
 
 ### **Server Configuration:**
 ```javascript
-BLUE_IP = '10.92.3.22'      // Container 132
-GREEN_IP = '10.92.3.24'     // Container 134
+BLUE_IP = '10.92.3.22'      // Container 132 (green-theoshift)
+GREEN_IP = '10.92.3.24'     // Container 134 (blue-theoshift)
 HAPROXY_IP = '10.92.3.26'   // Container 136
 DB_IP = '10.92.3.21'        // Container 131
 ```
@@ -270,11 +270,11 @@ Cascade: [Immediately switches back to previous PROD]
 ### **Manual (Old Way):**
 ```bash
 # 1. Check status
-ssh jwg "pm2 status"
-ssh jwa "pm2 status"
+ssh blue-theoshift "pm2 status"
+ssh green-theoshift "pm2 status"
 
 # 2. Deploy
-ssh jwg "cd /opt/jw-attendant-scheduler && git pull && npm install && npm run build && pm2 restart jw-attendant"
+ssh blue-theoshift "cd /opt/theoshift && git pull && npm install && npm run build && pm2 restart theoshift-green"
 
 # 3. Test
 curl http://10.92.3.24:3001/api/health

@@ -12,7 +12,7 @@ class WMACSDBVerifier {
     this.dbConfig = {
       host: '10.92.3.21',
       port: 5432,
-      database: 'jw_attendant_scheduler_staging',
+      database: 'theoshift_scheduler_staging',
       user: 'jw_scheduler_staging',
       password: 'jw_password'
     };
@@ -45,7 +45,7 @@ class WMACSDBVerifier {
   async testConnectivity() {
     console.log('🔍 Testing database connectivity...');
     
-    const result = await execAsync(`ssh jws "cd /opt/jw-attendant-scheduler && PGPASSWORD=${this.dbConfig.password} psql -h ${this.dbConfig.host} -U ${this.dbConfig.user} -d ${this.dbConfig.database} -c 'SELECT 1;'"`);
+    const result = await execAsync(`ssh jws "cd /opt/theoshift && PGPASSWORD=${this.dbConfig.password} psql -h ${this.dbConfig.host} -U ${this.dbConfig.user} -d ${this.dbConfig.database} -c 'SELECT 1;'"`);
     
     if (result.stdout.includes('1')) {
       console.log('   ✅ Database connection successful');
@@ -57,7 +57,7 @@ class WMACSDBVerifier {
   async testUserTable() {
     console.log('🔍 Testing user table structure...');
     
-    const result = await execAsync(`ssh jws "cd /opt/jw-attendant-scheduler && PGPASSWORD=${this.dbConfig.password} psql -h ${this.dbConfig.host} -U ${this.dbConfig.user} -d ${this.dbConfig.database} -c 'SELECT COUNT(*) FROM users;'"`);
+    const result = await execAsync(`ssh jws "cd /opt/theoshift && PGPASSWORD=${this.dbConfig.password} psql -h ${this.dbConfig.host} -U ${this.dbConfig.user} -d ${this.dbConfig.database} -c 'SELECT COUNT(*) FROM users;'"`);
     
     const userCount = result.stdout.match(/\d+/)?.[0];
     if (userCount && parseInt(userCount) > 0) {
@@ -70,7 +70,7 @@ class WMACSDBVerifier {
   async testAdminUser() {
     console.log('🔍 Testing admin user...');
     
-    const result = await execAsync(`ssh jws "cd /opt/jw-attendant-scheduler && PGPASSWORD=${this.dbConfig.password} psql -h ${this.dbConfig.host} -U ${this.dbConfig.user} -d ${this.dbConfig.database} -c \\"SELECT email, role FROM users WHERE email = 'admin@jwscheduler.local';\\""`);
+    const result = await execAsync(`ssh jws "cd /opt/theoshift && PGPASSWORD=${this.dbConfig.password} psql -h ${this.dbConfig.host} -U ${this.dbConfig.user} -d ${this.dbConfig.database} -c \\"SELECT email, role FROM users WHERE email = 'admin@jwscheduler.local';\\""`);
     
     if (result.stdout.includes('admin@jwscheduler.local') && result.stdout.includes('ADMIN')) {
       console.log('   ✅ Admin user exists with correct role');
@@ -82,7 +82,7 @@ class WMACSDBVerifier {
   async testPasswordHashes() {
     console.log('🔍 Testing password hash integrity...');
     
-    const result = await execAsync(`ssh jws "cd /opt/jw-attendant-scheduler && PGPASSWORD=${this.dbConfig.password} psql -h ${this.dbConfig.host} -U ${this.dbConfig.user} -d ${this.dbConfig.database} -c \\"SELECT email, LENGTH(\\\\\\\"passwordHash\\\\\\\") as hash_length, SUBSTRING(\\\\\\\"passwordHash\\\\\\\", 1, 4) as hash_prefix FROM users WHERE \\\\\\\"passwordHash\\\\\\\" IS NOT NULL;\\""`);
+    const result = await execAsync(`ssh jws "cd /opt/theoshift && PGPASSWORD=${this.dbConfig.password} psql -h ${this.dbConfig.host} -U ${this.dbConfig.user} -d ${this.dbConfig.database} -c \\"SELECT email, LENGTH(\\\\\\\"passwordHash\\\\\\\") as hash_length, SUBSTRING(\\\\\\\"passwordHash\\\\\\\", 1, 4) as hash_prefix FROM users WHERE \\\\\\\"passwordHash\\\\\\\" IS NOT NULL;\\""`);
     
     const lines = result.stdout.split('\n').filter(line => line.includes('@'));
     let validHashes = 0;
@@ -116,11 +116,11 @@ class WMACSDBVerifier {
     console.log(`🔧 Fixing password hash for ${email}...`);
     
     // Generate new bcrypt hash
-    const hashResult = await execAsync(`ssh jws "cd /opt/jw-attendant-scheduler && node -e \\"const bcrypt = require('bcryptjs'); bcrypt.hash('${plainPassword}', 12).then(hash => console.log(hash));\\""`);
+    const hashResult = await execAsync(`ssh jws "cd /opt/theoshift && node -e \\"const bcrypt = require('bcryptjs'); bcrypt.hash('${plainPassword}', 12).then(hash => console.log(hash));\\""`);
     const newHash = hashResult.stdout.trim();
     
     // Update database
-    const updateResult = await execAsync(`ssh jws "cd /opt/jw-attendant-scheduler && PGPASSWORD=${this.dbConfig.password} psql -h ${this.dbConfig.host} -U ${this.dbConfig.user} -d ${this.dbConfig.database} -c \\"UPDATE users SET \\\\\\\"passwordHash\\\\\\\" = '${newHash}' WHERE email = '${email}';\\""`);
+    const updateResult = await execAsync(`ssh jws "cd /opt/theoshift && PGPASSWORD=${this.dbConfig.password} psql -h ${this.dbConfig.host} -U ${this.dbConfig.user} -d ${this.dbConfig.database} -c \\"UPDATE users SET \\\\\\\"passwordHash\\\\\\\" = '${newHash}' WHERE email = '${email}';\\""`);
     
     if (updateResult.stdout.includes('UPDATE 1')) {
       console.log(`   ✅ Password hash updated for ${email}`);

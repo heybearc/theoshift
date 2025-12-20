@@ -1,4 +1,4 @@
-# JW Attendant Scheduler - Clean Slate Rebuild Plan
+# Theocratic Shift Scheduler - Clean Slate Rebuild Plan
 
 ## 🎯 OBJECTIVE
 Eliminate Flask→Django→NextJS migration debt and create a clean, maintainable codebase.
@@ -38,7 +38,7 @@ docker-compose.yml (if exists)
 ssh root@10.92.3.24 "systemctl stop nginx && pkill -f npm"
 
 # Wipe application directory
-ssh root@10.92.3.24 "rm -rf /opt/jw-attendant-scheduler/*"
+ssh root@10.92.3.24 "rm -rf /opt/theoshift/*"
 
 # Clean package caches
 ssh root@10.92.3.24 "npm cache clean --force"

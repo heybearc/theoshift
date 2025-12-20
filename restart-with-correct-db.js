@@ -8,16 +8,16 @@ async function restartApplicationWithCorrectDB() {
     
     // Stop current application
     console.log('⏹️ Stopping current application...');
-    await wmacs.executeCommand('10.92.3.24', 'pkill -f "npm start"', 'Stop current JW Attendant Scheduler application');
+    await wmacs.executeCommand('10.92.3.24', 'pkill -f "npm start"', 'Stop current Theocratic Shift Scheduler application');
     
     // Wait a moment for graceful shutdown
     await new Promise(resolve => setTimeout(resolve, 3000));
     
     // Start application with correct DATABASE_URL
     console.log('🚀 Starting application with correct database credentials...');
-    const startCommand = `cd /opt/jw-attendant-scheduler/current && DATABASE_URL='postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/jw_attendant_scheduler_staging' JWT_SECRET="$(openssl rand -hex 32)" NODE_ENV=production nohup npm start -- -p 3001 > /var/log/jw-attendant-scheduler.log 2>&1 &`;
+    const startCommand = `cd /opt/theoshift/current && DATABASE_URL='postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/theoshift_scheduler_staging' JWT_SECRET="$(openssl rand -hex 32)" NODE_ENV=production nohup npm start -- -p 3001 > /var/log/theoshift.log 2>&1 &`;
     
-    await wmacs.executeCommand('10.92.3.24', startCommand, 'Start JW Attendant Scheduler with correct database credentials');
+    await wmacs.executeCommand('10.92.3.24', startCommand, 'Start Theocratic Shift Scheduler with correct database credentials');
     
     // Wait for application to start
     await new Promise(resolve => setTimeout(resolve, 5000));
@@ -28,7 +28,7 @@ async function restartApplicationWithCorrectDB() {
     
     // Check application logs
     console.log('📋 Checking application logs...');
-    await wmacs.executeCommand('10.92.3.24', 'tail -20 /var/log/jw-attendant-scheduler.log', 'Check application startup logs');
+    await wmacs.executeCommand('10.92.3.24', 'tail -20 /var/log/theoshift.log', 'Check application startup logs');
     
     console.log('✅ WMACS restart completed successfully!');
     

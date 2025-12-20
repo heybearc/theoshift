@@ -10,7 +10,7 @@ const execAsync = promisify(exec);
 class WMACSRedirectLoopFix {
   constructor() {
     this.productionServer = '10.92.3.22';
-    this.productionPath = '/opt/jw-attendant-nextjs';
+    this.productionPath = '/opt/theoshift-green-nextjs';
     this.productionUrl = 'http://10.92.3.22:3001';
   }
 
@@ -43,7 +43,7 @@ class WMACSRedirectLoopFix {
     console.log('🛑 Step 1: Stopping Service');
     
     try {
-      await execAsync(`ssh root@${this.productionServer} "systemctl stop jw-attendant-nextjs"`);
+      await execAsync(`ssh root@${this.productionServer} "systemctl stop theoshift-green-nextjs"`);
       console.log('   ✅ Service stopped');
     } catch (error) {
       console.log('   ⚠️  Service stop failed:', error.message);
@@ -71,7 +71,7 @@ class WMACSRedirectLoopFix {
     
     try {
       // Create clean production .env
-      const envConfig = `DATABASE_URL=postgresql://jw_scheduler:jw_password@10.92.3.21:5432/jw_attendant_scheduler
+      const envConfig = `DATABASE_URL=postgresql://jw_scheduler:jw_password@10.92.3.21:5432/theoshift_scheduler
 NEXTAUTH_SECRET=production-nextauth-secret-2024-secure-fixed
 NEXTAUTH_URL=http://10.92.3.22:3001
 NODE_ENV=production
@@ -85,7 +85,7 @@ EOF"`);
       console.log('   ✅ Environment configuration updated');
       
       // Remove any conflicting env files
-      await execAsync(`ssh root@${this.productionServer} "cd ${this.productionPath} && rm -f .env.local .env.production"`);
+      await execAsync(`ssh root@${this.productionServer} "cd ${this.productionPath} && rm -f .env.local .env.green"`);
       console.log('   ✅ Conflicting env files removed');
       
     } catch (error) {
@@ -102,9 +102,9 @@ EOF"`);
       console.log('   📋 Auth config check:', authCheck.stdout.trim());
       
       // Check for any hardcoded domain references
-      const domainCheck = await execAsync(`ssh root@${this.productionServer} "cd ${this.productionPath} && grep -r 'attendant.cloudigan.net' . || echo 'No hardcoded domains found'"`);
+      const domainCheck = await execAsync(`ssh root@${this.productionServer} "cd ${this.productionPath} && grep -r 'theoshift.com' . || echo 'No hardcoded domains found'"`);
       
-      if (domainCheck.stdout.includes('attendant.cloudigan.net')) {
+      if (domainCheck.stdout.includes('theoshift.com')) {
         console.log('   ⚠️  Found hardcoded domain references:');
         console.log(domainCheck.stdout);
         
@@ -143,7 +143,7 @@ EOF"`);
     
     try {
       // Start service
-      await execAsync(`ssh root@${this.productionServer} "systemctl start jw-attendant-nextjs"`);
+      await execAsync(`ssh root@${this.productionServer} "systemctl start theoshift-green-nextjs"`);
       console.log('   ✅ Service started');
       
       // Wait for startup
@@ -158,7 +158,7 @@ EOF"`);
         // Test redirect destination
         const redirectTest = await execAsync(`curl -s '${this.productionUrl}/'`);
         
-        if (redirectTest.stdout.includes('attendant.cloudigan.net')) {
+        if (redirectTest.stdout.includes('theoshift.com')) {
           console.log('   ❌ Still redirecting to external domain');
         } else if (redirectTest.stdout.includes('/api/auth/signin')) {
           console.log('   ✅ Redirecting to correct internal auth page');
@@ -208,10 +208,10 @@ EOF"`);
     console.log('   - Verify no proxy/load balancer interference');
     
     console.log('\n📞 SUPPORT COMMANDS:');
-    console.log('   - Check service: systemctl status jw-attendant-nextjs');
-    console.log('   - View logs: journalctl -u jw-attendant-nextjs -f');
+    console.log('   - Check service: systemctl status theoshift-green-nextjs');
+    console.log('   - View logs: journalctl -u theoshift-green-nextjs -f');
     console.log('   - Test direct: curl -v http://10.92.3.22:3001');
-    console.log('   - Check env: cat /opt/jw-attendant-nextjs/.env');
+    console.log('   - Check env: cat /opt/theoshift-green-nextjs/.env');
   }
 }
 

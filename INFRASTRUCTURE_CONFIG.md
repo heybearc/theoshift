@@ -1,4 +1,4 @@
-# JW ATTENDANT SCHEDULER - IMMUTABLE INFRASTRUCTURE CONFIGURATION
+# THEOCRATIC SHIFT SCHEDULER - IMMUTABLE INFRASTRUCTURE CONFIGURATION
 ## Container and Network Configuration - AUTHORITATIVE SOURCE
 
 **📅 Last Updated:** September 23, 2025  
@@ -15,7 +15,7 @@ Container ID: 134
 IP Address: 10.92.3.24
 Port: 3001
 Purpose: Development and testing
-URL: https://jw-staging.cloudigan.net
+URL: https://blue.theoshift.com
 SSH: ssh root@10.92.3.24
 ```
 
@@ -25,7 +25,7 @@ Container ID: 132
 IP Address: 10.92.3.22
 Port: 3001
 Purpose: Live application
-URL: https://jw-production.cloudigan.net
+URL: https://green.theoshift.com
 SSH: ssh root@10.92.3.22
 ```
 
@@ -51,19 +51,19 @@ Local Development → Staging (134/10.92.3.24) → Production (132/10.92.3.22)
 ### **DEPLOYMENT COMMANDS:**
 ```bash
 # Deploy to Staging
-ssh root@10.92.3.24 "cd /opt/jw-attendant-scheduler && git pull origin staging && npm install && npm run dev -- --port 3001"
+ssh root@10.92.3.24 "cd /opt/theoshift && git pull origin staging && npm install && npm run dev -- --port 3001"
 
 # Deploy to Production  
-ssh root@10.92.3.22 "cd /opt/jw-attendant-scheduler && git pull origin main && npm install && npm run build && npm start -- --port 3001"
+ssh root@10.92.3.22 "cd /opt/theoshift && git pull origin main && npm install && npm run build && npm start -- --port 3001"
 ```
 
 ### **DATABASE CONNECTION:**
 ```bash
 # From Staging
-DATABASE_URL="postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler"
+DATABASE_URL="postgresql://theoshift_user:jw_password@10.92.3.21:5432/theoshift_scheduler"
 
 # From Production
-DATABASE_URL="postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler"
+DATABASE_URL="postgresql://theoshift_user:jw_password@10.92.3.21:5432/theoshift_scheduler"
 ```
 
 ---
@@ -72,10 +72,10 @@ DATABASE_URL="postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_sche
 
 ### **CONTAINER VERIFICATION COMMANDS:**
 ```bash
-# Verify Staging (Container 134)
+# Verify Staging (Container 134 (blue-theoshift))
 ssh root@10.92.3.24 "hostname && ip addr show | grep '10.92.3.24'"
 
-# Verify Production (Container 132)  
+# Verify Production (Container 132 (green-theoshift))  
 ssh root@10.92.3.22 "hostname && ip addr show | grep '10.92.3.22'"
 
 # Verify Database (Container 131)
@@ -98,23 +98,23 @@ ssh root@10.92.3.21 "sudo -u postgres psql -c '\l' | grep jw_attendant"
 
 ## 📊 ENVIRONMENT VARIABLES
 
-### **STAGING (.env.staging):**
+### **STAGING (.env.blue):**
 ```env
 NODE_ENV=development
 PORT=3001
-NEXTAUTH_URL=https://jw-staging.cloudigan.net
-NEXT_PUBLIC_APP_URL=https://jw-staging.cloudigan.net
-DATABASE_URL=postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler
+NEXTAUTH_URL=https://blue.theoshift.com
+NEXT_PUBLIC_APP_URL=https://blue.theoshift.com
+DATABASE_URL=postgresql://theoshift_user:jw_password@10.92.3.21:5432/theoshift_scheduler
 NEXTAUTH_SECRET=staging-secret-2024-secure-fqdn
 ```
 
-### **PRODUCTION (.env.production):**
+### **PRODUCTION (.env.green):**
 ```env
 NODE_ENV=production
 PORT=3001
-NEXTAUTH_URL=https://jw-production.cloudigan.net
-NEXT_PUBLIC_APP_URL=https://jw-production.cloudigan.net
-DATABASE_URL=postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler
+NEXTAUTH_URL=https://green.theoshift.com
+NEXT_PUBLIC_APP_URL=https://green.theoshift.com
+DATABASE_URL=postgresql://theoshift_user:jw_password@10.92.3.21:5432/theoshift_scheduler
 NEXTAUTH_SECRET=production-secret-2024-secure-fqdn
 ```
 
@@ -150,10 +150,10 @@ NEXTAUTH_SECRET=production-secret-2024-secure-fqdn
 ### **RECOVERY COMMANDS:**
 ```bash
 # Restart Staging Application
-ssh root@10.92.3.24 "cd /opt/jw-attendant-scheduler && pkill -f 'next.*3001' && npm run dev -- --port 3001"
+ssh root@10.92.3.24 "cd /opt/theoshift && pkill -f 'next.*3001' && npm run dev -- --port 3001"
 
 # Restart Production Application  
-ssh root@10.92.3.22 "cd /opt/jw-attendant-scheduler && pkill -f 'next.*3001' && npm start -- --port 3001"
+ssh root@10.92.3.22 "cd /opt/theoshift && pkill -f 'next.*3001' && npm start -- --port 3001"
 
 # Check Database Status
 ssh root@10.92.3.21 "systemctl status postgresql && sudo -u postgres psql -c 'SELECT version();'"

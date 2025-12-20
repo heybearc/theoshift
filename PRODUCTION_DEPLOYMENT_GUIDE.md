@@ -1,7 +1,7 @@
-# 🚀 JW Attendant Scheduler - Production Deployment Guide
+# 🚀 Theocratic Shift Scheduler - Production Deployment Guide
 
 ## **Target Environment**
-- **Production URL**: `https://attendant.cloudigan.net`
+- **Production URL**: `https://theoshift.com`
 - **Server**: `jwa` (10.92.3.22)
 - **Database**: PostgreSQL on `10.92.3.21:5432`
 - **Deployment Method**: APEX CI/CD with Nuclear Database Option
@@ -56,16 +56,16 @@ After deployment, manually verify:
 
 ```bash
 # Check application is running
-curl https://attendant.cloudigan.net
+curl https://theoshift.com
 
 # Check admin panel
-curl https://attendant.cloudigan.net/admin
+curl https://theoshift.com/admin
 
 # Check help system
-curl https://attendant.cloudigan.net/help
+curl https://theoshift.com/help
 
 # Check feedback system
-curl https://attendant.cloudigan.net/help/feedback
+curl https://theoshift.com/help/feedback
 ```
 
 ---
@@ -73,8 +73,8 @@ curl https://attendant.cloudigan.net/help/feedback
 ## **🔐 Default Credentials**
 
 ### **Admin Access**
-- **URL**: `https://attendant.cloudigan.net/admin`
-- **Email**: `admin@attendant.cloudigan.net`
+- **URL**: `https://theoshift.com/admin`
+- **Email**: `admin@theoshift.com`
 - **Password**: `admin123`
 
 ⚠️ **Change default password immediately after first login!**
@@ -95,8 +95,8 @@ The deployment uses a "nuclear" approach:
 ```
 Host: 10.92.3.21
 Port: 5432
-Database: jw_attendant_scheduler
-User: jw_user
+Database: theoshift_scheduler
+User: theoshift_user
 Password: jw_password
 ```
 
@@ -106,7 +106,7 @@ Password: jw_password
 
 ### **Upload Directories**
 ```
-/opt/jw-attendant-scheduler/public/uploads/
+/opt/theoshift/public/uploads/
 ├── feedback/          # Feedback attachments
 └── [future uploads]   # Other file types
 ```
@@ -121,7 +121,7 @@ Password: jw_password
 ## **🎯 Feature Verification Checklist**
 
 ### **✅ Core Application**
-- [ ] Main page loads (`https://attendant.cloudigan.net`)
+- [ ] Main page loads (`https://theoshift.com`)
 - [ ] Admin login works (`/admin`)
 - [ ] User authentication functional
 - [ ] Event management accessible
@@ -184,10 +184,10 @@ Password: jw_password
 ### **Log Monitoring**
 ```bash
 # Application logs
-ssh -F ssh_config_jw_attendant jwa 'tail -f /opt/jw-attendant-scheduler/production.log'
+ssh -F ssh_config_jw_attendant jwa 'tail -f /opt/theoshift/production.log'
 
 # PM2 logs (if using PM2)
-ssh -F ssh_config_jw_attendant jwa 'pm2 logs jw-attendant'
+ssh -F ssh_config_jw_attendant jwa 'pm2 logs theoshift-green'
 
 # System logs
 ssh -F ssh_config_jw_attendant jwa 'journalctl -u nginx -f'
@@ -196,13 +196,13 @@ ssh -F ssh_config_jw_attendant jwa 'journalctl -u nginx -f'
 ### **Health Checks**
 ```bash
 # Application health
-curl -f https://attendant.cloudigan.net/api/health
+curl -f https://theoshift.com/api/health
 
 # Database connectivity
-ssh -F ssh_config_jw_attendant jwa 'cd /opt/jw-attendant-scheduler && npx prisma db pull'
+ssh -F ssh_config_jw_attendant jwa 'cd /opt/theoshift && npx prisma db pull'
 
 # File system permissions
-ssh -F ssh_config_jw_attendant jwa 'ls -la /opt/jw-attendant-scheduler/public/uploads/'
+ssh -F ssh_config_jw_attendant jwa 'ls -la /opt/theoshift/public/uploads/'
 ```
 
 ---
@@ -223,12 +223,12 @@ ssh -F ssh_config_jw_attendant jwa
 pkill -f 'npm|node|next' || true
 
 # Restore from backup
-BACKUP_DIR="/opt/backups/jw-attendant-[timestamp]"
-cd /opt/jw-attendant-scheduler
+BACKUP_DIR="/opt/backups/theoshift-green-[timestamp]"
+cd /opt/theoshift
 cp $BACKUP_DIR/* . -r
 
 # Restore database
-psql -h 10.92.3.21 -U jw_user -d jw_attendant_scheduler < $BACKUP_DIR/database_backup.sql
+psql -h 10.92.3.21 -U theoshift_user -d theoshift_scheduler < $BACKUP_DIR/database_backup.sql
 
 # Restart services
 npm start
@@ -243,10 +243,10 @@ npm start
 #### **Application Won't Start**
 ```bash
 # Check logs
-tail -f /opt/jw-attendant-scheduler/production.log
+tail -f /opt/theoshift/production.log
 
 # Check dependencies
-cd /opt/jw-attendant-scheduler && npm install
+cd /opt/theoshift && npm install
 
 # Check environment
 cat .env
@@ -255,20 +255,20 @@ cat .env
 #### **Database Connection Issues**
 ```bash
 # Test database connection
-psql -h 10.92.3.21 -U jw_user -d jw_attendant_scheduler -c "SELECT 1;"
+psql -h 10.92.3.21 -U theoshift_user -d theoshift_scheduler -c "SELECT 1;"
 
 # Check Prisma connection
-cd /opt/jw-attendant-scheduler && npx prisma db pull
+cd /opt/theoshift && npx prisma db pull
 ```
 
 #### **File Upload Issues**
 ```bash
 # Check upload directory permissions
-ls -la /opt/jw-attendant-scheduler/public/uploads/
+ls -la /opt/theoshift/public/uploads/
 
 # Fix permissions if needed
-chmod 755 /opt/jw-attendant-scheduler/public/uploads/
-chmod 755 /opt/jw-attendant-scheduler/public/uploads/feedback/
+chmod 755 /opt/theoshift/public/uploads/
+chmod 755 /opt/theoshift/public/uploads/feedback/
 ```
 
 ---
@@ -276,7 +276,7 @@ chmod 755 /opt/jw-attendant-scheduler/public/uploads/feedback/
 ## **📞 Support Contacts**
 
 ### **Technical Issues**
-- Use the feedback system at `https://attendant.cloudigan.net/help/feedback`
+- Use the feedback system at `https://theoshift.com/help/feedback`
 - Include screenshots and detailed error descriptions
 - Attach log files when possible
 
@@ -299,4 +299,4 @@ Once all checks pass:
 
 ---
 
-**🎉 Production deployment complete! The JW Attendant Scheduler is now live at https://attendant.cloudigan.net with all new features including the comprehensive feedback system, help documentation, and file upload capabilities.**
+**🎉 Production deployment complete! The Theocratic Shift Scheduler is now live at https://theoshift.com with all new features including the comprehensive feedback system, help documentation, and file upload capabilities.**

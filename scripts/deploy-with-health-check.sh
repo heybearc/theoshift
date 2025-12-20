@@ -20,7 +20,7 @@ else
 fi
 
 SSH_KEY="~/.ssh/jw_staging"
-PROJECT_PATH="/opt/jw-attendant-scheduler"
+PROJECT_PATH="/opt/theoshift"
 
 echo "🚀 APEX GUARDIAN DEPLOYMENT"
 echo "=========================="

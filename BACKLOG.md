@@ -1,4 +1,4 @@
-# JW Attendant Scheduler - Backlog
+# Theocratic Shift Scheduler - Backlog
 
 ## 🐛 Bugs
 
@@ -10,7 +10,7 @@
 **Component**: Infrastructure / Configuration  
 
 #### Problem Description:
-The staging server has a symlink `.env -> .env.staging` which causes environment configuration conflicts. When both `.env.local` and `.env.staging` exist, the symlink causes `.env.staging` to override `.env.local`, leading to incorrect database credentials being used.
+The staging server has a symlink `.env -> .env.blue` which causes environment configuration conflicts. When both `.env.local` and `.env.blue` exist, the symlink causes `.env.blue` to override `.env.local`, leading to incorrect database credentials being used.
 
 #### Current Impact:
 - Database authentication failures
@@ -19,24 +19,24 @@ The staging server has a symlink `.env -> .env.staging` which causes environment
 - Requires manual intervention after each deployment
 
 #### Root Cause:
-1. Server has symlink: `.env -> .env.staging`
+1. Server has symlink: `.env -> .env.blue`
 2. Next.js loads environment files in this order:
    - `.env.local` (should have highest priority for local overrides)
-   - `.env.staging` (environment-specific)
+   - `.env.blue` (environment-specific)
    - `.env` (base configuration)
-3. Symlink causes `.env` to point to `.env.staging`, creating conflicts
+3. Symlink causes `.env` to point to `.env.blue`, creating conflicts
 
 #### Current Workaround:
-- Manually ensure `.env.staging` has correct credentials
-- Update both `.env.local` and `.env.staging` with same values
+- Manually ensure `.env.blue` has correct credentials
+- Update both `.env.local` and `.env.blue` with same values
 - Restart application after each environment file change
 
 #### Permanent Fix Needed:
-1. **Remove Symlink**: Delete `.env -> .env.staging` symlink on server
+1. **Remove Symlink**: Delete `.env -> .env.blue` symlink on server
 2. **Standardize Environment Loading**: 
    - Use `.env.local` for local development
-   - Use `.env.staging` for staging server (no symlink)
-   - Use `.env.production` for production server
+   - Use `.env.blue` for staging server (no symlink)
+   - Use `.env.green` for production server
 3. **Update Deployment Scripts**: Ensure proper environment file is used based on deployment target
 4. **Add Validation**: Script to verify correct environment file is loaded on startup
 5. **Documentation**: Document environment file precedence and usage
@@ -44,7 +44,7 @@ The staging server has a symlink `.env -> .env.staging` which causes environment
 #### Files Affected:
 - `.env` (symlink - should be removed)
 - `.env.local` (local development)
-- `.env.staging` (staging environment)
+- `.env.blue` (staging environment)
 - Deployment scripts in `wmacs/` and `apex/`
 
 #### Acceptance Criteria:
@@ -63,11 +63,11 @@ The staging server has a symlink `.env -> .env.staging` which causes environment
 #### Technical Notes:
 ```bash
 # Current problematic setup on server:
-lrwxrwxrwx 1 root root  12 Sep 30 21:51 .env -> .env.staging
+lrwxrwxrwx 1 root root  12 Sep 30 21:51 .env -> .env.blue
 
 # Correct setup should be:
 # No .env symlink
-# Application uses .env.staging directly when NODE_ENV=production
+# Application uses .env.blue directly when NODE_ENV=production
 ```
 
 ---
@@ -403,7 +403,7 @@ The APEX MCP `jw_application_restart` tool reports success but doesn't actually 
 
 #### Workaround:
 ```bash
-ssh root@10.92.3.24 'cd /opt/jw-attendant-scheduler && (PORT=3001 npm start > /dev/null 2>&1 &)'
+ssh root@10.92.3.24 'cd /opt/theoshift && (PORT=3001 npm start > /dev/null 2>&1 &)'
 ```
 
 #### Root Cause Investigation Needed:
@@ -573,7 +573,7 @@ Current system is invite-only (secure), but may need more sophisticated access r
 Next.js production server (`next start`) doesn't automatically load `.env` file, causing environment variables like `NEXTAUTH_URL` and `NEXT_PUBLIC_URL` to be undefined, resulting in localhost redirects.
 
 #### Solution Implemented:
-1. Created `/opt/jw-attendant-scheduler/start-server.sh` script
+1. Created `/opt/theoshift/start-server.sh` script
 2. Script exports environment variables before starting server
 3. Updated server startup process to use the script
 

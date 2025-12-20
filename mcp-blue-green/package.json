@@ -1,7 +1,7 @@
 {
   "name": "jw-blue-green-mcp",
   "version": "1.0.0",
-  "description": "Blue-Green Deployment MCP Server for JW Attendant Scheduler",
+  "description": "Blue-Green Deployment MCP Server for Theocratic Shift Scheduler",
   "main": "server.js",
   "bin": {
     "jw-blue-green-mcp": "./server.js"
@@ -16,7 +16,7 @@
     "mcp",
     "blue-green",
     "deployment",
-    "jw-attendant-scheduler"
+    "theoshift"
   ],
   "author": "Cory Allen",
   "license": "MIT"

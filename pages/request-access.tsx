@@ -13,7 +13,7 @@ export default function RequestAccess() {
               </svg>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Request Access</h1>
-            <p className="text-gray-600">Need access to JW Attendant Scheduler?</p>
+            <p className="text-gray-600">Need access to Theocratic Shift Scheduler?</p>
           </div>
 
           {/* Contact Information */}
@@ -105,7 +105,7 @@ export default function RequestAccess() {
         {/* Footer */}
         <div className="text-center">
           <p className="text-white/80 text-sm">
-            JW Attendant Scheduler • Secure Event Management System
+            Theocratic Shift Scheduler • Secure Event Management System
           </p>
         </div>
       </div>

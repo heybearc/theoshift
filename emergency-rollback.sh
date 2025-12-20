@@ -26,14 +26,14 @@ ssh jws "pkill -f 'next start' || true"
 
 # Method 1: Try filesystem backup restore
 print_status "Attempting filesystem backup restore..."
-LAST_BACKUP=$(ssh jws "ls -t /opt/jw-attendant-scheduler.backup.* 2>/dev/null | head -1" || echo "")
+LAST_BACKUP=$(ssh jws "ls -t /opt/theoshift.backup.* 2>/dev/null | head -1" || echo "")
 
 if [ -n "$LAST_BACKUP" ]; then
     print_status "Found backup: $LAST_BACKUP"
     ssh jws "
-        rm -rf /opt/jw-attendant-scheduler
-        mv '$LAST_BACKUP' /opt/jw-attendant-scheduler
-        cd /opt/jw-attendant-scheduler
+        rm -rf /opt/theoshift
+        mv '$LAST_BACKUP' /opt/theoshift
+        cd /opt/theoshift
         PORT=3001 nohup npm start > /tmp/app.log 2>&1 &
     "
     
@@ -50,7 +50,7 @@ fi
 
 # Method 2: Git-based rollback to last safe tag
 print_status "Attempting git-based rollback..."
-cd /Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler
+cd /Users/cory/Documents/Cloudy-Work/applications/theoshift
 
 # Find last safe tag
 LAST_SAFE_TAG=$(git tag | grep "safe-" | sort -r | head -1)
@@ -116,6 +116,6 @@ echo ""
 echo "EMERGENCY CONTACTS:"
 echo "- Check server logs: ssh jws 'tail -50 /tmp/app.log'"
 echo "- Check server status: ssh jws 'ps aux | grep next'"
-echo "- Manual restart: ssh jws 'cd /opt/jw-attendant-scheduler && PORT=3001 nohup npm start > /tmp/app.log 2>&1 &'"
+echo "- Manual restart: ssh jws 'cd /opt/theoshift && PORT=3001 nohup npm start > /tmp/app.log 2>&1 &'"
 
 exit 1

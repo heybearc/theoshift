@@ -123,7 +123,7 @@ export default function SessionsManagement() {
   return (
     <>
       <Head>
-        <title>Session Management | JW Attendant Scheduler</title>
+        <title>Session Management | Theocratic Shift Scheduler</title>
       </Head>
 
       <div className="min-h-screen bg-gray-50">

@@ -32,7 +32,7 @@ ssh jw-staging
 # OR directly: ssh root@10.92.3.24
 
 # Navigate to application directory (per workflow specs)
-cd /opt/jw-attendant-staging
+cd /opt/theoshift-green-staging
 ```
 
 ### Step 2: Pull Latest Staging Code
@@ -64,7 +64,7 @@ cp .env.example .env.local
 # Configure essential variables
 cat >> .env.local << EOF
 # Database (per SSH config specs)
-DATABASE_URL="postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler"
+DATABASE_URL="postgresql://theoshift_user:jw_password@10.92.3.21:5432/theoshift_scheduler"
 
 # NextAuth Configuration (per APEX specs)
 NEXTAUTH_URL="http://10.92.3.24:3001"
@@ -76,7 +76,7 @@ SMTP_PORT="587"
 SMTP_SECURE="false"
 SMTP_USER="your-email@gmail.com"
 SMTP_PASSWORD="your-app-password"
-EMAIL_FROM_NAME="JW Attendant Scheduler - Staging"
+EMAIL_FROM_NAME="Theocratic Shift Scheduler - Staging"
 EMAIL_FROM="your-email@gmail.com"
 EOF
 ```
@@ -102,7 +102,7 @@ npm run build
 npm run start
 
 # Or restart the systemd service (per SSH config specs)
-sudo systemctl restart jw-attendant-staging
+sudo systemctl restart theoshift-green-staging
 ```
 
 ### Step 7: Verify Deployment
@@ -193,7 +193,7 @@ If critical issues are discovered:
 
 ```bash
 # Stop the application
-pm2 stop jw-attendant-staging
+pm2 stop theoshift-green-staging
 
 # Rollback to previous stable commit
 git log --oneline -10
@@ -201,7 +201,7 @@ git checkout <previous-stable-commit>
 
 # Rebuild and restart
 npm run build
-pm2 restart jw-attendant-staging
+pm2 restart theoshift-green-staging
 
 # Verify rollback successful
 curl http://localhost:3001/api/health
@@ -227,13 +227,13 @@ curl http://10.92.3.24:3001/api/admin/email-config
 ### Log Monitoring
 ```bash
 # Check application logs (per SSH config specs)
-tail -f /var/log/jw-attendant-scheduler.log
+tail -f /var/log/theoshift.log
 
 # Check systemd service logs
-journalctl -u jw-attendant-staging -f
+journalctl -u theoshift-green-staging -f
 
 # Check service status
-systemctl status jw-attendant-staging
+systemctl status theoshift-green-staging
 ```
 
 ## 🎯 USER ACCEPTANCE TESTING PLAN

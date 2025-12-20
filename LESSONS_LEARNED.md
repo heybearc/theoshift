@@ -1,4 +1,4 @@
-# Lessons Learned - JW Attendant Scheduler Development
+# Lessons Learned - Theocratic Shift Scheduler Development
 
 ## Event-Centric Architecture Success
 
@@ -197,4 +197,4 @@
 - Provide immediate feedback for all user actions
 - Maintain responsive and interactive user experience
 
-This document captures the essential lessons learned from the JW Attendant Scheduler development process, providing guidance for future development and architectural decisions.
+This document captures the essential lessons learned from the Theocratic Shift Scheduler development process, providing guidance for future development and architectural decisions.

@@ -18,9 +18,9 @@ async function debugUrlFix() {
     console.log(`   Name: ${event.name}`);
     console.log(`   ID: ${event.id}`);
     console.log(`\n🎯 CORRECT URL TO USE:`);
-    console.log(`   https://jw-staging.cloudigan.net/events/${event.id}/positions`);
+    console.log(`   https://blue.theoshift.com/events/${event.id}/positions`);
     console.log(`\n❌ WRONG URL (probably what you're using):`);
-    console.log(`   https://jw-staging.cloudigan.net/events/1/positions`);
+    console.log(`   https://blue.theoshift.com/events/1/positions`);
     
     // Test the positions query with correct event ID
     const positions = await prisma.positions.findMany({

@@ -19,19 +19,19 @@ echo "🛡️ WMACS Guardian: Deploying $COMMIT_SHA to $ENVIRONMENT"
 case $ENVIRONMENT in
     "staging")
         SERVER="10.92.3.24"
-        SERVICE_NAME="jw-attendant-staging"
-        DEPLOY_PATH="/opt/jw-attendant-staging"
+        SERVICE_NAME="theoshift-green-staging"
+        DEPLOY_PATH="/opt/theoshift-green-staging"
         NEXTAUTH_URL="http://10.92.3.24:3001"
-        DATABASE_URL="postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/jw_attendant_scheduler_staging"
+        DATABASE_URL="postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/theoshift_scheduler_staging"
         NEXTAUTH_SECRET="staging-secret-2024"
         DEBUG="true"
         ;;
     "production")
         SERVER="10.92.3.22"
-        SERVICE_NAME="jw-attendant-production"
-        DEPLOY_PATH="/opt/jw-attendant-production"
+        SERVICE_NAME="theoshift-green-production"
+        DEPLOY_PATH="/opt/theoshift-green-production"
         NEXTAUTH_URL="http://10.92.3.22:3001"
-        DATABASE_URL="postgresql://jw_scheduler:jw_password@10.92.3.21:5432/jw_attendant_scheduler"
+        DATABASE_URL="postgresql://jw_scheduler:jw_password@10.92.3.21:5432/theoshift_scheduler"
         NEXTAUTH_SECRET="production-secret-2024-ultra-secure"
         DEBUG="false"
         ;;
@@ -59,7 +59,7 @@ ssh root@$SERVER "rm -rf $DEPLOY_PATH"
 
 # Step 4: Deploy fresh code
 echo "📦 Deploying fresh code from commit $COMMIT_SHA..."
-ssh root@$SERVER "cd /opt && git clone https://github.com/heybearc/jw-attendant-scheduler.git $(basename $DEPLOY_PATH)"
+ssh root@$SERVER "cd /opt && git clone https://github.com/heybearc/theoshift.git $(basename $DEPLOY_PATH)"
 ssh root@$SERVER "cd $DEPLOY_PATH && git checkout $COMMIT_SHA"
 
 # Step 5: Install dependencies
@@ -83,10 +83,10 @@ ssh root@$SERVER "cd $DEPLOY_PATH && npm run build"
 
 # Step 8: Verify no staging references
 echo "🔍 Verifying no cross-environment references..."
-STAGING_REFS=$(ssh root@$SERVER "cd $DEPLOY_PATH && grep -r '10.92.3.24' . --exclude-dir=node_modules --exclude-dir=.git || true")
-if [ ! -z "$STAGING_REFS" ]; then
-    echo "❌ STAGING REFERENCES FOUND IN $ENVIRONMENT:"
-    echo "$STAGING_REFS"
+BLUE_REFS=$(ssh root@$SERVER "cd $DEPLOY_PATH && grep -r '10.92.3.24' . --exclude-dir=node_modules --exclude-dir=.git || true")
+if [ ! -z "$BLUE_REFS" ]; then
+    echo "❌ BLUE REFERENCES FOUND IN $ENVIRONMENT:"
+    echo "$BLUE_REFS"
     exit 1
 fi
 
@@ -94,7 +94,7 @@ fi
 echo "🔧 Creating systemd service..."
 ssh root@$SERVER "cat > /etc/systemd/system/$SERVICE_NAME.service << 'EOF'
 [Unit]
-Description=JW Attendant Scheduler ($ENVIRONMENT)
+Description=Theocratic Shift Scheduler ($ENVIRONMENT)
 After=network.target
 
 [Service]

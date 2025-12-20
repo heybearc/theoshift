@@ -34,4 +34,4 @@ console.log('- WMACS Server Ops: Running ✅');
 console.log('');
 
 console.log('🚀 Ready for WMACS-guided troubleshooting and resolution');
-console.log('Database credentials confirmed: jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/jw_attendant_scheduler_staging');
+console.log('Database credentials confirmed: jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/theoshift_scheduler_staging');

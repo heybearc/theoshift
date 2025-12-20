@@ -5,7 +5,7 @@ description: Event-Centric Navigation System - Landing page and event selection 
 # Event-Centric Navigation System
 
 ## Overview
-The Event-Centric Navigation system serves as the foundation for all JW Attendant Scheduler functionality. Upon login, admin/staff users are directed to an event selection interface where they choose or create an event to manage.
+The Event-Centric Navigation system serves as the foundation for all Theocratic Shift Scheduler functionality. Upon login, admin/staff users are directed to an event selection interface where they choose or create an event to manage.
 
 ## Architecture Requirements
 
@@ -17,7 +17,7 @@ All subsequent functionality is scoped within the selected event context.
 ### SSH Access
 Use configured shortcuts for development and deployment:
 ```bash
-/ssh-jw-attendant  # Staging server access
+/ssh-theoshift-green  # Staging server access
 ```
 
 ## User Flow

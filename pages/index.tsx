@@ -8,7 +8,7 @@ export default function Home() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-        <p className="text-white text-lg">Loading JW Attendant Scheduler...</p>
+        <p className="text-white text-lg">Loading Theocratic Shift Scheduler...</p>
       </div>
     </div>
   )

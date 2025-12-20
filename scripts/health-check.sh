@@ -1,5 +1,5 @@
 #!/bin/bash
-# JW Attendant Scheduler - Health Check Script
+# Theocratic Shift Scheduler - Health Check Script
 # Container Infrastructure: 131=postgres, 132=prod, 134=staging
 
 set -e
@@ -7,18 +7,18 @@ set -e
 CONTAINER_ID=${1:-"134"}  # Default to staging
 TIMEOUT=${2:-"30"}        # Default 30 second timeout
 
-echo "🏥 JW Attendant Scheduler Health Check"
+echo "🏥 Theocratic Shift Scheduler Health Check"
 echo "====================================="
 
 # Validate container assignment
 case $CONTAINER_ID in
     "132")
-        echo "🎯 Checking PRODUCTION (Container 132 - 10.92.3.22)"
+        echo "🎯 Checking GREEN (Container 132 (green-theoshift) - 10.92.3.22)"
         CONTAINER_IP="10.92.3.22"
         ENV="production"
         ;;
     "134")
-        echo "🎯 Checking STAGING (Container 134 - 10.92.3.24)"
+        echo "🎯 Checking BLUE (Container 134 (blue-theoshift) - 10.92.3.24)"
         CONTAINER_IP="10.92.3.24"
         ENV="staging"
         ;;
@@ -60,7 +60,7 @@ check_database_connection() {
     echo "🗄️  Testing database connection..."
     # This would need to be run on the container itself
     echo "📝 Database check requires container access"
-    echo "   SSH command: ssh root@$CONTAINER_IP 'cd /opt/jw-attendant-scheduler/current && python manage.py check --database default'"
+    echo "   SSH command: ssh root@$CONTAINER_IP 'cd /opt/theoshift/current && python manage.py check --database default'"
     return 0
 }
 

@@ -119,7 +119,7 @@ check_static_assets() {
     echo "5. Testing static asset serving..."
     
     # Find a CSS file to test
-    local css_file=$(ssh -i $SSH_KEY root@$SSH_HOST 'find /opt/jw-attendant-scheduler/.next/static/css -name "*.css" | head -1' || echo "")
+    local css_file=$(ssh -i $SSH_KEY root@$SSH_HOST 'find /opt/theoshift/.next/static/css -name "*.css" | head -1' || echo "")
     
     if [ -n "$css_file" ]; then
         local css_filename=$(basename "$css_file")
@@ -137,7 +137,7 @@ check_static_assets() {
 check_database() {
     echo "6. Testing database connectivity..."
     
-    local db_check=$(ssh -i $SSH_KEY root@$SSH_HOST 'cd /opt/jw-attendant-scheduler && timeout 10 npx prisma db pull --print 2>/dev/null | grep "model"' || echo "")
+    local db_check=$(ssh -i $SSH_KEY root@$SSH_HOST 'cd /opt/theoshift && timeout 10 npx prisma db pull --print 2>/dev/null | grep "model"' || echo "")
     
     if [ -n "$db_check" ]; then
         echo "   ✅ Database connection successful"
@@ -152,7 +152,7 @@ check_database() {
 check_admin_user() {
     echo "7. Checking admin user exists..."
     
-    local admin_check=$(ssh -i $SSH_KEY root@$SSH_HOST 'cd /opt/jw-attendant-scheduler && node -e "
+    local admin_check=$(ssh -i $SSH_KEY root@$SSH_HOST 'cd /opt/theoshift && node -e "
         const { PrismaClient } = require(\"@prisma/client\");
         const prisma = new PrismaClient();
         prisma.users.findFirst({ where: { role: \"ADMIN\" } })
@@ -175,7 +175,7 @@ check_admin_user() {
         echo "   ⚠️  No admin user found - creating default admin..."
         
         # Create admin user
-        local create_result=$(ssh -i $SSH_KEY root@$SSH_HOST 'cd /opt/jw-attendant-scheduler && node scripts/seed-admin.js 2>&1' || echo "ERROR")
+        local create_result=$(ssh -i $SSH_KEY root@$SSH_HOST 'cd /opt/theoshift && node scripts/seed-admin.js 2>&1' || echo "ERROR")
         
         if echo "$create_result" | grep -q "Admin user created successfully"; then
             echo "   ✅ Admin user created successfully"
@@ -202,9 +202,9 @@ restart_server() {
     echo "Attempting automatic recovery..."
     
     echo "🔄 Attempting server restart..."
-    ssh -i $SSH_KEY root@$SSH_HOST 'cd /opt/jw-attendant-scheduler && pkill -f "next-server" || true'
+    ssh -i $SSH_KEY root@$SSH_HOST 'cd /opt/theoshift && pkill -f "next-server" || true'
     sleep 2
-    ssh -i $SSH_KEY root@$SSH_HOST 'cd /opt/jw-attendant-scheduler && PORT=3001 npm start > server.log 2>&1 &'
+    ssh -i $SSH_KEY root@$SSH_HOST 'cd /opt/theoshift && PORT=3001 npm start > server.log 2>&1 &'
     
     echo "Waiting for server startup..."
     sleep 15

@@ -3,7 +3,7 @@
 # Fix CSS hash mismatch after Next.js builds
 # This script creates symlinks to ensure CSS files are accessible
 
-CSS_DIR="/opt/jw-attendant-scheduler/.next/static/css"
+CSS_DIR="/opt/theoshift/.next/static/css"
 
 if [ -d "$CSS_DIR" ]; then
     cd "$CSS_DIR"

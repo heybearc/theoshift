@@ -197,7 +197,7 @@ export default function EventDocumentsPage({ eventId, event, documents, attendan
   return (
     <>
       <Head>
-        <title>Documents - {event?.name} | JW Attendant Scheduler</title>
+        <title>Documents - {event?.name} | Theocratic Shift Scheduler</title>
       </Head>
 
       <EventLayout 

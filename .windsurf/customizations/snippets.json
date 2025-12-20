@@ -24,7 +24,7 @@
       "prefix": "wmacs-ssh",
       "body": [
         "# 🛡️ WMACS Guardian: Container ${1|134 (staging),132 (production),131 (database)|} access",
-        "ssh ${2|jws,root@10.92.3.22,postgres@10.92.3.21|} \"cd ${3:/opt/jw-attendant-scheduler} && ${4:command}\""
+        "ssh ${2|jws,root@10.92.3.22,postgres@10.92.3.21|} \"cd ${3:/opt/theoshift} && ${4:command}\""
       ],
       "description": "Generate WMACS-compliant SSH command"
     },
@@ -34,7 +34,7 @@
         "## ${1:Step Name} - WMACS Enforced",
         "",
         "### Prerequisites",
-        "- [ ] Staging validation complete (Container 134)",
+        "- [ ] Staging validation complete (Container 134 (blue-theoshift))",
         "- [ ] WMACS Guardian approval obtained", 
         "- [ ] Research Advisor analysis passed",
         "",
@@ -62,13 +62,13 @@
         "      container: '134',",
         "      host: '10.92.3.24',", 
         "      port: 3001,",
-        "      path: '/opt/jw-attendant-scheduler'",
+        "      path: '/opt/theoshift'",
         "    },",
         "    production: {",
         "      container: '132',",
         "      host: '10.92.3.22',",
         "      port: 3001,", 
-        "      path: '/opt/jw-attendant-production'",
+        "      path: '/opt/theoshift-green-production'",
         "    },",
         "    database: {",
         "      container: '131',",

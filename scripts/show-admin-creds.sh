@@ -25,7 +25,7 @@ echo "=================================="
 echo ""
 
 # Query admin user from database
-admin_info=$(ssh -i $SSH_KEY root@$SSH_HOST 'cd /opt/jw-attendant-scheduler && node -e "
+admin_info=$(ssh -i $SSH_KEY root@$SSH_HOST 'cd /opt/theoshift && node -e "
     const { PrismaClient } = require(\"@prisma/client\");
     const prisma = new PrismaClient();
     prisma.users.findFirst({ 
@@ -47,7 +47,7 @@ if echo "$admin_info" | grep -q "NO_ADMIN_FOUND"; then
     echo "❌ No admin user found in database"
     echo ""
     echo "Run this command to create admin user:"
-    echo "ssh -i ~/.ssh/jw_staging root@$SSH_HOST 'cd /opt/jw-attendant-scheduler && node scripts/seed-admin.js'"
+    echo "ssh -i ~/.ssh/jw_staging root@$SSH_HOST 'cd /opt/theoshift && node scripts/seed-admin.js'"
     exit 1
 elif echo "$admin_info" | grep -q "ERROR"; then
     echo "❌ Error querying database"

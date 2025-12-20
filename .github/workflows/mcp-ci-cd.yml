@@ -1,4 +1,4 @@
-name: MCP-Powered CI/CD - JW Attendant Scheduler
+name: MCP-Powered CI/CD - Theocratic Shift Scheduler
 
 on:
   push:
@@ -117,11 +117,11 @@ jobs:
         PROXMOX_PASSWORD: ${{ secrets.PROXMOX_PASSWORD }}
       run: |
         # Use local deployment since we're on self-hosted runner
-        echo "🚀 Deploying to staging container 134 locally"
+        echo "🚀 Deploying to staging container 134 (blue-theoshift) locally"
         
         COMMIT_SHA="${{ github.sha }}"
         RELEASE_FILE="release-${COMMIT_SHA}.tar.gz"
-        RELEASE_DIR="/opt/jw-attendant-scheduler/releases/${COMMIT_SHA}"
+        RELEASE_DIR="/opt/theoshift/releases/${COMMIT_SHA}"
         
         # Stop existing application
         sudo pkill -f "next.*3001" || true
@@ -131,7 +131,7 @@ jobs:
         
         # Extract release
         cd "$RELEASE_DIR"
-        sudo tar -xzf /opt/github-runner/_work/jw-attendant-scheduler/jw-attendant-scheduler/${RELEASE_FILE}
+        sudo tar -xzf /opt/github-runner/_work/theoshift/theoshift/${RELEASE_FILE}
         
         # Set proper ownership for github-runner
         sudo chown -R github-runner:github-runner "$RELEASE_DIR"
@@ -140,17 +140,17 @@ jobs:
         sudo -u github-runner npm ci
         
         # Update current symlink atomically
-        sudo ln -sfn "$RELEASE_DIR" /opt/jw-attendant-scheduler/current
+        sudo ln -sfn "$RELEASE_DIR" /opt/theoshift/current
         
         # Install dependencies and build
-        cd /opt/jw-attendant-scheduler/current
+        cd /opt/theoshift/current
         sudo -u github-runner npm ci
         sudo -u github-runner npm run build
         
         # Create log directory and set permissions
         sudo mkdir -p /var/log
-        sudo touch /var/log/jw-attendant-scheduler.log
-        sudo chmod 666 /var/log/jw-attendant-scheduler.log
+        sudo touch /var/log/theoshift.log
+        sudo chmod 666 /var/log/theoshift.log
         
         # Stop existing process
         sudo pkill -f "next.*3001" || true
@@ -161,9 +161,9 @@ jobs:
         fi
         
         # Start application with environment variables
-        sudo -u github-runner DATABASE_URL="${{ secrets.DATABASE_URL }}" JWT_SECRET="$(openssl rand -hex 32)" NODE_ENV=production nohup npm start -- -p 3001 > /var/log/jw-attendant-scheduler.log 2>&1 &
+        sudo -u github-runner DATABASE_URL="${{ secrets.DATABASE_URL }}" JWT_SECRET="$(openssl rand -hex 32)" NODE_ENV=production nohup npm start -- -p 3001 > /var/log/theoshift.log 2>&1 &
         
-        echo "✅ Staging deployment completed with correct database credentials"
+        echo "✅ Blue deployment completed with correct database credentials"
 
     - name: 🔧 MCP Server Operations - Post Deploy
       if: env.ENVIRONMENT == 'staging' && steps.deploy.conclusion == 'success'
@@ -193,12 +193,12 @@ jobs:
       if: always()
       run: |
         if [ "${{ job.status }}" == "success" ]; then
-          echo "✅ Staging deployment successful"
-          echo "🔗 Staging URL: http://10.92.3.24:3001"
+          echo "✅ Blue deployment successful"
+          echo "🔗 Blue URL: http://10.92.3.24:3001"
         else
-          echo "❌ Staging deployment failed"
+          echo "❌ Blue deployment failed"
           echo "🔄 Automatic rollback initiated"
-          python3 scripts/mcp-rollback.py jw-attendant-scheduler 134 quick
+          python3 scripts/mcp-rollback.py theoshift 134 quick
         fi
 
   deploy-production:
@@ -223,7 +223,7 @@ jobs:
     - name: Deploy to production
       run: |
         # Upload and extract
-        scp jw-attendant-scheduler-${{ needs.build-and-test.outputs.commit-sha }}.tar.gz root@${{ secrets.PRODUCTION_HOST }}:/tmp/
+        scp theoshift-${{ needs.build-and-test.outputs.commit-sha }}.tar.gz root@${{ secrets.PRODUCTION_HOST }}:/tmp/
         
         # Deploy via SSH
         ssh root@${{ secrets.PRODUCTION_HOST }} << 'EOF'
@@ -233,11 +233,11 @@ jobs:
           pkill -f "next" || true
           
           # Create deployment directory
-          mkdir -p /opt/jw-attendant-scheduler/releases/${{ needs.build-and-test.outputs.commit-sha }}
+          mkdir -p /opt/theoshift/releases/${{ needs.build-and-test.outputs.commit-sha }}
           
           # Extract new release
-          cd /opt/jw-attendant-scheduler/releases/${{ needs.build-and-test.outputs.commit-sha }}
-          tar -xzf /tmp/jw-attendant-scheduler-${{ needs.build-and-test.outputs.commit-sha }}.tar.gz
+          cd /opt/theoshift/releases/${{ needs.build-and-test.outputs.commit-sha }}
+          tar -xzf /tmp/theoshift-${{ needs.build-and-test.outputs.commit-sha }}.tar.gz
           
           # Install dependencies and build
           npm ci
@@ -245,7 +245,7 @@ jobs:
           
           # Create environment file
           cat > .env.local << 'ENVEOF'
-        DATABASE_URL=postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler
+        DATABASE_URL=postgresql://theoshift_user:jw_password@10.92.3.21:5432/theoshift_scheduler
         JWT_SECRET=production-jwt-secret-key-secure
         EMAIL_ENCRYPTION_KEY=production-email-encryption-key-32chars
         NODE_ENV=production
@@ -253,18 +253,18 @@ jobs:
         ENVEOF
           
           # Update symlink atomically
-          ln -sfn /opt/jw-attendant-scheduler/releases/${{ needs.build-and-test.outputs.commit-sha }} /opt/jw-attendant-scheduler/current
+          ln -sfn /opt/theoshift/releases/${{ needs.build-and-test.outputs.commit-sha }} /opt/theoshift/current
           
           # Start application
-          cd /opt/jw-attendant-scheduler/current
-          nohup npm start -- -p 3001 > /var/log/jw-attendant-scheduler.log 2>&1 &
+          cd /opt/theoshift/current
+          nohup npm start -- -p 3001 > /var/log/theoshift.log 2>&1 &
           
           # Cleanup old releases (keep last 3)
-          cd /opt/jw-attendant-scheduler/releases
+          cd /opt/theoshift/releases
           ls -t | tail -n +4 | xargs rm -rf
           
           # Cleanup temp file
-          rm -f /tmp/jw-attendant-scheduler-${{ needs.build-and-test.outputs.commit-sha }}.tar.gz
+          rm -f /tmp/theoshift-${{ needs.build-and-test.outputs.commit-sha }}.tar.gz
         EOF
         
     - name: Generate deployment metrics

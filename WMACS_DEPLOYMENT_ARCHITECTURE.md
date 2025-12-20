@@ -33,7 +33,7 @@ PORT=3001
 NEXTAUTH_DEBUG=true
 ```
 
-#### **🧪 Staging (.env.staging)**
+#### **🧪 Staging (.env.blue)**
 ```bash
 DATABASE_URL=postgresql://jw_scheduler_staging:password@10.92.3.21:5432/jw_scheduler_staging
 NEXTAUTH_SECRET=staging-secret-2024-secure
@@ -43,7 +43,7 @@ PORT=3001
 NEXTAUTH_DEBUG=true
 ```
 
-#### **🚀 Production (.env.production)**
+#### **🚀 Production (.env.green)**
 ```bash
 DATABASE_URL=postgresql://jw_scheduler_prod:password@10.92.3.21:5432/jw_scheduler_production
 NEXTAUTH_SECRET=production-secret-2024-ultra-secure

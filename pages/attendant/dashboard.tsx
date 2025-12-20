@@ -391,7 +391,7 @@ export default function AttendantDashboard() {
   return (
     <>
       <Head>
-        <title>My Dashboard | JW Attendant Scheduler</title>
+        <title>My Dashboard | Theocratic Shift Scheduler</title>
       </Head>
 
       {/* Profile Verification Modal */}
@@ -460,7 +460,7 @@ export default function AttendantDashboard() {
               <div className="flex items-center">
                 <span className="text-2xl font-bold text-blue-600">📋</span>
                 <span className="ml-2 text-xl font-semibold text-gray-900">
-                  JW Attendant Scheduler
+                  Theocratic Shift Scheduler
                 </span>
               </div>
               <div className="flex items-center space-x-4">

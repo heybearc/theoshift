@@ -176,10 +176,10 @@ class APEXSigninDebug {
 NODE_ENV=production
 PORT=3001
 HOSTNAME=0.0.0.0
-DATABASE_URL=\"postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/jw_attendant_scheduler_staging\"
-NEXTAUTH_URL=\"https://attendant.cloudigan.net\"
+DATABASE_URL=\"postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/theoshift_scheduler_staging\"
+NEXTAUTH_URL=\"https://theoshift.com\"
 NEXTAUTH_SECRET=\"\$(openssl rand -hex 32)\"
-UPLOAD_DIR=\"/opt/jw-attendant-scheduler/public/uploads\"
+UPLOAD_DIR=\"/opt/theoshift/public/uploads\"
 MAX_FILE_SIZE=10485760
 FEEDBACK_ENABLED=true
 EOF
@@ -201,7 +201,7 @@ EOF
       cd ${prod.path}
       
       echo '🚀 Restarting application...'
-      pm2 restart jw-attendant
+      pm2 restart theoshift-green
       sleep 10
       
       echo 'Testing authentication after restart:'

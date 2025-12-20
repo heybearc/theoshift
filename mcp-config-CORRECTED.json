@@ -2,15 +2,15 @@
   "mcpServers": {
     "enhanced-jw-mcp-cicd": {
       "command": "/opt/homebrew/bin/node",
-      "args": ["/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-server-ops/enhanced-jw-mcp-cicd.cjs"]
+      "args": ["/Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-server-ops/enhanced-jw-mcp-cicd.cjs"]
     },
     "enhanced-ldc-mcp-cicd": {
       "command": "/opt/homebrew/bin/node",
-      "args": ["/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-server-ops/enhanced-ldc-mcp-cicd.js"]
+      "args": ["/Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-server-ops/enhanced-ldc-mcp-cicd.js"]
     },
     "federation-coordinator-cicd": {
       "command": "/opt/homebrew/bin/node",
-      "args": ["/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-server-ops/federation-coordinator-cicd.js"]
+      "args": ["/Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-server-ops/federation-coordinator-cicd.js"]
     }
   },
   "creditOptimization": {

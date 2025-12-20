@@ -11,7 +11,7 @@ async function wmacsTroubleshootLogs() {
   try {
     // Step 1: Check current application logs
     console.log('📋 Step 1: Checking main application logs');
-    const { stdout: mainLogs } = await execAsync('ssh root@10.92.3.24 "tail -30 /var/log/jw-attendant-scheduler.log"');
+    const { stdout: mainLogs } = await execAsync('ssh root@10.92.3.24 "tail -30 /var/log/theoshift.log"');
     console.log('Main Application Logs:');
     console.log(mainLogs);
 
@@ -32,7 +32,7 @@ async function wmacsTroubleshootLogs() {
 
     // Step 5: Check for any error logs in system
     console.log('\n❌ Step 5: Checking for error logs');
-    const { stdout: errorLogs } = await execAsync('ssh root@10.92.3.24 "journalctl -u jw-attendant-scheduler --no-pager -n 20 2>/dev/null || echo \'No systemd service logs found\'"');
+    const { stdout: errorLogs } = await execAsync('ssh root@10.92.3.24 "journalctl -u theoshift --no-pager -n 20 2>/dev/null || echo \'No systemd service logs found\'"');
     console.log('System Error Logs:', errorLogs.trim());
 
     console.log('\n✅ WMACS log analysis completed');

@@ -80,7 +80,7 @@ export default function GuestLookupPage() {
   return (
     <>
       <Head>
-        <title>Guest Attendant Lookup | JW Attendant Scheduler</title>
+        <title>Guest Attendant Lookup | Theocratic Shift Scheduler</title>
         <meta name="description" content="Look up your attendant assignments" />
       </Head>
 

@@ -1,15 +1,15 @@
 #!/bin/bash
-# JW Attendant Scheduler - MCP Rollback Script
+# Theocratic Shift Scheduler - MCP Rollback Script
 # Container Infrastructure: 131=postgres, 132=prod, 134=staging
 
 set -e
 
-PROJECT_NAME="jw-attendant-scheduler"
+PROJECT_NAME="theoshift"
 CONTAINER_ID=${1:-"134"}  # Default to staging
 MODE=${2:-"interactive"}
 TARGET_RELEASE=${3:-""}
 
-echo "🔄 JW Attendant Scheduler MCP Rollback"
+echo "🔄 Theocratic Shift Scheduler MCP Rollback"
 echo "====================================="
 echo "Project: $PROJECT_NAME"
 echo "Container: $CONTAINER_ID"
@@ -19,11 +19,11 @@ echo ""
 # Validate container assignment
 case $CONTAINER_ID in
     "132")
-        echo "🎯 Rolling back PRODUCTION (Container 132 - 10.92.3.22)"
+        echo "🎯 Rolling back GREEN (Container 132 (green-theoshift) - 10.92.3.22)"
         CONTAINER_IP="10.92.3.22"
         ;;
     "134")
-        echo "🎯 Rolling back STAGING (Container 134 - 10.92.3.24)"
+        echo "🎯 Rolling back BLUE (Container 134 (blue-theoshift) - 10.92.3.24)"
         CONTAINER_IP="10.92.3.24"
         ;;
     *)
@@ -51,7 +51,7 @@ case $MODE in
         cat << EOF > /tmp/rollback_jw_quick.sh
 #!/bin/bash
 set -e
-echo "🔄 Rolling back JW Attendant Scheduler to previous release..."
+echo "🔄 Rolling back Theocratic Shift Scheduler to previous release..."
 PREV=\$(ls -t $RELEASES_DIR | head -2 | tail -1)
 echo "Previous release: \$PREV"
 ln -sfn $RELEASES_DIR/\$PREV $CURRENT_LINK
@@ -60,7 +60,7 @@ systemctl restart nginx
 echo "🏥 Running health check..."
 sleep 3
 curl -f http://localhost:8000/health/ || curl -f http://localhost:8000/ || echo "Health check: Manual verification needed"
-echo "✅ JW Attendant Scheduler quick rollback complete"
+echo "✅ Theocratic Shift Scheduler quick rollback complete"
 echo "🔗 Application URL: http://$CONTAINER_IP:8000"
 EOF
         chmod +x /tmp/rollback_jw_quick.sh
@@ -77,7 +77,7 @@ EOF
         cat << EOF > /tmp/rollback_jw_release.sh
 #!/bin/bash
 set -e
-echo "🔄 Rolling back JW Attendant Scheduler to release: $TARGET_RELEASE"
+echo "🔄 Rolling back Theocratic Shift Scheduler to release: $TARGET_RELEASE"
 if [ ! -d "$RELEASES_DIR/$TARGET_RELEASE" ]; then
     echo "❌ Release $TARGET_RELEASE not found"
     exit 1
@@ -88,7 +88,7 @@ systemctl restart nginx
 echo "🏥 Running health check..."
 sleep 3
 curl -f http://localhost:8000/health/ || curl -f http://localhost:8000/ || echo "Health check: Manual verification needed"
-echo "✅ JW Attendant Scheduler rollback to $TARGET_RELEASE complete"
+echo "✅ Theocratic Shift Scheduler rollback to $TARGET_RELEASE complete"
 echo "🔗 Application URL: http://$CONTAINER_IP:8000"
 EOF
         chmod +x /tmp/rollback_jw_release.sh
@@ -121,7 +121,7 @@ esac
 
 # Step 3: Show rollback plan
 echo ""
-echo "📋 JW Attendant Scheduler Rollback Plan"
+echo "📋 Theocratic Shift Scheduler Rollback Plan"
 echo "======================================="
 echo "1. Switch symlink: $CURRENT_LINK -> previous/target release"
 echo "2. Restart services: $PROJECT_NAME, nginx"

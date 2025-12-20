@@ -15,15 +15,15 @@ export default function GettingStartedPage({ userRole }: GettingStartedProps) {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">🚀 Getting Started</h1>
           <p className="text-gray-600">
-            Learn the basics of using JW Attendant Scheduler effectively
+            Learn the basics of using Theocratic Shift Scheduler effectively
           </p>
         </div>
 
         {/* Overview */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-          <h2 className="text-xl font-semibold text-blue-900 mb-3">Welcome to JW Attendant Scheduler</h2>
+          <h2 className="text-xl font-semibold text-blue-900 mb-3">Welcome to Theocratic Shift Scheduler</h2>
           <p className="text-blue-800 mb-4">
-            JW Attendant Scheduler is a comprehensive event management system designed specifically for 
+            Theocratic Shift Scheduler is a comprehensive event management system designed specifically for 
             Jehovah's Witness events and assemblies. It helps manage attendant assignments, track attendance, 
             and coordinate event logistics efficiently.
           </p>

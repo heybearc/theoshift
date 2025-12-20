@@ -35,7 +35,7 @@ print_error() {
 
 # Check if we're in the right directory
 if [ ! -f "package.json" ]; then
-    print_error "Not in project root directory. Please run from jw-attendant-scheduler root."
+    print_error "Not in project root directory. Please run from theoshift root."
     exit 1
 fi
 
@@ -85,7 +85,7 @@ set -e
 echo "🔧 Starting deployment on staging server..."
 
 # Navigate to application directory (per SSH config specs)
-cd /opt/jw-attendant-staging
+cd /opt/theoshift-green-staging
 
 echo "📥 Pulling latest staging code..."
 git fetch origin
@@ -99,13 +99,13 @@ echo "🏗️ Building application..."
 npm run build
 
 echo "🔄 Restarting staging service..."
-sudo systemctl restart jw-attendant-staging
+sudo systemctl restart theoshift-green-staging
 
 echo "⏳ Waiting for service to start..."
 sleep 5
 
 echo "✅ Checking service status..."
-sudo systemctl status jw-attendant-staging --no-pager
+sudo systemctl status theoshift-green-staging --no-pager
 
 echo "🏥 Testing health endpoint..."
 if curl -f http://localhost:3001/api/health > /dev/null 2>&1; then
@@ -124,7 +124,7 @@ if [ $? -eq 0 ]; then
     echo "  • Target: 10.92.3.24:3001"
     echo "  • Branch: staging"
     echo "  • Admin Module: Phase 2 complete"
-    echo "  • Service: jw-attendant-staging"
+    echo "  • Service: theoshift-green-staging"
     echo ""
     echo "🔗 Access URLs:"
     echo "  • Application: http://10.92.3.24:3001"
@@ -140,7 +140,7 @@ else
     echo ""
     echo "🔍 TROUBLESHOOTING:"
     echo "  • Check SSH connection: ssh $SSH_TARGET"
-    echo "  • Check service logs: ssh $SSH_TARGET 'journalctl -u jw-attendant-staging -f'"
-    echo "  • Check application logs: ssh $SSH_TARGET 'tail -f /var/log/jw-attendant-scheduler.log'"
+    echo "  • Check service logs: ssh $SSH_TARGET 'journalctl -u theoshift-green-staging -f'"
+    echo "  • Check application logs: ssh $SSH_TARGET 'tail -f /var/log/theoshift.log'"
     exit 1
 fi

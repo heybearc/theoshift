@@ -27,7 +27,7 @@ async function debugAPICalls() {
       console.log(`   ID: ${event.id}`)
       console.log(`   Type: ${event.eventType}`)
       console.log(`   Status: ${event.status}`)
-      console.log(`   URL: https://jw-staging.cloudigan.net/events/${event.id}`)
+      console.log(`   URL: https://blue.theoshift.com/events/${event.id}`)
       console.log('')
     })
     

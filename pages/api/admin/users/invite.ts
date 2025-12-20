@@ -77,7 +77,7 @@ async function handleCreateInvitation(req: NextApiRequest, res: NextApiResponse,
     // Send invitation email
     console.log('DEBUG: NEXTAUTH_URL =', process.env.NEXTAUTH_URL)
     console.log('DEBUG: All env vars:', Object.keys(process.env).filter(k => k.includes('NEXT')))
-    const invitationUrl = `${process.env.NEXTAUTH_URL || 'https://jw-staging.cloudigan.net'}/auth/accept-invitation?token=${invitationToken}`
+    const invitationUrl = `${process.env.NEXTAUTH_URL || 'https://blue.theoshift.com'}/auth/accept-invitation?token=${invitationToken}`
     console.log('DEBUG: Generated invitation URL:', invitationUrl)
     
     try {
@@ -151,17 +151,17 @@ async function sendInvitationEmail(email: string, firstName: string, invitationU
   await transporter.sendMail({
     from: `"${config.fromName}" <${config.fromEmail}>`,
     to: email,
-    subject: 'You\'re Invited to JW Attendant Scheduler',
-    text: `Hi ${firstName},\n\nYou've been invited to join JW Attendant Scheduler.\n\n${customMessage || ''}\n\nClick the link below to accept your invitation and set up your account:\n${invitationUrl}\n\nThis invitation will expire in 7 days.\n\nBest regards,\nJW Attendant Scheduler Team`,
+    subject: 'You\'re Invited to Theocratic Shift Scheduler',
+    text: `Hi ${firstName},\n\nYou've been invited to join Theocratic Shift Scheduler.\n\n${customMessage || ''}\n\nClick the link below to accept your invitation and set up your account:\n${invitationUrl}\n\nThis invitation will expire in 7 days.\n\nBest regards,\nTheocratic Shift Scheduler Team`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background-color: #2563eb; color: white; padding: 20px; text-align: center;">
-          <h1 style="margin: 0;">JW Attendant Scheduler</h1>
+          <h1 style="margin: 0;">Theocratic Shift Scheduler</h1>
         </div>
         <div style="padding: 30px; background-color: #f9fafb;">
           <h2 style="color: #1f2937;">Hi ${firstName},</h2>
           <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
-            You've been invited to join <strong>JW Attendant Scheduler</strong>.
+            You've been invited to join <strong>Theocratic Shift Scheduler</strong>.
           </p>
           ${customMessage ? `
             <div style="background-color: #dbeafe; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0;">
@@ -185,7 +185,7 @@ async function sendInvitationEmail(email: string, firstName: string, invitationU
           </p>
         </div>
         <div style="background-color: #e5e7eb; padding: 20px; text-align: center; color: #6b7280; font-size: 12px;">
-          <p style="margin: 0;">JW Attendant Scheduler</p>
+          <p style="margin: 0;">Theocratic Shift Scheduler</p>
           <p style="margin: 5px 0 0 0;">This is an automated message, please do not reply.</p>
         </div>
       </div>

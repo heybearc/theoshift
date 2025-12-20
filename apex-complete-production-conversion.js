@@ -72,13 +72,13 @@ class APEXProductionConversion {
       echo '🗄️ Setting up production database...'
       
       # Create production database if it doesn't exist
-      sudo -u postgres psql -c \"CREATE DATABASE jw_attendant_scheduler_production;\" 2>/dev/null || echo 'Database may already exist'
+      sudo -u postgres psql -c \"CREATE DATABASE theoshift_scheduler_production;\" 2>/dev/null || echo 'Database may already exist'
       
       # Create production user if it doesn't exist  
       sudo -u postgres psql -c \"CREATE USER jw_scheduler_production WITH PASSWORD 'jw_prod_password_2024';\" 2>/dev/null || echo 'User may already exist'
       
       # Grant permissions
-      sudo -u postgres psql -c \"GRANT ALL PRIVILEGES ON DATABASE jw_attendant_scheduler_production TO jw_scheduler_production;\"
+      sudo -u postgres psql -c \"GRANT ALL PRIVILEGES ON DATABASE theoshift_scheduler_production TO jw_scheduler_production;\"
       
       echo 'Production database setup complete'
     "`);
@@ -93,17 +93,17 @@ class APEXProductionConversion {
       echo '🔄 Converting all staging references to production...'
       
       # Remove all staging environment files
-      rm -f .env.local .env.staging .env.development
+      rm -f .env.local .env.blue .env.development
       
       # Create proper production environment
       cat > .env << 'EOF'
 NODE_ENV=production
 PORT=3001
 HOSTNAME=0.0.0.0
-DATABASE_URL=\"postgresql://jw_scheduler_production:jw_prod_password_2024@10.92.3.21:5432/jw_attendant_scheduler_production\"
-NEXTAUTH_URL=\"https://attendant.cloudigan.net\"
+DATABASE_URL=\"postgresql://jw_scheduler_production:jw_prod_password_2024@10.92.3.21:5432/theoshift_scheduler_production\"
+NEXTAUTH_URL=\"https://theoshift.com\"
 NEXTAUTH_SECRET=\"\$(openssl rand -hex 32)\"
-UPLOAD_DIR=\"/opt/jw-attendant-scheduler/public/uploads\"
+UPLOAD_DIR=\"/opt/theoshift/public/uploads\"
 MAX_FILE_SIZE=10485760
 FEEDBACK_ENABLED=true
 EOF
@@ -111,9 +111,9 @@ EOF
       echo 'Production environment created'
       
       # Update any hardcoded staging URLs in code
-      find . -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' | xargs grep -l 'jw-staging.cloudigan.net' | while read file; do
+      find . -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' | xargs grep -l 'blue.theoshift.com' | while read file; do
         echo \"Updating staging URLs in \$file\"
-        sed -i 's|jw-staging.cloudigan.net|attendant.cloudigan.net|g' \"\$file\"
+        sed -i 's|blue.theoshift.com|theoshift.com|g' \"\$file\"
       done
       
       echo 'Staging URL references updated'
@@ -171,7 +171,7 @@ EOF
 @tailwind components;
 @tailwind utilities;
 
-/* Global styles for JW Attendant Scheduler */
+/* Global styles for Theocratic Shift Scheduler */
 * {
   box-sizing: border-box;
   padding: 0;
@@ -227,7 +227,7 @@ EOF
       echo '🔨 Complete rebuild for production...'
       
       # Stop application
-      pm2 delete jw-attendant || true
+      pm2 delete theoshift-green || true
       
       # Clean everything
       rm -rf .next node_modules/.cache
@@ -257,7 +257,7 @@ EOF
               await prisma.users.create({
                 data: {
                   id: crypto.randomUUID(),
-                  email: 'admin@attendant.cloudigan.net',
+                  email: 'admin@theoshift.com',
                   firstName: 'Production',
                   lastName: 'Administrator',
                   role: 'ADMIN',
@@ -281,7 +281,7 @@ EOF
       \"
       
       # Build with production environment
-      NODE_ENV=production NEXTAUTH_URL=https://attendant.cloudigan.net npm run build
+      NODE_ENV=production NEXTAUTH_URL=https://theoshift.com npm run build
       
       echo 'Production build completed'
     "`);
@@ -308,7 +308,7 @@ EOF
       curl -f http://localhost:3001 > /dev/null && echo '✅ Application responding' || echo '❌ Application not responding'
       
       # Test authentication
-      curl -s http://localhost:3001/api/auth/providers | grep -q 'attendant.cloudigan.net' && echo '✅ Authentication URLs correct' || echo '❌ Authentication URLs still wrong'
+      curl -s http://localhost:3001/api/auth/providers | grep -q 'theoshift.com' && echo '✅ Authentication URLs correct' || echo '❌ Authentication URLs still wrong'
       
       # Test CSS
       CSS_FILE=\\\$(find .next -name '*.css' -type f | head -1 | xargs basename)

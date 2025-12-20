@@ -1,4 +1,4 @@
-# JW Attendant Scheduler - Master Development Roadmap
+# Theocratic Shift Scheduler - Master Development Roadmap
 
 ## Event-Centric Architecture Overview
 
@@ -154,7 +154,7 @@
 4. **SDD Compliance**: All features follow SDD architecture principles
 
 ### SSH Configuration
-- Staging Server: Use `/ssh-jw-attendant` shortcut
+- Staging Server: Use `/ssh-theoshift-green` shortcut
 - Production Server: Automated deployment only
 - Development: Local with staging database connection
 
@@ -270,4 +270,4 @@
 
 ---
 
-*This roadmap serves as the master plan for transforming the Next.js SDD foundation into a complete JW Attendant Scheduler system with full Django feature parity.*
+*This roadmap serves as the master plan for transforming the Next.js SDD foundation into a complete Theocratic Shift Scheduler system with full Django feature parity.*

@@ -10,8 +10,8 @@ class WMACSServerRecovery {
     this.stabilizer = new WMACSTerminalStabilizer();
     this.stagingHost = '10.92.3.24';
     this.stagingPort = 3001;
-    this.appPath = '/opt/jw-attendant-scheduler/current';
-    this.dbUrl = 'postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/jw_attendant_scheduler_staging';
+    this.appPath = '/opt/theoshift/current';
+    this.dbUrl = 'postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/theoshift_scheduler_staging';
   }
 
   async executeStableCommand(command, description) {
@@ -69,7 +69,7 @@ class WMACSServerRecovery {
   }
 
   async startApplication() {
-    console.log('🚀 WMACS: Starting JW Attendant Scheduler application...');
+    console.log('🚀 WMACS: Starting Theocratic Shift Scheduler application...');
     
     // Generate fresh JWT secret
     const jwtSecret = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -80,7 +80,7 @@ JWT_SECRET='${jwtSecret}' \\
 NODE_ENV=production \\
 NEXTAUTH_URL='http://${this.stagingHost}:${this.stagingPort}' \\
 NEXTAUTH_SECRET='${jwtSecret}' \\
-nohup npm start -- -p ${this.stagingPort} > /var/log/jw-attendant-scheduler.log 2>&1 &"`;
+nohup npm start -- -p ${this.stagingPort} > /var/log/theoshift.log 2>&1 &"`;
     
     await this.executeStableCommand(startCommand, 'Start application with proper environment');
     
@@ -117,7 +117,7 @@ nohup npm start -- -p ${this.stagingPort} > /var/log/jw-attendant-scheduler.log 
     
     // Check application logs
     const logs = await this.executeStableCommand(
-      `ssh root@${this.stagingHost} "tail -10 /var/log/jw-attendant-scheduler.log"`,
+      `ssh root@${this.stagingHost} "tail -10 /var/log/theoshift.log"`,
       'Check application startup logs'
     );
     
@@ -171,7 +171,7 @@ nohup npm start -- -p ${this.stagingPort} > /var/log/jw-attendant-scheduler.log 
       console.log('\n🚨 Emergency diagnostics:');
       try {
         await this.executeStableCommand(
-          `ssh root@${this.stagingHost} "tail -20 /var/log/jw-attendant-scheduler.log"`,
+          `ssh root@${this.stagingHost} "tail -20 /var/log/theoshift.log"`,
           'Get detailed error logs'
         );
       } catch (diagError) {

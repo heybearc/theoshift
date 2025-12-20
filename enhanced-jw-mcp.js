@@ -299,7 +299,7 @@ Last checked: ${healthData.timestamp}`;
       const possibleRoots = [
         process.cwd(),
         path.join(process.cwd(), '..'),
-        '/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler',
+        '/Users/cory/Documents/Cloudy-Work/applications/theoshift',
         __dirname
       ];
       

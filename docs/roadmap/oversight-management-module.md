@@ -1,5 +1,5 @@
 ---
-description: Oversight Management Module Specification for JW Attendant Scheduler
+description: Oversight Management Module Specification for Theocratic Shift Scheduler
 priority: high
 status: planned
 module: oversight-management

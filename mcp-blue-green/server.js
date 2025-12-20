@@ -2,7 +2,7 @@
 
 /**
  * Blue-Green Deployment MCP Server
- * Handles PROD/STANDBY orchestration for JW Attendant Scheduler and LDC Construction Tools
+ * Handles PROD/STANDBY orchestration for Theocratic Shift Scheduler and LDC Construction Tools
  */
 
 const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
@@ -28,8 +28,8 @@ const server = new Server(
 
 // Configuration
 const APPS = {
-  'jw-attendant': {
-    name: 'JW Attendant Scheduler',
+  'theoshift-green': {
+    name: 'Theocratic Shift Scheduler',
     blueIp: '10.92.3.22',
     greenIp: '10.92.3.24',
     blueContainer: 132,
@@ -37,10 +37,10 @@ const APPS = {
     haproxyBackend: 'jw_attendant',
     sshBlue: 'jwa',
     sshGreen: 'jwg',
-    path: '/opt/jw-attendant-scheduler',
+    path: '/opt/theoshift',
     branch: 'production-gold-standard',
-    pmBlue: 'jw-attendant-blue',
-    pmGreen: 'jw-attendant',
+    pmBlue: 'theoshift-blue',
+    pmGreen: 'theoshift-green',
     healthEndpoint: '/api/health',
   },
   'ldc-tools': {
@@ -64,9 +64,9 @@ const HAPROXY_IP = '10.92.3.26';
 const DB_IP = '10.92.3.21';
 
 // Get current deployment state from HAProxy (per-app)
-async function getDeploymentState(app = 'jw-attendant') {
+async function getDeploymentState(app = 'theoshift-green') {
   try {
-    const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'jw-deployment-state.json';
+    const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'theoshift-deployment-state.json';
     const { stdout } = await execAsync(`ssh haproxy "cat /var/lib/haproxy/${stateFile} 2>/dev/null || echo '{}'"`);
     const state = JSON.parse(stdout || '{}');
     return {
@@ -87,9 +87,9 @@ async function getDeploymentState(app = 'jw-attendant') {
 }
 
 // Save deployment state to HAProxy (per-app)
-async function saveDeploymentState(state, app = 'jw-attendant') {
+async function saveDeploymentState(state, app = 'theoshift-green') {
   try {
-    const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'jw-deployment-state.json';
+    const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'theoshift-deployment-state.json';
     const stateJson = JSON.stringify(state);
     await execAsync(`ssh haproxy "echo '${stateJson}' > /var/lib/haproxy/${stateFile}"`);
   } catch (error) {
@@ -142,9 +142,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         properties: {
           app: {
             type: 'string',
-            description: 'Application to check (jw-attendant or ldc-tools)',
-            enum: ['jw-attendant', 'ldc-tools'],
-            default: 'jw-attendant',
+            description: 'Application to check (theoshift-green or ldc-tools)',
+            enum: ['theoshift-green', 'ldc-tools'],
+            default: 'theoshift-green',
           },
         },
       },
@@ -157,9 +157,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         properties: {
           app: {
             type: 'string',
-            description: 'Application to deploy (jw-attendant or ldc-tools)',
-            enum: ['jw-attendant', 'ldc-tools'],
-            default: 'jw-attendant',
+            description: 'Application to deploy (theoshift-green or ldc-tools)',
+            enum: ['theoshift-green', 'ldc-tools'],
+            default: 'theoshift-green',
           },
           pullGithub: {
             type: 'boolean',
@@ -187,9 +187,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         properties: {
           app: {
             type: 'string',
-            description: 'Application to switch (jw-attendant or ldc-tools)',
-            enum: ['jw-attendant', 'ldc-tools'],
-            default: 'jw-attendant',
+            description: 'Application to switch (theoshift-green or ldc-tools)',
+            enum: ['theoshift-green', 'ldc-tools'],
+            default: 'theoshift-green',
           },
           requireApproval: {
             type: 'boolean',
@@ -212,7 +212,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   if (name === 'get_deployment_status') {
-    const app = args.app || 'jw-attendant';
+    const app = args.app || 'theoshift-green';
     const appConfig = APPS[app];
     const haproxyBackend = await getHAProxyBackend(app);
     const state = await getDeploymentState(app);
@@ -264,7 +264,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 
   if (name === 'deploy_to_standby') {
-    const app = args.app || 'jw-attendant';
+    const app = args.app || 'theoshift-green';
     const appConfig = APPS[app];
     const haproxyBackend = await getHAProxyBackend(app);
     const state = await getDeploymentState(app);
@@ -280,7 +280,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // Step 1: Create backup (if requested)
       if (args.createBackup) {
         steps.push('Creating backup...');
-        if (app === 'jw-attendant') {
+        if (app === 'theoshift-green') {
           await execAsync(`ssh root@${DB_IP} "/usr/local/bin/backup-jw-scheduler.sh"`);
           await execAsync(`ssh ${standbyShortcut} "/usr/local/bin/backup-to-nfs.sh"`);
         } else {
@@ -310,7 +310,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // Step 4: Run migrations (if requested)
       if (args.runMigrations) {
         steps.push('Creating database backup...');
-        await execAsync(`ssh root@${DB_IP} "sudo -u postgres pg_dump jw_attendant_scheduler_staging | gzip > /mnt/data/jw-attendant-backups/database/manual/pre-migration-$(date +%Y%m%d_%H%M%S).sql.gz"`);
+        await execAsync(`ssh root@${DB_IP} "sudo -u postgres pg_dump theoshift_scheduler_staging | gzip > /mnt/data/theoshift-green-backups/database/manual/pre-migration-$(date +%Y%m%d_%H%M%S).sql.gz"`);
         steps.push('✅ Pre-migration backup created');
 
         steps.push('Running migrations...');
@@ -366,7 +366,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 
   if (name === 'switch_traffic') {
-    const app = args.app || 'jw-attendant';
+    const app = args.app || 'theoshift-green';
     const appConfig = APPS[app];
     const haproxyBackend = await getHAProxyBackend(app);
     const state = await getDeploymentState(app);

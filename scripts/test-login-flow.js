@@ -112,7 +112,7 @@ async function testLoginFlow() {
     console.log('DEBUG STEPS:')
     console.log('1. Open browser dev tools (F12)')
     console.log('2. Go to Application/Storage tab')
-    console.log('3. Check Cookies for jw-staging.cloudigan.net')
+    console.log('3. Check Cookies for blue.theoshift.com')
     console.log('4. Look for next-auth.session-token')
     console.log('5. Check if the cookie exists and has a value')
     console.log('')

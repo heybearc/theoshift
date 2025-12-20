@@ -45,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ]
 
     // Add title row
-    const titleRow = worksheet.addRow(['JW Attendant Scheduler - Event Positions Export'])
+    const titleRow = worksheet.addRow(['Theocratic Shift Scheduler - Event Positions Export'])
     titleRow.font = { size: 16, bold: true, color: { argb: 'FF1e40af' } }
     worksheet.mergeCells('A1:J1')
     titleRow.alignment = { horizontal: 'center' }

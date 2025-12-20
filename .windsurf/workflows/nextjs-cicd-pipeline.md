@@ -1,12 +1,12 @@
 ---
-description: APEX Guardian CI/CD Pipeline for Next.js JW Attendant Scheduler
+description: APEX Guardian CI/CD Pipeline for Next.js Theocratic Shift Scheduler
 ---
 
 # APEX Guardian CI/CD Pipeline - Next.js Implementation
 
 **Environment Mapping (CORRECTED):**
-- **Staging:** Container 134 (10.92.3.24:3001) - Development and testing
-- **Production:** Container 132 (10.92.3.22:3001) - Live application  
+- **Staging:** Container 134 (blue-theoshift) (10.92.3.24:3001) - Development and testing
+- **Production:** Container 132 (green-theoshift) (10.92.3.22:3001) - Live application  
 - **Database:** Container 131 (10.92.3.21:5432) - Shared PostgreSQL
 
 ## 🛡️ APEX Cascade Rules (MANDATORY)
@@ -27,12 +27,12 @@ description: APEX Guardian CI/CD Pipeline for Next.js JW Attendant Scheduler
 
 ### 1. Connect to Staging Environment
 ```bash
-ssh jws  # 10.92.3.24 (Container 134)
+ssh jws  # 10.92.3.24 (Container 134 (blue-theoshift))
 ```
 
 ### 2. Navigate to Project Directory
 ```bash
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 ```
 
 ### 3. Verify APEX Guardian Status

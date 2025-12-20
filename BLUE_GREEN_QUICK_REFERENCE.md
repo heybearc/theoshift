@@ -50,20 +50,20 @@ Switch traffic with emergency mode
 
 ### Check Servers
 ```bash
-ssh jwa "pm2 list"
-ssh jwg "pm2 list"
+ssh green-theoshift "pm2 list"
+ssh blue-theoshift "pm2 list"
 ```
 
 ### Restart
 ```bash
-ssh jwa "pm2 restart jw-attendant-blue"
-ssh jwg "pm2 restart jw-attendant"
+ssh green-theoshift "pm2 restart theoshift-blue"
+ssh blue-theoshift "pm2 restart theoshift-green"
 ```
 
 ### View Logs
 ```bash
-ssh jwa "pm2 logs jw-attendant-blue --lines 50"
-ssh jwg "pm2 logs jw-attendant --lines 50"
+ssh green-theoshift "pm2 logs theoshift-blue --lines 50"
+ssh blue-theoshift "pm2 logs theoshift-green --lines 50"
 ```
 
 ### Check State
@@ -81,7 +81,7 @@ ssh haproxy "grep default_backend /etc/haproxy/haproxy.cfg | grep jw_attendant"
 ## 🌐 **URLs**
 
 ```
-Production:    https://attendant.cloudigan.net
+Production:    https://theoshift.com
 BLUE:          http://10.92.3.22:3001
 GREEN:         http://10.92.3.24:3001
 HAProxy Stats: http://10.92.3.26:8404
@@ -120,11 +120,11 @@ HAProxy Stats: http://10.92.3.26:8404
 ### Health Check Fails
 ```bash
 # Check if running
-ssh jwa "pm2 list"
-ssh jwg "pm2 list"
+ssh green-theoshift "pm2 list"
+ssh blue-theoshift "pm2 list"
 
 # Restart
-ssh jwa "pm2 restart jw-attendant-blue"
+ssh green-theoshift "pm2 restart theoshift-blue"
 ```
 
 ### State Out of Sync
@@ -142,8 +142,8 @@ ssh haproxy "/usr/local/bin/jw-deployment-state.sh set blue green"
 ### Git Issues
 ```bash
 # Test pull
-ssh jwa "cd /opt/jw-attendant-scheduler && git pull"
-ssh jwg "cd /opt/jw-attendant-scheduler && git pull"
+ssh green-theoshift "cd /opt/theoshift && git pull"
+ssh blue-theoshift "cd /opt/theoshift && git pull"
 ```
 
 ---
@@ -152,7 +152,7 @@ ssh jwg "cd /opt/jw-attendant-scheduler && git pull"
 
 ```
 MCP Server:
-/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-blue-green/server.js
+/Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-blue-green/server.js
 
 State File:
 /var/lib/jw-deployment/state.json (on HAProxy)
@@ -164,7 +164,7 @@ Git Credentials:
 ~/.git-credentials
 
 Application:
-/opt/jw-attendant-scheduler/ (on BLUE and GREEN)
+/opt/theoshift/ (on BLUE and GREEN)
 ```
 
 ---

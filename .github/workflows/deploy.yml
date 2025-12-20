@@ -1,4 +1,4 @@
-name: Deploy JW Attendant Scheduler
+name: Deploy Theocratic Shift Scheduler
 
 on:
   push:
@@ -45,13 +45,13 @@ jobs:
         if [ -d "public" ]; then cp -r public deploy-package/; fi
         echo "BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)" > deploy-package/.build-info
         echo "COMMIT_SHA=${{ github.sha }}" >> deploy-package/.build-info
-        tar -czf jw-attendant-scheduler-${{ github.sha }}.tar.gz -C deploy-package .
+        tar -czf theoshift-${{ github.sha }}.tar.gz -C deploy-package .
         
     - name: Upload deployment artifact
       uses: actions/upload-artifact@v4
       with:
         name: deployment-${{ github.sha }}
-        path: jw-attendant-scheduler-${{ github.sha }}.tar.gz
+        path: theoshift-${{ github.sha }}.tar.gz
         retention-days: 30
 
   deploy-staging:
@@ -76,7 +76,7 @@ jobs:
     - name: Deploy to staging
       run: |
         # Upload and extract
-        scp jw-attendant-scheduler-${{ needs.build.outputs.commit-sha }}.tar.gz root@${{ secrets.STAGING_HOST }}:/tmp/
+        scp theoshift-${{ needs.build.outputs.commit-sha }}.tar.gz root@${{ secrets.STAGING_HOST }}:/tmp/
         
         # Deploy via SSH
         ssh root@${{ secrets.STAGING_HOST }} << 'EOF'
@@ -86,11 +86,11 @@ jobs:
           pkill -f "next" || true
           
           # Create deployment directory
-          mkdir -p /opt/jw-attendant-scheduler/releases/${{ needs.build.outputs.commit-sha }}
+          mkdir -p /opt/theoshift/releases/${{ needs.build.outputs.commit-sha }}
           
           # Extract new release
-          cd /opt/jw-attendant-scheduler/releases/${{ needs.build.outputs.commit-sha }}
-          tar -xzf /tmp/jw-attendant-scheduler-${{ needs.build.outputs.commit-sha }}.tar.gz
+          cd /opt/theoshift/releases/${{ needs.build.outputs.commit-sha }}
+          tar -xzf /tmp/theoshift-${{ needs.build.outputs.commit-sha }}.tar.gz
           
           # Install dependencies and build
           npm ci
@@ -98,24 +98,24 @@ jobs:
           
           # Create environment file
           cat > .env.local << 'ENVEOF'
-        DATABASE_URL=postgresql://postgres:Cl0udy!!(@)@10.92.3.21:5432/jw_attendant_scheduler_staging
+        DATABASE_URL=postgresql://postgres:Cl0udy!!(@)@10.92.3.21:5432/theoshift_scheduler_staging
         NEXTAUTH_SECRET=staging-secret-key
         NEXTAUTH_URL=http://${{ secrets.STAGING_HOST }}:3001
         ENVEOF
           
           # Update symlink atomically
-          ln -sfn /opt/jw-attendant-scheduler/releases/${{ needs.build.outputs.commit-sha }} /opt/jw-attendant-scheduler/current
+          ln -sfn /opt/theoshift/releases/${{ needs.build.outputs.commit-sha }} /opt/theoshift/current
           
           # Start application
-          cd /opt/jw-attendant-scheduler/current
-          nohup npm start -- -p 3001 > /var/log/jw-attendant-scheduler.log 2>&1 &
+          cd /opt/theoshift/current
+          nohup npm start -- -p 3001 > /var/log/theoshift.log 2>&1 &
           
           # Cleanup old releases (keep last 3)
-          cd /opt/jw-attendant-scheduler/releases
+          cd /opt/theoshift/releases
           ls -t | tail -n +4 | xargs rm -rf
           
           # Cleanup temp file
-          rm -f /tmp/jw-attendant-scheduler-${{ needs.build.outputs.commit-sha }}.tar.gz
+          rm -f /tmp/theoshift-${{ needs.build.outputs.commit-sha }}.tar.gz
         EOF
         
     - name: Health check
@@ -150,7 +150,7 @@ jobs:
     - name: Deploy to production
       run: |
         # Upload and extract
-        scp jw-attendant-scheduler-${{ needs.build.outputs.commit-sha }}.tar.gz root@${{ secrets.PRODUCTION_HOST }}:/tmp/
+        scp theoshift-${{ needs.build.outputs.commit-sha }}.tar.gz root@${{ secrets.PRODUCTION_HOST }}:/tmp/
         
         # Deploy via SSH
         ssh root@${{ secrets.PRODUCTION_HOST }} << 'EOF'
@@ -160,11 +160,11 @@ jobs:
           pkill -f "next" || true
           
           # Create deployment directory
-          mkdir -p /opt/jw-attendant-scheduler/releases/${{ needs.build.outputs.commit-sha }}
+          mkdir -p /opt/theoshift/releases/${{ needs.build.outputs.commit-sha }}
           
           # Extract new release
-          cd /opt/jw-attendant-scheduler/releases/${{ needs.build.outputs.commit-sha }}
-          tar -xzf /tmp/jw-attendant-scheduler-${{ needs.build.outputs.commit-sha }}.tar.gz
+          cd /opt/theoshift/releases/${{ needs.build.outputs.commit-sha }}
+          tar -xzf /tmp/theoshift-${{ needs.build.outputs.commit-sha }}.tar.gz
           
           # Install only production dependencies (lighter than full build)
           npm ci --only=production
@@ -177,18 +177,18 @@ jobs:
         ENVEOF
           
           # Update symlink atomically
-          ln -sfn /opt/jw-attendant-scheduler/releases/${{ needs.build.outputs.commit-sha }} /opt/jw-attendant-scheduler/current
+          ln -sfn /opt/theoshift/releases/${{ needs.build.outputs.commit-sha }} /opt/theoshift/current
           
           # Start application (use pre-built artifacts)
-          cd /opt/jw-attendant-scheduler/current
-          nohup npx next start -p 3001 > /var/log/jw-attendant-scheduler.log 2>&1 &
+          cd /opt/theoshift/current
+          nohup npx next start -p 3001 > /var/log/theoshift.log 2>&1 &
           
           # Cleanup old releases (keep last 3)
-          cd /opt/jw-attendant-scheduler/releases
+          cd /opt/theoshift/releases
           ls -t | tail -n +4 | xargs rm -rf
           
           # Cleanup temp file
-          rm -f /tmp/jw-attendant-scheduler-${{ needs.build.outputs.commit-sha }}.tar.gz
+          rm -f /tmp/theoshift-${{ needs.build.outputs.commit-sha }}.tar.gz
         EOF
         
     - name: Health check

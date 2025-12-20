@@ -53,7 +53,7 @@ EOF"`;
 
     // Step 2: Move to public directory
     console.log('📂 Step 2: Moving to public directory');
-    const moveFile = `ssh root@10.92.3.24 "cp /tmp/test-login.html /opt/jw-attendant-scheduler/current/public/"`;
+    const moveFile = `ssh root@10.92.3.24 "cp /tmp/test-login.html /opt/theoshift/current/public/"`;
     await execAsync(moveFile);
     console.log('✅ File moved to public directory');
 

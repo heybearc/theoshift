@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // WMACS Guardian: Port 3001 Enforcement System
-// Ensures all JW Attendant Scheduler deployments use port 3001
+// Ensures all Theocratic Shift Scheduler deployments use port 3001
 
 const fs = require('fs');
 const path = require('path');
@@ -12,7 +12,7 @@ class WMACSPortGuardian {
     this.configFiles = [
       '.env',
       '.env.local',
-      '.env.production',
+      '.env.green',
       '.env.development'
     ];
   }

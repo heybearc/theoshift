@@ -9,7 +9,7 @@ echo "=================================="
 # Configuration
 PROD_SERVER="jwa"
 SSH_CONFIG="/Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant"
-PROJECT_PATH="/opt/jw-attendant-scheduler"
+PROJECT_PATH="/opt/theoshift"
 
 echo "Step 1: Kill all existing processes..."
 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
@@ -26,8 +26,8 @@ ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
 NODE_ENV=production
 PORT=3001
 HOSTNAME=0.0.0.0
-DATABASE_URL=\"postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler\"
-NEXTAUTH_URL=\"https://attendant.cloudigan.net\"
+DATABASE_URL=\"postgresql://theoshift_user:jw_password@10.92.3.21:5432/theoshift_scheduler\"
+NEXTAUTH_URL=\"https://theoshift.com\"
 NEXTAUTH_SECRET=\"prod-secret-$(date +%s)\"
 EOF
     
@@ -90,7 +90,7 @@ ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
 echo ""
 echo "🎉 Emergency deployment complete!"
 echo "Test: http://10.92.3.22:3001"
-echo "Production: https://attendant.cloudigan.net"
+echo "Production: https://theoshift.com"
 echo ""
 echo "If still not working, check logs:"
 echo "ssh -F $SSH_CONFIG $PROD_SERVER 'tail -f $PROJECT_PATH/production.log'"

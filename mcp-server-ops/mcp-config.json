@@ -2,21 +2,21 @@
   "mcpServers": {
     "enhanced-jw-mcp-cicd": {
       "command": "node",
-      "args": ["/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-server-ops/enhanced-jw-mcp-cicd.cjs"],
+      "args": ["/Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-server-ops/enhanced-jw-mcp-cicd.cjs"],
       "env": {
         "NODE_ENV": "production"
       }
     },
     "enhanced-ldc-mcp-cicd": {
       "command": "node", 
-      "args": ["/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-server-ops/enhanced-ldc-mcp-cicd.js"],
+      "args": ["/Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-server-ops/enhanced-ldc-mcp-cicd.js"],
       "env": {
         "NODE_ENV": "production"
       }
     },
     "federation-coordinator-cicd": {
       "command": "node",
-      "args": ["/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-server-ops/federation-coordinator-cicd.js"],
+      "args": ["/Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-server-ops/federation-coordinator-cicd.js"],
       "env": {
         "NODE_ENV": "production"
       }

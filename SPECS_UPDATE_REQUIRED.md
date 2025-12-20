@@ -32,20 +32,20 @@ Following the updated CASCADE RULES, I have examined all project specifications 
 **From .github/workflows/staging-to-production.yml:**
 - ✅ **SSH User:** `root@10.92.3.24` (staging), `root@10.92.3.22` (production)
 - ✅ **SSH Key:** `${{ secrets.JW_ATTENDANT_SSH_KEY }}`
-- ✅ **Application Directory:** `/opt/jw-attendant-staging`, `/opt/jw-attendant-production`
-- ✅ **Service Names:** `jw-attendant-production` (systemd service)
-- ✅ **Database Connection:** `postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler`
+- ✅ **Application Directory:** `/opt/theoshift-green-staging`, `/opt/theoshift-green-production`
+- ✅ **Service Names:** `theoshift-green-production` (systemd service)
+- ✅ **Database Connection:** `postgresql://theoshift_user:jw_password@10.92.3.21:5432/theoshift_scheduler`
 
 **From .windsurf/workflows/staging-development.md:**
 - ✅ **SSH Alias:** `ssh jw-staging` (configured SSH alias)
-- ✅ **Application Directory:** `/opt/jw-attendant-staging`
-- ✅ **Service Management:** `systemctl restart jw-attendant-staging`
-- ✅ **Database Connection:** `psql -h 10.92.3.21 -U jw_user -d jw_attendant_scheduler`
+- ✅ **Application Directory:** `/opt/theoshift-green-staging`
+- ✅ **Service Management:** `systemctl restart theoshift-green-staging`
+- ✅ **Database Connection:** `psql -h 10.92.3.21 -U theoshift_user -d theoshift_scheduler`
 
 **From .github/workflows/mcp-ci-cd.yml:**
-- ✅ **Release Directory Pattern:** `/opt/jw-attendant-scheduler/releases/{commit-sha}`
-- ✅ **Current Symlink:** `/opt/jw-attendant-scheduler/current`
-- ✅ **Log Location:** `/var/log/jw-attendant-scheduler.log`
+- ✅ **Release Directory Pattern:** `/opt/theoshift/releases/{commit-sha}`
+- ✅ **Current Symlink:** `/opt/theoshift/current`
+- ✅ **Log Location:** `/var/log/theoshift.log`
 - ✅ **Process Management:** Direct npm start with nohup
 
 ### ❌ **STILL MISSING:**

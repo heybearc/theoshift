@@ -42,14 +42,14 @@ async function simpleRecovery() {
     
     // Step 5: Start application
     console.log('\n🚀 Step 5: Starting application');
-    const dbUrl = 'postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/jw_attendant_scheduler_staging';
+    const dbUrl = 'postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/theoshift_scheduler_staging';
     const jwtSecret = 'wmacs-recovery-secret-' + Date.now();
     
-    const startCommand = `cd /opt/jw-attendant-scheduler/current && ` +
+    const startCommand = `cd /opt/theoshift/current && ` +
       `DATABASE_URL='${dbUrl}' ` +
       `JWT_SECRET='${jwtSecret}' ` +
       `NODE_ENV=production ` +
-      `nohup npm start -- -p ${port} > /var/log/jw-attendant-scheduler.log 2>&1 &`;
+      `nohup npm start -- -p ${port} > /var/log/theoshift.log 2>&1 &`;
     
     await execAsync(`ssh root@${host} "${startCommand}"`);
     console.log('✅ Application start command executed');
@@ -67,7 +67,7 @@ async function simpleRecovery() {
     const listeningCheck = await execAsync(`ssh root@${host} "ss -tlnp | grep :${port} || echo 'NOT_LISTENING'"`);
     console.log('Listening check:', listeningCheck.stdout.trim());
     
-    const logs = await execAsync(`ssh root@${host} "tail -15 /var/log/jw-attendant-scheduler.log"`);
+    const logs = await execAsync(`ssh root@${host} "tail -15 /var/log/theoshift.log"`);
     console.log('\n📋 Application logs:');
     console.log(logs.stdout);
     
@@ -83,7 +83,7 @@ async function simpleRecovery() {
       console.log('⚠️  HTTP test failed, checking if app is still starting...');
       
       // Check logs for startup progress
-      const recentLogs = await execAsync(`ssh root@${host} "tail -5 /var/log/jw-attendant-scheduler.log"`);
+      const recentLogs = await execAsync(`ssh root@${host} "tail -5 /var/log/theoshift.log"`);
       console.log('Recent logs:', recentLogs.stdout);
       
       console.log('\n⚠️  WMACS Recovery: PARTIAL SUCCESS');
@@ -99,7 +99,7 @@ async function simpleRecovery() {
     // Emergency diagnostics
     try {
       console.log('\n🚨 Emergency diagnostics:');
-      const emergencyLogs = await execAsync(`ssh root@${host} "tail -20 /var/log/jw-attendant-scheduler.log"`);
+      const emergencyLogs = await execAsync(`ssh root@${host} "tail -20 /var/log/theoshift.log"`);
       console.log(emergencyLogs.stdout);
     } catch (diagError) {
       console.log('Could not get emergency diagnostics');

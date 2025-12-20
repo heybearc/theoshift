@@ -211,7 +211,7 @@ export default function EventPositions({ eventId }: EventPositionsProps) {
   return (
     <>
       <Head>
-        <title>{event?.name ? `${event.name} - Positions` : 'Event Positions'} | JW Attendant Scheduler</title>
+        <title>{event?.name ? `${event.name} - Positions` : 'Event Positions'} | Theocratic Shift Scheduler</title>
       </Head>
 
       <div className="min-h-screen bg-gray-50">

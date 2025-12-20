@@ -129,7 +129,7 @@ export default function AcceptInvitation({ invitation, error }: AcceptInvitation
         <div>
           <div className="mx-auto h-12 w-12 text-green-500 text-4xl text-center">🎉</div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Welcome to JW Attendant Scheduler
+            Welcome to Theocratic Shift Scheduler
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Complete your account setup

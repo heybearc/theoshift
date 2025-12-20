@@ -7,7 +7,7 @@ import { spawn } from 'child_process';
 import { createWriteStream } from 'fs';
 
 async function restartJWAttendantWithWMACS() {
-  console.log('🔄 Using WMACS to restart JW Attendant Scheduler with correct database credentials...');
+  console.log('🔄 Using WMACS to restart Theocratic Shift Scheduler with correct database credentials...');
   
   // Create MCP client to communicate with WMACS server
   const mcpClient = spawn('node', ['-e', `
@@ -18,7 +18,7 @@ async function restartJWAttendantWithWMACS() {
       const transport = new StdioClientTransport({
         command: 'node',
         args: ['src/index.js'],
-        cwd: '/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-server-ops'
+        cwd: '/Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-server-ops'
       });
       
       const client = new Client({
@@ -40,7 +40,7 @@ async function restartJWAttendantWithWMACS() {
             arguments: {
               host: '10.92.3.24',
               command: 'pkill -f "npm start"',
-              reason: 'Stop JW Attendant Scheduler for database credential update'
+              reason: 'Stop Theocratic Shift Scheduler for database credential update'
             }
           }
         });
@@ -52,7 +52,7 @@ async function restartJWAttendantWithWMACS() {
         
         // Start with correct DATABASE_URL
         console.log('🚀 Starting JW Attendant with correct database credentials...');
-        const startCommand = 'cd /opt/jw-attendant-scheduler/current && DATABASE_URL=\\'postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/jw_attendant_scheduler_staging\\' JWT_SECRET="$(openssl rand -hex 32)" NODE_ENV=production nohup npm start -- -p 3001 > /var/log/jw-attendant-scheduler.log 2>&1 &';
+        const startCommand = 'cd /opt/theoshift/current && DATABASE_URL=\\'postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/theoshift_scheduler_staging\\' JWT_SECRET="$(openssl rand -hex 32)" NODE_ENV=production nohup npm start -- -p 3001 > /var/log/theoshift.log 2>&1 &';
         
         const startResult = await client.request({
           method: 'tools/call',
@@ -61,7 +61,7 @@ async function restartJWAttendantWithWMACS() {
             arguments: {
               host: '10.92.3.24',
               command: startCommand,
-              reason: 'Start JW Attendant Scheduler with correct database credentials'
+              reason: 'Start Theocratic Shift Scheduler with correct database credentials'
             }
           }
         });
@@ -78,7 +78,7 @@ async function restartJWAttendantWithWMACS() {
             arguments: {
               host: '10.92.3.24',
               command: 'ps aux | grep "npm start" | grep -v grep',
-              reason: 'Verify JW Attendant Scheduler is running'
+              reason: 'Verify Theocratic Shift Scheduler is running'
             }
           }
         });
@@ -98,7 +98,7 @@ async function restartJWAttendantWithWMACS() {
     executeWMACSRestart();
   `], {
     stdio: 'inherit',
-    cwd: '/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/mcp-server-ops'
+    cwd: '/Users/cory/Documents/Cloudy-Work/applications/theoshift/mcp-server-ops'
   });
   
   return new Promise((resolve, reject) => {

@@ -11,8 +11,8 @@ const fs = require('fs');
 class MCPDeployment {
     constructor() {
         this.serverHost = 'jws';
-        this.projectPath = '/opt/jw-attendant-scheduler';
-        this.backupPath = '/opt/jw-attendant-scheduler/scripts/mcp-backup';
+        this.projectPath = '/opt/theoshift';
+        this.backupPath = '/opt/theoshift/scripts/mcp-backup';
     }
 
     async validateCurrentMCP() {
@@ -107,7 +107,7 @@ class MCPWrapper {
     async getHealthCheck() {
         try {
             // Run our corrected health check
-            const result = execSync('node /opt/jw-attendant-scheduler/scripts/corrected-mcp-health.js', { encoding: 'utf8' });
+            const result = execSync('node /opt/theoshift/scripts/corrected-mcp-health.js', { encoding: 'utf8' });
             
             // Extract the MCP-compatible output
             const lines = result.split('\\n');
@@ -247,7 +247,7 @@ EOF"`);
 
         console.log('🎉 MCP Health Check Deployment Complete!');
         console.log('✅ Reliable health checking now available');
-        console.log('🔧 Use: ssh jws "cd /opt/jw-attendant-scheduler && node scripts/corrected-mcp-health.js"');
+        console.log('🔧 Use: ssh jws "cd /opt/theoshift && node scripts/corrected-mcp-health.js"');
     }
 }
 

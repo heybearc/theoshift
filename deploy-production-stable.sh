@@ -1,10 +1,10 @@
 #!/bin/bash
-# JW Attendant Scheduler - Production Deployment Script
+# Theocratic Shift Scheduler - Production Deployment Script
 # Uses the SAME stable method as staging
 
 set -e
 
-echo "🚀 Starting JW Attendant Scheduler Deployment to Production"
+echo "🚀 Starting Theocratic Shift Scheduler Deployment to Production"
 echo "Using proven staging deployment method"
 
 # Sync code to production server (same as staging)
@@ -15,23 +15,23 @@ rsync -avz --delete \
   --exclude '.env.local' \
   --exclude '.git' \
   -e "ssh -F /Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant" \
-  /Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler/ \
-  jwa:/opt/jw-attendant-scheduler/
+  /Users/cory/Documents/Cloudy-Work/applications/theoshift/ \
+  jwa:/opt/theoshift/
 
 # Build and restart on server (same as staging but with production env)
 echo "🔨 Building application..."
 ssh -F /Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant jwa << 'ENDSSH'
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 
 # Set up production environment
 cat > .env << 'EOF'
 NODE_ENV=production
 PORT=3001
 HOSTNAME=0.0.0.0
-DATABASE_URL="postgresql://jw_scheduler:jw_password@10.92.3.21:5432/jw_attendant_scheduler"
-NEXTAUTH_URL="https://attendant.cloudigan.net"
+DATABASE_URL="postgresql://jw_scheduler:jw_password@10.92.3.21:5432/theoshift_scheduler"
+NEXTAUTH_URL="https://theoshift.com"
 NEXTAUTH_SECRET="prod-secret-$(date +%s)"
-UPLOAD_DIR="/opt/jw-attendant-scheduler/public/uploads"
+UPLOAD_DIR="/opt/theoshift/public/uploads"
 MAX_FILE_SIZE=10485760
 FEEDBACK_ENABLED=true
 EOF
@@ -46,13 +46,13 @@ npm run build
 chmod +x start.sh
 
 # Use PM2 with ecosystem config (same as staging)
-pm2 delete jw-attendant || true
+pm2 delete theoshift-green || true
 pm2 start ecosystem.config.js
 pm2 save
 ENDSSH
 
 echo "✅ Deployment complete!"
-echo "🌐 Application running at: https://attendant.cloudigan.net"
+echo "🌐 Application running at: https://theoshift.com"
 
 # Show status (same as staging)
 ssh -F /Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant jwa 'pm2 list'

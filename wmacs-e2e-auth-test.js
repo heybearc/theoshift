@@ -58,10 +58,10 @@ class WMACSE2EAuthTest {
         this.logSuccess('Root page accessible');
         
         // Check actual content
-        const contentResult = await execAsync(`ssh ${this.stagingServer} "curl -s -L -c ${this.cookieJar} '${this.baseUrl}/' | grep -o 'Sign in\\|JW Attendant Scheduler\\|Loading\\|Redirecting' | head -3"`);
+        const contentResult = await execAsync(`ssh ${this.stagingServer} "curl -s -L -c ${this.cookieJar} '${this.baseUrl}/' | grep -o 'Sign in\\|Theocratic Shift Scheduler\\|Loading\\|Redirecting' | head -3"`);
         console.log('   Content found:', contentResult.stdout.trim());
         
-        if (contentResult.stdout.includes('JW Attendant Scheduler')) {
+        if (contentResult.stdout.includes('Theocratic Shift Scheduler')) {
           this.logSuccess('Root page loads with expected content');
         } else {
           this.logFailure('Root page content unexpected');
@@ -153,10 +153,10 @@ class WMACSE2EAuthTest {
         this.logSuccess('Dashboard accessible with authentication');
         
         // Check dashboard content
-        const contentResult = await execAsync(`ssh ${this.stagingServer} "curl -s -b ${this.cookieJar} '${this.baseUrl}/dashboard' | grep -o 'JW Attendant Scheduler\\|Welcome back\\|Total Users\\|Total Events' | head -4"`);
+        const contentResult = await execAsync(`ssh ${this.stagingServer} "curl -s -b ${this.cookieJar} '${this.baseUrl}/dashboard' | grep -o 'Theocratic Shift Scheduler\\|Welcome back\\|Total Users\\|Total Events' | head -4"`);
         console.log('   Dashboard content:', contentResult.stdout.trim());
         
-        if (contentResult.stdout.includes('JW Attendant Scheduler')) {
+        if (contentResult.stdout.includes('Theocratic Shift Scheduler')) {
           this.logSuccess('Dashboard contains expected content');
         } else {
           this.logFailure('Dashboard content missing');

@@ -141,7 +141,7 @@ description: One sentence describing the main focus
 - "Added ability to export assignments to PDF"
 
 ### ❌ DON'Ts (Technical Details):
-- NO IP addresses (10.92.3.22, Container 132, etc.)
+- NO IP addresses (10.92.3.22, Container 132 (green-theoshift), etc.)
 - NO file paths (pages/api/events/[id]/attendants.tsx)
 - NO technical jargon (Prisma, getBoundingClientRect, etc.)
 - NO deployment details (Blue/Green environments)

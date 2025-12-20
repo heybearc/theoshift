@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      app: 'JW Attendant Scheduler',
+      app: 'Theocratic Shift Scheduler',
       version: process.env.npm_package_version || '2.2.0',
       database: {
         connected: true,
@@ -33,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(503).json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      app: 'JW Attendant Scheduler',
+      app: 'Theocratic Shift Scheduler',
       error: error instanceof Error ? error.message : 'Unknown error',
     })
   }

@@ -97,7 +97,7 @@
 3. **Testing Validation**
    ```bash
    # Test in each project
-   cd applications/jw-attendant-scheduler
+   cd applications/theoshift
    node wmacs/wmacs-guardian.js test
    
    cd applications/ldc-construction-tools

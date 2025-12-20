@@ -1,4 +1,4 @@
-# JW Attendant Scheduler - Preserved Assets Documentation
+# Theocratic Shift Scheduler - Preserved Assets Documentation
 
 ## 🗄️ DATABASE SCHEMA (PRESERVE COMPLETELY)
 
@@ -105,7 +105,7 @@ GET /api/counts/analytics
 ### Database Configuration:
 ```bash
 # From .env.local
-DATABASE_URL=postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/jw_attendant_scheduler_staging
+DATABASE_URL=postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/theoshift_scheduler_staging
 NEXTAUTH_SECRET=staging-nextauth-secret-2024
 NEXTAUTH_URL=http://10.92.3.24:3001
 NODE_ENV=production
@@ -115,8 +115,8 @@ PORT=3001
 ### Container Setup:
 ```bash
 # Infrastructure that works
-- Staging: Container 134 (10.92.3.24:3001)
-- Production: Container 132 (10.92.3.22:3001)
+- Staging: Container 134 (blue-theoshift) (10.92.3.24:3001)
+- Production: Container 132 (green-theoshift) (10.92.3.22:3001)
 - Database: Container 131 (10.92.3.21:5432)
 ```
 

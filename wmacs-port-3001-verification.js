@@ -109,7 +109,7 @@ class WMACSPort3001Verification {
     console.log('   - Deployment blocking for incorrect ports');
     
     console.log('\n🎉 MISSION ACCOMPLISHED!');
-    console.log('JW Attendant Scheduler successfully migrated to Next.js');
+    console.log('Theocratic Shift Scheduler successfully migrated to Next.js');
     console.log('and deployed to production on the immutable port 3001!');
   }
 }

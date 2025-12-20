@@ -3,7 +3,7 @@
 ## 🚀 **One-Line Setup for Any Workspace**
 
 ```bash
-curl -s https://raw.githubusercontent.com/heybearc/jw-attendant-scheduler/feature/api-foundation/apex-setup.sh | bash -s "your-workspace-name"
+curl -s https://raw.githubusercontent.com/heybearc/theoshift/feature/api-foundation/apex-setup.sh | bash -s "your-workspace-name"
 ```
 
 ## 📋 **What This Does**
@@ -30,7 +30,7 @@ After setup, your workspace will have:
 
 ```bash
 # Setup APEX in current directory
-curl -s https://raw.githubusercontent.com/heybearc/jw-attendant-scheduler/feature/api-foundation/apex-setup.sh | bash -s "my-project"
+curl -s https://raw.githubusercontent.com/heybearc/theoshift/feature/api-foundation/apex-setup.sh | bash -s "my-project"
 
 # Deploy to staging
 npm run apex:deploy:staging
@@ -55,8 +55,8 @@ npm run apex:health
 │   ├── apex-clean-deploy.sh        # Clean deployment script
 │   └── apex-health-check.sh        # Health monitoring
 ├── env-templates/
-│   ├── .env.staging                 # Staging template
-│   └── .env.production              # Production template
+│   ├── .env.blue                 # Staging template
+│   └── .env.green              # Production template
 └── README.md                        # Quick reference
 ```
 

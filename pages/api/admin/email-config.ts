@@ -38,7 +38,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               smtpPassword: '',
               smtpSecure: true,
               fromEmail: '',
-              fromName: 'JW Attendant Scheduler',
+              fromName: 'Theocratic Shift Scheduler',
               replyToEmail: ''
             }
           }

@@ -139,7 +139,7 @@ Example searches that now work:
 
 ## Files Modified
 
-1. `/opt/jw-attendant-scheduler/pages/events/[id]/attendants.tsx`
+1. `/opt/theoshift/pages/events/[id]/attendants.tsx`
    - Line 1663: Removed `isActive: true` filter
    - Lines 1688-1689: Added verification fields
    - Lines 171-191: Enhanced search filter logic

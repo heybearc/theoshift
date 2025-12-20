@@ -54,7 +54,7 @@ class WMACsMCPClient {
       `ssh ${envConfig.ssh} "cd ${envConfig.path} && git pull origin ${envConfig.branch}"`,
       
       // Start application
-      `ssh ${envConfig.ssh} "cd ${envConfig.path} && npm run dev -- --port ${envConfig.port} > /var/log/jw-attendant-scheduler.log 2>&1 &"`
+      `ssh ${envConfig.ssh} "cd ${envConfig.path} && npm run dev -- --port ${envConfig.port} > /var/log/theoshift.log 2>&1 &"`
     ].filter(Boolean);
 
     for (const command of commands) {

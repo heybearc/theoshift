@@ -1,7 +1,7 @@
 # APEX Guardian Fix Report - Event Attendants Page
 
 **Date:** October 15, 2025  
-**Environment:** JW Attendant Scheduler Staging (10.92.3.24:3001)  
+**Environment:** Theocratic Shift Scheduler Staging (10.92.3.24:3001)  
 **Status:** ✅ ALL ISSUES RESOLVED
 
 ## Issues Identified and Fixed
@@ -62,7 +62,7 @@ isActive: true
 ## Technical Changes Made
 
 ### Files Modified:
-1. `/opt/jw-attendant-scheduler/pages/events/[id]/attendants.tsx`
+1. `/opt/theoshift/pages/events/[id]/attendants.tsx`
 
 ### Changes:
 1. **Line 1689-1690:** Added `profileVerificationRequired: true,` and `profileVerifiedAt: true,` to select clause

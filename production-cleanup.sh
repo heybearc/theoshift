@@ -8,7 +8,7 @@ echo "=========================="
 
 PROD_SERVER="jwa"
 SSH_CONFIG="/Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant"
-PROJECT_PATH="/opt/jw-attendant-scheduler"
+PROJECT_PATH="/opt/theoshift"
 
 echo "Step 1: Check current disk usage..."
 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "

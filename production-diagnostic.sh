@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Comprehensive Production Diagnostic
-echo "🔍 JW Attendant Scheduler Production Diagnostic"
+echo "🔍 Theocratic Shift Scheduler Production Diagnostic"
 echo "=============================================="
 
 PROD_SERVER="jwa"
@@ -23,7 +23,7 @@ timeout 30 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
 echo ""
 echo "2. 📁 File System Check..."
 timeout 30 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
-    cd /opt/jw-attendant-scheduler
+    cd /opt/theoshift
     echo 'Directory contents:'
     ls -la | head -15
     echo ''
@@ -37,7 +37,7 @@ timeout 30 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
 echo ""
 echo "3. 🗄️ Database Check..."
 timeout 30 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
-    cd /opt/jw-attendant-scheduler
+    cd /opt/theoshift
     echo 'Prisma schema check:'
     npx prisma db pull --print 2>/dev/null | head -10 || echo 'Database connection failed'
     echo ''
@@ -48,7 +48,7 @@ timeout 30 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
 echo ""
 echo "4. 🎨 CSS/Build Check..."
 timeout 30 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
-    cd /opt/jw-attendant-scheduler
+    cd /opt/theoshift
     echo 'Tailwind config:'
     ls -la tailwind.config.js postcss.config.js 2>/dev/null || echo 'Missing CSS config files'
     echo ''
@@ -62,10 +62,10 @@ timeout 30 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
 echo ""
 echo "5. 📊 Staging vs Production Comparison..."
 echo "Staging file count:"
-timeout 20 ssh -F "$SSH_CONFIG" "$STAGING_SERVER" "cd /opt/jw-attendant-scheduler && find . -name '*.tsx' -o -name '*.ts' -o -name '*.js' | wc -l" 2>/dev/null || echo "SSH timeout"
+timeout 20 ssh -F "$SSH_CONFIG" "$STAGING_SERVER" "cd /opt/theoshift && find . -name '*.tsx' -o -name '*.ts' -o -name '*.js' | wc -l" 2>/dev/null || echo "SSH timeout"
 
 echo "Production file count:"
-timeout 20 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "cd /opt/jw-attendant-scheduler && find . -name '*.tsx' -o -name '*.ts' -o -name '*.js' | wc -l" 2>/dev/null || echo "SSH timeout"
+timeout 20 ssh -F "$SSH_CONFIG" "$PROD_SERVER" "cd /opt/theoshift && find . -name '*.tsx' -o -name '*.ts' -o -name '*.js' | wc -l" 2>/dev/null || echo "SSH timeout"
 
 echo ""
 echo "6. 🌐 Application Response Check..."

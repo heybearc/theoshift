@@ -96,12 +96,12 @@ export async function GET(req: NextRequest) {
 }`;
 
       // Write test endpoint to server
-      await execAsync(`ssh ${this.stagingServer} "mkdir -p /opt/jw-attendant-scheduler/src/app/api/debug-session && cat > /opt/jw-attendant-scheduler/src/app/api/debug-session/route.ts << 'EOF'
+      await execAsync(`ssh ${this.stagingServer} "mkdir -p /opt/theoshift/src/app/api/debug-session && cat > /opt/theoshift/src/app/api/debug-session/route.ts << 'EOF'
 ${testEndpoint}
 EOF"`);
 
       // Restart app to load new endpoint
-      await execAsync(`ssh ${this.stagingServer} "/opt/jw-attendant-scheduler/wmacs-simple-start.sh"`);
+      await execAsync(`ssh ${this.stagingServer} "/opt/theoshift/wmacs-simple-start.sh"`);
       
       // Wait for restart
       await new Promise(resolve => setTimeout(resolve, 3000));
@@ -124,7 +124,7 @@ EOF"`);
       console.log('   Headers being sent:', headersTest.stdout.trim());
       
       // Check if the auth-helpers getAuthenticatedSession is working
-      const authHelpersCheck = await execAsync(`ssh ${this.stagingServer} "grep -A 5 'getAuthenticatedSession' /opt/jw-attendant-scheduler/src/lib/auth-helpers.ts"`);
+      const authHelpersCheck = await execAsync(`ssh ${this.stagingServer} "grep -A 5 'getAuthenticatedSession' /opt/theoshift/src/lib/auth-helpers.ts"`);
       console.log('   Auth helpers implementation:', authHelpersCheck.stdout.trim());
       
     } catch (error) {
@@ -137,11 +137,11 @@ EOF"`);
     
     try {
       // Check what the dashboard is actually doing
-      const dashboardCode = await execAsync(`ssh ${this.stagingServer} "grep -A 10 -B 5 'fetch.*api' /opt/jw-attendant-scheduler/src/app/dashboard/page.tsx"`);
+      const dashboardCode = await execAsync(`ssh ${this.stagingServer} "grep -A 10 -B 5 'fetch.*api' /opt/theoshift/src/app/dashboard/page.tsx"`);
       console.log('   Dashboard fetch code:', dashboardCode.stdout.trim());
       
       // Check if the credentials: 'include' is actually in the deployed code
-      const credentialsCheck = await execAsync(`ssh ${this.stagingServer} "grep -n 'credentials.*include' /opt/jw-attendant-scheduler/src/app/dashboard/page.tsx"`);
+      const credentialsCheck = await execAsync(`ssh ${this.stagingServer} "grep -n 'credentials.*include' /opt/theoshift/src/app/dashboard/page.tsx"`);
       console.log('   Credentials include found:', credentialsCheck.stdout.trim());
       
     } catch (error) {

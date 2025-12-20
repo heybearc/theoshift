@@ -36,7 +36,7 @@ class WMACSAPITester {
     
     try {
       // Check if API directory exists
-      const result = await execAsync('ssh jws "ls -la /opt/jw-attendant-scheduler/src/app/api"');
+      const result = await execAsync('ssh jws "ls -la /opt/theoshift/src/app/api"');
       
       if (result.stdout.includes('users')) {
         this.logSuccess('API directory structure created');

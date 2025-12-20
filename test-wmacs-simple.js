@@ -27,7 +27,7 @@ const testCommands = [
     tool: 'mcp0_execute_ssh_command',
     params: {
       host: '10.92.3.24', 
-      command: 'cd /opt/jw-attendant-scheduler/current && DATABASE_URL=\'postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/jw_attendant_scheduler_staging\' JWT_SECRET="$(openssl rand -hex 32)" NODE_ENV=production nohup npm start -- -p 3001 > /var/log/jw-attendant-scheduler.log 2>&1 &',
+      command: 'cd /opt/theoshift/current && DATABASE_URL=\'postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/theoshift_scheduler_staging\' JWT_SECRET="$(openssl rand -hex 32)" NODE_ENV=production nohup npm start -- -p 3001 > /var/log/theoshift.log 2>&1 &',
       reason: 'Start JW Attendant with correct database credentials'
     }
   },

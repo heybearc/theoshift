@@ -52,7 +52,7 @@ class WMACSRealErrorDiagnosis {
       console.log('   Dashboard response:', result.stdout.trim());
       
       // Check if dashboard page loads at all
-      const contentCheck = await execAsync(`ssh ${this.stagingServer} "curl -s '${this.baseUrl}/dashboard' | grep -o 'JW Attendant Scheduler\\|Failed to fetch\\|Loading dashboard' | head -3"`);
+      const contentCheck = await execAsync(`ssh ${this.stagingServer} "curl -s '${this.baseUrl}/dashboard' | grep -o 'Theocratic Shift Scheduler\\|Failed to fetch\\|Loading dashboard' | head -3"`);
       console.log('   Dashboard content indicators:', contentCheck.stdout.trim());
       
     } catch (error) {
@@ -109,11 +109,11 @@ class WMACSRealErrorDiagnosis {
     
     try {
       // Check if auth.ts file exists and is accessible
-      const authFileResult = await execAsync(`ssh ${this.stagingServer} "ls -la /opt/jw-attendant-scheduler/auth.ts"`);
+      const authFileResult = await execAsync(`ssh ${this.stagingServer} "ls -la /opt/theoshift/auth.ts"`);
       console.log('   Auth file status:', authFileResult.stdout.trim());
       
       // Check if the auth import path is correct in auth-helpers
-      const authImportResult = await execAsync(`ssh ${this.stagingServer} "grep -n 'authOptions' /opt/jw-attendant-scheduler/src/lib/auth-helpers.ts"`);
+      const authImportResult = await execAsync(`ssh ${this.stagingServer} "grep -n 'authOptions' /opt/theoshift/src/lib/auth-helpers.ts"`);
       console.log('   Auth import in helpers:', authImportResult.stdout.trim());
       
     } catch (error) {

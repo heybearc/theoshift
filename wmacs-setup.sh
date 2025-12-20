@@ -5,7 +5,7 @@
 
 set -e
 
-WMACS_REPO_URL="https://raw.githubusercontent.com/heybearc/jw-attendant-scheduler/feature/api-foundation"
+WMACS_REPO_URL="https://raw.githubusercontent.com/heybearc/theoshift/feature/api-foundation"
 WORKSPACE_NAME=${1:-"default-workspace"}
 
 echo "🛡️ WMACS Guardian: Setting up workspace '$WORKSPACE_NAME'"
@@ -41,8 +41,8 @@ EOF
 
 # Create environment templates
 echo "🌍 Creating environment templates..."
-cat > .wmacs/env-templates/.env.staging << 'EOF'
-# WMACS Guardian: Staging Environment Template
+cat > .wmacs/env-templates/.env.blue << 'EOF'
+# WMACS Guardian: Blue Environment Template
 NODE_ENV=production
 PORT=3001
 NEXTAUTH_URL=http://10.92.3.24:3001
@@ -53,8 +53,8 @@ NEXTAUTH_DEBUG=true
 # Add your staging-specific variables below:
 EOF
 
-cat > .wmacs/env-templates/.env.production << 'EOF'
-# WMACS Guardian: Production Environment Template
+cat > .wmacs/env-templates/.env.green << 'EOF'
+# WMACS Guardian: Green Environment Template
 NODE_ENV=production
 PORT=3001
 NEXTAUTH_URL=http://10.92.3.22:3001
@@ -78,27 +78,27 @@ if [ ! -f "$WORKSPACE_CONFIG" ]; then
     exit 1
 fi
 
-STAGING_SERVER=$(jq -r '.staging_server' "$WORKSPACE_CONFIG" 2>/dev/null || echo "10.92.3.24")
-PRODUCTION_SERVER=$(jq -r '.production_server' "$WORKSPACE_CONFIG" 2>/dev/null || echo "10.92.3.22")
+BLUE_SERVER=$(jq -r '.staging_server' "$WORKSPACE_CONFIG" 2>/dev/null || echo "10.92.3.24")
+GREEN_SERVER=$(jq -r '.production_server' "$WORKSPACE_CONFIG" 2>/dev/null || echo "10.92.3.22")
 PORT=$(jq -r '.port' "$WORKSPACE_CONFIG" 2>/dev/null || echo "3001")
 
 echo "🛡️ WMACS Guardian Health Check"
 echo "================================"
 
 # Check staging
-echo "🧪 Checking staging ($STAGING_SERVER:$PORT)..."
-if curl -s -f "http://$STAGING_SERVER:$PORT/health" >/dev/null 2>&1; then
-    echo "   ✅ Staging healthy"
+echo "🧪 Checking staging ($BLUE_SERVER:$PORT)..."
+if curl -s -f "http://$BLUE_SERVER:$PORT/health" >/dev/null 2>&1; then
+    echo "   ✅ Blue healthy"
 else
-    echo "   ❌ Staging unhealthy"
+    echo "   ❌ Blue unhealthy"
 fi
 
 # Check production
-echo "🚀 Checking production ($PRODUCTION_SERVER:$PORT)..."
-if curl -s -f "http://$PRODUCTION_SERVER:$PORT/health" >/dev/null 2>&1; then
-    echo "   ✅ Production healthy"
+echo "🚀 Checking production ($GREEN_SERVER:$PORT)..."
+if curl -s -f "http://$GREEN_SERVER:$PORT/health" >/dev/null 2>&1; then
+    echo "   ✅ Green healthy"
 else
-    echo "   ❌ Production unhealthy"
+    echo "   ❌ Green unhealthy"
 fi
 
 echo "================================"

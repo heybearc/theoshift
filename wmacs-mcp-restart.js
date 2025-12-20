@@ -34,7 +34,7 @@ class WMACsMCPRestart {
       
       // Step 3: Start application with proper environment
       console.log('🚀 Step 3: Starting application...');
-      const startCommand = `ssh ${stagingEnv.ssh} "cd ${stagingEnv.path} && nohup npm run dev -- --port ${stagingEnv.port} > /var/log/jw-attendant-scheduler.log 2>&1 & echo $!"`;
+      const startCommand = `ssh ${stagingEnv.ssh} "cd ${stagingEnv.path} && nohup npm run dev -- --port ${stagingEnv.port} > /var/log/theoshift.log 2>&1 & echo $!"`;
       const result = await this.executeOperation(startCommand);
       
       if (result.stdout) {

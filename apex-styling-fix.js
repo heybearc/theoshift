@@ -119,7 +119,7 @@ class APEXStylingFix {
       cd ${prod.path}
       
       # Stop the application
-      pm2 stop jw-attendant || true
+      pm2 stop theoshift-green || true
       
       # Clean build artifacts
       rm -rf .next
@@ -143,7 +143,7 @@ class APEXStylingFix {
     
     await this.runCommand(`ssh -F /Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant ${prod.server} "
       cd ${prod.path}
-      pm2 restart jw-attendant
+      pm2 restart theoshift-green
       sleep 5
     "`);
   }

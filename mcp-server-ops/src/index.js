@@ -38,15 +38,15 @@ export class WMACSServerOps {
       allowedHosts: ['10.92.3.24', '10.92.3.22'], // staging and production
       allowedCommands: [
         'pkill -f "next.*3001"',
-        'rm -rf /opt/jw-attendant-scheduler/current/.next',
+        'rm -rf /opt/theoshift/current/.next',
         'npm run build',
         'npm start -- -p 3001',
-        'ln -sfn /opt/jw-attendant-scheduler/releases/',
-        'systemctl restart jw-attendant-scheduler'
+        'ln -sfn /opt/theoshift/releases/',
+        'systemctl restart theoshift'
       ],
       allowedPaths: [
-        '/opt/jw-attendant-scheduler/',
-        '/var/log/jw-attendant-scheduler.log'
+        '/opt/theoshift/',
+        '/var/log/theoshift.log'
       ],
       maxOperationsPerHour: 10,
       requireApproval: true
@@ -61,7 +61,7 @@ export class WMACSServerOps {
       tools: [
         {
           name: 'restart_application',
-          description: 'Safely restart the JW Attendant Scheduler application with guardrails',
+          description: 'Safely restart the Theocratic Shift Scheduler application with guardrails',
           inputSchema: {
             type: 'object',
             properties: {
@@ -211,7 +211,7 @@ export class WMACSServerOps {
       logger.info('Executing SSH command', { host, command, reason });
       
       const result = await ssh.execCommand(command, {
-        cwd: '/opt/jw-attendant-scheduler'
+        cwd: '/opt/theoshift'
       });
 
       logger.info('SSH command result', { 
@@ -235,12 +235,12 @@ export class WMACSServerOps {
     let commands = [];
     
     if (clearCache) {
-      commands.push('rm -rf /opt/jw-attendant-scheduler/current/.next');
-      commands.push('cd /opt/jw-attendant-scheduler/current && npm run build');
+      commands.push('rm -rf /opt/theoshift/current/.next');
+      commands.push('cd /opt/theoshift/current && npm run build');
     }
     
     commands.push('pkill -f "next.*3001"');
-    commands.push('cd /opt/jw-attendant-scheduler/current && nohup npm start -- -p 3001 > /var/log/jw-attendant-scheduler.log 2>&1 &');
+    commands.push('cd /opt/theoshift/current && nohup npm start -- -p 3001 > /var/log/theoshift.log 2>&1 &');
 
     const results = [];
     for (const command of commands) {
@@ -265,7 +265,7 @@ export class WMACSServerOps {
     const host = await this.validateOperation('update_symlink', environment);
 
     // Validate release exists
-    const checkCommand = `ls -la /opt/jw-attendant-scheduler/releases/${releaseHash}*`;
+    const checkCommand = `ls -la /opt/theoshift/releases/${releaseHash}*`;
     const checkResult = await this.executeSSHCommand(host, checkCommand, 'validate_release');
     
     if (checkResult.code !== 0) {
@@ -273,7 +273,7 @@ export class WMACSServerOps {
     }
 
     // Update symlink
-    const updateCommand = `rm -f /opt/jw-attendant-scheduler/current && ln -sfn /opt/jw-attendant-scheduler/releases/${releaseHash}* /opt/jw-attendant-scheduler/current`;
+    const updateCommand = `rm -f /opt/theoshift/current && ln -sfn /opt/theoshift/releases/${releaseHash}* /opt/theoshift/current`;
     const result = await this.executeSSHCommand(host, updateCommand, reason);
 
     if (result.code !== 0) {
@@ -294,9 +294,9 @@ export class WMACSServerOps {
 
     const commands = [
       'ps aux | grep "next.*3001" | grep -v grep',
-      'ls -la /opt/jw-attendant-scheduler/current',
+      'ls -la /opt/theoshift/current',
       'curl -s -o /dev/null -w "%{http_code}" http://localhost:3001',
-      'tail -n 5 /var/log/jw-attendant-scheduler.log'
+      'tail -n 5 /var/log/theoshift.log'
     ];
 
     const results = {};

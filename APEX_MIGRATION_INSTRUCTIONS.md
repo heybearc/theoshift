@@ -18,7 +18,7 @@ This guide will migrate your repository from WMACS to the new APEX Guardian Syst
 ### Copy the universal sync tool from the source repository:
 ```bash
 # Replace SOURCE_REPO_PATH with actual path to your APEX-enabled repository
-SOURCE_REPO_PATH="/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler"
+SOURCE_REPO_PATH="/Users/cory/Documents/Cloudy-Work/applications/theoshift"
 
 # Copy universal sync to current repository
 cp "$SOURCE_REPO_PATH/apex/apex-universal-sync.js" ./

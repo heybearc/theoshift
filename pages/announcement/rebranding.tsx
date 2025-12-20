@@ -24,7 +24,7 @@ export default function RebrandingAnnouncement() {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">What's Changing?</h2>
           <div className="space-y-4 text-gray-700">
             <p>
-              We're excited to announce that <strong>JW Attendant Scheduler</strong> is becoming 
+              We're excited to announce that <strong>Theocratic Shift Scheduler</strong> is becoming 
               <strong className="text-blue-600"> Theocratic Shift Scheduler</strong>!
             </p>
             <p>
@@ -93,7 +93,7 @@ export default function RebrandingAnnouncement() {
               </a>
             </div>
             <p className="text-sm text-gray-600">
-              <strong>Don't worry!</strong> The old domain (<code className="bg-gray-100 px-2 py-1 rounded">attendant.cloudigan.net</code>) 
+              <strong>Don't worry!</strong> The old domain (<code className="bg-gray-100 px-2 py-1 rounded">theoshift.com</code>) 
               will continue to work for the next 6 months. You have plenty of time to update your bookmarks.
             </p>
           </div>

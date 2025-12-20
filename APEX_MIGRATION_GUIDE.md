@@ -33,7 +33,7 @@ mv apex/ apex/
 ```json
 // apex/config/project.json
 {
-  "name": "jw-attendant-scheduler",
+  "name": "theoshift",
   "apex_version": "1.0",
   "apex_enabled": true,
   "deployment_standards": "1.0",

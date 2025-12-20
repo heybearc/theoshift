@@ -1,16 +1,16 @@
 #!/bin/bash
-# JW Attendant Scheduler - MCP Deployment Script
+# Theocratic Shift Scheduler - MCP Deployment Script
 # Container Infrastructure: 131=postgres, 132=prod, 134=staging
 
 set -e
 
-PROJECT_NAME="jw-attendant-scheduler"
+PROJECT_NAME="theoshift"
 CONTAINER_ID=${1:-"134"}  # Default to staging
 ENVIRONMENT=${2:-"staging"}
 REPO_OWNER="cloudigan"
-REPO_NAME="jw-attendant-scheduler"
+REPO_NAME="theoshift"
 
-echo "🚀 JW Attendant Scheduler MCP Deployment"
+echo "🚀 Theocratic Shift Scheduler MCP Deployment"
 echo "========================================"
 echo "Project: $PROJECT_NAME"
 echo "Container: $CONTAINER_ID"
@@ -21,11 +21,11 @@ echo ""
 # Validate container assignment
 case $CONTAINER_ID in
     "132")
-        echo "🎯 Deploying to PRODUCTION (Container 132 - 10.92.3.22)"
+        echo "🎯 Deploying to GREEN (Container 132 (green-theoshift) - 10.92.3.22)"
         CONTAINER_IP="10.92.3.22"
         ;;
     "134")
-        echo "🎯 Deploying to STAGING (Container 134 - 10.92.3.24)"
+        echo "🎯 Deploying to BLUE (Container 134 (blue-theoshift) - 10.92.3.24)"
         CONTAINER_IP="10.92.3.24"
         ;;
     *)
@@ -63,15 +63,15 @@ RELEASE_DIR="/opt/$PROJECT_NAME/releases/$COMMIT_SHA"
 CURRENT_LINK="/opt/$PROJECT_NAME/current"
 SHARED_DIR="/opt/$PROJECT_NAME/shared"
 
-# Deployment commands for JW Attendant Scheduler
+# Deployment commands for Theocratic Shift Scheduler
 cat << EOF > /tmp/deploy_jw_${COMMIT_SHA}.sh
 #!/bin/bash
-# JW Attendant Scheduler Deployment - $COMMIT_SHA
+# Theocratic Shift Scheduler Deployment - $COMMIT_SHA
 # Container: $CONTAINER_ID ($CONTAINER_IP)
 
 set -e
 
-echo "🚀 Starting JW Attendant Scheduler deployment to $RELEASE_DIR"
+echo "🚀 Starting Theocratic Shift Scheduler deployment to $RELEASE_DIR"
 
 # Create directory structure
 mkdir -p $RELEASE_DIR
@@ -106,7 +106,7 @@ echo "🏥 Running health check..."
 sleep 5
 curl -f http://localhost:8000/health/ || curl -f http://localhost:8000/ || echo "Health check: Manual verification needed"
 
-echo "✅ JW Attendant Scheduler deployment complete: $COMMIT_SHA"
+echo "✅ Theocratic Shift Scheduler deployment complete: $COMMIT_SHA"
 echo "🔗 Application URL: http://$CONTAINER_IP:8000"
 EOF
 
@@ -116,7 +116,7 @@ echo "✅ Deployment script created: /tmp/deploy_jw_${COMMIT_SHA}.sh"
 
 # Step 4: Show deployment plan
 echo ""
-echo "📋 JW Attendant Scheduler Deployment Plan"
+echo "📋 Theocratic Shift Scheduler Deployment Plan"
 echo "========================================="
 echo "1. Create snapshot: pre-deploy-$COMMIT_SHA"
 echo "2. Deploy to: $RELEASE_DIR"
@@ -135,7 +135,7 @@ echo ""
 cat /tmp/deploy_jw_${COMMIT_SHA}.sh | grep -E "^echo|^#" | sed 's/^echo /  /'
 
 echo ""
-echo "✅ JW Attendant Scheduler deployment simulation complete!"
+echo "✅ Theocratic Shift Scheduler deployment simulation complete!"
 echo ""
 echo "📝 Next Steps:"
 echo "   1. SSH to container: ssh root@$CONTAINER_IP"

@@ -236,7 +236,7 @@ export default function EventAssignments({ eventId, event, assignments, attendan
   return (
     <>
       <Head>
-        <title>{event?.name ? `${event.name} - Assignments` : 'Event Assignments'} | JW Attendant Scheduler</title>
+        <title>{event?.name ? `${event.name} - Assignments` : 'Event Assignments'} | Theocratic Shift Scheduler</title>
       </Head>
 
       <div className="min-h-screen bg-gray-50">

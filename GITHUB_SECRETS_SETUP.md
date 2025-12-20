@@ -5,7 +5,7 @@
 To enable automated deployments, add these secrets to your GitHub repository:
 
 ### Navigation to Secrets
-1. Go to your GitHub repository: `cloudigan/jw-attendant-scheduler`
+1. Go to your GitHub repository: `cloudigan/theoshift`
 2. Click **Settings** tab
 3. Click **Secrets and variables** → **Actions**
 4. Click **New repository secret**
@@ -31,7 +31,7 @@ Value: Cl0udy!!(@)
 #### Database Configuration
 ```
 Name: DATABASE_URL
-Value: postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler
+Value: postgresql://theoshift_user:jw_password@10.92.3.21:5432/theoshift_scheduler
 ```
 
 #### Django Application
@@ -82,5 +82,5 @@ After adding secrets, push a commit to the `staging` branch to trigger the workf
 
 Once secrets are configured:
 1. Set up container directory structure
-2. Configure JW Attendant Scheduler on container 134
+2. Configure Theocratic Shift Scheduler on container 134 (blue-theoshift)
 3. Test full deployment pipeline

@@ -93,7 +93,7 @@ export default function AdminDashboard({ user, stats, userLastSeenVersion }: Adm
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white mb-8">
         <h2 className="text-2xl font-bold mb-2">Welcome back, {user.name}!</h2>
         <p className="text-blue-100">
-          JW Attendant Scheduler Admin Portal - Stable Next.js 14.2.33 with Pages Router
+          Theocratic Shift Scheduler Admin Portal - Stable Next.js 14.2.33 with Pages Router
         </p>
       </div>
 

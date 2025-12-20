@@ -1,5 +1,5 @@
 # Admin Module Specification
-## JW Attendant Scheduler - Administrative Control Center
+## Theocratic Shift Scheduler - Administrative Control Center
 
 ### Overview
 The Admin Module is a comprehensive administrative control center that provides system-wide management capabilities through organized sub-modules. This centralized approach ensures efficient administration of users, system configuration, and operational settings.
@@ -160,7 +160,7 @@ interface EmailConfig {
 ### Development Approach
 1. **Feature Branch**: `feature/admin-module`
 2. **Incremental Development**: Build and test each component with APEX Guardian
-3. **Staging Testing**: Use container 134 for all testing
+3. **Staging Testing**: Use container 134 (blue-theoshift) for all testing
 4. **API-First**: Complete backend APIs before UI development
 5. **Email Testing**: Test with actual Gmail configuration
 

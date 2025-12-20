@@ -9,7 +9,7 @@ echo "🚀 Starting Attendant Table Consolidation Migration"
 echo "=================================================="
 
 # Configuration
-BACKUP_DIR="/tmp/jw-attendant-backups"
+BACKUP_DIR="/tmp/theoshift-green-backups"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="$BACKUP_DIR/pre_consolidation_backup_$TIMESTAMP.sql"
 

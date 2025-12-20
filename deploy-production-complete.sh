@@ -1,14 +1,14 @@
 #!/bin/bash
 
-# JW Attendant Scheduler - Complete Production Deployment
+# Theocratic Shift Scheduler - Complete Production Deployment
 # Includes all new features: Feedback System, Help Documentation, File Uploads
-# Target: https://attendant.cloudigan.net
+# Target: https://theoshift.com
 
 set -e
 
-echo "🚀 JW Attendant Scheduler - Production Deployment"
+echo "🚀 Theocratic Shift Scheduler - Production Deployment"
 echo "=================================================="
-echo "Target: https://attendant.cloudigan.net"
+echo "Target: https://theoshift.com"
 echo "Features: Complete system with feedback, help docs, file uploads"
 echo ""
 
@@ -16,11 +16,11 @@ echo ""
 PROD_SERVER="jwa"
 STAGING_SERVER="jws"
 SSH_CONFIG="/Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant"
-PROJECT_PATH="/opt/jw-attendant-scheduler"
-BACKUP_DIR="/opt/backups/jw-attendant-$(date +%Y%m%d-%H%M%S)"
+PROJECT_PATH="/opt/theoshift"
+BACKUP_DIR="/opt/backups/theoshift-green-$(date +%Y%m%d-%H%M%S)"
 DB_HOST="10.92.3.21"
-DB_NAME="jw_attendant_scheduler"
-DB_USER="jw_user"
+DB_NAME="theoshift_scheduler"
+DB_USER="theoshift_user"
 
 # Colors for output
 RED='\033[0;31m'
@@ -118,7 +118,7 @@ ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
     # Initialize git if needed
     if [ ! -d .git ]; then
         git init
-        git remote add origin https://github.com/your-repo/jw-attendant-scheduler.git || true
+        git remote add origin https://github.com/your-repo/theoshift.git || true
     fi
     
     # Fetch and deploy latest code
@@ -135,7 +135,7 @@ ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
     
     # Update environment configuration
     cat > .env << 'EOF'
-# JW Attendant Scheduler - Production Environment
+# Theocratic Shift Scheduler - Production Environment
 NODE_ENV=production
 PORT=3001
 
@@ -143,11 +143,11 @@ PORT=3001
 DATABASE_URL=\"postgresql://$DB_USER:jw_password@$DB_HOST:5432/$DB_NAME\"
 
 # NextAuth Configuration
-NEXTAUTH_URL=\"https://attendant.cloudigan.net\"
+NEXTAUTH_URL=\"https://theoshift.com\"
 NEXTAUTH_SECRET=\"\$(openssl rand -hex 32)\"
 
 # File Upload Configuration
-UPLOAD_DIR=\"/opt/jw-attendant-scheduler/public/uploads\"
+UPLOAD_DIR=\"/opt/theoshift/public/uploads\"
 MAX_FILE_SIZE=10485760
 
 # Email Configuration (if needed)
@@ -155,9 +155,9 @@ EMAIL_ENCRYPTION_KEY=\"\$(openssl rand -hex 16)\"
 EOF
 
     # Update any hardcoded staging references in code
-    find . -name '*.tsx' -o -name '*.ts' -o -name '*.js' -o -name '*.json' | grep -v node_modules | xargs sed -i 's/10\\.92\\.3\\.24:3000/attendant.cloudigan.net/g' || true
-    find . -name '*.tsx' -o -name '*.ts' -o -name '*.js' -o -name '*.json' | grep -v node_modules | xargs sed -i 's/http:\\/\\/10\\.92\\.3\\.24:3000/https:\\/\\/attendant.cloudigan.net/g' || true
-    find . -name '*.tsx' -o -name '*.ts' -o -name '*.js' -o -name '*.json' | grep -v node_modules | xargs sed -i 's/staging\\.cloudigan\\.net/attendant.cloudigan.net/g' || true
+    find . -name '*.tsx' -o -name '*.ts' -o -name '*.js' -o -name '*.json' | grep -v node_modules | xargs sed -i 's/10\\.92\\.3\\.24:3000/theoshift.com/g' || true
+    find . -name '*.tsx' -o -name '*.ts' -o -name '*.js' -o -name '*.json' | grep -v node_modules | xargs sed -i 's/http:\\/\\/10\\.92\\.3\\.24:3000/https:\\/\\/theoshift.com/g' || true
+    find . -name '*.tsx' -o -name '*.ts' -o -name '*.js' -o -name '*.json' | grep -v node_modules | xargs sed -i 's/staging\\.cloudigan\\.net/theoshift.com/g' || true
     
     # Update package.json scripts for production
     sed -i 's/\"start\": \"next start -p 3000\"/\"start\": \"next start -p 3000\"/g' package.json || true
@@ -200,7 +200,7 @@ ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
                 const adminUser = await prisma.users.create({
                     data: {
                         id: 'admin_' + Date.now(),
-                        email: 'admin@attendant.cloudigan.net',
+                        email: 'admin@theoshift.com',
                         firstName: 'System',
                         lastName: 'Administrator',
                         role: 'ADMIN',
@@ -244,8 +244,8 @@ ssh -F "$SSH_CONFIG" "$PROD_SERVER" "
     
     # Start with PM2 for better process management
     if command -v pm2 &> /dev/null; then
-        pm2 delete jw-attendant || true
-        pm2 start npm --name 'jw-attendant' -- start
+        pm2 delete theoshift-green || true
+        pm2 start npm --name 'theoshift-green' -- start
         pm2 save
     else
         # Fallback to nohup
@@ -312,17 +312,17 @@ log_success "New features verified"
 
 # Final success message
 echo ""
-echo "🎉 JW Attendant Scheduler Production Deployment Complete!"
+echo "🎉 Theocratic Shift Scheduler Production Deployment Complete!"
 echo "========================================================="
-log_success "Production URL: https://attendant.cloudigan.net"
-log_success "Admin Panel: https://attendant.cloudigan.net/admin"
-log_success "Help Center: https://attendant.cloudigan.net/help"
-log_success "Feedback System: https://attendant.cloudigan.net/help/feedback"
+log_success "Production URL: https://theoshift.com"
+log_success "Admin Panel: https://theoshift.com/admin"
+log_success "Help Center: https://theoshift.com/help"
+log_success "Feedback System: https://theoshift.com/help/feedback"
 log_success "Backup Location: $BACKUP_DIR"
 
 echo ""
 echo "🔐 Default Admin Credentials:"
-echo "Email: admin@attendant.cloudigan.net"
+echo "Email: admin@theoshift.com"
 echo "Password: admin123"
 echo ""
 
@@ -345,13 +345,13 @@ echo "- ✅ Professional Help Center with troubleshooting"
 
 echo ""
 log_info "Next steps:"
-echo "1. Test admin login at https://attendant.cloudigan.net/admin"
-echo "2. Submit test feedback at https://attendant.cloudigan.net/help/feedback"
+echo "1. Test admin login at https://theoshift.com/admin"
+echo "2. Submit test feedback at https://theoshift.com/help/feedback"
 echo "3. Test file uploads in feedback system"
-echo "4. Verify help documentation at https://attendant.cloudigan.net/help"
+echo "4. Verify help documentation at https://theoshift.com/help"
 echo "5. Test user comment functionality"
 echo "6. Monitor production logs: ssh -F $SSH_CONFIG $PROD_SERVER 'tail -f $PROJECT_PATH/production.log'"
 
 echo ""
 echo "🛡️ Production deployment completed successfully! 🚀"
-echo "All staging references updated to https://attendant.cloudigan.net"
+echo "All staging references updated to https://theoshift.com"

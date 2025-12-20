@@ -21,7 +21,7 @@
     },
     {
       "command": "wmacs.test.staging",
-      "title": "WMACS: Test Staging Environment (Container 134)",
+      "title": "WMACS: Test Staging Environment (Container 134 (blue-theoshift))",
       "category": "WMACS Guardian",
       "when": "workspaceFolder", 
       "execution": {
@@ -31,7 +31,7 @@
     },
     {
       "command": "wmacs.test.production",
-      "title": "WMACS: Test Production Environment (Container 132)",
+      "title": "WMACS: Test Production Environment (Container 132 (green-theoshift))",
       "category": "WMACS Guardian",
       "when": "workspaceFolder", 
       "execution": {
@@ -51,7 +51,7 @@
     },
     {
       "command": "wmacs.deploy.staging",
-      "title": "WMACS: Deploy to Staging (Container 134)",
+      "title": "WMACS: Deploy to Staging (Container 134 (blue-theoshift))",
       "category": "WMACS Guardian",
       "when": "workspaceFolder",
       "execution": {

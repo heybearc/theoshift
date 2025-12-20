@@ -7,7 +7,7 @@ const bcrypt = require('bcryptjs');
 const dbConfig = {
   host: '10.92.3.21',
   port: 5432,
-  database: 'jw_attendant_scheduler_staging',
+  database: 'theoshift_scheduler_staging',
   user: 'jw_scheduler_staging',
   password: 'jw_password'
 };

@@ -14,7 +14,7 @@ A Model Context Protocol server for automated server-side operations within the 
 ### 🔧 Available Operations
 
 #### `restart_application`
-Safely restart the JW Attendant Scheduler with optional cache clearing:
+Safely restart the Theocratic Shift Scheduler with optional cache clearing:
 ```json
 {
   "environment": "staging|production",

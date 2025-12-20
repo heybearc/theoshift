@@ -7,7 +7,7 @@
 
 const https = require('https');
 
-const BASE_URL = 'https://jw-staging.cloudigan.net';
+const BASE_URL = 'https://blue.theoshift.com';
 const IP_ADDRESS = '10.92.3.24';
 
 class URLConsistencyTester {
@@ -146,7 +146,7 @@ class URLConsistencyTester {
       
       // Check if X-Served-By header contains FQDN
       const servedBy = response.headers['x-served-by'];
-      if (servedBy && servedBy.includes('jw-staging.cloudigan.net')) {
+      if (servedBy && servedBy.includes('blue.theoshift.com')) {
         return {
           success: true,
           details: `X-Served-By header correctly shows: ${servedBy}`

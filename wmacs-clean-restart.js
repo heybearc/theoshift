@@ -23,11 +23,11 @@ async function wmacsCleanRestart() {
 
     // Step 3: Start application with proper environment
     console.log('🚀 Step 3: Starting application');
-    const startCmd = `ssh root@10.92.3.24 "cd /opt/jw-attendant-scheduler/current && \\
-DATABASE_URL='postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/jw_attendant_scheduler_staging' \\
+    const startCmd = `ssh root@10.92.3.24 "cd /opt/theoshift/current && \\
+DATABASE_URL='postgresql://jw_scheduler_staging:Cloudy_92!@10.92.3.21:5432/theoshift_scheduler_staging' \\
 JWT_SECRET=\\$(openssl rand -hex 32) \\
 NODE_ENV=production \\
-nohup npm start -- -p 3001 > /var/log/jw-attendant-scheduler.log 2>&1 & \\
+nohup npm start -- -p 3001 > /var/log/theoshift.log 2>&1 & \\
 echo 'Application started'"`;
     
     await execAsync(startCmd);
@@ -42,7 +42,7 @@ echo 'Application started'"`;
 
     // Step 5: Check logs for any errors
     console.log('📋 Step 5: Checking startup logs');
-    const logs = await execAsync('ssh root@10.92.3.24 "tail -20 /var/log/jw-attendant-scheduler.log"');
+    const logs = await execAsync('ssh root@10.92.3.24 "tail -20 /var/log/theoshift.log"');
     console.log('Recent logs:');
     console.log(logs.stdout);
 

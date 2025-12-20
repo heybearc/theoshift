@@ -223,7 +223,7 @@ ssh ${stagingEnv.ssh} "cd ${stagingEnv.path} && sed -i 's|</head>|<link rel=\"st
       await this.sleep(2000);
       
       await this.executeOperation(
-        `ssh ${stagingEnv.ssh} "cd ${stagingEnv.path} && nohup npm run dev -- --port ${stagingEnv.port} > /var/log/jw-attendant-scheduler.log 2>&1 &"`
+        `ssh ${stagingEnv.ssh} "cd ${stagingEnv.path} && nohup npm run dev -- --port ${stagingEnv.port} > /var/log/theoshift.log 2>&1 &"`
       );
       
       // Step 5: Wait and validate

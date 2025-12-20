@@ -13,7 +13,7 @@ pkill -f "npm start" 2>/dev/null || true
 sleep 2
 
 # Start application in development mode with proper logging
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 PORT=3001 npm run dev > /var/log/nextjs-clean-auth.log 2>&1 &
 APP_PID=$!
 

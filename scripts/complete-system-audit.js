@@ -15,7 +15,7 @@ async function completeSystemAudit() {
     console.log('Environment:', process.env.NODE_ENV)
     
     // Check all environment files
-    const envFiles = ['.env', '.env.local', '.env.staging']
+    const envFiles = ['.env', '.env.local', '.env.blue']
     envFiles.forEach(file => {
       if (fs.existsSync(path.join(process.cwd(), file))) {
         console.log(`✅ ${file} exists`)

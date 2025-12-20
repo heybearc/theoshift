@@ -11,7 +11,7 @@ async function wmacsDebugLoginFlow() {
   try {
     // Step 1: Check current application logs
     console.log('📋 Step 1: Checking current application logs');
-    const logs = await execAsync('ssh root@10.92.3.24 "tail -50 /var/log/jw-attendant-scheduler.log"');
+    const logs = await execAsync('ssh root@10.92.3.24 "tail -50 /var/log/theoshift.log"');
     console.log('Recent logs:');
     console.log(logs.stdout);
 

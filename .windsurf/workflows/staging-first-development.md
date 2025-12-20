@@ -16,7 +16,7 @@ description: Staging-First Development Workflow - Prevent deployment issues
 ssh jws
 
 # Navigate to project
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 
 # Create feature branch on staging
 git checkout -b feature/your-feature-name
@@ -112,7 +112,7 @@ git tag "safe-$(date +%Y%m%d-%H%M%S)" staging
 git push origin --tags
 
 # Store current working state
-cp -r /opt/jw-attendant-scheduler /opt/jw-attendant-scheduler.backup.$(date +%Y%m%d-%H%M%S)
+cp -r /opt/theoshift /opt/theoshift.backup.$(date +%Y%m%d-%H%M%S)
 ```
 
 ### 2. HEALTH CHECK VALIDATION
@@ -144,9 +144,9 @@ git tag "stable-checkpoint-$(date +%H%M%S)"
 pkill -f 'next start'
 
 # Restore from backup
-rm -rf /opt/jw-attendant-scheduler
-mv /opt/jw-attendant-scheduler.backup.YYYYMMDD-HHMMSS /opt/jw-attendant-scheduler
-cd /opt/jw-attendant-scheduler
+rm -rf /opt/theoshift
+mv /opt/theoshift.backup.YYYYMMDD-HHMMSS /opt/theoshift
+cd /opt/theoshift
 
 # Restart known good version
 PORT=3001 nohup npm start > /tmp/app.log 2>&1 &
@@ -201,13 +201,13 @@ echo "🚨 EMERGENCY ROLLBACK INITIATED"
 pkill -f 'next start'
 
 # Get last safe backup
-LAST_BACKUP=$(ls -t /opt/jw-attendant-scheduler.backup.* | head -1)
+LAST_BACKUP=$(ls -t /opt/theoshift.backup.* | head -1)
 
 if [ -n "$LAST_BACKUP" ]; then
     echo "Restoring from: $LAST_BACKUP"
-    rm -rf /opt/jw-attendant-scheduler
-    mv "$LAST_BACKUP" /opt/jw-attendant-scheduler
-    cd /opt/jw-attendant-scheduler
+    rm -rf /opt/theoshift
+    mv "$LAST_BACKUP" /opt/theoshift
+    cd /opt/theoshift
     PORT=3001 nohup npm start > /tmp/app.log 2>&1 &
     sleep 5
     

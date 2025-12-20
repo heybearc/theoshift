@@ -4,8 +4,8 @@
     "ip": "10.92.3.24",
     "port": 3001,
     "ssh": "root@10.92.3.24",
-    "url": "https://jw-staging.cloudigan.net",
-    "path": "/opt/jw-attendant-scheduler",
+    "url": "https://blue.theoshift.com",
+    "path": "/opt/theoshift",
     "branch": "staging",
     "nodeEnv": "development"
   },
@@ -14,8 +14,8 @@
     "ip": "10.92.3.22",
     "port": 3001,
     "ssh": "root@10.92.3.22", 
-    "url": "https://attendant.cloudigan.net",
-    "path": "/opt/jw-attendant-scheduler",
+    "url": "https://theoshift.com",
+    "path": "/opt/theoshift",
     "branch": "main",
     "nodeEnv": "production"
   },
@@ -25,7 +25,7 @@
     "port": 5432,
     "ssh": "root@10.92.3.21",
     "service": "postgresql",
-    "database": "jw_attendant_scheduler",
-    "user": "jw_user"
+    "database": "theoshift_scheduler",
+    "user": "theoshift_user"
   }
 }

@@ -69,12 +69,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const info = await transporter.sendMail({
       from: `"${config.fromName}" <${config.fromEmail}>`,
       to: testEmail,
-      subject: 'JW Attendant Scheduler - Test Email',
-      text: 'This is a test email from JW Attendant Scheduler. If you received this, your email configuration is working correctly!',
+      subject: 'Theocratic Shift Scheduler - Test Email',
+      text: 'This is a test email from Theocratic Shift Scheduler. If you received this, your email configuration is working correctly!',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #2563eb;">✅ Email Configuration Test</h2>
-          <p>This is a test email from <strong>JW Attendant Scheduler</strong>.</p>
+          <p>This is a test email from <strong>Theocratic Shift Scheduler</strong>.</p>
           <p>If you received this message, your email configuration is working correctly!</p>
           <hr style="border: 1px solid #e5e7eb; margin: 20px 0;">
           <p style="color: #6b7280; font-size: 14px;">

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Authenticated Testing Script for JW Attendant Scheduler
+ * Authenticated Testing Script for Theocratic Shift Scheduler
  * Tests functionality that requires authentication using admin credentials
  */
 

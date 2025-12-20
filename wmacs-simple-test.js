@@ -16,7 +16,7 @@ async function wmacsSimpleTest() {
     method: 'execute_command',
     params: {
       container_id: 'staging',
-      command: 'echo "<html><body><h1>Test Login</h1><form id=\\"f\\"><input id=\\"e\\" value=\\"admin@jwscheduler.local\\"><input id=\\"p\\" type=\\"password\\" value=\\"AdminPass123!\\"><button onclick=\\"login()\\">Login</button></form><div id=\\"r\\"></div><script>function login(){fetch(\\"/api/auth/login\\",{method:\\"POST\\",headers:{\\"Content-Type\\":\\"application/json\\"},credentials:\\"include\\",body:JSON.stringify({email:document.getElementById(\\"e\\").value,password:document.getElementById(\\"p\\").value})}).then(r=>r.json()).then(d=>document.getElementById(\\"r\\").innerHTML=JSON.stringify(d))}</script></body></html>" > /opt/jw-attendant-scheduler/current/public/simple-test.html'
+      command: 'echo "<html><body><h1>Test Login</h1><form id=\\"f\\"><input id=\\"e\\" value=\\"admin@jwscheduler.local\\"><input id=\\"p\\" type=\\"password\\" value=\\"AdminPass123!\\"><button onclick=\\"login()\\">Login</button></form><div id=\\"r\\"></div><script>function login(){fetch(\\"/api/auth/login\\",{method:\\"POST\\",headers:{\\"Content-Type\\":\\"application/json\\"},credentials:\\"include\\",body:JSON.stringify({email:document.getElementById(\\"e\\").value,password:document.getElementById(\\"p\\").value})}).then(r=>r.json()).then(d=>document.getElementById(\\"r\\").innerHTML=JSON.stringify(d))}</script></body></html>" > /opt/theoshift/current/public/simple-test.html'
     }
   };
 

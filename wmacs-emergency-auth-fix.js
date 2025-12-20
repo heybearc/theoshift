@@ -10,7 +10,7 @@ const execAsync = promisify(exec);
 class WMACSEmergencyAuthFix {
   constructor() {
     this.productionServer = '10.92.3.22';
-    this.productionPath = '/opt/jw-attendant-nextjs';
+    this.productionPath = '/opt/theoshift-green-nextjs';
   }
 
   async runEmergencyFix() {
@@ -38,7 +38,7 @@ class WMACSEmergencyAuthFix {
   async stopService() {
     console.log('🛑 Stopping service...');
     try {
-      await execAsync(`ssh root@${this.productionServer} "systemctl stop jw-attendant-nextjs"`);
+      await execAsync(`ssh root@${this.productionServer} "systemctl stop theoshift-green-nextjs"`);
       console.log('   ✅ Service stopped');
     } catch (error) {
       console.log('   ⚠️  Service stop failed:', error.message);
@@ -196,7 +196,7 @@ AUTHEOF"`);
     
     try {
       // Start service
-      await execAsync(`ssh root@${this.productionServer} "systemctl start jw-attendant-nextjs"`);
+      await execAsync(`ssh root@${this.productionServer} "systemctl start theoshift-green-nextjs"`);
       console.log('   ✅ Service started');
       
       // Wait for startup

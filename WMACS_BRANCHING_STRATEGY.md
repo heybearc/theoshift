@@ -1,4 +1,4 @@
-# APEX BRANCHING STRATEGY - JW ATTENDANT SCHEDULER
+# APEX BRANCHING STRATEGY - THEOCRATIC SHIFT SCHEDULER
 ## Foundation-First Development with Stability Priority
 
 **📅 Strategy Date:** September 23, 2025  
@@ -129,7 +129,7 @@ feature/user-attendant-linking → staging → main
 ### **DEPLOYMENT PIPELINE:**
 ```
 STAGING: Container 135 (10.92.3.25) - Continuous deployment
-PRODUCTION: Container 134 (10.92.3.24) - Manual deployment from main
+PRODUCTION: Container 134 (blue-theoshift) (10.92.3.24) - Manual deployment from main
 DATABASE: Container 131 (10.92.3.21) - Shared across environments
 ```
 

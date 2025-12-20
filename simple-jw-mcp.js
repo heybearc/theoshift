@@ -18,7 +18,7 @@ class SimpleJWMCP {
       tools: [
         {
           name: 'jw_status_check',
-          description: 'Check JW Attendant Scheduler status',
+          description: 'Check Theocratic Shift Scheduler status',
           inputSchema: {
             type: 'object',
             properties: { message: { type: 'string' } },
@@ -35,7 +35,7 @@ class SimpleJWMCP {
         return {
           content: [{
             type: 'text',
-            text: `✅ JW Attendant Scheduler MCP is working! Message: ${args.message}`
+            text: `✅ Theocratic Shift Scheduler MCP is working! Message: ${args.message}`
           }]
         };
       }

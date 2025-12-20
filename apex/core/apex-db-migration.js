@@ -131,7 +131,7 @@ class APEXDatabaseMigration {
     try {
       // Use MCP operation with proper SSH aliases
       const sshAlias = this.getSshAlias(envConfig);
-      const command = `ssh ${sshAlias} "cd /opt/jw-attendant-scheduler && source .env && psql \\$DATABASE_URL -f database/migrations/${migrationFile}"`;
+      const command = `ssh ${sshAlias} "cd /opt/theoshift && source .env && psql \\$DATABASE_URL -f database/migrations/${migrationFile}"`;
       
       this.log(`🔧 Executing migration on ${sshAlias} (container ${envConfig.container})`);
       
@@ -207,7 +207,7 @@ class APEXDatabaseMigration {
 
   async executeDatabaseQuery(envConfig, query) {
     const sshAlias = this.getSshAlias(envConfig);
-    const command = `ssh ${sshAlias} "cd /opt/jw-attendant-scheduler && source .env && psql \\$DATABASE_URL -c \\"${query}\\""`;
+    const command = `ssh ${sshAlias} "cd /opt/theoshift && source .env && psql \\$DATABASE_URL -c \\"${query}\\""`;
     
     return execSync(command, { 
       encoding: 'utf8',

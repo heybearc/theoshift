@@ -88,7 +88,7 @@ export default function FeedbackPage({ userRole, userName, userEmail }: Feedback
             <div className="text-6xl mb-4">✅</div>
             <h1 className="text-2xl font-bold text-green-900 mb-4">Feedback Submitted!</h1>
             <p className="text-green-700 mb-6">
-              Thank you for your feedback. Your input helps us improve JW Attendant Scheduler.
+              Thank you for your feedback. Your input helps us improve Theocratic Shift Scheduler.
             </p>
             <div className="space-x-4">
               <button
@@ -123,7 +123,7 @@ export default function FeedbackPage({ userRole, userName, userEmail }: Feedback
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">💡 Send Feedback</h1>
           <p className="text-gray-600">
-            Help us improve JW Attendant Scheduler by reporting bugs, suggesting enhancements, or requesting new features.
+            Help us improve Theocratic Shift Scheduler by reporting bugs, suggesting enhancements, or requesting new features.
           </p>
         </div>
 

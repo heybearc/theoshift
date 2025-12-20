@@ -5,7 +5,7 @@ description: Staging-First Development Workflow with CI/CD Pipeline
 # Staging-First Development Workflow
 
 ## Overview
-All development for JW Attendant Scheduler follows a staging-first approach with automated CI/CD deployment to production.
+All development for Theocratic Shift Scheduler follows a staging-first approach with automated CI/CD deployment to production.
 
 ## Development Environment Setup
 
@@ -14,10 +14,10 @@ Use the configured SSH shortcuts for server access:
 
 ```bash
 # Access staging server
-/ssh-jw-attendant
+/ssh-theoshift-green
 
 # Alternative staging access
-ssh staging-jw-attendant
+ssh staging-theoshift-green
 
 # Production access (automated deployment only)
 # Direct SSH to production is restricted
@@ -54,10 +54,10 @@ git push origin feature/[feature-name]
 
 ```bash
 # 1. SSH to staging server
-/ssh-jw-attendant
+/ssh-theoshift-green
 
 # 2. Navigate to application directory
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 
 # 3. Pull latest changes
 git fetch origin
@@ -69,8 +69,8 @@ npm install
 npm run build
 
 # 5. Restart application
-pm2 restart jw-attendant-scheduler
-pm2 logs jw-attendant-scheduler --lines 50
+pm2 restart theoshift
+pm2 logs theoshift --lines 50
 ```
 
 ### 3. Testing in Staging
@@ -217,12 +217,12 @@ npx prisma migrate deploy
 ### Staging Rollback
 ```bash
 # SSH to staging
-/ssh-jw-attendant
+/ssh-theoshift-green
 
 # Rollback to previous commit
 git checkout [previous-commit-hash]
 npm run build
-pm2 restart jw-attendant-scheduler
+pm2 restart theoshift
 ```
 
 ### Production Rollback
@@ -294,4 +294,4 @@ pm2 restart jw-attendant-scheduler
 
 ---
 
-*This workflow ensures reliable, secure, and efficient development and deployment of JW Attendant Scheduler features.*
+*This workflow ensures reliable, secure, and efficient development and deployment of Theocratic Shift Scheduler features.*

@@ -12,7 +12,7 @@ class CorrectedMCPHealth {
     constructor() {
         this.serverHost = 'jws';
         this.sshConfig = '-F /Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant';
-        this.projectPath = '/opt/jw-attendant-scheduler';
+        this.projectPath = '/opt/theoshift';
         this.healthData = {};
     }
 

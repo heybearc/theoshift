@@ -18,7 +18,7 @@ The MCP restart operations were not properly synchronizing the latest code from 
 
 ### Forced Repository Synchronization
 ```bash
-cd /opt/jw-attendant-scheduler
+cd /opt/theoshift
 git fetch origin
 git reset --hard origin/staging
 ```
@@ -82,7 +82,7 @@ async function verifyDeployment() {
 4. **Add deployment verification** to all MCP tools
 
 ## 🌐 CURRENT STATUS
-The admin panel at `https://jw-staging.cloudigan.net/admin` now correctly displays:
+The admin panel at `https://blue.theoshift.com/admin` now correctly displays:
 - Single professional navigation header
 - Clean glassmorphism design
 - No duplicate navigation elements

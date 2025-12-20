@@ -122,11 +122,11 @@ jobs:
             xargs sed -i 's/staging\.cloudigan\.net/attendant\.cloudigan\.net/g' || true
           
           # Update environment references
-          if [ -f ".env.staging" ]; then
-            cp .env.staging .env.production
-            sed -i 's/staging/production/g' .env.production
-            sed -i 's/STAGING/PRODUCTION/g' .env.production
-            sed -i 's/jw-staging\.cloudigan\.net/attendant\.cloudigan\.net/g' .env.production
+          if [ -f ".env.blue" ]; then
+            cp .env.blue .env.green
+            sed -i 's/staging/production/g' .env.green
+            sed -i 's/STAGING/PRODUCTION/g' .env.green
+            sed -i 's/jw-staging\.cloudigan\.net/attendant\.cloudigan\.net/g' .env.green
           fi
           
           echo "✅ References updated"
@@ -136,23 +136,23 @@ jobs:
           echo "🚀 Deploying to production server..."
           
           # Create backup
-          ssh jwa "mkdir -p /opt/backups/jw-attendant-$(date +%Y%m%d-%H%M%S) && \
-                   cp -r /opt/jw-attendant-scheduler/* /opt/backups/jw-attendant-$(date +%Y%m%d-%H%M%S)/ 2>/dev/null || true"
+          ssh green-theoshift "mkdir -p /opt/backups/theoshift-green-$(date +%Y%m%d-%H%M%S) && \
+                   cp -r /opt/theoshift/* /opt/backups/theoshift-green-$(date +%Y%m%d-%H%M%S)/ 2>/dev/null || true"
           
           # Stop production services
-          ssh jwa "pkill -f 'npm\\|node\\|next' || true"
+          ssh green-theoshift "pkill -f 'npm\\|node\\|next' || true"
           
           # Deploy code
-          ssh jwa "cd /opt/jw-attendant-scheduler && \
+          ssh green-theoshift "cd /opt/theoshift && \
                    git fetch origin && \
                    git checkout feature/admin-module-events-management && \
                    git pull origin feature/admin-module-events-management"
           
           # Copy updated files
-          scp -r .env.production jwa:/opt/jw-attendant-scheduler/.env || true
+          scp -r .env.green jwa:/opt/theoshift/.env || true
           
           # Install and build
-          ssh jwa "cd /opt/jw-attendant-scheduler && \
+          ssh green-theoshift "cd /opt/theoshift && \
                    npm install && \
                    npm run build"
           
@@ -162,9 +162,9 @@ jobs:
         run: |
           echo "⚙️ Configuring production environment..."
           
-          ssh jwa "cd /opt/jw-attendant-scheduler && \
-                   echo 'DATABASE_URL=\"postgresql://jw_user:jw_password@10.92.3.21:5432/jw_attendant_scheduler\"' >> .env && \
-                   echo 'NEXTAUTH_URL=\"https://attendant.cloudigan.net\"' >> .env && \
+          ssh green-theoshift "cd /opt/theoshift && \
+                   echo 'DATABASE_URL=\"postgresql://theoshift_user:jw_password@10.92.3.21:5432/theoshift_scheduler\"' >> .env && \
+                   echo 'NEXTAUTH_URL=\"https://theoshift.com\"' >> .env && \
                    echo 'NEXTAUTH_SECRET=\"${{ secrets.NEXTAUTH_SECRET }}\"' >> .env"
           
           echo "✅ Environment configured"
@@ -173,7 +173,7 @@ jobs:
         run: |
           echo "🎯 Starting production services..."
           
-          ssh jwa "cd /opt/jw-attendant-scheduler && \
+          ssh green-theoshift "cd /opt/theoshift && \
                    nohup npm start > production.log 2>&1 &"
           
           # Wait for startup
@@ -186,12 +186,12 @@ jobs:
           echo "🏥 Performing production health check..."
           
           # Check if service is running
-          ssh jwa "curl -f http://localhost:3001/admin > /dev/null" || {
+          ssh green-theoshift "curl -f http://localhost:3001/admin > /dev/null" || {
             echo "❌ Production health check failed!"
             
             # Rollback
-            ssh jwa "pkill -f 'npm\\|node\\|next' || true && \
-                     cd /opt/jw-attendant-scheduler && \
+            ssh green-theoshift "pkill -f 'npm\\|node\\|next' || true && \
+                     cd /opt/theoshift && \
                      git checkout HEAD~1 && \
                      npm install && \
                      npm run build && \
@@ -202,7 +202,7 @@ jobs:
           }
           
           # Verify admin modules
-          ssh jwa "cd /opt/jw-attendant-scheduler && node mcp-diagnostic.js" | grep -q "Admin modules: 6" || {
+          ssh green-theoshift "cd /opt/theoshift && node mcp-diagnostic.js" | grep -q "Admin modules: 6" || {
             echo "⚠️ Admin module verification warning"
           }
           
@@ -212,8 +212,8 @@ jobs:
         run: |
           echo "🎉 APEX Guardian Production Deployment Complete!"
           echo "=================================================="
-          echo "✅ Production URL: https://attendant.cloudigan.net"
-          echo "✅ Admin Panel: https://attendant.cloudigan.net/admin"
+          echo "✅ Production URL: https://theoshift.com"
+          echo "✅ Admin Panel: https://theoshift.com/admin"
           echo "✅ All staging references updated to production"
           echo "✅ 6 Admin modules + bulk import deployed"
           echo "✅ MCP server deployed and functional"
@@ -221,8 +221,8 @@ jobs:
           
           # Create deployment artifact
           echo "deployment_success=true" >> $GITHUB_OUTPUT
-          echo "deployment_url=https://attendant.cloudigan.net" >> $GITHUB_OUTPUT
-          echo "admin_url=https://attendant.cloudigan.net/admin" >> $GITHUB_OUTPUT
+          echo "deployment_url=https://theoshift.com" >> $GITHUB_OUTPUT
+          echo "admin_url=https://theoshift.com/admin" >> $GITHUB_OUTPUT
 
   post-deployment:
     name: 📋 Post-Deployment Tasks
@@ -234,9 +234,9 @@ jobs:
       - name: 📧 Notify Deployment Success
         run: |
           echo "📧 Deployment notification would be sent here"
-          echo "✅ JW Attendant Scheduler successfully deployed to production"
-          echo "🔗 URL: https://attendant.cloudigan.net"
-          echo "👨‍💼 Admin: https://attendant.cloudigan.net/admin"
+          echo "✅ Theocratic Shift Scheduler successfully deployed to production"
+          echo "🔗 URL: https://theoshift.com"
+          echo "👨‍💼 Admin: https://theoshift.com/admin"
 
       - name: 📝 Update Documentation
         run: |

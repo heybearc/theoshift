@@ -7,7 +7,7 @@ while IFS='=' read -r key value; do
   [[ -z $key ]] && continue
   # Export the variable
   export "$key=$value"
-done < /opt/jw-attendant-scheduler/.env
+done < /opt/theoshift/.env
 
 # Start the Next.js application
 npm start

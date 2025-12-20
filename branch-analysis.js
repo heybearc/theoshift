@@ -207,7 +207,7 @@ class BranchAnalyzer {
     }
 
     async run() {
-        console.log('🔍 JW Attendant Scheduler - Branch Analysis\n');
+        console.log('🔍 Theocratic Shift Scheduler - Branch Analysis\n');
         console.log('='.repeat(50));
         
         this.getCurrentFeatures();

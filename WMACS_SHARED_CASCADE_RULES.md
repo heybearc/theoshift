@@ -294,7 +294,7 @@ EOF
 mkdir -p .apex/env-templates/
 
 # Staging template
-cat > .apex/env-templates/.env.staging << EOF
+cat > .apex/env-templates/.env.blue << EOF
 NODE_ENV=production
 PORT=3001
 NEXTAUTH_URL=http://10.92.3.24:3001
@@ -304,7 +304,7 @@ NEXTAUTH_DEBUG=true
 EOF
 
 # Production template
-cat > .apex/env-templates/.env.production << EOF
+cat > .apex/env-templates/.env.green << EOF
 NODE_ENV=production
 PORT=3001
 NEXTAUTH_URL=http://10.92.3.22:3001

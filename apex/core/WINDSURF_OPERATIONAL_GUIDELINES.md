@@ -120,7 +120,7 @@ QOS Agent (Oversight)
 
 ## Environment-Specific Guidelines
 
-### JW Attendant Scheduler
+### Theocratic Shift Scheduler
 - **Containers**: 132 (production), 135 (staging)
 - **Database**: PostgreSQL Container 131
 - **Ports**: 3001 (Django application)

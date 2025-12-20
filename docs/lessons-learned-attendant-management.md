@@ -8,7 +8,7 @@ status: completed
 # Attendant Management Module - Lessons Learned
 
 ## Project Overview
-Successfully implemented a comprehensive attendant management system for the JW Attendant Scheduler Next.js application, transitioning from concept to production-ready module with event-specific workflows.
+Successfully implemented a comprehensive attendant management system for the Theocratic Shift Scheduler Next.js application, transitioning from concept to production-ready module with event-specific workflows.
 
 ## Technical Achievements
 
@@ -211,4 +211,4 @@ The transition from standalone to event-centric management demonstrates the valu
 
 ---
 
-*This lessons learned document will inform future module development and serve as a reference for best practices in the JW Attendant Scheduler application.*
+*This lessons learned document will inform future module development and serve as a reference for best practices in the Theocratic Shift Scheduler application.*

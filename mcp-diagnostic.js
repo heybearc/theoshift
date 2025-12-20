@@ -19,7 +19,7 @@ console.log('📁 Process argv[1]:', process.argv[1]);
 const possibleRoots = [
     process.cwd(),
     path.join(process.cwd(), '..'),
-    '/Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler',
+    '/Users/cory/Documents/Cloudy-Work/applications/theoshift',
     __dirname
 ];
 

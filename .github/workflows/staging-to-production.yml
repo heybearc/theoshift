@@ -50,7 +50,7 @@ jobs:
         
     - name: Run error fixer on staging
       run: |
-        ssh root@10.92.3.24 'cd /opt/jw-attendant-staging && npm run build && npm run test || echo "Tests not yet implemented"'
+        ssh root@10.92.3.24 'cd /opt/theoshift-green-staging && npm run build && npm run test || echo "Tests not yet implemented"'
         
     - name: Run link checker on staging
       run: |
@@ -58,7 +58,7 @@ jobs:
         
     - name: Run stability tests on staging
       run: |
-        ssh root@10.92.3.24 'cd /opt/jw-attendant-staging && npm run test:e2e || echo "E2E tests not yet implemented"'
+        ssh root@10.92.3.24 'cd /opt/theoshift-green-staging && npm run test:e2e || echo "E2E tests not yet implemented"'
         
     - name: Check performance metrics
       run: |
@@ -100,19 +100,19 @@ jobs:
     - name: Deploy to Production
       run: |
         # Backup current production
-        ssh root@10.92.3.22 'cd /opt/jw-attendant-production && cp -r . /opt/backups/jw-attendant-$(date +%Y%m%d_%H%M%S)/'
+        ssh root@10.92.3.22 'cd /opt/theoshift-green-production && cp -r . /opt/backups/theoshift-green-$(date +%Y%m%d_%H%M%S)/'
         
         # Sync from staging to production
-        ssh root@10.92.3.24 'cd /opt/jw-attendant-staging && rsync -avz --exclude=node_modules --exclude=.next --exclude=.git . root@10.92.3.22:/opt/jw-attendant-production/'
+        ssh root@10.92.3.24 'cd /opt/theoshift-green-staging && rsync -avz --exclude=node_modules --exclude=.next --exclude=.git . root@10.92.3.22:/opt/theoshift-green-production/'
         
         # Install dependencies and build on production
-        ssh root@10.92.3.22 'cd /opt/jw-attendant-production && npm install && npm run build'
+        ssh root@10.92.3.22 'cd /opt/theoshift-green-production && npm install && npm run build'
         
         # Generate Prisma client on production
-        ssh root@10.92.3.22 'cd /opt/jw-attendant-production && npx prisma generate'
+        ssh root@10.92.3.22 'cd /opt/theoshift-green-production && npx prisma generate'
         
         # Restart production service
-        ssh root@10.92.3.22 'systemctl restart jw-attendant-production'
+        ssh root@10.92.3.22 'systemctl restart theoshift-green-production'
         
         # Health check
         sleep 10
@@ -129,8 +129,8 @@ jobs:
       run: |
         echo "❌ Deployment failed, initiating rollback"
         # Find latest backup
-        BACKUP=$(ssh root@10.92.3.22 'ls -t /opt/backups/jw-attendant-* | head -1')
+        BACKUP=$(ssh root@10.92.3.22 'ls -t /opt/backups/theoshift-green-* | head -1')
         # Restore from backup
-        ssh root@10.92.3.22 "cd /opt && rm -rf jw-attendant-production && cp -r $BACKUP jw-attendant-production"
+        ssh root@10.92.3.22 "cd /opt && rm -rf theoshift-green-production && cp -r $BACKUP theoshift-green-production"
         # Restart service
-        ssh root@10.92.3.22 'systemctl restart jw-attendant-production'
+        ssh root@10.92.3.22 'systemctl restart theoshift-green-production'

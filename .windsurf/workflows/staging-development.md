@@ -13,7 +13,7 @@ ssh jw-staging
 
 ## 2. Navigate to Project Directory
 ```bash
-cd /opt/jw-attendant-staging
+cd /opt/theoshift-green-staging
 ```
 
 ## 3. Activate Virtual Environment
@@ -27,7 +27,7 @@ source venv/bin/activate
 python3 manage.py runserver 0.0.0.0:8002
 
 # Or use the production service
-systemctl status jw-attendant-staging
+systemctl status theoshift-green-staging
 ```
 
 ## 5. Make Code Changes
@@ -50,13 +50,13 @@ python3 manage.py collectstatic --noinput
 
 ## 8. Restart Staging Service
 ```bash
-sudo systemctl restart jw-attendant-staging
+sudo systemctl restart theoshift-green-staging
 ```
 
 ## 9. Test Changes
 ```bash
 # Check service status
-sudo systemctl status jw-attendant-staging
+sudo systemctl status theoshift-green-staging
 
 # Test health endpoint
 curl http://10.92.3.22:8001/health/
@@ -88,13 +88,13 @@ python3 manage.py test
 python3 manage.py check
 
 # View logs
-journalctl -u jw-attendant-staging -f
+journalctl -u theoshift-green-staging -f
 ```
 
 ### Database Management
 ```bash
 # Connect to PostgreSQL
-psql -h 10.92.3.21 -U jw_user -d jw_attendant_scheduler
+psql -h 10.92.3.21 -U theoshift_user -d theoshift_scheduler
 
 # Create superuser
 python3 manage.py createsuperuser

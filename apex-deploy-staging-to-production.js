@@ -59,7 +59,7 @@ class APEXStagingToProduction {
       await this.validateProduction();
 
       this.log('🎉 APEX Guardian: Deployment completed successfully!');
-      this.log('Production URL: https://attendant.cloudigan.net');
+      this.log('Production URL: https://theoshift.com');
 
     } catch (error) {
       this.log(`❌ Deployment failed: ${error.message}`);
@@ -74,7 +74,7 @@ class APEXStagingToProduction {
 
   async backupProduction() {
     const prod = this.environments.production;
-    const backupDir = `/opt/backups/jw-attendant-${new Date().toISOString().slice(0,19).replace(/:/g,'-')}`;
+    const backupDir = `/opt/backups/theoshift-green-${new Date().toISOString().slice(0,19).replace(/:/g,'-')}`;
     await this.runCommand(`ssh -F /Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant ${prod.server} "mkdir -p ${backupDir} && cp -r ${prod.path}/* ${backupDir}/ 2>/dev/null || true"`);
   }
 
@@ -92,10 +92,10 @@ class APEXStagingToProduction {
 NODE_ENV=production
 PORT=3001
 HOSTNAME=0.0.0.0
-DATABASE_URL="postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/jw_attendant_scheduler_staging"
-NEXTAUTH_URL="https://attendant.cloudigan.net"
+DATABASE_URL="postgresql://jw_scheduler_staging:jw_password@10.92.3.21:5432/theoshift_scheduler_staging"
+NEXTAUTH_URL="https://theoshift.com"
 NEXTAUTH_SECRET="prod-secret-$(date +%s)"
-UPLOAD_DIR="/opt/jw-attendant-scheduler/public/uploads"
+UPLOAD_DIR="/opt/theoshift/public/uploads"
 MAX_FILE_SIZE=10485760
 FEEDBACK_ENABLED=true
 EOF'`);
@@ -103,7 +103,7 @@ EOF'`);
 
   async deployAndRestart() {
     const prod = this.environments.production;
-    await this.runCommand(`ssh -F /Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant ${prod.server} "cd ${prod.path} && pm2 restart jw-attendant"`);
+    await this.runCommand(`ssh -F /Users/cory/Documents/Cloudy-Work/ssh_config_jw_attendant ${prod.server} "cd ${prod.path} && pm2 restart theoshift-green"`);
   }
 
   async validateProduction() {

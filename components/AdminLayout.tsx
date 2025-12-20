@@ -218,7 +218,7 @@ export default function AdminLayout({ children, title, breadcrumbs = [], userLas
         
         {/* Footer with Version */}
         <footer className="bg-white border-t border-gray-200 py-4 px-6 text-center text-sm text-gray-500">
-          <div>JW Attendant Scheduler v{packageJson.version} | © 2025 | 
+          <div>Theocratic Shift Scheduler v{packageJson.version} | © 2025 | 
             <Link href="/release-notes" className="text-blue-600 hover:text-blue-800 ml-1">Release Notes</Link>
           </div>
         </footer>

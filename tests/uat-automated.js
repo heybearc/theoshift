@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Automated UAT Test Suite for JW Attendant Scheduler
+ * Automated UAT Test Suite for Theocratic Shift Scheduler
  * Tests all critical functionality and generates a detailed report
  */
 

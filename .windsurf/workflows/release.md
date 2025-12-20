@@ -1,10 +1,10 @@
 ---
-description: Switch traffic from STANDBY to PRODUCTION (after bump and testing)
+description: Switch traffic from STANDBY to GREEN (after bump and testing)
 ---
 
 # Release Workflow
 
-Switches traffic from STANDBY to PRODUCTION after you've tested and approved the changes.
+Switches traffic from STANDBY to GREEN after you've tested and approved the changes.
 
 **Prerequisites:** Must run `/bump` workflow first to prepare the release on STANDBY.
 
@@ -17,27 +17,27 @@ This is your approval to switch traffic to the version currently on STANDBY.
 ## What This Workflow Does
 
 ### Step 1: Verify STANDBY Ready
-- Checks that STANDBY has newer version than PRODUCTION
+- Checks that STANDBY has newer version than GREEN
 - Verifies STANDBY is healthy and responding
 - Confirms you've tested on STANDBY
 
 ### Step 2: Switch Traffic
-- Uses HAProxy to switch traffic from PRODUCTION to STANDBY
-- STANDBY becomes new PRODUCTION
-- Old PRODUCTION becomes new STANDBY
+- Uses HAProxy to switch traffic from GREEN to STANDBY
+- STANDBY becomes new GREEN
+- Old GREEN becomes new STANDBY
 - Zero downtime switch
 
 ### Step 3: Verify Switch
-- Confirms traffic is now going to new PRODUCTION
-- Checks new PRODUCTION is healthy
+- Confirms traffic is now going to new GREEN
+- Checks new GREEN is healthy
 - Monitors for any immediate issues
 
 ### Step 4: Report Status
-- Shows current PRODUCTION and STANDBY status
+- Shows current GREEN and STANDBY status
 - Displays version running on each
 - Confirms successful release
 
-**Note:** After release, run `/sync` to update new STANDBY with PRODUCTION code.
+**Note:** After release, run `/sync` to update new STANDBY with GREEN code.
 
 ## Example
 
@@ -48,13 +48,13 @@ This is your approval to switch traffic to the version currently on STANDBY.
 **Cascade does:**
 ```
 1. ✅ Verify STANDBY ready: v2.4.1 (Blue)
-2. ✅ Verify PRODUCTION: v2.4.0 (Green)
+2. ✅ Verify GREEN: v2.4.0 (Green)
 3. ✅ Switch HAProxy traffic: Green → Blue
 4. ✅ Confirm switch successful
 
 🎉 RELEASE COMPLETE
 
-New PRODUCTION: Blue (10.92.3.22:3001) - v2.4.1
+New GREEN: Blue (10.92.3.22:3001) - v2.4.1
 New STANDBY: Green (10.92.3.24:3001) - v2.4.0
 
 Next: Run "sync" to update STANDBY with v2.4.1
@@ -81,13 +81,13 @@ If issues are found after traffic switch:
 **You say:** "rollback"
 
 **Cascade does:**
-1. Immediately switches traffic back to old PRODUCTION
+1. Immediately switches traffic back to old GREEN
 2. Logs the rollback
 3. Failed release stays on STANDBY for debugging
 
 ## After Release
 
-**Next step:** Run `/sync` to update new STANDBY with PRODUCTION code
+**Next step:** Run `/sync` to update new STANDBY with GREEN code
 
 This ensures both environments are running the same version and you can start developing the next release.
 
@@ -102,7 +102,7 @@ This ensures both environments are running the same version and you can start de
 
 ## Related Workflows
 - `/bump` - Version bump and deploy to STANDBY
-- `/sync` - Sync STANDBY with PRODUCTION
+- `/sync` - Sync STANDBY with GREEN
 - `/staging-first-development` - Full CI/CD workflow
 
 ## Notes

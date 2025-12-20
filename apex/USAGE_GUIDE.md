@@ -94,7 +94,7 @@ After synchronization, each project will have access to:
 
 ### **Basic Commands**
 ```bash
-# In any project directory (jw-attendant-scheduler or ldc-construction-tools)
+# In any project directory (theoshift or ldc-construction-tools)
 
 # Start guardian protection
 node wmacs/wmacs-guardian.js start [container]
@@ -223,7 +223,7 @@ git status
 ./update-wmacs.sh full-update --message "Weekly maintenance update"
 
 # Validate all projects
-for project in jw-attendant-scheduler ldc-construction-tools; do
+for project in theoshift ldc-construction-tools; do
   cd ~/Documents/Cloudy-Work/applications/$project
   node wmacs/wmacs-guardian.js test
 done
@@ -267,4 +267,4 @@ git checkout v1.1.0
 
 **Last Updated**: 2025-09-19  
 **Current Version**: v1.2.0  
-**Supported Projects**: JW Attendant Scheduler, LDC Construction Tools
+**Supported Projects**: Theocratic Shift Scheduler, LDC Construction Tools

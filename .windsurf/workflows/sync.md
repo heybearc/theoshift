@@ -1,10 +1,10 @@
 ---
-description: Sync STANDBY with PRODUCTION code after release
+description: Sync STANDBY with GREEN code after release
 ---
 
 # Sync Workflow
 
-Synchronizes the STANDBY environment with PRODUCTION code after a release, ensuring both environments are running the same version.
+Synchronizes the STANDBY environment with GREEN code after a release, ensuring both environments are running the same version.
 
 **Prerequisites:** Must run `/release` workflow first to switch traffic.
 
@@ -12,22 +12,22 @@ Synchronizes the STANDBY environment with PRODUCTION code after a release, ensur
 
 Simply say: **"sync"** or **"/sync"**
 
-This updates the STANDBY environment to match PRODUCTION.
+This updates the STANDBY environment to match GREEN.
 
 ## What This Workflow Does
 
 ### Step 1: Identify Environments
-- Determines current PRODUCTION environment
+- Determines current GREEN environment
 - Identifies current STANDBY environment
-- Verifies PRODUCTION version
+- Verifies GREEN version
 
 ### Step 2: Deploy to STANDBY
-- Deploys PRODUCTION code to STANDBY
+- Deploys GREEN code to STANDBY
 - Runs: `git pull && npm install && npm run build && pm2 restart`
-- Ensures STANDBY matches PRODUCTION exactly
+- Ensures STANDBY matches GREEN exactly
 
 ### Step 3: Verify Sync
-- Checks STANDBY version matches PRODUCTION
+- Checks STANDBY version matches GREEN
 - Verifies STANDBY is healthy
 - Confirms both environments in sync
 
@@ -44,14 +44,14 @@ This updates the STANDBY environment to match PRODUCTION.
 
 **Cascade does:**
 ```
-1. ✅ Identify PRODUCTION: Blue (v2.4.1)
+1. ✅ Identify GREEN: Blue (v2.4.1)
 2. ✅ Identify STANDBY: Green (v2.4.0)
 3. ✅ Deploy v2.4.1 to Green
 4. ✅ Verify sync successful
 
 🔄 SYNC COMPLETE
 
-PRODUCTION: Blue (10.92.3.22:3001) - v2.4.1
+GREEN: Blue (10.92.3.22:3001) - v2.4.1
 STANDBY: Green (10.92.3.24:3001) - v2.4.1
 
 Both environments in sync. Ready for next development cycle.
@@ -60,7 +60,7 @@ Both environments in sync. Ready for next development cycle.
 ## Why Sync?
 
 ### After Release:
-- PRODUCTION has new version (e.g., v2.4.1)
+- GREEN has new version (e.g., v2.4.1)
 - STANDBY has old version (e.g., v2.4.0)
 - Need to sync STANDBY before next development
 
@@ -93,14 +93,14 @@ Ready for next "bump"!
 ## Safety Features
 
 ### Validation
-- ✅ Verifies PRODUCTION is healthy
+- ✅ Verifies GREEN is healthy
 - ✅ Confirms STANDBY is accessible
 - ✅ Checks git repository status
 - ✅ Validates deployment successful
 
-### No Impact on PRODUCTION
+### No Impact on GREEN
 - ✅ Only touches STANDBY
-- ✅ PRODUCTION unchanged
+- ✅ GREEN unchanged
 - ✅ No traffic impact
 - ✅ Safe to run anytime
 
@@ -111,7 +111,7 @@ Ready for next "bump"!
 - Traffic switch (to update STANDBY)
 
 ### Optional:
-- After hotfix directly to PRODUCTION
+- After hotfix directly to GREEN
 - To reset STANDBY to known good state
 - Before starting new development cycle
 

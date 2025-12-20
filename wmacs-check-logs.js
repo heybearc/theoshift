@@ -21,7 +21,7 @@ console.log('5. Check browser console errors');
 console.log('');
 
 console.log('🔧 Log Files to Monitor:');
-console.log('- /var/log/jw-attendant-scheduler.log (main application)');
+console.log('- /var/log/theoshift.log (main application)');
 console.log('- Next.js server logs (stdout/stderr)');
 console.log('- Authentication middleware logs');
 console.log('- Database connection logs');

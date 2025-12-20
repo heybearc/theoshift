@@ -1,13 +1,13 @@
-# JW Attendant Scheduler - MCP CI/CD Implementation Complete
+# Theocratic Shift Scheduler - MCP CI/CD Implementation Complete
 
 ## ✅ Implementation Status
 
-Your MCP-powered CI/CD system is now fully implemented in the JW Attendant Scheduler repository with the correct container infrastructure.
+Your MCP-powered CI/CD system is now fully implemented in the Theocratic Shift Scheduler repository with the correct container infrastructure.
 
 ### Container Infrastructure Confirmed
 - **Database**: Container **131** (10.92.3.21) - PostgreSQL shared database
-- **Production**: Container **132** (10.92.3.22) - JW Attendant Scheduler production  
-- **Staging**: Container **134** (10.92.3.24) - JW Attendant Scheduler staging
+- **Production**: Container **132** (10.92.3.22) - Theocratic Shift Scheduler production  
+- **Staging**: Container **134** (10.92.3.24) - Theocratic Shift Scheduler staging
 
 ## 🔧 Files Added to Repository
 
@@ -31,13 +31,13 @@ scripts/mcp-rollback.py      # Python MCP rollback
 
 ## 🚀 Usage Commands
 
-### Deploy to Staging (Container 134)
+### Deploy to Staging (Container 134 (blue-theoshift))
 ```bash
-cd /Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler
+cd /Users/cory/Documents/Cloudy-Work/applications/theoshift
 ./scripts/deploy.sh 134 staging
 ```
 
-### Deploy to Production (Container 132)
+### Deploy to Production (Container 132 (green-theoshift))
 ```bash
 ./scripts/deploy.sh 132 main
 ```
@@ -57,10 +57,10 @@ cd /Users/cory/Documents/Cloudy-Work/applications/jw-attendant-scheduler
 ## 📋 Next Steps Required
 
 ### 1. Container Setup (High Priority)
-Container 134 (staging) needs to be configured with:
-- JW Attendant Scheduler application installed
-- Directory structure: `/opt/jw-attendant-scheduler/`
-- Service configuration: `systemctl` service for jw-attendant-scheduler
+Container 134 (blue-theoshift) (staging) needs to be configured with:
+- Theocratic Shift Scheduler application installed
+- Directory structure: `/opt/theoshift/`
+- Service configuration: `systemctl` service for theoshift
 - Nginx configuration for port 8000
 - Database connection to Container 131
 
@@ -77,7 +77,7 @@ SECRET_KEY=<django-secret-key>
 ### 3. Directory Structure Setup
 On both containers (132 and 134), create:
 ```
-/opt/jw-attendant-scheduler/
+/opt/theoshift/
 ├── releases/              # Release directories by SHA
 ├── current/              # Symlink to active release
 ├── shared/
@@ -90,7 +90,7 @@ On both containers (132 and 134), create:
 ### 4. Service Configuration
 Create systemd service files on containers:
 ```
-/etc/systemd/system/jw-attendant-scheduler.service
+/etc/systemd/system/theoshift.service
 ```
 
 ## 🎯 Benefits Delivered
@@ -115,7 +115,7 @@ Create systemd service files on containers:
 ### Staging Deployment
 1. Push to `staging` branch triggers GitHub Actions
 2. Build immutable artifact with locked dependencies
-3. MCP orchestration deploys to Container 134
+3. MCP orchestration deploys to Container 134 (blue-theoshift)
 4. Atomic symlink switch to new release
 5. Health checks validate deployment success
 
@@ -123,7 +123,7 @@ Create systemd service files on containers:
 1. Push to `main` branch (after staging validation)
 2. Download same immutable artifact from staging
 3. Create pre-deployment snapshot
-4. MCP orchestration deploys to Container 132
+4. MCP orchestration deploys to Container 132 (green-theoshift)
 5. Atomic symlink switch with zero downtime
 6. Comprehensive health checks
 
@@ -137,13 +137,13 @@ Create systemd service files on containers:
 
 ### Deployment Script Test
 ✅ **Staging deployment simulation successful**
-- Container 134 correctly identified (10.92.3.24)
+- Container 134 (blue-theoshift) correctly identified (10.92.3.24)
 - MCP GitHub integration functional
 - MCP Proxmox integration functional
 - Deployment commands generated correctly
 
 ### Health Check Test
-⚠️ **Container 134 not yet configured**
+⚠️ **Container 134 (blue-theoshift) not yet configured**
 - Web service not responding (expected - needs setup)
 - Health endpoint not available (expected)
 - Manual container configuration required
@@ -158,4 +158,4 @@ Your MCP-powered CI/CD system eliminates regression issues through:
 ✅ **Full auditability** with SHA-based tracking  
 ✅ **Zero-downtime deployments** via atomic symlink switching  
 
-The system is ready for use once Container 134 is configured with the JW Attendant Scheduler application.
+The system is ready for use once Container 134 (blue-theoshift) is configured with the Theocratic Shift Scheduler application.

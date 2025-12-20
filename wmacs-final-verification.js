@@ -84,9 +84,9 @@ class WMACSFinalVerification {
       }
       
       // Test root page redirect
-      const rootResult = await execAsync(`ssh ${this.stagingServer} "curl -s '${this.baseUrl}/' | grep -o 'JW Attendant Scheduler\\|Loading\\|Redirecting' | head -2"`);
+      const rootResult = await execAsync(`ssh ${this.stagingServer} "curl -s '${this.baseUrl}/' | grep -o 'Theocratic Shift Scheduler\\|Loading\\|Redirecting' | head -2"`);
       
-      if (rootResult.stdout.includes('JW Attendant Scheduler')) {
+      if (rootResult.stdout.includes('Theocratic Shift Scheduler')) {
         console.log('   ✅ Root page loads with redirect logic');
       } else {
         console.log('   ❌ Root page not working');
@@ -140,9 +140,9 @@ class WMACSFinalVerification {
       }
       
       // Test dashboard contains expected elements
-      const contentResult = await execAsync(`ssh ${this.stagingServer} "curl -s '${this.baseUrl}/dashboard' | grep -o 'JW Attendant Scheduler\\|Loading dashboard\\|useSession' | head -3"`);
+      const contentResult = await execAsync(`ssh ${this.stagingServer} "curl -s '${this.baseUrl}/dashboard' | grep -o 'Theocratic Shift Scheduler\\|Loading dashboard\\|useSession' | head -3"`);
       
-      if (contentResult.stdout.includes('JW Attendant Scheduler')) {
+      if (contentResult.stdout.includes('Theocratic Shift Scheduler')) {
         console.log('   ✅ Dashboard contains expected content');
       } else {
         console.log('   ❌ Dashboard content missing');

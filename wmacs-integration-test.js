@@ -66,8 +66,8 @@ class WMACSIntegrationTest {
         this.logSuccess('Dashboard page loads successfully');
         
         // Check for dashboard content
-        const contentResult = await execAsync(`ssh jws "curl -s '${this.baseUrl}/dashboard' | grep -o 'JW Attendant Scheduler' | head -1"`);
-        if (contentResult.stdout.includes('JW Attendant Scheduler')) {
+        const contentResult = await execAsync(`ssh jws "curl -s '${this.baseUrl}/dashboard' | grep -o 'Theocratic Shift Scheduler' | head -1"`);
+        if (contentResult.stdout.includes('Theocratic Shift Scheduler')) {
           this.logSuccess('Dashboard contains expected content');
         } else {
           this.logWarning('Dashboard content may not be loading correctly');

@@ -100,17 +100,17 @@ class WMACsMCPRecovery {
         if (params.cleanCache) cleanCommands.push('rm -rf node_modules/.cache');
         
         return this.executeCommand(
-          `ssh ${params.environment === 'staging' ? 'root@10.92.3.24' : 'root@10.92.3.22'} "cd /opt/jw-attendant-scheduler && ${cleanCommands.join(' && ')}"`
+          `ssh ${params.environment === 'staging' ? 'root@10.92.3.24' : 'root@10.92.3.22'} "cd /opt/theoshift && ${cleanCommands.join(' && ')}"`
         );
         
       case 'update_code':
         return this.executeCommand(
-          `ssh ${params.environment === 'staging' ? 'root@10.92.3.24' : 'root@10.92.3.22'} "cd /opt/jw-attendant-scheduler && git pull origin ${params.branch}"`
+          `ssh ${params.environment === 'staging' ? 'root@10.92.3.24' : 'root@10.92.3.22'} "cd /opt/theoshift && git pull origin ${params.branch}"`
         );
         
       case 'start_application':
         return this.executeCommand(
-          `ssh ${params.environment === 'staging' ? 'root@10.92.3.24' : 'root@10.92.3.22'} "cd /opt/jw-attendant-scheduler && nohup npm run dev -- --port ${params.port} > /var/log/jw-attendant-scheduler.log 2>&1 & echo $!"`
+          `ssh ${params.environment === 'staging' ? 'root@10.92.3.24' : 'root@10.92.3.22'} "cd /opt/theoshift && nohup npm run dev -- --port ${params.port} > /var/log/theoshift.log 2>&1 & echo $!"`
         );
         
       default:
@@ -172,7 +172,7 @@ class WMACsMCPRecovery {
     console.log('🚨 Emergency fallback: Attempting basic restart...');
     try {
       await this.executeCommand(
-        `ssh ${envConfig.ssh} "cd /opt/jw-attendant-scheduler && pkill -f next; sleep 2; npm run dev -- --port ${envConfig.port} > /var/log/emergency.log 2>&1 &"`
+        `ssh ${envConfig.ssh} "cd /opt/theoshift && pkill -f next; sleep 2; npm run dev -- --port ${envConfig.port} > /var/log/emergency.log 2>&1 &"`
       );
       console.log('✅ Emergency fallback completed');
     } catch (error) {
