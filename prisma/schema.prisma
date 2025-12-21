@@ -137,6 +137,112 @@ model attendants {
   position_oversight_assignments_position_oversight_assignments_overseer_idToattendants position_oversight_assignments[] @relation("position_oversight_assignments_overseer_idToattendants")
 }
 
+// NEW: Department system models (backward compatible - coexists with attendants)
+model department_templates {
+  id               String                 @id @default(uuid())
+  name             String                 @unique
+  description      String?
+  parentId         String?
+  icon             String?
+  sortOrder        Int                    @default(0)
+  isActive         Boolean                @default(true)
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  parent           department_templates?  @relation("DepartmentHierarchy", fields: [parentId], references: [id])
+  children         department_templates[] @relation("DepartmentHierarchy")
+  event_departments event_departments[]
+
+  @@index([parentId])
+}
+
+model event_departments {
+  id               String               @id @default(uuid())
+  eventId          String
+  templateId       String?
+  name             String
+  description      String?
+  parentId         String?
+  isActive         Boolean              @default(true)
+  customSettings   Json?
+  sortOrder        Int                  @default(0)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  event            events               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  template         department_templates? @relation(fields: [templateId], references: [id])
+  parent           event_departments?   @relation("EventDepartmentHierarchy", fields: [parentId], references: [id])
+  children         event_departments[]  @relation("EventDepartmentHierarchy")
+  event_volunteers event_volunteers[]
+
+  @@unique([eventId, name])
+  @@index([eventId])
+  @@index([parentId])
+}
+
+model volunteers {
+  id                          String                   @id
+  userId                      String?                  @unique
+  firstName                   String
+  lastName                    String
+  email                       String
+  phone                       String?
+  availabilityStatus          String?                  @default("AVAILABLE")
+  isAvailable                 Boolean                  @default(true)
+  notes                       String?
+  servingAs                   Json?                    @default("[]")
+  skills                      Json?
+  preferredDepartments        Json?
+  unavailableDates            Json?
+  totalAssignments            Int                      @default(0)
+  totalHours                  Float                    @default(0)
+  createdAt                   DateTime                 @default(now())
+  updatedAt                   DateTime                 @updatedAt
+  congregation                String
+  formsOfService              Json                     @default("[]")
+  isActive                    Boolean                  @default(true)
+  pinHash                     String?
+  profileVerificationRequired Boolean                  @default(false)
+  profileVerifiedAt           DateTime?
+  user                        users?                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event_volunteers            event_volunteers[]
+  volunteer_publications      volunteer_publications[]
+
+  @@index([userId])
+}
+
+model event_volunteers {
+  id                    String            @id @default(uuid())
+  eventId               String
+  volunteerId           String
+  departmentId          String
+  role                  String            @default("VOLUNTEER")
+  isActive              Boolean           @default(true)
+  assignedStationRanges Json?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  event                 events            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  volunteer             volunteers        @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+  department            event_departments @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, volunteerId, departmentId])
+  @@index([eventId])
+  @@index([volunteerId])
+  @@index([departmentId])
+}
+
+model volunteer_publications {
+  id           String     @id @default(uuid())
+  documentId   String
+  volunteerId  String
+  publishedAt  DateTime   @default(now())
+  viewedAt     DateTime?
+  downloadedAt DateTime?
+  volunteer    volunteers @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, volunteerId])
+  @@index([volunteerId])
+  @@index([documentId])
+}
+
 model count_sessions {
   id              String             @id
   eventId         String
@@ -316,6 +422,8 @@ model events {
   oversight_assignments          oversight_assignments[]
   position_oversight_assignments position_oversight_assignments[]
   positions                      positions[]
+  event_departments              event_departments[]
+  event_volunteers               event_volunteers[]
 }
 
 model feedback {
@@ -568,6 +676,7 @@ model users {
   position_assignments           position_assignments[]
   position_oversight_assignments position_oversight_assignments[]
   shift_templates                shift_templates[]
+  volunteer                      volunteers?
 }
 
 enum AssignmentStatus {
