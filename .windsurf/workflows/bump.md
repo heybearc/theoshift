@@ -1,10 +1,17 @@
 ---
-description: Version bump, release notes, and deploy to STANDBY for testing
+description: Version bump, release notes, announcements, help updates, and deploy to STANDBY for testing
 ---
 
 # Bump Workflow
 
-Prepares a new release by bumping version, creating release notes, and deploying to STANDBY for testing.
+Prepares a new release by:
+1. Bumping version number based on work performed
+2. Writing user-friendly release notes
+3. Adding in-app announcement banner
+4. Updating help pages and creating new help topics if needed
+5. Deploying to STANDBY for testing
+
+**Works for:** Theocratic Shift Scheduler (jw-attendant) and LDC Tools (ldc-tools)
 
 ## Usage
 
@@ -39,13 +46,25 @@ Simply say:
 - Pushes to `production-gold-standard` branch
 - Tags commit with version number
 
-### Step 4: Deploy to STANDBY
-- Identifies current STANDBY environment (Blue or Green)
-- Deploys ONLY to STANDBY (blue-green protocol)
+### Step 4: Add Announcement Banner (if applicable)
+- Creates announcement in database for new release
+- Shows banner to users about new features/fixes
+- Links to release notes page
+- Auto-dismissible after viewing
+
+### Step 5: Update Help Documentation (if needed)
+- Updates existing help topics for changed features
+- Creates new help topics for new features
+- Ensures help content matches new functionality
+- Reviews help index for completeness
+
+### Step 6: Deploy to STANDBY
+- MCP identifies current STANDBY environment (whichever isn't LIVE)
+- Deploys ONLY to STANDBY (never touches LIVE)
 - Runs: `git pull && npm install && npm run build && pm2 restart`
 - Verifies deployment successful
 
-### Step 5: Request Testing
+### Step 7: Request Testing
 - Provides STANDBY URL for testing
 - Lists changes in this release
 - Shows test checklist
@@ -59,10 +78,12 @@ Simply say:
 ```
 1. ✅ Bump version: 2.4.0 → 2.4.1
 2. ✅ Create release notes: release-notes/v2.4.1.md
-3. ✅ Commit: "Release v2.4.1"
-4. ✅ Push to production-gold-standard
-5. ✅ Deploy to Blue (STANDBY): http://10.92.3.22:3001
-6. ⏸️  READY FOR TESTING
+3. ✅ Add announcement banner for new release
+4. ✅ Update help pages (if needed)
+5. ✅ Commit: "Release v2.4.1"
+6. ✅ Push to production-gold-standard
+7. ✅ Deploy to STANDBY: http://10.92.3.22:3001 (Blue)
+8. ⏸️  READY FOR TESTING
 
 📋 Test Checklist:
 - [ ] All pages load
@@ -149,11 +170,12 @@ description: One sentence describing the main focus
 
 ## Safety Features
 
-### Blue-Green Protocol
-- ✅ Deploys to STANDBY only
-- ✅ Never touches PRODUCTION
+### LIVE/STANDBY Protocol
+- ✅ MCP dynamically identifies which server is STANDBY
+- ✅ Deploys to STANDBY only (never touches LIVE)
 - ✅ Maintains rollback capability
 - ✅ Requires explicit approval (via "release")
+- ✅ Works identically for theoshift and ldc-tools
 
 ### Validation Checks
 - ✅ Verifies on `production-gold-standard` branch
@@ -166,8 +188,8 @@ description: One sentence describing the main focus
 
 ### Next Steps:
 1. **Test on STANDBY** - Thoroughly test all changes
-2. **Say "release"** - Switch traffic when ready
-3. **Say "sync"** - Sync new STANDBY after release
+2. **Say "release"** - Switch traffic to STANDBY (making it LIVE)
+3. **Say "sync"** - Deploy to new STANDBY (keeping both in sync)
 
 ### If Issues Found:
 - Fix issues on local

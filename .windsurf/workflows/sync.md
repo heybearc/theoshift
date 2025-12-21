@@ -1,12 +1,14 @@
 ---
-description: Sync STANDBY with GREEN code after release
+description: `/sync` - Sync STANDBY with LIVE code after release
 ---
 
 # Sync Workflow
 
-Synchronizes the STANDBY environment with GREEN code after a release, ensuring both environments are running the same version.
+Synchronizes the STANDBY environment with LIVE code after a release, ensuring both environments are running the same version.
 
 **Prerequisites:** Must run `/release` workflow first to switch traffic.
+
+**Works for:** Theocratic Shift Scheduler (jw-attendant) and LDC Tools (ldc-tools)
 
 ## Usage
 
@@ -17,17 +19,17 @@ This updates the STANDBY environment to match GREEN.
 ## What This Workflow Does
 
 ### Step 1: Identify Environments
-- Determines current GREEN environment
+- MCP determines current LIVE environment
 - Identifies current STANDBY environment
-- Verifies GREEN version
+- Verifies LIVE version
 
 ### Step 2: Deploy to STANDBY
-- Deploys GREEN code to STANDBY
+- Deploys LIVE code to STANDBY
 - Runs: `git pull && npm install && npm run build && pm2 restart`
-- Ensures STANDBY matches GREEN exactly
+- Ensures STANDBY matches LIVE exactly
 
 ### Step 3: Verify Sync
-- Checks STANDBY version matches GREEN
+- Checks STANDBY version matches LIVE
 - Verifies STANDBY is healthy
 - Confirms both environments in sync
 
@@ -44,15 +46,15 @@ This updates the STANDBY environment to match GREEN.
 
 **Cascade does:**
 ```
-1. ✅ Identify GREEN: Blue (v2.4.1)
+1. ✅ Identify LIVE: Blue (v2.4.1)
 2. ✅ Identify STANDBY: Green (v2.4.0)
-3. ✅ Deploy v2.4.1 to Green
+3. ✅ Deploy v2.4.1 to Green (STANDBY)
 4. ✅ Verify sync successful
 
 🔄 SYNC COMPLETE
 
-GREEN: Blue (10.92.3.22:3001) - v2.4.1
-STANDBY: Green (10.92.3.24:3001) - v2.4.1
+LIVE: Blue (10.92.3.22:3001) - v2.4.1 ← Users here
+STANDBY: Green (10.92.3.24:3001) - v2.4.1 ← Now synced
 
 Both environments in sync. Ready for next development cycle.
 ```
@@ -60,7 +62,7 @@ Both environments in sync. Ready for next development cycle.
 ## Why Sync?
 
 ### After Release:
-- GREEN has new version (e.g., v2.4.1)
+- LIVE has new version (e.g., v2.4.1)
 - STANDBY has old version (e.g., v2.4.0)
 - Need to sync STANDBY before next development
 
@@ -74,17 +76,17 @@ Both environments in sync. Ready for next development cycle.
 
 ```
 1. "bump" → Version bump + deploy to STANDBY
-   PROD: v2.4.0 (Green)
+   LIVE: v2.4.0 (Green)
    STANDBY: v2.4.1 (Blue)
 
 2. Test on STANDBY
 
 3. "release" → Switch traffic
-   PROD: v2.4.1 (Blue) ← Traffic switched
+   LIVE: v2.4.1 (Blue) ← Traffic switched
    STANDBY: v2.4.0 (Green) ← Old version
 
 4. "sync" → Update STANDBY
-   PROD: v2.4.1 (Blue)
+   LIVE: v2.4.1 (Blue)
    STANDBY: v2.4.1 (Green) ← Now synced
 
 Ready for next "bump"!
@@ -93,14 +95,16 @@ Ready for next "bump"!
 ## Safety Features
 
 ### Validation
-- ✅ Verifies GREEN is healthy
+- ✅ MCP dynamically identifies LIVE/STANDBY
+- ✅ Verifies LIVE is healthy
 - ✅ Confirms STANDBY is accessible
 - ✅ Checks git repository status
 - ✅ Validates deployment successful
+- ✅ Works identically for theoshift and ldc-tools
 
-### No Impact on GREEN
+### No Impact on LIVE
 - ✅ Only touches STANDBY
-- ✅ GREEN unchanged
+- ✅ LIVE unchanged
 - ✅ No traffic impact
 - ✅ Safe to run anytime
 
@@ -111,7 +115,7 @@ Ready for next "bump"!
 - Traffic switch (to update STANDBY)
 
 ### Optional:
-- After hotfix directly to GREEN
+- After hotfix directly to LIVE
 - To reset STANDBY to known good state
 - Before starting new development cycle
 
