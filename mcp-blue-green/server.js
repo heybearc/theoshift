@@ -64,13 +64,13 @@ const HAPROXY_IP = '10.92.3.26';
 const DB_IP = '10.92.3.21';
 
 // Get current deployment state from HAProxy (per-app)
-async function getDeploymentState(app = 'theoshift-green') {
+async function getDeploymentState(app = 'jw-attendant') {
   try {
-    const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'theoshift-deployment-state.json';
+    const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'jw-deployment-state.json';
     const { stdout } = await execAsync(`ssh haproxy "cat /var/lib/haproxy/${stateFile} 2>/dev/null || echo '{}'"`);
     const state = JSON.parse(stdout || '{}');
     return {
-      prod: state.prod || 'blue',
+      live: state.prod || state.live || 'blue',
       standby: state.standby || 'green',
       lastSwitch: state.lastSwitch || null,
       switchCount: state.switchCount || 0,
@@ -87,9 +87,9 @@ async function getDeploymentState(app = 'theoshift-green') {
 }
 
 // Save deployment state to HAProxy (per-app)
-async function saveDeploymentState(state, app = 'theoshift-green') {
+async function saveDeploymentState(state, app = 'jw-attendant') {
   try {
-    const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'theoshift-deployment-state.json';
+    const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'jw-deployment-state.json';
     const stateJson = JSON.stringify(state);
     await execAsync(`ssh haproxy "echo '${stateJson}' > /var/lib/haproxy/${stateFile}"`);
   } catch (error) {
@@ -136,15 +136,15 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
       name: 'get_deployment_status',
-      description: 'Get current PROD and STANDBY server status with health checks',
+      description: 'Get current LIVE and STANDBY server status with health checks',
       inputSchema: {
         type: 'object',
         properties: {
           app: {
             type: 'string',
-            description: 'Application to check (theoshift-green or ldc-tools)',
-            enum: ['theoshift-green', 'ldc-tools'],
-            default: 'theoshift-green',
+            description: 'Application to check (jw-attendant or ldc-tools)',
+            enum: ['jw-attendant', 'ldc-tools'],
+            default: 'jw-attendant',
           },
         },
       },
@@ -157,9 +157,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         properties: {
           app: {
             type: 'string',
-            description: 'Application to deploy (theoshift-green or ldc-tools)',
-            enum: ['theoshift-green', 'ldc-tools'],
-            default: 'theoshift-green',
+            description: 'Application to deploy (jw-attendant or ldc-tools)',
+            enum: ['jw-attendant', 'ldc-tools'],
+            default: 'jw-attendant',
           },
           pullGithub: {
             type: 'boolean',
@@ -181,15 +181,15 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     },
     {
       name: 'switch_traffic',
-      description: 'Switch traffic from PROD to STANDBY (requires approval)',
+      description: 'Switch traffic from LIVE to STANDBY (requires approval)',
       inputSchema: {
         type: 'object',
         properties: {
           app: {
             type: 'string',
-            description: 'Application to switch (theoshift-green or ldc-tools)',
-            enum: ['theoshift-green', 'ldc-tools'],
-            default: 'theoshift-green',
+            description: 'Application to switch (jw-attendant or ldc-tools)',
+            enum: ['jw-attendant', 'ldc-tools'],
+            default: 'jw-attendant',
           },
           requireApproval: {
             type: 'boolean',
@@ -212,19 +212,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   if (name === 'get_deployment_status') {
-    const app = args.app || 'theoshift-green';
+    const app = args.app || 'jw-attendant';
     const appConfig = APPS[app];
     const haproxyBackend = await getHAProxyBackend(app);
     const state = await getDeploymentState(app);
     
-    // Determine actual PROD/STANDBY based on HAProxy
-    const actualProd = haproxyBackend !== 'error' ? haproxyBackend : state.prod;
-    const actualStandby = actualProd === 'blue' ? 'green' : 'blue';
+    // Determine actual LIVE/STANDBY based on HAProxy
+    const actualLive = haproxyBackend !== 'error' ? haproxyBackend : state.live;
+    const actualStandby = actualLive === 'blue' ? 'green' : 'blue';
     
-    const prodIp = actualProd === 'blue' ? appConfig.blueIp : appConfig.greenIp;
+    const liveIp = actualLive === 'blue' ? appConfig.blueIp : appConfig.greenIp;
     const standbyIp = actualStandby === 'blue' ? appConfig.blueIp : appConfig.greenIp;
 
-    const prodHealth = await checkHealth(prodIp, app);
+    const liveHealth = await checkHealth(liveIp, app);
     const standbyHealth = await checkHealth(standbyIp, app);
 
     return {
@@ -234,12 +234,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           text: JSON.stringify({
             app: appConfig.name,
             current: {
-              prod: {
-                server: actualProd.toUpperCase(),
-                ip: prodIp,
-                container: actualProd === 'blue' ? appConfig.blueContainer : appConfig.greenContainer,
-                healthy: prodHealth,
-                status: prodHealth ? '✅ ONLINE' : '❌ DOWN',
+              live: {
+                server: actualLive.toUpperCase(),
+                ip: liveIp,
+                container: actualLive === 'blue' ? appConfig.blueContainer : appConfig.greenContainer,
+                healthy: liveHealth,
+                status: liveHealth ? '✅ ONLINE' : '❌ DOWN',
               },
               standby: {
                 server: actualStandby.toUpperCase(),
@@ -264,12 +264,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 
   if (name === 'deploy_to_standby') {
-    const app = args.app || 'theoshift-green';
+    const app = args.app || 'jw-attendant';
     const appConfig = APPS[app];
     const haproxyBackend = await getHAProxyBackend(app);
     const state = await getDeploymentState(app);
-    const actualProd = haproxyBackend !== 'error' ? haproxyBackend : state.prod;
-    const actualStandby = actualProd === 'blue' ? 'green' : 'blue';
+    const actualLive = haproxyBackend !== 'error' ? haproxyBackend : state.live;
+    const actualStandby = actualLive === 'blue' ? 'green' : 'blue';
     const standbyIp = actualStandby === 'blue' ? appConfig.blueIp : appConfig.greenIp;
     const standbyName = actualStandby;
     const standbyShortcut = actualStandby === 'blue' ? appConfig.sshBlue : appConfig.sshGreen;
@@ -280,7 +280,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // Step 1: Create backup (if requested)
       if (args.createBackup) {
         steps.push('Creating backup...');
-        if (app === 'theoshift-green') {
+        if (app === 'jw-attendant') {
           await execAsync(`ssh root@${DB_IP} "/usr/local/bin/backup-jw-scheduler.sh"`);
           await execAsync(`ssh ${standbyShortcut} "/usr/local/bin/backup-to-nfs.sh"`);
         } else {
@@ -366,12 +366,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 
   if (name === 'switch_traffic') {
-    const app = args.app || 'theoshift-green';
+    const app = args.app || 'jw-attendant';
     const appConfig = APPS[app];
     const haproxyBackend = await getHAProxyBackend(app);
     const state = await getDeploymentState(app);
-    const actualProd = haproxyBackend !== 'error' ? haproxyBackend : state.prod;
-    const actualStandby = actualProd === 'blue' ? 'green' : 'blue';
+    const actualLive = haproxyBackend !== 'error' ? haproxyBackend : state.live;
+    const actualStandby = actualLive === 'blue' ? 'green' : 'blue';
     
     // Check standby health
     const standbyIp = actualStandby === 'blue' ? appConfig.blueIp : appConfig.greenIp;
@@ -396,11 +396,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             type: 'text',
             text: `⚠️ TRAFFIC SWITCH APPROVAL REQUIRED\n\n` +
                   `App: ${appConfig.name}\n` +
-                  `Current PROD: ${actualProd.toUpperCase()} (${actualProd === 'blue' ? appConfig.blueIp : appConfig.greenIp})\n` +
-                  `New PROD: ${actualStandby.toUpperCase()} (${standbyIp})\n\n` +
+                  `Current LIVE: ${actualLive.toUpperCase()} (${actualLive === 'blue' ? appConfig.blueIp : appConfig.greenIp})\n` +
+                  `New LIVE: ${actualStandby.toUpperCase()} (${standbyIp})\n\n` +
                   `This will:\n` +
                   `1. Switch HAProxy to route traffic to ${actualStandby.toUpperCase()}\n` +
-                  `2. Swap PROD/STANDBY roles\n` +
+                  `2. Swap LIVE/STANDBY roles\n` +
                   `3. Update state tracking\n\n` +
                   `To proceed, run: switch_traffic with requireApproval=false\n` +
                   `To cancel, take no action.`,
@@ -411,16 +411,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     // Perform the switch
     try {
-      const newProd = actualStandby;
-      const newStandby = actualProd;
-      const newBackend = newProd === 'blue' ? `${appConfig.haproxyBackend}_blue` : `${appConfig.haproxyBackend}_green`;
+      const newLive = actualStandby;
+      const newStandby = actualLive;
+      const newBackend = newLive === 'blue' ? `${appConfig.haproxyBackend}_blue` : `${appConfig.haproxyBackend}_green`;
 
       // Update HAProxy config
       await execAsync(`ssh root@${HAPROXY_IP} "sed -i 's/use_backend ${appConfig.haproxyBackend}_.*if is_${appConfig.haproxyBackend === 'jw_attendant' ? 'jw_attendant' : 'ldc'}/use_backend ${newBackend} if is_${appConfig.haproxyBackend === 'jw_attendant' ? 'jw_attendant' : 'ldc'}/' /etc/haproxy/haproxy.cfg && systemctl reload haproxy"`);
 
       // Update state
       const newState = {
-        prod: newProd,
+        prod: newLive,
+        live: newLive,
         standby: newStandby,
         lastSwitch: new Date().toISOString(),
         switchCount: state.switchCount + 1,
@@ -433,8 +434,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             type: 'text',
             text: `✅ TRAFFIC SWITCH COMPLETE!\n\n` +
                   `App: ${appConfig.name}\n` +
-                  `New PROD: ${newProd.toUpperCase()} (${standbyIp})\n` +
-                  `New STANDBY: ${newStandby.toUpperCase()} (${actualProd === 'blue' ? appConfig.blueIp : appConfig.greenIp})\n\n` +
+                  `New LIVE: ${newLive.toUpperCase()} (${standbyIp})\n` +
+                  `New STANDBY: ${newStandby.toUpperCase()} (${actualLive === 'blue' ? appConfig.blueIp : appConfig.greenIp})\n\n` +
                   `Switch #${newState.switchCount} completed at ${newState.lastSwitch}\n\n` +
                   `HAProxy Stats: http://${HAPROXY_IP}:8404`,
           },
