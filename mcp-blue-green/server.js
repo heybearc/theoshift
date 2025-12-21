@@ -28,7 +28,7 @@ const server = new Server(
 
 // Configuration
 const APPS = {
-  'theoshift-green': {
+  'jw-attendant': {
     name: 'Theocratic Shift Scheduler',
     blueIp: '10.92.3.22',
     greenIp: '10.92.3.24',
