@@ -78,7 +78,7 @@ async function getDeploymentState(app = 'jw-attendant') {
   } catch (error) {
     // Fallback to default state
     return {
-      prod: 'blue',
+      live: 'blue',
       standby: 'green',
       lastSwitch: null,
       switchCount: 0,
