@@ -1,60 +1,56 @@
 ---
-description: APEX Guardian CI/CD Pipeline for Next.js Theocratic Shift Scheduler
+description: MCP Blue-Green Deployment Pipeline for Next.js Theocratic Shift Scheduler
 ---
 
-# APEX Guardian CI/CD Pipeline - Next.js Implementation
+# MCP Blue-Green Deployment Pipeline - Next.js Implementation
 
-**Environment Mapping (CORRECTED):**
-- **Staging:** Container 134 (blue-theoshift) (10.92.3.24:3001) - Development and testing
-- **Production:** Container 132 (green-theoshift) (10.92.3.22:3001) - Live application  
+**Environment Mapping:**
+- **Blue:** Container 134 (10.92.3.24:3001) - https://blue.theoshift.com
+- **Green:** Container 132 (10.92.3.22:3001) - https://green.theoshift.com
 - **Database:** Container 131 (10.92.3.21:5432) - Shared PostgreSQL
 
-## 🛡️ APEX Cascade Rules (MANDATORY)
+**Note:** Either Blue or Green can be LIVE or STANDBY. Status is determined by HAProxy routing.
+
+## 🛡️ MCP Deployment Rules (MANDATORY)
 
 ### Core Principles
-1. **Battle-tested deployment pipeline** - No shortcuts allowed
-2. **Exact code parity** - Deploy exact staging codebase to production
-3. **Staging-first development** - All changes validated in staging
-4. **Automated testing** - Required before production deployment
+1. **Deploy to STANDBY first** - Always test on STANDBY before switching traffic
+2. **Use MCP commands** - All deployments via MCP Blue-Green system
+3. **Test before switch** - Validate STANDBY environment before making it LIVE
+4. **Automated health checks** - Required before traffic switch
 
 ### Prohibited Actions (Auto-Reject)
-❌ Direct production deployment
-❌ Skipping staging validation
+❌ Direct LIVE deployment
+❌ Skipping STANDBY validation
 ❌ Manual file copying between environments
-❌ Different code between staging and production
+❌ Bypassing MCP deployment system
 
-## Phase 1: Feature Development (Current Environment)
+## Phase 1: Feature Development
 
-### 1. Connect to Staging Environment
+### 1. Check Current Deployment Status
 ```bash
-ssh jws  # 10.92.3.24 (Container 134 (blue-theoshift))
+# Use MCP to check which server is LIVE/STANDBY
+mcp3_get_deployment_status(app: "theoshift")
 ```
 
-### 2. Navigate to Project Directory
+### 2. Connect to STANDBY Environment
+```bash
+# SSH to the STANDBY server (check status first)
+ssh jwa  # Blue (10.92.3.24)
+# OR
+ssh jwg  # Green (10.92.3.22)
+```
+
+### 3. Navigate to Project Directory
 ```bash
 cd /opt/theoshift
 ```
 
-### 3. Verify APEX Guardian Status
+### 4. Development Workflow
 ```bash
-# Check APEX system
-node apex/apex-guardian.js status
+# Pull latest code
+git pull origin main
 
-# Verify environment configuration
-cat apex-config.js
-```
-
-### 4. Feature Branch Development
-```bash
-# Create feature branch (if not exists)
-git checkout -b feature/your-feature-name
-
-# Or switch to existing feature branch
-git checkout feature/nextauth-implementation
-```
-
-### 5. Development Workflow
-```bash
 # Install dependencies
 npm install
 
@@ -62,21 +58,26 @@ npm install
 npm run build
 npm run lint
 
-# Start development server
-npm start
+# Restart application
+pm2 restart theoshift-blue
+# OR
+pm2 restart theoshift-green
 ```
 
-### 6. Test Changes
+### 5. Test Changes
 ```bash
 # Verify application health
-curl http://10.92.3.24:3001/auth/signin
-
-# Test API endpoints
-curl http://10.92.3.24:3001/api/users
+curl https://blue.theoshift.com/api/health
+# OR
+curl https://green.theoshift.com/api/health
 ```
+
+## Phase 2: Deployment via MCP
+
+See `/bump`, `/release`, and `/sync` workflows for complete MCP deployment process.
 
 ---
 
-**🛡️ APEX Guardian Enforcement:** This workflow is MANDATORY and enforced by APEX Research Advisor.
+**🛡️ MCP Blue-Green Enforcement:** This workflow uses the MCP Blue-Green deployment system.
 
-**Container Mapping:** 134 (staging: 10.92.3.24) → 132 (production: 10.92.3.22) → 131 (database: 10.92.3.21)
+**Container Mapping:** Blue (134: 10.92.3.24) ⇄ Green (132: 10.92.3.22) → Database (131: 10.92.3.21)

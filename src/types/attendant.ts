@@ -1,4 +1,4 @@
-// Enhanced Attendant Types for APEX Attendant Management System
+// Enhanced Attendant Types for Theocratic Shift Scheduler
 // Date: 2025-01-04
 
 export interface Attendant {

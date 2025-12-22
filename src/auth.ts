@@ -2,7 +2,7 @@ import { AuthOptions, getServerSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaClient } from '@prisma/client'
 
-// WMACS Guardian: Proper Prisma singleton pattern
+// Proper Prisma singleton pattern
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
@@ -40,7 +40,7 @@ export const authOptions: AuthOptions = {
         }
 
         try {
-          // WMACS Guardian: Proper Prisma usage with error handling
+          // Proper Prisma usage with error handling
           const user = await prisma.users.findUnique({
             where: {
               email: credentials.email
@@ -55,7 +55,7 @@ export const authOptions: AuthOptions = {
             throw new Error("User has no password set")
           }
 
-          // WMACS Guardian Fix: Use proper bcrypt validation
+          // Use proper bcrypt validation
           const bcrypt = require('bcryptjs');
           const isPasswordValid = await bcrypt.compare(credentials.password, user.passwordHash);
 

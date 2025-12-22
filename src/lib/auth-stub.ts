@@ -1,5 +1,4 @@
-// WMACS AUTH STUB - Simple authentication replacement for NextAuth
-// WMACS Rule: WMACS-COMPLEX-001 (Proportional complexity)
+// AUTH STUB - Simple authentication replacement for NextAuth
 // Purpose: Unblock admin module with minimal auth complexity
 
 import React from 'react'
