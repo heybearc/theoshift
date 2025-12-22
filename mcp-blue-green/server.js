@@ -28,7 +28,7 @@ const server = new Server(
 
 // Configuration
 const APPS = {
-  'jw-attendant': {
+  'theoshift': {
     name: 'Theocratic Shift Scheduler',
     blueIp: '10.92.3.22',
     greenIp: '10.92.3.24',
@@ -64,7 +64,7 @@ const HAPROXY_IP = '10.92.3.26';
 const DB_IP = '10.92.3.21';
 
 // Get current deployment state from HAProxy (per-app)
-async function getDeploymentState(app = 'jw-attendant') {
+async function getDeploymentState(app = 'theoshift') {
   try {
     const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'jw-deployment-state.json';
     const { stdout } = await execAsync(`ssh haproxy "cat /var/lib/haproxy/${stateFile} 2>/dev/null || echo '{}'"`);
@@ -87,7 +87,7 @@ async function getDeploymentState(app = 'jw-attendant') {
 }
 
 // Save deployment state to HAProxy (per-app)
-async function saveDeploymentState(state, app = 'jw-attendant') {
+async function saveDeploymentState(state, app = 'theoshift') {
   try {
     const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'jw-deployment-state.json';
     const stateJson = JSON.stringify(state);
@@ -142,9 +142,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         properties: {
           app: {
             type: 'string',
-            description: 'Application to check (jw-attendant or ldc-tools)',
-            enum: ['jw-attendant', 'ldc-tools'],
-            default: 'jw-attendant',
+            description: 'Application to check (theoshift or ldc-tools)',
+            enum: ['theoshift', 'ldc-tools'],
+            default: 'theoshift',
           },
         },
       },
@@ -157,9 +157,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         properties: {
           app: {
             type: 'string',
-            description: 'Application to deploy (jw-attendant or ldc-tools)',
-            enum: ['jw-attendant', 'ldc-tools'],
-            default: 'jw-attendant',
+            description: 'Application to deploy (theoshift or ldc-tools)',
+            enum: ['theoshift', 'ldc-tools'],
+            default: 'theoshift',
           },
           pullGithub: {
             type: 'boolean',
@@ -187,9 +187,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         properties: {
           app: {
             type: 'string',
-            description: 'Application to switch (jw-attendant or ldc-tools)',
-            enum: ['jw-attendant', 'ldc-tools'],
-            default: 'jw-attendant',
+            description: 'Application to switch (theoshift or ldc-tools)',
+            enum: ['theoshift', 'ldc-tools'],
+            default: 'theoshift',
           },
           requireApproval: {
             type: 'boolean',
@@ -212,7 +212,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   if (name === 'get_deployment_status') {
-    const app = args.app || 'jw-attendant';
+    const app = args.app || 'theoshift';
     const appConfig = APPS[app];
     const haproxyBackend = await getHAProxyBackend(app);
     const state = await getDeploymentState(app);
@@ -264,7 +264,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 
   if (name === 'deploy_to_standby') {
-    const app = args.app || 'jw-attendant';
+    const app = args.app || 'theoshift';
     const appConfig = APPS[app];
     const haproxyBackend = await getHAProxyBackend(app);
     const state = await getDeploymentState(app);
@@ -280,7 +280,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // Step 1: Create backup (if requested)
       if (args.createBackup) {
         steps.push('Creating backup...');
-        if (app === 'jw-attendant') {
+        if (app === 'theoshift') {
           await execAsync(`ssh root@${DB_IP} "/usr/local/bin/backup-jw-scheduler.sh"`);
           await execAsync(`ssh ${standbyShortcut} "/usr/local/bin/backup-to-nfs.sh"`);
         } else {
@@ -366,7 +366,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 
   if (name === 'switch_traffic') {
-    const app = args.app || 'jw-attendant';
+    const app = args.app || 'theoshift';
     const appConfig = APPS[app];
     const haproxyBackend = await getHAProxyBackend(app);
     const state = await getDeploymentState(app);

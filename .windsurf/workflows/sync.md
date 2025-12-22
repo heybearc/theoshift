@@ -8,7 +8,7 @@ Synchronizes the STANDBY environment with LIVE code after a release, ensuring bo
 
 **Prerequisites:** Must run `/release` workflow first to switch traffic.
 
-**Works for:** Theocratic Shift Scheduler (jw-attendant) and LDC Tools (ldc-tools)
+**Works for:** Theocratic Shift Scheduler (theoshift) and LDC Tools (ldc-tools)
 
 ## Usage
 

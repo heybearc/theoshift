@@ -8,7 +8,7 @@ Switches traffic to STANDBY after you've tested and approved the changes. STANDB
 
 **Prerequisites:** Must run `/bump` workflow first to prepare the release on STANDBY.
 
-**Works for:** Theocratic Shift Scheduler (jw-attendant) and LDC Tools (ldc-tools)
+**Works for:** Theocratic Shift Scheduler (theoshift) and LDC Tools (ldc-tools)
 
 ## Usage
 

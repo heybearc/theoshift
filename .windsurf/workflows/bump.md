@@ -11,7 +11,7 @@ Prepares a new release by:
 4. Updating help pages and creating new help topics if needed
 5. Deploying to STANDBY for testing
 
-**Works for:** Theocratic Shift Scheduler (jw-attendant) and LDC Tools (ldc-tools)
+**Works for:** Theocratic Shift Scheduler (theoshift) and LDC Tools (ldc-tools)
 
 ## Usage
 

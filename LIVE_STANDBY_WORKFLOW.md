@@ -41,7 +41,7 @@
 ### Step 1: Check Status
 ```bash
 # MCP will show which server is LIVE and which is STANDBY
-mcp3_get_deployment_status(app: "jw-attendant")
+mcp3_get_deployment_status(app: "theoshift")
 ```
 
 **Output shows:**
@@ -54,7 +54,7 @@ mcp3_get_deployment_status(app: "jw-attendant")
 ```bash
 # MCP automatically deploys to whichever server is STANDBY
 mcp3_deploy_to_standby(
-  app: "jw-attendant",
+  app: "theoshift",
   pullGithub: true,
   createBackup: true,
   runMigrations: false
@@ -78,7 +78,7 @@ mcp3_deploy_to_standby(
 ```bash
 # When ready, switch traffic to STANDBY (making it LIVE)
 mcp3_switch_traffic(
-  app: "jw-attendant",
+  app: "theoshift",
   requireApproval: true,
   emergency: false
 )
@@ -95,7 +95,7 @@ mcp3_switch_traffic(
 After traffic switch, you can update the new STANDBY to match LIVE:
 ```bash
 # Deploy to new STANDBY to keep both servers in sync
-mcp3_deploy_to_standby(app: "jw-attendant")
+mcp3_deploy_to_standby(app: "theoshift")
 ```
 
 ---

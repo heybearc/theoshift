@@ -3,7 +3,7 @@
 ## ✅ Unified Workflow for Both Apps
 
 This workflow works **identically** for:
-- **Theocratic Shift Scheduler** (jw-attendant)
+- **Theocratic Shift Scheduler** (theoshift)
 - **LDC Construction Tools** (ldc-tools)
 
 The MCP server dynamically identifies which server is LIVE and which is STANDBY, so you never need to specify server names.
@@ -223,7 +223,7 @@ The MCP server dynamically identifies which server is LIVE and which is STANDBY,
 
 ## 🚀 App-Specific Details
 
-### Theocratic Shift Scheduler (jw-attendant)
+### Theocratic Shift Scheduler (theoshift)
 - **Branch:** production-gold-standard
 - **Blue:** 10.92.3.22 (Container 132)
 - **Green:** 10.92.3.24 (Container 134)
@@ -243,7 +243,7 @@ The MCP server dynamically identifies which server is LIVE and which is STANDBY,
 
 ## 🔍 How to Check Status
 
-**Command:** `mcp3_get_deployment_status(app: "jw-attendant")`
+**Command:** `mcp3_get_deployment_status(app: "theoshift")`
 
 **Shows:**
 - Which server is LIVE (currently serving users)
@@ -270,7 +270,7 @@ A: Not recommended. Sync keeps environments identical for next bump.
 A: Say "release" again to rollback, or fix and bump again.
 
 **Q: Do I need to specify the app?**
-A: MCP defaults to jw-attendant. For LDC Tools, specify `app: "ldc-tools"`.
+A: MCP defaults to theoshift. For LDC Tools, specify `app: "ldc-tools"`.
 
 **Q: What if bump fails?**
 A: Fix the issue, run bump again. Version increments automatically.
