@@ -34,7 +34,7 @@ const APPS = {
     greenIp: '10.92.3.22',
     blueContainer: 134,
     greenContainer: 132,
-    haproxyBackend: 'jw_attendant',
+    haproxyBackend: 'theoshift',
     sshBlue: 'root@10.92.3.24',
     sshGreen: 'root@10.92.3.22',
     path: '/opt/theoshift',
