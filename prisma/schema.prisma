@@ -412,8 +412,8 @@ model events {
   circuitoverseeremail           String?
   circuitoverseername            String?
   circuitoverseerphone           String?
-  parentEventId                  String?
-  departmentTemplateId           String?
+  parentEventId                  String?                          @map("parenteventid")
+  departmentTemplateId           String?                          @map("departmenttemplateid")
   announcements                  announcements[]
   assignments                    assignments[]
   count_sessions                 count_sessions[]
