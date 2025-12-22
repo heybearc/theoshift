@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 
 interface DepartmentTemplate {
   id: string
@@ -185,6 +186,16 @@ export default function DepartmentTemplatesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back to Admin Portal */}
+        <div className="mb-4">
+          <Link
+            href="/admin"
+            className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+          >
+            ← Back to Admin Portal
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
