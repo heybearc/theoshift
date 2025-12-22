@@ -151,6 +151,7 @@ model department_templates {
   parent           department_templates?  @relation("DepartmentHierarchy", fields: [parentId], references: [id])
   children         department_templates[] @relation("DepartmentHierarchy")
   event_departments event_departments[]
+  events           events[]
 
   @@index([parentId])
 }
@@ -411,6 +412,8 @@ model events {
   circuitoverseeremail           String?
   circuitoverseername            String?
   circuitoverseerphone           String?
+  parentEventId                  String?
+  departmentTemplateId           String?
   announcements                  announcements[]
   assignments                    assignments[]
   count_sessions                 count_sessions[]
@@ -424,6 +427,12 @@ model events {
   positions                      positions[]
   event_departments              event_departments[]
   event_volunteers               event_volunteers[]
+  parentEvent                    events?                          @relation("EventHierarchy", fields: [parentEventId], references: [id], onDelete: Cascade)
+  childEvents                    events[]                         @relation("EventHierarchy")
+  departmentTemplate             department_templates?            @relation(fields: [departmentTemplateId], references: [id], onDelete: SetNull)
+
+  @@index([parentEventId])
+  @@index([departmentTemplateId])
 }
 
 model feedback {
