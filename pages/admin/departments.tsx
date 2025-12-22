@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
+import AdminLayout from '../../components/AdminLayout'
 
 interface DepartmentTemplate {
   id: string
@@ -184,24 +184,13 @@ export default function DepartmentTemplatesPage() {
   const parentDepartments = departments.filter(d => !d.parentId && d.id !== editingDept?.id)
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back to Admin Portal */}
-        <div className="mb-4">
-          <Link
-            href="/admin"
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            ← Back to Admin Portal
-          </Link>
-        </div>
-
+    <AdminLayout title="Department Templates">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Department Templates</h1>
-              <p className="mt-2 text-gray-600">
+              <p className="text-gray-600">
                 Manage department templates that can be used across all events
               </p>
             </div>
@@ -418,7 +407,7 @@ export default function DepartmentTemplatesPage() {
           </div>
         )}
       </div>
-    </div>
+    </AdminLayout>
   )
 }
 
