@@ -38,7 +38,7 @@ const APPS = {
     sshBlue: 'jwa',
     sshGreen: 'jwg',
     path: '/opt/theoshift',
-    branch: 'production-gold-standard',
+    branch: 'main',
     pmBlue: 'theoshift-blue',
     pmGreen: 'theoshift-green',
     healthEndpoint: '/api/health',
