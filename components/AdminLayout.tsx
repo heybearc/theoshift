@@ -24,6 +24,7 @@ export default function AdminLayout({ children, title, breadcrumbs = [], userLas
   const navigationItems = [
     { label: 'Dashboard', href: '/admin', icon: '🏠' },
     { label: 'User Management', href: '/admin/users', icon: '👥' },
+    { label: 'Department Templates', href: '/admin/departments', icon: '🏢' },
     { label: 'Health Monitor', href: '/admin/health', icon: '💚' },
     { label: 'API Status', href: '/admin/api-status', icon: '📊' },
     { label: 'Audit Logs', href: '/admin/audit-logs', icon: '📋' },
