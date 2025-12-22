@@ -123,6 +123,9 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse, userId: stri
     where.status = status as string
   }
 
+  // Check if we should include child event count
+  const includeChildCount = req.query.includeChildCount === 'true'
+
   // Get events with pagination
   const [events, total, userPermissions] = await Promise.all([
     prisma.events.findMany({
@@ -136,7 +139,8 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse, userId: stri
         _count: {
           select: {
             event_attendants: true,
-            positions: true
+            positions: true,
+            ...(includeChildCount ? { childEvents: true } : {})
           }
         }
       }
@@ -197,6 +201,7 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse, userId: stri
           updatedAt: event.updatedAt?.toISOString() || null,
           attendantsCount: event._count?.event_attendants || 0,
           positionsCount: event._count?.positions || 0,
+          childEventsCount: includeChildCount ? (event._count?.childEvents || 0) : undefined,
           userRole: permission?.role || 'VIEWER',
           userScopeType: permission?.scopeType || null
         }

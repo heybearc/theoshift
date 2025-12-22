@@ -67,7 +67,7 @@ export default function CreateEventPage() {
       try {
         const [templatesRes, eventsRes] = await Promise.all([
           fetch('/api/admin/department-templates'),
-          fetch('/api/events')
+          fetch('/api/events?includeChildCount=true')
         ])
         
         const templatesData = await templatesRes.json()
@@ -78,7 +78,11 @@ export default function CreateEventPage() {
         }
         
         if (eventsData.success) {
-          setEvents(eventsData.data)
+          // Filter out events that already have children (to prevent circular references)
+          const eligibleParentEvents = eventsData.data.filter((event: any) => 
+            !event.childEventsCount || event.childEventsCount === 0
+          )
+          setEvents(eligibleParentEvents)
         }
       } catch (err) {
         console.error('Error fetching data:', err)
@@ -528,7 +532,7 @@ export default function CreateEventPage() {
 
               <div className="md:col-span-1">
                 <label htmlFor="attendantsNeeded" className="block text-sm font-medium text-gray-700 mb-1">
-                  Attendants Needed
+                  Volunteers Needed
                 </label>
                 <input
                   type="number"
