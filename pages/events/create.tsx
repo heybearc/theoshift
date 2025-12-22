@@ -2,7 +2,7 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import EventLayout from '../../components/EventLayout'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 
@@ -18,6 +18,22 @@ interface EventFormData {
   capacity: string
   attendantsNeeded: string
   status: string
+  departmentTemplateId: string
+  parentEventId: string
+}
+
+interface DepartmentTemplate {
+  id: string
+  name: string
+  icon: string | null
+  parentId: string | null
+}
+
+interface Event {
+  id: string
+  name: string
+  startDate: string
+  endDate: string
 }
 
 export default function CreateEventPage() {
@@ -25,6 +41,9 @@ export default function CreateEventPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [departmentTemplates, setDepartmentTemplates] = useState<DepartmentTemplate[]>([])
+  const [events, setEvents] = useState<Event[]>([])
+  const [loadingData, setLoadingData] = useState(true)
 
   const [formData, setFormData] = useState<EventFormData>({
     name: '',
@@ -37,8 +56,39 @@ export default function CreateEventPage() {
     location: '',
     capacity: '',
     attendantsNeeded: '',
-    status: 'UPCOMING'
+    status: 'UPCOMING',
+    departmentTemplateId: '',
+    parentEventId: ''
   })
+
+  // Fetch department templates and events
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [templatesRes, eventsRes] = await Promise.all([
+          fetch('/api/admin/department-templates'),
+          fetch('/api/events')
+        ])
+        
+        const templatesData = await templatesRes.json()
+        const eventsData = await eventsRes.json()
+        
+        if (templatesData.success) {
+          setDepartmentTemplates(templatesData.data)
+        }
+        
+        if (eventsData.success) {
+          setEvents(eventsData.data)
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err)
+      } finally {
+        setLoadingData(false)
+      }
+    }
+    
+    fetchData()
+  }, [])
 
   const [errors, setErrors] = useState<Partial<EventFormData>>({})
 
@@ -140,7 +190,9 @@ export default function CreateEventPage() {
         location: formData.location,
         capacity: formData.capacity ? parseInt(formData.capacity) : undefined,
         attendantsNeeded: formData.attendantsNeeded ? parseInt(formData.attendantsNeeded) : undefined,
-        status: formData.status
+        status: formData.status,
+        departmentTemplateId: formData.departmentTemplateId || undefined,
+        parentEventId: formData.parentEventId || undefined
       }
 
       const response = await fetch('/api/events', {
@@ -304,6 +356,60 @@ export default function CreateEventPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Optional description of the event..."
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* Department Configuration */}
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Department Configuration</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="departmentTemplateId" className="block text-sm font-medium text-gray-700 mb-1">
+                  Department Template
+                </label>
+                <select
+                  id="departmentTemplateId"
+                  name="departmentTemplateId"
+                  value={formData.departmentTemplateId}
+                  onChange={handleInputChange}
+                  disabled={loadingData}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                >
+                  <option value="">Select a department template (optional)</option>
+                  {departmentTemplates.map(template => (
+                    <option key={template.id} value={template.id}>
+                      {template.icon} {template.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  Link this event to a department template for consistency
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="parentEventId" className="block text-sm font-medium text-gray-700 mb-1">
+                  Parent Event
+                </label>
+                <select
+                  id="parentEventId"
+                  name="parentEventId"
+                  value={formData.parentEventId}
+                  onChange={handleInputChange}
+                  disabled={loadingData}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                >
+                  <option value="">No parent event (standalone)</option>
+                  {events.map(event => (
+                    <option key={event.id} value={event.id}>
+                      {event.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  Create as a child event (e.g., Audio Crew under Audio-Video)
+                </p>
               </div>
             </div>
           </div>
