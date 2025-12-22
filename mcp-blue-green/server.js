@@ -30,13 +30,13 @@ const server = new Server(
 const APPS = {
   'theoshift': {
     name: 'Theocratic Shift Scheduler',
-    blueIp: '10.92.3.22',
-    greenIp: '10.92.3.24',
-    blueContainer: 132,
-    greenContainer: 134,
+    blueIp: '10.92.3.24',
+    greenIp: '10.92.3.22',
+    blueContainer: 134,
+    greenContainer: 132,
     haproxyBackend: 'jw_attendant',
-    sshBlue: 'jwa',
-    sshGreen: 'jwg',
+    sshBlue: 'root@10.92.3.24',
+    sshGreen: 'root@10.92.3.22',
     path: '/opt/theoshift',
     branch: 'main',
     pmBlue: 'theoshift-blue',
@@ -61,13 +61,14 @@ const APPS = {
 };
 
 const HAPROXY_IP = '10.92.3.26';
+const HAPROXY_CONTAINER = 136;
 const DB_IP = '10.92.3.21';
 
 // Get current deployment state from HAProxy (per-app)
 async function getDeploymentState(app = 'theoshift') {
   try {
     const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'theoshift-deployment-state.json';
-    const { stdout } = await execAsync(`ssh haproxy "cat /var/lib/haproxy/${stateFile} 2>/dev/null || echo '{}'"`);
+    const { stdout } = await execAsync(`ssh prox "pct exec ${HAPROXY_CONTAINER} -- cat /var/lib/haproxy/${stateFile} 2>/dev/null || echo '{}'"`);
     const state = JSON.parse(stdout || '{}');
     return {
       live: state.prod || state.live || 'blue',
@@ -91,7 +92,7 @@ async function saveDeploymentState(state, app = 'theoshift') {
   try {
     const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'theoshift-deployment-state.json';
     const stateJson = JSON.stringify(state);
-    await execAsync(`ssh haproxy "echo '${stateJson}' > /var/lib/haproxy/${stateFile}"`);
+    await execAsync(`ssh prox "pct exec ${HAPROXY_CONTAINER} -- bash -c 'echo \\\"${stateJson}\\\" > /var/lib/haproxy/${stateFile}'"`);
   } catch (error) {
     console.error('Failed to save state:', error.message);
     throw error;
@@ -117,7 +118,7 @@ async function getHAProxyBackend(app) {
   try {
     const appConfig = APPS[app];
     // Look for the main routing rule (use_backend X if is_appname)
-    const { stdout } = await execAsync(`ssh root@${HAPROXY_IP} "grep 'use_backend ${appConfig.haproxyBackend}.*if is_${appConfig.haproxyBackend === 'jw_attendant' ? 'jw_attendant' : 'ldc'}$' /etc/haproxy/haproxy.cfg | head -1"`);
+    const { stdout } = await execAsync(`ssh prox "pct exec ${HAPROXY_CONTAINER} -- grep 'use_backend ${appConfig.haproxyBackend}.*if is_${appConfig.haproxyBackend === 'jw_attendant' ? 'jw_attendant' : 'ldc'}$' /etc/haproxy/haproxy.cfg | head -1"`);
     // Check which backend is being used (the backend name comes right after use_backend)
     const match = stdout.match(/use_backend\s+(\S+)/);
     if (match) {
@@ -416,7 +417,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const newBackend = newLive === 'blue' ? `${appConfig.haproxyBackend}_blue` : `${appConfig.haproxyBackend}_green`;
 
       // Update HAProxy config
-      await execAsync(`ssh root@${HAPROXY_IP} "sed -i 's/use_backend ${appConfig.haproxyBackend}_.*if is_${appConfig.haproxyBackend === 'jw_attendant' ? 'jw_attendant' : 'ldc'}/use_backend ${newBackend} if is_${appConfig.haproxyBackend === 'jw_attendant' ? 'jw_attendant' : 'ldc'}/' /etc/haproxy/haproxy.cfg && systemctl reload haproxy"`);
+      await execAsync(`ssh prox "pct exec ${HAPROXY_CONTAINER} -- bash -c \\"sed -i 's/use_backend ${appConfig.haproxyBackend}_.*if is_${appConfig.haproxyBackend === 'jw_attendant' ? 'jw_attendant' : 'ldc'}/use_backend ${newBackend} if is_${appConfig.haproxyBackend === 'jw_attendant' ? 'jw_attendant' : 'ldc'}/' /etc/haproxy/haproxy.cfg && systemctl reload haproxy\\"`);
 
       // Update state
       const newState = {
