@@ -78,10 +78,10 @@ export default function AdminDashboard({ user, stats, userLastSeenVersion }: Adm
       iconColor: 'text-orange-600'
     },
     {
-      title: 'APEX Module Testing',
-      description: 'Comprehensive testing of all admin modules',
-      href: '/admin/test-modules',
-      icon: '🧪',
+      title: 'Department Templates',
+      description: 'Manage volunteer department templates',
+      href: '/admin/departments',
+      icon: '🏢',
       color: 'bg-cyan-50 hover:bg-cyan-100 border-cyan-200',
       iconColor: 'text-cyan-600'
     }
