@@ -61,6 +61,7 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
       },
       _count: {
         select: {
+          event_departments: true,
           events: true
         }
       }
