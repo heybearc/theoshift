@@ -1,10 +1,10 @@
 {
-  "name": "jw-blue-green-mcp",
+  "name": "theoshift-blue-green-mcp",
   "version": "1.0.0",
   "description": "Blue-Green Deployment MCP Server for Theocratic Shift Scheduler",
   "main": "server.js",
   "bin": {
-    "jw-blue-green-mcp": "./server.js"
+    "theoshift-blue-green-mcp": "./server.js"
   },
   "scripts": {
     "start": "node server.js"

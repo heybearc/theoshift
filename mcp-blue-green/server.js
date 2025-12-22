@@ -66,7 +66,7 @@ const DB_IP = '10.92.3.21';
 // Get current deployment state from HAProxy (per-app)
 async function getDeploymentState(app = 'theoshift') {
   try {
-    const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'jw-deployment-state.json';
+    const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'theoshift-deployment-state.json';
     const { stdout } = await execAsync(`ssh haproxy "cat /var/lib/haproxy/${stateFile} 2>/dev/null || echo '{}'"`);
     const state = JSON.parse(stdout || '{}');
     return {
@@ -89,7 +89,7 @@ async function getDeploymentState(app = 'theoshift') {
 // Save deployment state to HAProxy (per-app)
 async function saveDeploymentState(state, app = 'theoshift') {
   try {
-    const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'jw-deployment-state.json';
+    const stateFile = app === 'ldc-tools' ? 'ldc-deployment-state.json' : 'theoshift-deployment-state.json';
     const stateJson = JSON.stringify(state);
     await execAsync(`ssh haproxy "echo '${stateJson}' > /var/lib/haproxy/${stateFile}"`);
   } catch (error) {
