@@ -198,12 +198,19 @@ export default function CreateEventPage() {
       if (formData.endTime) submitData.endTime = formData.endTime
       if (formData.capacity) submitData.capacity = parseInt(formData.capacity)
       if (formData.attendantsNeeded) submitData.attendantsNeeded = parseInt(formData.attendantsNeeded)
-      if (formData.departmentTemplateId && formData.departmentTemplateId !== '') {
-        submitData.departmentTemplateId = formData.departmentTemplateId
+      
+      // Only add UUID fields if they have valid non-empty values
+      const deptId = formData.departmentTemplateId?.trim()
+      if (deptId && deptId !== '') {
+        submitData.departmentTemplateId = deptId
       }
-      if (formData.parentEventId && formData.parentEventId !== '') {
-        submitData.parentEventId = formData.parentEventId
+      
+      const parentId = formData.parentEventId?.trim()
+      if (parentId && parentId !== '') {
+        submitData.parentEventId = parentId
       }
+
+      console.log('Submitting data:', JSON.stringify(submitData, null, 2))
 
       const response = await fetch('/api/events', {
         method: 'POST',
