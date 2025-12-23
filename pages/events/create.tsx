@@ -77,9 +77,9 @@ export default function CreateEventPage() {
           setDepartmentTemplates(templatesData.data)
         }
         
-        if (eventsData.success) {
+        if (eventsData.success && eventsData.data.events) {
           // Filter out events that already have children (to prevent circular references)
-          const eligibleParentEvents = eventsData.data.filter((event: any) => 
+          const eligibleParentEvents = eventsData.data.events.filter((event: any) => 
             !event.childEventsCount || event.childEventsCount === 0
           )
           setEvents(eligibleParentEvents)
