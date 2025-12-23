@@ -416,8 +416,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const newStandby = actualLive;
       const newBackend = newLive === 'blue' ? `${appConfig.haproxyBackend}_blue` : `${appConfig.haproxyBackend}_green`;
 
-      // Update HAProxy config
-      await execAsync(`ssh prox "pct exec ${HAPROXY_CONTAINER} -- bash -c \\"sed -i 's/use_backend ${appConfig.haproxyBackend}_.*if is_${appConfig.haproxyBackend === 'jw_attendant' ? 'jw_attendant' : 'ldc'}/use_backend ${newBackend} if is_${appConfig.haproxyBackend === 'jw_attendant' ? 'jw_attendant' : 'ldc'}/' /etc/haproxy/haproxy.cfg && systemctl reload haproxy\\"`);
+      // Update HAProxy config - use correct ACL name based on backend
+      const aclName = appConfig.haproxyBackend === 'theoshift' ? 'theoshift' : 'ldc';
+      await execAsync(`ssh prox "pct exec ${HAPROXY_CONTAINER} -- bash -c \\"sed -i 's/use_backend ${appConfig.haproxyBackend}_.*if is_${aclName}/use_backend ${newBackend} if is_${aclName}/' /etc/haproxy/haproxy.cfg && systemctl reload haproxy\\"`);
 
       // Update state
       const newState = {
