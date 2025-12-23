@@ -148,6 +148,10 @@ model department_templates {
   isActive         Boolean                @default(true)
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
+  // Phase 3: Template-driven configuration
+  moduleConfig     Json?                  // Module toggles: countTimes, lanyards, positions, customFields
+  terminology      Json?                  // Label overrides: volunteer, position, shift, assignment
+  positionTemplates Json?                 // Pre-configured position templates
   parent           department_templates?  @relation("DepartmentHierarchy", fields: [parentId], references: [id])
   children         department_templates[] @relation("DepartmentHierarchy")
   event_departments event_departments[]
