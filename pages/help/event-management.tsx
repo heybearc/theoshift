@@ -55,13 +55,13 @@ export default function EventManagementPage({ userRole }: EventManagementProps) 
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Positions & Requirements</h4>
-                      <p className="text-gray-600">Define attendant positions and their requirements</p>
+                      <h4 className="font-semibold text-gray-900">Department Configuration (Optional)</h4>
+                      <p className="text-gray-600">Link event to a department template for consistency</p>
                       <ul className="mt-2 text-sm text-gray-600 space-y-1">
-                        <li>• Security positions (entrance, parking, roving)</li>
-                        <li>• Cleaning assignments (restrooms, auditorium, grounds)</li>
-                        <li>• Technical support (sound, video, IT)</li>
-                        <li>• First aid and medical assistance</li>
+                        <li>• Select from predefined department templates</li>
+                        <li>• Templates include Audio, Video, First Aid, Cleaning, etc.</li>
+                        <li>• Helps maintain consistency across similar events</li>
+                        <li>• Can be left blank if not needed</li>
                       </ul>
                     </div>
                   </div>
@@ -69,12 +69,26 @@ export default function EventManagementPage({ userRole }: EventManagementProps) 
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Capacity & Scheduling</h4>
-                      <p className="text-gray-600">Set capacity needs and shift schedules</p>
+                      <h4 className="font-semibold text-gray-900">Parent Event (Optional)</h4>
+                      <p className="text-gray-600">Create hierarchical event relationships</p>
                       <ul className="mt-2 text-sm text-gray-600 space-y-1">
-                        <li>• Number of attendants needed per position</li>
+                        <li>• Link child events to a parent event</li>
+                        <li>• Useful for multi-day conventions or related assemblies</li>
+                        <li>• Helps organize complex event structures</li>
+                        <li>• Can be left blank for standalone events</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Capacity & Volunteers</h4>
+                      <p className="text-gray-600">Set volunteer needs and capacity</p>
+                      <ul className="mt-2 text-sm text-gray-600 space-y-1">
+                        <li>• Number of volunteers needed</li>
+                        <li>• Event capacity and attendance limits</li>
                         <li>• Shift times and rotations</li>
-                        <li>• Break schedules and coverage</li>
                         <li>• Special requirements or qualifications</li>
                       </ul>
                     </div>
