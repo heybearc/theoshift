@@ -104,6 +104,83 @@ export default function EventManagementPage({ userRole }: EventManagementProps) 
             </div>
           )}
 
+          {/* Hierarchical Events */}
+          <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">🔗 Hierarchical Events</h2>
+              
+              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Parent and Child Events</h3>
+                
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">What are Hierarchical Events?</h4>
+                    <p className="text-gray-600 mb-3">
+                      Hierarchical events allow you to organize complex assemblies or conventions with multiple departments 
+                      or components. A parent event can have multiple child events, each representing a specific department 
+                      or aspect of the larger event.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Example Structure</h4>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <p className="font-semibold text-gray-900 mb-2">Parent Event: "Regional Convention 2026"</p>
+                      <ul className="text-sm text-gray-700 space-y-1 ml-4">
+                        <li>├── Child: "RC 2026 - Audio Department"</li>
+                        <li>├── Child: "RC 2026 - First Aid Department"</li>
+                        <li>├── Child: "RC 2026 - Parking Department"</li>
+                        <li>└── Child: "RC 2026 - Cleaning Department"</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Creating Parent Events</h4>
+                    <ol className="text-sm text-gray-600 space-y-2">
+                      <li><strong>1.</strong> Create the main event (e.g., "Regional Convention 2026")</li>
+                      <li><strong>2.</strong> Leave the "Parent Event" field blank</li>
+                      <li><strong>3.</strong> Optionally select a department template if the parent has a primary focus</li>
+                      <li><strong>4.</strong> Complete the event creation</li>
+                    </ol>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Creating Child Events</h4>
+                    <ol className="text-sm text-gray-600 space-y-2">
+                      <li><strong>1.</strong> Create a new event for each department</li>
+                      <li><strong>2.</strong> Select the parent event from the "Parent Event" dropdown</li>
+                      <li><strong>3.</strong> Select the appropriate department template</li>
+                      <li><strong>4.</strong> Set dates, times, and other details specific to that department</li>
+                    </ol>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Viewing Child Events</h4>
+                    <p className="text-gray-600 mb-2">
+                      When viewing a parent event's details page, you'll see:
+                    </p>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      <li>• A "Child Events" section listing all related events</li>
+                      <li>• Each child event shows its name, type, dates, and status</li>
+                      <li>• Click any child event to navigate to its details</li>
+                      <li>• Child events also show a link back to their parent</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Benefits of Hierarchical Events</h4>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      <li>• <strong>Better Organization:</strong> Clear structure for complex events</li>
+                      <li>• <strong>Department Focus:</strong> Each department has its own event with specific details</li>
+                      <li>• <strong>Simplified Management:</strong> Manage volunteers and positions per department</li>
+                      <li>• <strong>Easy Navigation:</strong> Quick access between parent and child events</li>
+                      <li>• <strong>Flexible Structure:</strong> Add or remove departments as needed</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+          </div>
+
           {/* Event Selection */}
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">🎯 Event Selection</h2>
