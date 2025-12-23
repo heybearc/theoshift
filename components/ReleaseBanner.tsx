@@ -45,7 +45,7 @@ export default function ReleaseBanner({ currentVersion, userLastSeenVersion }: R
             <p className="ml-3 font-medium">
               <span className="md:hidden">New in v{currentVersion}!</span>
               <span className="hidden md:inline">
-                🎉 New in v{currentVersion}: Enhanced filtering, colored badges, ADMIN access, and more!
+                🎉 New in v{currentVersion}: Event creation fixes, department templates, and parent event hierarchy!
               </span>
             </p>
           </div>
