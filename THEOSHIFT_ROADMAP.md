@@ -59,42 +59,146 @@ Transform Theocratic Shift Scheduler from a single-purpose attendant management 
 
 ## 🚀 UPCOMING PHASES
 
-### **Phase 3: Enhanced Volunteer Management** 🔄 **NEXT** (Q1 2026)
+### **Phase 3: Template-Driven Department System** 🔄 **NEXT** (Q1 2026)
 **Target Version:** v3.1.0  
-**Estimated Duration:** 3-4 weeks
+**Estimated Duration:** 4-5 weeks
+
+**Vision:**
+Transform department templates from simple metadata into **intelligent configuration systems** that define the entire event experience. Each department template configures which modules, features, terminology, and workflows are available for events using that template.
 
 **Goals:**
-- Advanced filtering and search for volunteers
-- Bulk operations (delete, status updates, role assignments)
-- Department-based volunteer filtering
-- Saved filter presets
-- Export filtered results
+- Configuration-driven event features (not code-driven)
+- Department-specific modules (Count Times, Lanyards, etc.)
+- Custom terminology per department
+- Pre-configured position templates
+- Dynamic UI generation based on template
+
+---
+
+#### **Phase 3A: Enhanced Department Template System** (Weeks 1-3)
 
 **Features:**
-1. **Advanced Filtering**
-   - Filter by serving roles (Elder, MS, Pioneer, etc.)
-   - Filter by availability status
-   - Filter by department assignments
-   - Text search across name, email, phone
-   - Combined multi-filter support
 
-2. **Bulk Operations**
+1. **Module Configuration System**
+   - Toggle which features each department needs:
+     - Count Times module (for Attendants, not for Baptism)
+     - Lanyard Management module (for Attendants, not for Parking)
+     - Position management (all departments)
+     - Custom fields per department
+   - Visual module selector in admin interface
+   - Module dependencies and validation
+
+2. **Custom Fields Designer**
+   - Define department-specific data fields:
+     - Attendants: badge_number, section_assignment
+     - Baptism: candidate_name, interview_date, baptism_date
+     - Parking: vehicle_type, lot_assignment
+   - Field types: text, number, date, select, multiselect
+   - Required/optional field configuration
+   - Field validation rules
+
+3. **Terminology Overrides**
+   - Customize labels per department:
+     - "Volunteer" → "Attendant" (Attendants dept)
+     - "Volunteer" → "Baptism Assistant" (Baptism dept)
+     - "Position" → "Post" or "Station" or "Role"
+     - "Shift" → "Rotation" or "Time Slot"
+   - System-wide terminology consistency per event
+
+4. **Position Templates**
+   - Pre-configured positions per department:
+     - Attendants: Main Entrance, Upper Level, Stage Area
+     - Baptism: Speaker, Pool Assistant, Coordinator
+     - Parking: Lot A Attendant, Traffic Director
+   - One-click position creation from template
+   - Bulk position import for events
+
+5. **Template Builder UI**
+   - Admin interface for template configuration
+   - Visual module toggles
+   - Custom field designer
+   - Terminology editor
+   - Position template manager
+   - Preview mode to see event layout
+
+**Database Schema:**
+```typescript
+department_templates {
+  // Existing fields
+  id, name, description, icon, parentId, sortOrder, isActive
+  
+  // New fields
+  moduleConfig: JSON {
+    countTimes: boolean
+    lanyards: boolean
+    positions: boolean
+    customFields: CustomField[]
+  }
+  terminology: JSON {
+    volunteer?: string
+    position?: string
+    shift?: string
+    assignment?: string
+  }
+  positionTemplates: JSON[]
+}
+```
+
+---
+
+#### **Phase 3B: Dynamic Event Experience** (Weeks 3-4)
+
+**Features:**
+
+1. **Dynamic Event Dashboard**
+   - Event tabs shown/hidden based on template modules
+   - Attendants event: Shows Count Times + Lanyards tabs
+   - Baptism event: Hides Count Times + Lanyards tabs
+   - Custom field forms generated dynamically
+
+2. **Template-Driven Event Creation**
+   - Select department template during event creation
+   - Template modules automatically applied
+   - Position templates available for quick setup
+   - Custom fields included in event form
+
+3. **Smart Navigation**
+   - EventLayout component reads template config
+   - Only shows applicable navigation items
+   - Terminology applied throughout UI
+   - Consistent labeling per department
+
+---
+
+#### **Phase 3C: Volunteer Management Enhancements** (Week 5)
+
+**Features:**
+
+1. **Advanced Search & Filtering**
+   - Text search across name, email, phone
+   - Filter by serving roles (Elder, MS, Pioneer)
+   - Filter by availability status
+   - Combined multi-filter support
+   - **Removed:** Department-based filtering (not needed with simplified architecture)
+
+2. **Saved Filter Presets**
+   - Save commonly used filter combinations
+   - Quick-access filter buttons
+   - Share filters with team members
+   - Default filters per user role
+
+3. **Bulk Operations**
    - Multi-select volunteers with checkboxes
    - Bulk status updates
    - Bulk role assignments
    - Bulk delete with confirmation
    - Progress indicators for long operations
 
-3. **Search Enhancements**
-   - Debounced search for performance
-   - Search result highlighting
-   - Recent searches
-   - Search suggestions
-
 **Success Metrics:**
-- 50% reduction in time to find specific volunteers
-- 90% user satisfaction with search functionality
-- Support for 1000+ volunteer databases
+- 70% reduction in event setup time using templates
+- 90% of departments use custom modules
+- 50% reduction in volunteer search time
+- Zero UI confusion from irrelevant features
 
 ---
 
