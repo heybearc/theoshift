@@ -79,7 +79,17 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
 }
 
 async function handlePost(req: NextApiRequest, res: NextApiResponse) {
-  const { name, description, parentId, icon, sortOrder, isActive } = req.body
+  const { 
+    name, 
+    description, 
+    parentId, 
+    icon, 
+    sortOrder, 
+    isActive,
+    moduleConfig,
+    terminology,
+    positionTemplates
+  } = req.body
 
   if (!name) {
     return res.status(400).json({ success: false, error: 'Department name is required' })
@@ -100,7 +110,11 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse) {
       parentId: parentId || null,
       icon: icon || null,
       sortOrder: sortOrder || 0,
-      isActive: isActive !== undefined ? isActive : true
+      isActive: isActive !== undefined ? isActive : true,
+      // Phase 3: Configuration fields
+      moduleConfig: moduleConfig || null,
+      terminology: terminology || null,
+      positionTemplates: positionTemplates || null
     },
     include: {
       parent: {

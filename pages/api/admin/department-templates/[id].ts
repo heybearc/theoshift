@@ -91,7 +91,17 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse, id: string) 
 }
 
 async function handlePut(req: NextApiRequest, res: NextApiResponse, id: string) {
-  const { name, description, parentId, icon, sortOrder, isActive } = req.body
+  const { 
+    name, 
+    description, 
+    parentId, 
+    icon, 
+    sortOrder, 
+    isActive,
+    moduleConfig,
+    terminology,
+    positionTemplates
+  } = req.body
 
   const existing = await prisma.department_templates.findUnique({
     where: { id }
@@ -119,7 +129,11 @@ async function handlePut(req: NextApiRequest, res: NextApiResponse, id: string) 
       ...(parentId !== undefined && { parentId }),
       ...(icon !== undefined && { icon }),
       ...(sortOrder !== undefined && { sortOrder }),
-      ...(isActive !== undefined && { isActive })
+      ...(isActive !== undefined && { isActive }),
+      // Phase 3: Configuration fields
+      ...(moduleConfig !== undefined && { moduleConfig }),
+      ...(terminology !== undefined && { terminology }),
+      ...(positionTemplates !== undefined && { positionTemplates })
     },
     include: {
       parent: {
