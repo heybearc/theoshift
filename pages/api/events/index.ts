@@ -13,15 +13,15 @@ const eventSchema = z.object({
   eventType: z.enum(['CIRCUIT_ASSEMBLY', 'REGIONAL_CONVENTION', 'SPECIAL_EVENT', 'OTHER']),
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid start date'),
   endDate: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid end date'),
-  startTime: z.string(),
+  startTime: z.string().min(1, 'Start time is required'),
   endTime: z.string().optional(),
   location: z.string().min(1, 'Location is required').max(500),
   // Note: capacity and attendantsNeeded are validated but not stored in DB (could use settings field)
   capacity: z.number().int().positive().optional(),
   attendantsNeeded: z.number().int().min(0).optional(),
   status: z.enum(['ARCHIVED', 'UPCOMING', 'CURRENT', 'COMPLETED', 'CANCELLED']).default('UPCOMING'),
-  parentEventId: z.string().uuid().optional(),
-  departmentTemplateId: z.string().uuid().optional(),
+  parentEventId: z.string().uuid().optional().or(z.literal(undefined)),
+  departmentTemplateId: z.string().uuid().optional().or(z.literal(undefined)),
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
