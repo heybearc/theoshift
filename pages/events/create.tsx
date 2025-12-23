@@ -195,8 +195,8 @@ export default function CreateEventPage() {
         capacity: formData.capacity ? parseInt(formData.capacity) : undefined,
         attendantsNeeded: formData.attendantsNeeded ? parseInt(formData.attendantsNeeded) : undefined,
         status: formData.status,
-        departmentTemplateId: formData.departmentTemplateId || undefined,
-        parentEventId: formData.parentEventId || undefined
+        departmentTemplateId: formData.departmentTemplateId && formData.departmentTemplateId !== '' ? formData.departmentTemplateId : undefined,
+        parentEventId: formData.parentEventId && formData.parentEventId !== '' ? formData.parentEventId : undefined
       }
 
       const response = await fetch('/api/events', {
