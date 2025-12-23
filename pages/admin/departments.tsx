@@ -4,6 +4,8 @@ import { authOptions } from '../api/auth/[...nextauth]'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import AdminLayout from '../../components/AdminLayout'
+import DepartmentTemplateModal from '../../components/DepartmentTemplateModal'
+import { ModuleConfig, Terminology, PositionTemplate } from '../../types/departmentTemplate'
 
 interface DepartmentTemplate {
   id: string
@@ -13,6 +15,9 @@ interface DepartmentTemplate {
   icon: string | null
   sortOrder: number
   isActive: boolean
+  moduleConfig?: ModuleConfig | null
+  terminology?: Terminology | null
+  positionTemplates?: PositionTemplate[] | null
   parent?: {
     id: string
     name: string
@@ -30,15 +35,6 @@ interface DepartmentTemplate {
   }
 }
 
-interface DepartmentFormData {
-  name: string
-  description: string
-  parentId: string
-  icon: string
-  sortOrder: number
-  isActive: boolean
-}
-
 export default function DepartmentTemplatesPage() {
   const router = useRouter()
   const [departments, setDepartments] = useState<DepartmentTemplate[]>([])
@@ -47,14 +43,6 @@ export default function DepartmentTemplatesPage() {
   const [success, setSuccess] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [editingDept, setEditingDept] = useState<DepartmentTemplate | null>(null)
-  const [formData, setFormData] = useState<DepartmentFormData>({
-    name: '',
-    description: '',
-    parentId: '',
-    icon: '',
-    sortOrder: 0,
-    isActive: true
-  })
 
   useEffect(() => {
     fetchDepartments()
@@ -81,68 +69,38 @@ export default function DepartmentTemplatesPage() {
 
   const handleCreate = () => {
     setEditingDept(null)
-    setFormData({
-      name: '',
-      description: '',
-      parentId: '',
-      icon: '',
-      sortOrder: 0,
-      isActive: true
-    })
     setShowModal(true)
   }
 
   const handleEdit = (dept: DepartmentTemplate) => {
     setEditingDept(dept)
-    setFormData({
-      name: dept.name,
-      description: dept.description || '',
-      parentId: dept.parentId || '',
-      icon: dept.icon || '',
-      sortOrder: dept.sortOrder,
-      isActive: dept.isActive
-    })
     setShowModal(true)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSave = async (data: any) => {
     setError('')
     setSuccess('')
 
-    try {
-      const url = editingDept
-        ? `/api/admin/department-templates/${editingDept.id}`
-        : '/api/admin/department-templates'
-      
-      const method = editingDept ? 'PUT' : 'POST'
+    const url = editingDept
+      ? `/api/admin/department-templates/${editingDept.id}`
+      : '/api/admin/department-templates'
+    
+    const method = editingDept ? 'PUT' : 'POST'
 
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.name,
-          description: formData.description || null,
-          parentId: formData.parentId || null,
-          icon: formData.icon || null,
-          sortOrder: formData.sortOrder,
-          isActive: formData.isActive
-        })
-      })
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
 
-      const data = await response.json()
+    const result = await response.json()
 
-      if (data.success) {
-        setSuccess(editingDept ? 'Department updated successfully' : 'Department created successfully')
-        setShowModal(false)
-        fetchDepartments()
-      } else {
-        setError(data.error || 'Failed to save department')
-      }
-    } catch (err) {
-      setError('Error saving department')
-      console.error(err)
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to save department')
     }
+
+    setSuccess(editingDept ? 'Department updated successfully' : 'Department created successfully')
+    await fetchDepartments()
   }
 
   const handleDelete = async (id: string) => {
@@ -295,117 +253,14 @@ export default function DepartmentTemplatesPage() {
           </div>
         )}
 
-        {/* Modal */}
-        {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                {editingDept ? 'Edit Department' : 'Create Department'}
-              </h2>
-
-              <form onSubmit={handleSubmit}>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Description
-                    </label>
-                    <textarea
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      rows={3}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Parent Department
-                    </label>
-                    <select
-                      value={formData.parentId}
-                      onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">None (Top Level)</option>
-                      {parentDepartments.map((dept) => (
-                        <option key={dept.id} value={dept.id}>
-                          {dept.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Icon (Emoji)
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.icon}
-                      onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="👥"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Sort Order
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.sortOrder}
-                      onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="isActive"
-                      checked={formData.isActive}
-                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
-                      Active
-                    </label>
-                  </div>
-                </div>
-
-                <div className="mt-6 flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    {editingDept ? 'Update' : 'Create'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        {/* Department Template Configuration Modal */}
+        <DepartmentTemplateModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          onSave={handleSave}
+          department={editingDept}
+          allDepartments={departments}
+        />
       </div>
     </AdminLayout>
   )
