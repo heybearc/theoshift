@@ -215,9 +215,13 @@ export default function CreateEventPage() {
           router.push('/events')
         }, 1500)
       } else {
+        console.error('Full error response:', data)
         setError(data.error || 'Failed to create event')
         if (data.details) {
           console.error('Validation errors:', data.details)
+          // Display validation errors to user
+          const errorMessages = data.details.map((err: any) => `${err.path?.join('.')}: ${err.message}`).join(', ')
+          setError(`Validation failed: ${errorMessages}`)
         }
       }
     } catch (error) {
