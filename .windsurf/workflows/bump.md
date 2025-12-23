@@ -43,7 +43,7 @@ Simply say:
 
 ### Step 3: Commit and Push
 - Commits changes with message: `Release v{version}`
-- Pushes to `production-gold-standard` branch
+- Pushes to `main` branch
 - Tags commit with version number
 
 ### Step 4: Add Announcement Banner (if applicable)
@@ -61,7 +61,7 @@ Simply say:
 ### Step 6: Deploy to STANDBY
 - MCP identifies current STANDBY environment (whichever isn't LIVE)
 - Deploys ONLY to STANDBY (never touches LIVE)
-- Runs: `git pull && npm install && npm run build && pm2 restart`
+- Pulls from `main` branch: `git pull origin main && npm install && npm run build && pm2 restart`
 - Verifies deployment successful
 
 ### Step 7: Request Testing
@@ -81,7 +81,7 @@ Simply say:
 3. ✅ Add announcement banner for new release
 4. ✅ Update help pages (if needed)
 5. ✅ Commit: "Release v2.4.1"
-6. ✅ Push to production-gold-standard
+6. ✅ Push to main
 7. ✅ Deploy to STANDBY: http://10.92.3.22:3001 (Blue)
 8. ⏸️  READY FOR TESTING
 
@@ -178,7 +178,7 @@ description: One sentence describing the main focus
 - ✅ Works identically for theoshift and ldc-tools
 
 ### Validation Checks
-- ✅ Verifies on `production-gold-standard` branch
+- ✅ Verifies on `main` branch
 - ✅ Checks for uncommitted changes
 - ✅ Validates version format
 - ✅ Ensures release notes created
