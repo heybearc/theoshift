@@ -20,8 +20,8 @@ const eventSchema = z.object({
   capacity: z.number().int().positive().optional(),
   attendantsNeeded: z.number().int().min(0).optional(),
   status: z.enum(['ARCHIVED', 'UPCOMING', 'CURRENT', 'COMPLETED', 'CANCELLED']).default('UPCOMING'),
-  parentEventId: z.string().uuid().optional().or(z.literal(undefined)),
-  departmentTemplateId: z.string().uuid().optional().or(z.literal(undefined)),
+  parentEventId: z.string().optional(),
+  departmentTemplateId: z.string().optional(),
 })
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
