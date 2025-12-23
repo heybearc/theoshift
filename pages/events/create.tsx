@@ -183,20 +183,26 @@ export default function CreateEventPage() {
     setSuccess('')
 
     try {
-      const submitData = {
+      const submitData: any = {
         name: formData.name,
-        description: formData.description || undefined,
         eventType: formData.eventType,
         startDate: formData.startDate,
         endDate: formData.endDate,
         startTime: formData.startTime,
-        endTime: formData.endTime || undefined,
         location: formData.location,
-        capacity: formData.capacity ? parseInt(formData.capacity) : undefined,
-        attendantsNeeded: formData.attendantsNeeded ? parseInt(formData.attendantsNeeded) : undefined,
         status: formData.status,
-        departmentTemplateId: formData.departmentTemplateId && formData.departmentTemplateId !== '' ? formData.departmentTemplateId : undefined,
-        parentEventId: formData.parentEventId && formData.parentEventId !== '' ? formData.parentEventId : undefined
+      }
+
+      // Add optional fields only if they have values
+      if (formData.description) submitData.description = formData.description
+      if (formData.endTime) submitData.endTime = formData.endTime
+      if (formData.capacity) submitData.capacity = parseInt(formData.capacity)
+      if (formData.attendantsNeeded) submitData.attendantsNeeded = parseInt(formData.attendantsNeeded)
+      if (formData.departmentTemplateId && formData.departmentTemplateId !== '') {
+        submitData.departmentTemplateId = formData.departmentTemplateId
+      }
+      if (formData.parentEventId && formData.parentEventId !== '') {
+        submitData.parentEventId = formData.parentEventId
       }
 
       const response = await fetch('/api/events', {
