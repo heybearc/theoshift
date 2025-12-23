@@ -22,6 +22,8 @@ interface Event {
   status: string
   createdAt: string
   updatedAt: string
+  parentEventId?: string | null
+  departmentTemplateId?: string | null
   // APEX GUARDIAN: Oversight Management Fields (database field names)
   circuitoverseername?: string
   circuitoverseerphone?: string
@@ -33,6 +35,23 @@ interface Event {
   attendantoverseerphone?: string
   attendantoverseeremail?: string
   attendantoverseerassistants?: any[]
+  childEvents?: Array<{
+    id: string
+    name: string
+    eventType: string
+    startDate: string
+    endDate: string
+    status: string
+  }>
+  parentEvent?: {
+    id: string
+    name: string
+  } | null
+  departmentTemplate?: {
+    id: string
+    name: string
+    description?: string
+  } | null
   countStats?: {
     peakAttendance: number | null
     averageCount: number | null
@@ -489,6 +508,81 @@ export default function EventDetailsPage({ event, canEdit, canDelete, canManageC
               </div>
             </div>
 
+            {/* Parent Event & Department Template Info */}
+            {(event.parentEvent || event.departmentTemplate) && (
+              <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center mr-4">
+                    <span className="text-2xl">🔗</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">Event Relationships</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {event.parentEvent && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <label className="block text-sm font-medium text-blue-700 mb-2">Parent Event</label>
+                      <Link
+                        href={`/events/${event.parentEvent.id}`}
+                        className="text-blue-600 hover:text-blue-800 font-semibold hover:underline"
+                      >
+                        {event.parentEvent.name} →
+                      </Link>
+                    </div>
+                  )}
+                  {event.departmentTemplate && (
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                      <label className="block text-sm font-medium text-purple-700 mb-2">Department Template</label>
+                      <p className="text-purple-900 font-semibold">{event.departmentTemplate.name}</p>
+                      {event.departmentTemplate.description && (
+                        <p className="text-sm text-purple-700 mt-1">{event.departmentTemplate.description}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Child Events Section */}
+            {event.childEvents && event.childEvents.length > 0 && (
+              <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center mr-4">
+                    <span className="text-2xl">📅</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">Child Events ({event.childEvents.length})</h3>
+                </div>
+                <div className="space-y-3">
+                  {event.childEvents.map((childEvent) => (
+                    <Link
+                      key={childEvent.id}
+                      href={`/events/${childEvent.id}`}
+                      className="block bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900">{childEvent.name}</h4>
+                          <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                            <span className="flex items-center">
+                              <span className="mr-1">📋</span>
+                              {getEventTypeLabel(childEvent.eventType)}
+                            </span>
+                            <span className="flex items-center">
+                              <span className="mr-1">📅</span>
+                              {formatDate(childEvent.startDate)} - {formatDate(childEvent.endDate)}
+                            </span>
+                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(childEvent.status)}`}>
+                              {childEvent.status}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-teal-600 font-bold">→</div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* APEX GUARDIAN: Assignment Progress Dashboard */}
             <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
               <div className="flex items-center mb-6">
@@ -921,7 +1015,33 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             users: true
           }
         },
-        positions: true
+        positions: true,
+        childEvents: {
+          select: {
+            id: true,
+            name: true,
+            eventType: true,
+            startDate: true,
+            endDate: true,
+            status: true
+          },
+          orderBy: {
+            startDate: 'asc'
+          }
+        },
+        parentEvent: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        departmentTemplate: {
+          select: {
+            id: true,
+            name: true,
+            description: true
+          }
+        }
       }
     })
 
@@ -1012,6 +1132,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       createdAt: event.createdAt?.toISOString() || null,
       updatedAt: event.updatedAt?.toISOString() || null,
       totalShiftsNeeded,
+      childEvents: (event as any).childEvents?.map((child: any) => ({
+        ...child,
+        startDate: child.startDate ? format(child.startDate, 'yyyy-MM-dd') : null,
+        endDate: child.endDate ? format(child.endDate, 'yyyy-MM-dd') : null
+      })) || [],
+      parentEvent: (event as any).parentEvent || null,
+      departmentTemplate: (event as any).departmentTemplate || null,
       _count: {
         event_attendants: event.event_attendants?.length || 0,
         assignments: totalAssignments,
