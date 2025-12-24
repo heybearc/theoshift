@@ -2,10 +2,13 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import EventLayout from '../../../components/EventLayout'
+import EventNavigation from '../../../components/EventNavigation'
+import { TemplateProvider } from '../../../contexts/TemplateContext'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { format, parseISO } from 'date-fns'
+import { ModuleConfig, Terminology, PositionTemplate } from '../../../types/departmentTemplate'
 
 interface Event {
   id: string
@@ -51,6 +54,9 @@ interface Event {
     id: string
     name: string
     description?: string
+    moduleConfig?: ModuleConfig | null
+    terminology?: Terminology | null
+    positionTemplates?: PositionTemplate[] | null
   } | null
   countStats?: {
     peakAttendance: number | null
@@ -372,19 +378,25 @@ export default function EventDetailsPage({ event, canEdit, canDelete, canManageC
   }
 
   return (
-    <EventLayout 
-      title={event.name}
-      breadcrumbs={[
-        { label: 'Events', href: '/events' },
-        { label: event.name }
-      ]}
-      selectedEvent={{
-        id: event.id,
-        name: event.name,
-        status: event.status.toLowerCase() as any
-      }}
+    <TemplateProvider
+      moduleConfig={event.departmentTemplate?.moduleConfig as ModuleConfig | null}
+      terminology={event.departmentTemplate?.terminology as Terminology | null}
+      positionTemplates={event.departmentTemplate?.positionTemplates as PositionTemplate[] | null}
+      departmentTemplateName={event.departmentTemplate?.name}
     >
-      <div className="max-w-7xl mx-auto">
+      <EventLayout 
+        title={event.name}
+        breadcrumbs={[
+          { label: 'Events', href: '/events' },
+          { label: event.name }
+        ]}
+        selectedEvent={{
+          id: event.id,
+          name: event.name,
+          status: event.status.toLowerCase() as any
+        }}
+      >
+        <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -802,112 +814,16 @@ export default function EventDetailsPage({ event, canEdit, canDelete, canManageC
               )}
             </div>
 
-            {/* APEX GUARDIAN: Enhanced Quick Actions */}
-            <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
-              <div className="flex items-center mb-4">
-                <div className="w-10 h-10 bg-gray-600 rounded-lg flex items-center justify-center mr-3">
-                  <span className="text-xl">⚡</span>
-                </div>
-                <h3 className="text-lg font-bold text-gray-900">Quick Actions</h3>
-              </div>
-              <div className="space-y-3">
-                {/* Status Change Actions */}
-                {event.status === 'UPCOMING' && (
-                  <button
-                    onClick={() => handleStatusChange('CURRENT')}
-                    className="w-full flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors"
-                  >
-                    🚀 Start Event
-                  </button>
-                )}
-                {event.status === 'CURRENT' && (
-                  <button
-                    onClick={() => handleStatusChange('COMPLETED')}
-                    className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors"
-                  >
-                    ✅ Complete Event
-                  </button>
-                )}
-                
-                {/* Enhanced Workflow Actions */}
-                <Link
-                  href={`/events/${event.id}/positions`}
-                  className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  📋 Manage Positions
-                </Link>
-                <Link
-                  href={`/events/${event.id}/attendants`}
-                  className="w-full flex items-center justify-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  👥 View Attendants
-                </Link>
-                <Link
-                  href={`/events/${event.id}/count-times`}
-                  className="w-full flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  📊 Count Times
-                </Link>
-                <Link
-                  href={`/events/${event.id}/documents`}
-                  className="w-full flex items-center justify-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  📄 Documents
-                </Link>
-                <Link
-                  href={`/events/${event.id}/announcements`}
-                  className="w-full flex items-center justify-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  📢 Announcements
-                </Link>
-                <Link
-                  href={`/events/${event.id}/lanyards`}
-                  className="w-full flex items-center justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  🏷️ Lanyards
-                </Link>
-                <button
-                  onClick={handleExportData}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  📄 Generate Reports
-                </button>
-                {canEdit && (
-                  <Link
-                    href={`/events/${event.id}/edit`}
-                    className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    ⚙️ Event Settings
-                  </Link>
-                )}
-                <Link
-                  href={`/events/${event.id}/permissions`}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-purple-300 bg-purple-50 rounded-lg text-sm font-medium text-purple-700 hover:bg-purple-100 transition-colors"
-                >
-                  🔐 Manage Permissions
-                </Link>
-                
-                {/* Archive Action (only for completed events) */}
-                {event.status === 'COMPLETED' && canEdit && (
-                  <button
-                    onClick={() => handleStatusChange('ARCHIVED')}
-                    className="w-full flex items-center justify-center px-4 py-2 border border-yellow-300 bg-yellow-50 rounded-md text-sm font-medium text-yellow-700 hover:bg-yellow-100 transition-colors"
-                  >
-                    📦 Archive Event
-                  </button>
-                )}
-                
-                {/* Delete Action (only for event owners) */}
-                {canDelete && (
-                  <button
-                    onClick={handleDeleteEvent}
-                    className="w-full flex items-center justify-center px-4 py-2 border border-red-300 bg-red-50 rounded-md text-sm font-medium text-red-700 hover:bg-red-100 transition-colors"
-                  >
-                    🗑️ Delete Event
-                  </button>
-                )}
-              </div>
-            </div>
+            {/* Phase 3B: Dynamic Event Navigation */}
+            <EventNavigation
+              eventId={event.id}
+              canEdit={canEdit}
+              canDelete={canDelete}
+              onStatusChange={handleStatusChange}
+              onDelete={handleDeleteEvent}
+              onExport={handleExportData}
+              currentStatus={event.status}
+            />
 
             {/* Event Timeline */}
             <div className="bg-white shadow rounded-lg p-6">
@@ -940,6 +856,7 @@ export default function EventDetailsPage({ event, canEdit, canDelete, canManageC
         </div>
       </div>
     </EventLayout>
+    </TemplateProvider>
   )
 }
 
@@ -1039,7 +956,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           select: {
             id: true,
             name: true,
-            description: true
+            description: true,
+            moduleConfig: true,
+            terminology: true,
+            positionTemplates: true
           }
         }
       }

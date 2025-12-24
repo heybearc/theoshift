@@ -968,6 +968,32 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const { prisma } = await import('../../../src/lib/prisma')
     
+    // Phase 3B: Check if Lanyards module is enabled for this event
+    const eventTemplate = await prisma.events.findUnique({
+      where: { id: id as string },
+      select: {
+        departmentTemplate: {
+          select: {
+            moduleConfig: true
+          }
+        }
+      }
+    })
+    
+    // If event has a department template with moduleConfig, check if lanyards is disabled
+    if (eventTemplate?.departmentTemplate?.moduleConfig) {
+      const moduleConfig = eventTemplate.departmentTemplate.moduleConfig as any
+      if (moduleConfig.lanyards === false) {
+        // Lanyards module is disabled for this event
+        return {
+          redirect: {
+            destination: `/events/${id}`,
+            permanent: false,
+          },
+        }
+      }
+    }
+    
     // Fetch event with lanyards and attendants data
     const eventData = await prisma.events.findUnique({
       where: { id: id as string },

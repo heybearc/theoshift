@@ -24,7 +24,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         include: {
           event_attendants: true,
           assignments: true,
-          event_positions: true
+          event_positions: true,
+          // Phase 3B: Include department template configuration
+          departmentTemplate: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              moduleConfig: true,
+              terminology: true,
+              positionTemplates: true
+            }
+          }
         }
       })
 
