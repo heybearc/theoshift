@@ -18,19 +18,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const hostname = os.hostname();
     
     // Determine server based on hostname or environment
-    // Container 134 (BLUE) = 10.92.3.24
-    // Container 132 (GREEN) = 10.92.3.22
+    // Container 134 (BLUE) = 10.92.3.24 - hostname: blue-theoshift
+    // Container 132 (GREEN) = 10.92.3.22 - hostname: green-theoshift
     
     let server: 'BLUE' | 'GREEN' = 'BLUE';
     let container = 134;
     let ip = '10.92.3.24';
     
     // Check if we can determine from hostname or environment
-    if (hostname.includes('132') || process.env.SERVER_NAME === 'GREEN') {
+    if (hostname.includes('green') || hostname.includes('132') || process.env.SERVER_NAME === 'GREEN') {
       server = 'GREEN';
       container = 132;
       ip = '10.92.3.22';
-    } else if (hostname.includes('134') || process.env.SERVER_NAME === 'BLUE') {
+    } else if (hostname.includes('blue') || hostname.includes('134') || process.env.SERVER_NAME === 'BLUE') {
       server = 'BLUE';
       container = 134;
       ip = '10.92.3.24';
