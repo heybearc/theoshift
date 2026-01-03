@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import ReleaseBanner from './ReleaseBanner'
+import ServerIndicator from './ServerIndicator'
 
 interface AdminLayoutProps {
   children: ReactNode
@@ -218,9 +219,12 @@ export default function AdminLayout({ children, title, breadcrumbs = [], userLas
             {children}
         
         {/* Footer with Version */}
-        <footer className="bg-white border-t border-gray-200 py-4 px-6 text-center text-sm text-gray-500">
-          <div>Theocratic Shift Scheduler v{packageJson.version} | © 2025 | 
-            <Link href="/release-notes" className="text-blue-600 hover:text-blue-800 ml-1">Release Notes</Link>
+        <footer className="bg-white border-t border-gray-200 py-4 px-6 text-sm text-gray-500">
+          <div className="flex items-center justify-center space-x-3">
+            <div>Theocratic Shift Scheduler v{packageJson.version} | © 2025 | 
+              <Link href="/release-notes" className="text-blue-600 hover:text-blue-800 ml-1">Release Notes</Link>
+            </div>
+            <ServerIndicator />
           </div>
         </footer>
           </div>
