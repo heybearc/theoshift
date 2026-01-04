@@ -1,12 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import os from 'os';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { promises as fs } from 'fs';
 
-const execAsync = promisify(exec);
-
-const STATE_FILE_PATH = '/var/lib/haproxy/theoshift-deployment-state.json';
-const HAPROXY_CONTAINER = 136;
+const STATE_FILE_PATH = '/opt/theoshift/deployment-state.json';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -36,19 +32,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ip = '10.92.3.24';
     }
     
-    // Determine if this is LIVE or STANDBY by reading deployment state file from HAProxy
+    // Determine if this is LIVE or STANDBY by reading local deployment state file
     let status: 'LIVE' | 'STANDBY' = 'STANDBY';
     
     try {
-      // Try to read the deployment state file from HAProxy container
-      const { stdout } = await execAsync(
-        `ssh -o StrictHostKeyChecking=no -o ConnectTimeout=2 root@10.92.3.26 "cat ${STATE_FILE_PATH} 2>/dev/null || echo '{}'"`
-      );
-      
-      const state = JSON.parse(stdout || '{}');
+      // Try to read the local deployment state file
+      const stateData = await fs.readFile(STATE_FILE_PATH, 'utf-8');
+      const state = JSON.parse(stateData);
       
       // Check which server is currently LIVE
-      const liveServer = state.live || state.prod || 'blue';
+      const liveServer = state.live || state.prod || 'green';
       if (liveServer.toLowerCase() === server.toLowerCase()) {
         status = 'LIVE';
       } else {
@@ -59,8 +52,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (process.env.SERVER_STATUS) {
         status = process.env.SERVER_STATUS as 'LIVE' | 'STANDBY';
       } else {
-        // Default fallback: BLUE is typically LIVE initially
-        status = server === 'BLUE' ? 'LIVE' : 'STANDBY';
+        // Default fallback: GREEN is LIVE (matches HAProxy default)
+        status = server === 'GREEN' ? 'LIVE' : 'STANDBY';
       }
     }
     
