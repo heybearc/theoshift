@@ -4,6 +4,7 @@ import { authOptions } from '../../api/auth/[...nextauth]'
 import EventLayout from '../../../components/EventLayout'
 import EventNavigation from '../../../components/EventNavigation'
 import { TemplateProvider } from '../../../contexts/TemplateContext'
+import { VolunteerText } from '../../../components/DynamicText'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -428,7 +429,7 @@ export default function EventDetailsPage({ event, canEdit, canDelete, canManageC
                 href={`/events/${event.id}/attendants`}
                 className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded transition-colors min-h-[44px] touch-manipulation flex items-center justify-center"
               >
-                👥 Attendants
+                👥 <VolunteerText plural />
               </Link>
               <Link
                 href={`/events/${event.id}/positions`}
@@ -648,7 +649,7 @@ export default function EventDetailsPage({ event, canEdit, canDelete, canManageC
                 </div>
                 <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
                   <div className="text-2xl font-bold text-purple-600">{event._count.event_attendants}</div>
-                  <div className="text-sm text-purple-600 font-medium">Attendants Linked</div>
+                  <div className="text-sm text-purple-600 font-medium"><VolunteerText plural /> Linked</div>
                 </div>
                 <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
                   <div className="text-2xl font-bold text-orange-600">
