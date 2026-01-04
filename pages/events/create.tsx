@@ -274,7 +274,7 @@ export default function CreateEventPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="mt-2 text-sm text-gray-600">
-                Set up a new event with attendant scheduling
+                Create a new event with customizable department configuration
               </p>
             </div>
             <Link
@@ -301,6 +301,66 @@ export default function CreateEventPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
+          {/* Department Configuration - MOVED TO TOP */}
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-2 flex items-center">
+              <span className="text-2xl mr-2">🎯</span>
+              Department Configuration
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Choose a department template to customize available features and terminology for this event
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="departmentTemplateId" className="block text-sm font-medium text-gray-700 mb-1">
+                  Department Template
+                </label>
+                <select
+                  id="departmentTemplateId"
+                  name="departmentTemplateId"
+                  value={formData.departmentTemplateId}
+                  onChange={handleInputChange}
+                  disabled={loadingData}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 bg-white"
+                >
+                  <option value="">No template (all features enabled)</option>
+                  {departmentTemplates.map(template => (
+                    <option key={template.id} value={template.id}>
+                      {template.icon} {template.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  Controls which features are available (Count Times, Lanyards, etc.)
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="parentEventId" className="block text-sm font-medium text-gray-700 mb-1">
+                  Parent Event
+                </label>
+                <select
+                  id="parentEventId"
+                  name="parentEventId"
+                  value={formData.parentEventId}
+                  onChange={handleInputChange}
+                  disabled={loadingData}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 bg-white"
+                >
+                  <option value="">No parent event (standalone)</option>
+                  {events.map(event => (
+                    <option key={event.id} value={event.id}>
+                      {event.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  Create as a child event (e.g., Audio Crew under Audio-Video)
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Basic Information */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
@@ -377,60 +437,6 @@ export default function CreateEventPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Optional description of the event..."
                 />
-              </div>
-            </div>
-          </div>
-
-          {/* Department Configuration */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Department Configuration</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="departmentTemplateId" className="block text-sm font-medium text-gray-700 mb-1">
-                  Department Template
-                </label>
-                <select
-                  id="departmentTemplateId"
-                  name="departmentTemplateId"
-                  value={formData.departmentTemplateId}
-                  onChange={handleInputChange}
-                  disabled={loadingData}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                >
-                  <option value="">Select a department template (optional)</option>
-                  {departmentTemplates.map(template => (
-                    <option key={template.id} value={template.id}>
-                      {template.icon} {template.name}
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-1 text-xs text-gray-500">
-                  Link this event to a department template for consistency
-                </p>
-              </div>
-
-              <div>
-                <label htmlFor="parentEventId" className="block text-sm font-medium text-gray-700 mb-1">
-                  Parent Event
-                </label>
-                <select
-                  id="parentEventId"
-                  name="parentEventId"
-                  value={formData.parentEventId}
-                  onChange={handleInputChange}
-                  disabled={loadingData}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                >
-                  <option value="">No parent event (standalone)</option>
-                  {events.map(event => (
-                    <option key={event.id} value={event.id}>
-                      {event.name}
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-1 text-xs text-gray-500">
-                  Create as a child event (e.g., Audio Crew under Audio-Video)
-                </p>
               </div>
             </div>
           </div>
