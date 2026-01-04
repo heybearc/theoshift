@@ -55,6 +55,8 @@ export function useModuleConfig() {
 export function useTerminology() {
   const { terminology } = useTemplateContext()
   
+  // Default terminology uses "Volunteer" (neutral/generic)
+  // Only the Attendants template should override to "Attendant"
   const getLabel = (key: keyof Terminology, defaultLabel: string): string => {
     return terminology?.[key] || defaultLabel
   }
