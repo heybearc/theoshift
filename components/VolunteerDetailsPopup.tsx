@@ -9,6 +9,7 @@ interface Volunteer {
   email: string
   phone: string | null
   congregation: string
+  notes?: string | null
   formsOfService: any
   isActive: boolean
   profileVerificationRequired?: boolean
@@ -153,6 +154,12 @@ export default function VolunteerDetailsPopup({ volunteer, children, onEdit }: V
                     <label className="text-xs text-gray-500">Congregation</label>
                     <p className="text-sm text-gray-900">{volunteer.congregation}</p>
                   </div>
+                  {volunteer.notes?.trim() && (
+                    <div>
+                      <label className="text-xs text-gray-500">Notes</label>
+                      <p className="text-sm text-gray-900 whitespace-pre-wrap">{volunteer.notes}</p>
+                    </div>
+                  )}
                 </div>
               </div>
 

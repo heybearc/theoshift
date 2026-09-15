@@ -23,8 +23,8 @@ Day-board preview is live in **v4.32.0+** (optional via **Try new layout**). Cla
 ### Next steps
 
 1. Smoke day board on production (`Try new layout`).
-2. When ready: publish gate — make day board the default Positions nav target.
-3. Optional: reconcile pending handoff `theoshift` (chat notify blast) — may already be covered by v4.29.4+ bulk-email safety; close or re-scope.
+2. When ready: publish gate — make day board the default Positions nav target, keep **Back to classic** (or cookie preference) so in-flight events can switch back.
+3. After STANDBY smoke of FB-039 notes save, `/ship` when you want it on LIVE.
 
 ## Exact next command
 
@@ -37,8 +37,7 @@ Open an event → Positions → **Try new layout** on https://theoshift.com (or 
 **Current**
 
 - **PIN column** — Still in DB; magic links are primary UI.
-- **Positions redesign** — Preview only; not published as default.
-- **Handoff (pending):** chat notify blast safeguards — review vs later bulk-email confirm/throttle/abort.
+- **Positions redesign** — Preview only; not published as default. Classic stays until explicitly published; day board already has **Back to classic**.
 
 **Infrastructure**
 

@@ -34,6 +34,7 @@ interface Volunteer {
   email: string
   phone: string | null
   congregation: string
+  notes: string | null
   formsOfService: any // JSON field for forms of service
   isActive: boolean
   createdAt: string | null
@@ -400,7 +401,7 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
       formsOfService: Array.isArray(attendant.formsOfService) 
         ? attendant.formsOfService.join(', ') 
         : attendant.formsOfService || '',
-      notes: '',
+      notes: attendant.notes || '',
       isActive: attendant.isActive,
       isOverseer: attendant.isOverseer ?? false,
       isKeyman: attendant.isKeyman ?? false
@@ -2916,6 +2917,12 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                       <label className="text-xs text-gray-500">Congregation</label>
                       <p className="text-sm text-gray-900">{viewingAttendant.congregation}</p>
                     </div>
+                    {viewingAttendant.notes && (
+                      <div className="md:col-span-2">
+                        <label className="text-xs text-gray-500">Notes</label>
+                        <p className="text-sm text-gray-900 whitespace-pre-wrap">{viewingAttendant.notes}</p>
+                      </div>
+                    )}
                     <div>
                       <label className="text-xs text-gray-500">Status</label>
                       <p className="text-sm">
@@ -3276,6 +3283,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         email: attendant.email,
         phone: attendant.phone,
         congregation: attendant.congregation,
+        notes: attendant.notes || null,
         formsOfService: attendant.formsOfService,
         isActive: attendant.isActive,
         createdAt: attendant.createdAt?.toISOString() || null,
