@@ -7,7 +7,6 @@
  * 1. Find duplicate volunteers (same email or firstName+lastName+congregation)
  * 2. For each duplicate set, choose the "canonical" record:
  *    - Prefer record with userId (linked to system user)
- *    - Otherwise, prefer record with pinHash (has volunteer portal access)
  *    - Otherwise, prefer oldest record (first created)
  * 3. Migrate all event_volunteers references to canonical record
  * 4. Migrate all position_assignments references to canonical record
@@ -26,7 +25,6 @@ interface VolunteerRecord {
   lastName: string
   email: string
   congregation: string
-  pinHash: string | null
   createdAt: Date
 }
 
@@ -46,7 +44,6 @@ async function findDuplicatesByEmail(): Promise<Map<string, VolunteerRecord[]>> 
       lastName: true,
       email: true,
       congregation: true,
-      pinHash: true,
       createdAt: true,
     },
     orderBy: { createdAt: 'asc' }
@@ -76,17 +73,11 @@ async function findDuplicatesByEmail(): Promise<Map<string, VolunteerRecord[]>> 
 function chooseCanonicalRecord(records: VolunteerRecord[]): VolunteerRecord {
   // Priority:
   // 1. Has userId (linked to system user)
-  // 2. Has pinHash (volunteer portal access)
-  // 3. Oldest record (first created)
-  
+  // 2. Oldest record (first created)
+
   const withUserId = records.filter(r => r.userId !== null)
   if (withUserId.length > 0) {
     return withUserId[0]
-  }
-
-  const withPinHash = records.filter(r => r.pinHash !== null)
-  if (withPinHash.length > 0) {
-    return withPinHash[0]
   }
 
   // Already sorted by createdAt ascending, so first is oldest
@@ -112,7 +103,6 @@ async function mergeDuplicates(duplicateGroups: Map<string, VolunteerRecord[]>):
     console.log(`📧 ${email}`)
     console.log(`   ✅ Canonical: ${canonical.firstName} ${canonical.lastName} (${canonical.id})`)
     console.log(`      - userId: ${canonical.userId || 'none'}`)
-    console.log(`      - pinHash: ${canonical.pinHash ? 'set' : 'none'}`)
     console.log(`      - created: ${canonical.createdAt.toISOString()}`)
     console.log(`   ❌ Duplicates (${duplicates.length}):`)
     for (const dup of duplicates) {

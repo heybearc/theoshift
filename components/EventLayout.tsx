@@ -10,6 +10,7 @@ import FloatingActionButton from './FloatingActionButton'
 import QuickVolunteerLookup from './QuickVolunteerLookup'
 import QuickAssignmentForm from './QuickAssignmentForm'
 import { getViewAsVolunteerId } from '@/lib/viewAsClient'
+import { eventPositionsHref } from '../lib/eventPositionsHref'
 
 // Lazy load QR scanner (only loaded when needed)
 const QRScanner = dynamic(() => import('./QRScanner'), {
@@ -282,7 +283,7 @@ export default function EventLayout({
                 id: 'view-positions',
                 label: 'View Positions',
                 icon: '📋',
-                onClick: () => router.push(`/events/${selectedEvent.id}/positions`),
+                onClick: () => router.push(eventPositionsHref(selectedEvent.id)),
                 color: 'bg-orange-600 hover:bg-orange-700'
               },
               {

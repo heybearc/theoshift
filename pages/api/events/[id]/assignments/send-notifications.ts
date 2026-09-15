@@ -179,7 +179,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         overseerName,
         overseerEmail,
         overseerPhone: overseerPhone ?? undefined,
-        eventUrl: `${process.env.NEXTAUTH_URL}/events/${event.id}/positions`,
+        eventUrl: `${process.env.NEXTAUTH_URL}/events/${event.id}/positions-next`,
       })
 
       preparedByVolunteer.set(assignment.volunteerId, {

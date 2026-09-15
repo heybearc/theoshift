@@ -21,16 +21,16 @@ export default function VolunteerPortalHelp({ userRole }: VolunteerPortalHelpPro
 
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Accessing the Portal</h2>
           <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">🔐 Login Methods (NEW in v4.17.0)</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">🔐 Sign-in</h3>
             <p className="text-gray-700 mb-3">
-              Volunteers now use a secure, passwordless login method - no PIN or password required!
+              Volunteers sign in with a secure email link. No password is required.
             </p>
             
             <div className="space-y-4">
               <div className="border-l-4 border-green-500 pl-4 bg-green-50 p-4 rounded-r-lg">
                 <h4 className="font-semibold text-gray-900 mb-2">📧 Magic Link Sign-In</h4>
                 <p className="text-gray-700 mb-3">
-                  The easiest and most secure way to sign in. No password to remember, no PIN needed!
+                  Enter your email and we send a one-time sign-in link. No password to remember.
                 </p>
                 <ol className="list-decimal list-inside text-gray-700 space-y-2 ml-4">
                   <li>Go to the <strong>TheoShift login page</strong></li>

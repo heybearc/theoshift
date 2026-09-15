@@ -7,6 +7,7 @@ import { VolunteerText } from './DynamicText'
 import dynamic from 'next/dynamic'
 import { useSession } from 'next-auth/react'
 import { getViewAsVolunteerId, setViewAsVolunteerId } from '@/lib/viewAsClient'
+import { eventPositionsHref } from '../lib/eventPositionsHref'
 
 const EventQRCode = dynamic(() => import('./EventQRCode'), { ssr: false })
 
@@ -104,7 +105,7 @@ export default function EventPageLayout({
   const eventTabs: Array<{ id: EventPageLayoutProps['currentPage']; label: ReactNode; href: string }> = [
     { id: 'overview', label: 'Overview', href: `/events/${event.id}` },
     ...(isPositionsEnabled
-      ? [{ id: 'positions' as const, label: '📋 Positions', href: `/events/${event.id}/positions` }]
+      ? [{ id: 'positions' as const, label: '📋 Positions', href: eventPositionsHref(event.id) }]
       : []),
     {
       id: 'volunteers',
@@ -293,7 +294,7 @@ export default function EventPageLayout({
               </Link>
               {isPositionsEnabled && (
                 <Link
-                  href={`/events/${event.id}/positions`}
+                  href={eventPositionsHref(event.id)}
                   className={`flex-shrink-0 px-3 sm:px-4 py-2.5 text-sm font-medium whitespace-nowrap min-h-[44px] flex items-center touch-manipulation ${
                     currentPage === 'positions'
                       ? 'text-blue-600 border-b-2 border-blue-600'

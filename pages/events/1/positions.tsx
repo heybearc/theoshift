@@ -9,7 +9,7 @@ export default function LegacyEventRedirect() {
   useEffect(() => {
     // Redirect to the correct active event
     const correctEventId = 'd43d977b-c06e-446f-8c6d-05b407daf459'
-    router.replace(`/events/${correctEventId}/positions`)
+    router.replace(`/events/${correctEventId}/positions-next`)
   }, [router])
 
   return (

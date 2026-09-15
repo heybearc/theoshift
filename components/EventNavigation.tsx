@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { useModuleConfig, useTerminology } from '../contexts/TemplateContext'
+import { eventPositionsHref } from '../lib/eventPositionsHref'
 
 interface EventNavigationProps {
   eventId: string
@@ -60,7 +61,7 @@ export default function EventNavigation({
         {/* Core Workflow Actions - Always show Positions */}
         {isPositionsEnabled && (
           <Link
-            href={`/events/${eventId}/positions`}
+            href={eventPositionsHref(eventId)}
             className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
           >
             📋 Manage {terminology.position}s

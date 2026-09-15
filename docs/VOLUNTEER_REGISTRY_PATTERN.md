@@ -14,7 +14,7 @@ volunteers (GLOBAL REGISTRY)
 ├── One record per person
 ├── Email is unique identifier
 ├── Can link to system user (userId)
-└── Has pinHash for volunteer portal login
+└── Signs in via magic-link email
 
 event_volunteers (EVENT ASSOCIATION)
 ├── Links volunteer to event

@@ -176,7 +176,6 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const [showProfileVerification, setShowProfileVerification] = useState(false)
   const [profileData, setProfileData] = useState({ email: '', phone: '' })
-  const [pinUpdateMessage, setPinUpdateMessage] = useState('')
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   const [editProfileData, setEditProfileData] = useState({ email: '', phone: '' })
   const [countValues, setCountValues] = useState<Map<string, string>>(new Map())
@@ -597,20 +596,7 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
         })
       })
       
-      const result = await response.json()
-      
-      if (response.ok && result.newPin) {
-        // Show PIN update message
-        setPinUpdateMessage(`Your PIN has been updated to the last 4 digits of your phone: ${result.newPin}`)
-        setShowProfileVerification(false)
-        
-        // Reload dashboard to get updated data
-        setTimeout(() => {
-          loadDashboard()
-          // Clear message after showing dashboard
-          setTimeout(() => setPinUpdateMessage(''), 8000)
-        }, 100)
-      } else if (response.ok) {
+      if (response.ok) {
         setShowProfileVerification(false)
         loadDashboard()
       }
@@ -962,12 +948,6 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
             <p className="text-xs text-gray-500 mt-1">Format: (XXX) XXX-XXXX</p>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p className="text-xs text-blue-800">
-              <strong>Note:</strong> Your PIN will be automatically updated to the last 4 digits of your phone number.
-            </p>
-          </div>
-
           <button
             onClick={handleProfileVerification}
             className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
@@ -1185,27 +1165,6 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* PIN Update Message */}
-          {pinUpdateMessage && (
-            <div className="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-green-800">
-                    {pinUpdateMessage}
-                  </p>
-                  <p className="text-xs text-green-700 mt-1">
-                    Please use this PIN for your next login.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Welcome Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">

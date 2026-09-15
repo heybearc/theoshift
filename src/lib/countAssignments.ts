@@ -36,7 +36,7 @@ export async function resolveVolunteerIdForSessionUser(userId: string, role: str
 }
 
 /**
- * `count_group_entries.enteredBy` references users.id. Volunteer PIN sessions use volunteers.id as
+ * `count_group_entries.enteredBy` references users.id. Volunteer sessions use volunteers.id as
  * session.user.id — passing that into enteredBy violates FK and causes 500 on group count submit.
  * Returns the linked account user id for volunteers, or null if they have no users row.
  */

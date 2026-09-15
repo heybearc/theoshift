@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 
 /**
- * Positions day-board layout (preview) help
+ * Positions day-board layout (default Positions tab)
  */
 export default function PositionsDayBoardHelp() {
   const router = useRouter()
@@ -39,21 +39,24 @@ export default function PositionsDayBoardHelp() {
           <section>
             <h2 className="mb-4 text-xl font-bold text-gray-900">Overview</h2>
             <p className="leading-relaxed text-gray-700">
-              The new Positions layout organizes stations by event day. You can
-              assign volunteers, set overseers, edit shift times, and run setup
-              tools without the old list/grid chrome. Classic Positions stays
-              available until the new layout is set as the default.
+              Positions organizes stations by event day. You can assign
+              volunteers, set overseers, edit shift times, and run setup tools
+              from the day board. Classic Positions remains available from{' '}
+              <strong> Use classic layout</strong> if you need the older list/grid.
             </p>
           </section>
 
           <section>
             <h2 className="mb-4 text-xl font-bold text-gray-900">How to open it</h2>
             <ol className="list-decimal space-y-2 pl-5 text-gray-700">
-              <li>Open an event and go to <strong>Positions</strong>.</li>
-              <li>Choose <strong>Try new layout</strong>.</li>
+              <li>Open an event and go to <strong>Positions</strong> (day board is the default).</li>
               <li>
                 Use day tabs (or the coverage chips above them on multi-day
                 events) to switch days.
+              </li>
+              <li>
+                Choose <strong>Use classic layout</strong> only if you need the
+                older Positions page.
               </li>
             </ol>
           </section>

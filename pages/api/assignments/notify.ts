@@ -163,7 +163,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    const eventUrl = `${process.env.NEXTAUTH_URL}/events/${event.id}/positions`
+    const eventUrl = `${process.env.NEXTAUTH_URL}/events/${event.id}/positions-next`
 
     // Build notification data based on type
     let notificationData: AssignmentEmailData | AssignmentUpdateData | AssignmentCancelledData | AssignmentReminderData

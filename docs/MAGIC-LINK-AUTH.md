@@ -156,8 +156,7 @@ The magic link email includes:
 
 All existing authentication methods still work:
 - ✅ Admin/Overseer email + password login
-- ✅ Volunteer PIN login (firstName + lastName + congregation + PIN)
-- ✅ Magic link login (NEW)
+- ✅ Volunteer magic-link login
 
 ## Error Handling
 

@@ -25,7 +25,7 @@ export type ResolvedAccount = {
 
 /**
  * Resolve the signed-in actor to users and/or volunteers rows.
- * Staff sessions use users.id; volunteer PIN sessions use volunteers.id.
+ * Staff sessions use users.id; volunteer sessions use volunteers.id.
  */
 export async function resolveAccountFromSession(sessionUser: {
   id?: string | null
@@ -118,7 +118,7 @@ export async function resolveAccountFromSession(sessionUser: {
     })
   }
 
-  // Volunteer row may link back to a users row not found by session id (PIN login)
+  // Volunteer row may link back to a users row not found by session id
   if (!user && volunteer?.userId) {
     user = await prisma.users.findUnique({
       where: { id: volunteer.userId },

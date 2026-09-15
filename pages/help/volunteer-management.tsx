@@ -215,16 +215,7 @@ export default function VolunteerManagementHelp({ userRole }: VolunteerManagemen
                 <li>Overseer and Keyman assignments</li>
                 <li>Forms of Service</li>
                 <li>Active/Inactive status</li>
-                <li>Volunteer PIN (Overseers and Admins)</li>
               </ul>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">PIN Management</h3>
-              <p className="text-gray-700">
-                Overseers and Administrators can set or reset volunteer PINs. This is useful when an
-                volunteer forgets their PIN or needs it changed for security reasons.
-              </p>
             </div>
           </div>
         </section>

@@ -373,7 +373,7 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                 👥 Volunteers
               </Link>
               <Link
-                href={`/events/${event.id}/positions`}
+                href={`/events/${event.id}/positions-next`}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition-colors min-h-[44px] touch-manipulation flex items-center justify-center"
               >
                 📋 Positions
@@ -699,7 +699,7 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                 
                 {/* Enhanced Workflow Actions */}
                 <Link
-                  href={`/events/${event.id}/positions`}
+                  href={`/events/${event.id}/positions-next`}
                   className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
                 >
                   📋 Manage Positions

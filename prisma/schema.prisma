@@ -148,7 +148,6 @@ model volunteers {
   congregation                  String
   formsOfService                Json                             @default("[]")
   isActive                      Boolean                          @default(true)
-  pinHash                       String?
   profileVerificationRequired   Boolean                          @default(false)
   profileVerifiedAt             DateTime?
   user                          users?                           @relation(fields: [userId], references: [id], onDelete: Cascade)

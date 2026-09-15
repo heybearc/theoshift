@@ -1,6 +1,6 @@
 /**
- * Generated release tests for Positions day-board redesign (v4.32.x candidate).
- * Covers BASE_REV v4.31.0..HEAD behavior: preview entry, day board, collapse UX.
+ * Generated release tests for Positions day board (default Positions tab).
+ * Covers BASE_REV v4.32.1..HEAD: day board is default; classic remains available.
  */
 import { test, expect } from '@playwright/test'
 import { loginAsAdmin } from './login-helper'
@@ -22,28 +22,33 @@ test.describe('Generated release — Positions day board', () => {
     await loginAsAdmin(page)
   })
 
-  test('classic Positions offers Try new layout preview link', async ({ page }) => {
+  test('Positions tab opens the day board by default', async ({ page }) => {
+    const eventId = await getEventId(page)
+    await page.goto(`${BASE_URL}/events/${eventId}`)
+    await page.waitForLoadState('domcontentloaded')
+
+    const positionsTab = page.getByRole('link', { name: /Positions/i }).first()
+    await expect(positionsTab).toHaveAttribute(
+      'href',
+      new RegExp(`/events/${eventId}/positions-next`)
+    )
+    await positionsTab.click()
+    await expect(page).toHaveURL(new RegExp(`/events/${eventId}/positions-next`))
+    await expect(page.getByText(/Stations by day/i).first()).toBeVisible({ timeout: 15000 })
+    await expect(page.getByRole('link', { name: /Use classic layout/i })).toBeVisible()
+  })
+
+  test('classic Positions remains available with a return to the day board', async ({ page }) => {
     const eventId = await getEventId(page)
     await page.goto(`${BASE_URL}/events/${eventId}/positions`)
     await page.waitForLoadState('domcontentloaded')
 
-    const tryNew = page.getByRole('link', { name: /Try new layout/i })
-    await expect(tryNew).toBeVisible({ timeout: 15000 })
-    await expect(tryNew).toHaveAttribute('href', new RegExp(`/events/${eventId}/positions-next`))
-  })
-
-  test('positions-next loads day board with redesign chrome', async ({ page }) => {
-    const eventId = await getEventId(page)
-    await page.goto(`${BASE_URL}/events/${eventId}/positions-next`)
-    await page.waitForLoadState('domcontentloaded')
-
-    await expect(
-      page.getByText(/Positions redesign preview|Stations by day/i).first()
-    ).toBeVisible({ timeout: 15000 })
-
-    await expect(page.getByRole('link', { name: /Back to classic/i })).toBeVisible()
-
-    await expect(page.getByText(/Underfilled only/i).first()).toBeVisible()
+    const useDayBoard = page.getByRole('link', { name: /Use day board/i })
+    await expect(useDayBoard).toBeVisible({ timeout: 15000 })
+    await expect(useDayBoard).toHaveAttribute(
+      'href',
+      new RegExp(`/events/${eventId}/positions-next`)
+    )
   })
 
   test('day board exposes underfilled filter and expand controls when stations exist', async ({

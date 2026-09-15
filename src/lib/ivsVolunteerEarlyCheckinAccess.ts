@@ -22,7 +22,7 @@ export type EarlyCheckinAccessResult =
 
 /**
  * Resolve the volunteers.id used for IVS early check-in access.
- * PIN sessions use volunteers.id as session.user.id; staff may simulate via x-view-as-volunteer-id.
+ * Volunteer sessions use volunteers.id as session.user.id; staff may simulate via x-view-as-volunteer-id.
  */
 export async function resolveEarlyCheckinVolunteerId(
   req: NextApiRequest,

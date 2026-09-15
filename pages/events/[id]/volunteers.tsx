@@ -104,7 +104,6 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
     formsOfService: '',
     overseerId: null as string | null,
     keymanId: null as string | null,
-    pinAction: '', // 'auto-generate', 'reset', or ''
     profileVerificationRequired: '' // 'true', 'false', or ''
   })
   const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set())
@@ -972,42 +971,6 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
           )
         }
 
-        // Handle bulk PIN operations
-        if (bulkEditData.pinAction !== '') {
-          
-          let pin = ''
-          if (bulkEditData.pinAction === 'auto-generate' && attendant.phone) {
-            const digits = attendant.phone.replace(/\D/g, '')
-            if (digits.length >= 4) {
-              pin = digits.slice(-4)
-            }
-          } else if (bulkEditData.pinAction === 'reset') {
-            // Generate a random 4-digit PIN for reset
-            pin = Math.floor(1000 + Math.random() * 9000).toString()
-          }
-
-          if (pin) {
-            updates.push(
-              fetch('/api/volunteer/set-pin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  volunteerId: attendant.id,
-                  eventId: eventId,
-                  pin,
-                  autoGenerate: false
-                })
-              }).then(response => {
-                if (!response.ok) {
-                  console.error(`PIN update failed for ${attendant.firstName} ${attendant.lastName}:`, response.status)
-                  throw new Error(`PIN update failed`)
-                }
-                return response
-              })
-            )
-          }
-        }
-
         // Handle oversight assignments separately
         const oversightData: any = {}
         if (bulkEditData.overseerId !== null) {
@@ -1051,7 +1014,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
       
       setShowBulkEditModal(false)
       setSelectedAttendants(new Set())
-      setBulkEditData({ isActive: '', formsOfService: '', congregation: '', overseerId: null, keymanId: null, pinAction: '', profileVerificationRequired: '' })
+      setBulkEditData({ isActive: '', formsOfService: '', congregation: '', overseerId: null, keymanId: null, profileVerificationRequired: '' })
       
       // Preserve filter state and pagination in URL before reload
       try {
@@ -1100,10 +1063,10 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
             </div>
             <div className="ml-3 flex-1">
               <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                📧 Volunteer Login Now Uses Magic Links
+                📧 Volunteer login uses email links
               </h3>
               <p className="text-sm text-gray-700 mb-2">
-                Volunteers now receive a secure email link to sign in. No PIN required!
+                Volunteers receive a secure email link to sign in.
               </p>
               <a
                 href="/help/volunteer-portal"

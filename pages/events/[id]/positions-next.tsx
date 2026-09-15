@@ -13,8 +13,7 @@ import {
 } from '../../../lib/eventDates'
 
 /**
- * Positions redesign preview (parallel surface).
- * Classic `/positions` remains the default source of truth until this is published.
+ * Published Positions layout (day board). Classic `/positions` remains available via Use classic layout.
  */
 export default function PositionsNextPage({
   eventId,
@@ -50,10 +49,7 @@ export default function PositionsNextPage({
     >
       <Head>
         <title>
-          {event?.name
-            ? `${event.name} - Positions (new)`
-            : 'Positions (new)'}{' '}
-          | TheoShift
+            {event?.name ? `${event.name} - Positions` : 'Positions'} | TheoShift
         </title>
       </Head>
 
@@ -63,18 +59,18 @@ export default function PositionsNextPage({
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-semibold text-indigo-950">
-                  Positions redesign preview
+                  Positions day board
                 </p>
                 <p className="text-sm text-indigo-900">
-                  Day-board layout for multi-day stations and per-shift overseers.
-                  Classic Positions stays the default until this is published.
+                  Default layout for multi-day stations and per-shift overseers.
+                  Classic Positions is still available if you need it.
                 </p>
               </div>
               <Link
                 href={`/events/${eventId}/positions`}
                 className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-md border border-indigo-300 bg-white px-3 py-2 text-sm font-medium text-indigo-900 hover:bg-indigo-100 touch-manipulation"
               >
-                Back to classic
+                Use classic layout
               </Link>
             </div>
           </div>
