@@ -1,8 +1,8 @@
 # TheoShift Plan
 
-**Last updated:** 2026-09-13  
+**Last updated:** 2026-09-22  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.32.1 LIVE** (GREEN). Positions redesign preview at `/positions-next` (classic remains default). Event clone parity fixed in v4.32.1.
+**Status:** **v4.32.2 LIVE** (GREEN). Positions day board is the default (`/positions-next`). Classic remains at `/positions`. PIN login removed.
 
 ---
 
@@ -23,8 +23,11 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Positions redesign — publish gate** — Day board at `/positions-next` (v4.32.0+); classic remains default until explicit publish.
+- **Idle** — pick next: mobile Positions/Volunteers, FB-036, or chat increment.
 - **Mobile readiness across TheoShift** — Positions + Volunteers pages next (narrow viewport). Early Check-In volunteer path done through **v4.29.7**.
+
+### Recently Completed (2026-09-15)
+- ✅ **v4.32.2** — Day board default Positions tab; PIN login/admin/`pinHash` removed; volunteer notes persist; both nodes aligned
 
 ### Recently Completed (2026-09-05 → 2026-09-13)
 - ✅ **v4.32.1** — Event clone parity: `onVolunteerRoster` + role flags; department overseer/keyman columns; `shiftDate`/`volunteersNeeded`; fresh lanyards; POSITION `scopeIds` remap; assignment overseer/keyman; help + release notes; shipped + synced
@@ -81,8 +84,8 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 
 ### High Priority
 - **Positions page redesign (out-of-band)** — Rebuild Positions UX/logic for multi-body shifts, rotating per-shift overseers, and regional multi-day stations without overloading the current page. Ship Option C first on the live page; redesign in a parallel branch/surface and publish when ready (do not break events using today’s layout).
-  - Status: Preview shipped (**v4.32.0** `/positions-next`); **publish gate** still open (classic = default)
-  - Effort: XL (remaining: publish + cutover)
+  - Status: Published as default (**v4.32.2** `/positions-next`); classic fallback remains
+  - Effort: XL (cutover done; further UX polish optional)
   - Constraint: Current page remains source of truth until redesigned page is explicitly published
   - Drivers: 4+ volunteers per shift; different overseer per shift; 3-day regionals; auto-assign + position oversight mismatch
 - **TheoShift Native In-App Chat (Event-Scoped, Magic-Link Compatible)** — Real-time communication for overseers and volunteers inside TheoShift
@@ -362,7 +365,7 @@ Feedback **FB-036** closed as deferred; all scope lives in this section until an
 
 ## Version History
 
-**Current:** v4.30.1 (IVS dashboard intake; LIVE BLUE + STANDBY GREEN synced)  
+**Current:** v4.32.2 (day board default; PIN removed; LIVE GREEN + STANDBY BLUE)  
 **Previous:** v4.30.0 (IVS intake initial ship) / v4.29.14 (early check-in scroll)  
 **Baseline:** v4.0.0 (production-ready platform)
 

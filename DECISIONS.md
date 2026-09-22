@@ -629,6 +629,12 @@ This document tracks significant technical decisions made during development.
 **Decision:** Anyone with an **active** `event_volunteers` row on an **IVS-enabled** event may submit intake requests (same people who can use Early Check-In for roster access). Submissions still create Pending IVS Approvals rows with real email/phone; no auto-approve.  
 **Consequences:** Shipped **v4.30.1**. Staff still review on Approvals; import-batch remains how IVS list membership is marked for Approvals/export, not who can request.
 
+### D-TS-047: Trust HAProxy for LIVE color; skip switch when already on candidate
+**Date:** 2026-09-15  
+**Context:** v4.32.2 candidate landed on GREEN while MCP `haproxy.backend` was `error` and reported LIVE=BLUE. Public `is_theoshift` already used `theoshift_green`. Switching would have sent traffic to BLUE still on old PIN code after `pinHash` drop.  
+**Decision:** When MCP HAProxy status is `error`, read `use_backend … if is_theoshift` before `/release`. Do not switch if LIVE already serves the candidate.  
+**Consequences:** Shipped **v4.32.2** without a traffic switch. PIN login retired (magic link only). Both nodes later aligned on `62465c1d`.
+
 ---
 
 ## Shared Decisions
