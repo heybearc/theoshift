@@ -1,6 +1,7 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { prisma } from '@/lib/prisma'
+import { findUserByEmailCaseInsensitive } from '@/lib/userEmailLookup'
 import bcrypt from 'bcryptjs'
 
 export const authOptions: NextAuthOptions = {
@@ -17,9 +18,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          const user = await prisma.users.findUnique({
-            where: { email: credentials.email }
-          })
+          const user = await findUserByEmailCaseInsensitive(credentials.email)
 
           if (!user || !user.isActive) {
             return null
