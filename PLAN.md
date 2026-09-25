@@ -1,8 +1,8 @@
 # TheoShift Plan
 
-**Last updated:** 2026-09-22  
+**Last updated:** 2026-09-25  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.32.2 LIVE** (GREEN). Positions day board is the default (`/positions-next`). Classic remains at `/positions`. PIN login removed.
+**Status:** **v4.32.3 LIVE** (BLUE). Overseer login is case-insensitive. Positions day board is the default. PIN login removed.
 
 ---
 
@@ -25,6 +25,9 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ### Active Work
 - **Idle** — pick next: mobile Positions/Volunteers, FB-036, or chat increment.
 - **Mobile readiness across TheoShift** — Positions + Volunteers pages next (narrow viewport). Early Check-In volunteer path done through **v4.29.7**.
+
+### Recently Completed (2026-09-25)
+- ✅ **v4.32.3** — Overseer/admin email login is case-insensitive; shipped + synced; color hostnames restored to their nodes
 
 ### Recently Completed (2026-09-15)
 - ✅ **v4.32.2** — Day board default Positions tab; PIN login/admin/`pinHash` removed; volunteer notes persist; both nodes aligned
@@ -365,7 +368,7 @@ Feedback **FB-036** closed as deferred; all scope lives in this section until an
 
 ## Version History
 
-**Current:** v4.32.2 (day board default; PIN removed; LIVE GREEN + STANDBY BLUE)  
+**Current:** v4.32.3 (case-insensitive overseer login; LIVE BLUE + STANDBY GREEN)  
 **Previous:** v4.30.0 (IVS intake initial ship) / v4.29.14 (early check-in scroll)  
 **Baseline:** v4.0.0 (production-ready platform)
 

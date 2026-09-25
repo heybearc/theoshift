@@ -635,6 +635,12 @@ This document tracks significant technical decisions made during development.
 **Decision:** When MCP HAProxy status is `error`, read `use_backend … if is_theoshift` before `/release`. Do not switch if LIVE already serves the candidate.  
 **Consequences:** Shipped **v4.32.2** without a traffic switch. PIN login retired (magic link only). Both nodes later aligned on `62465c1d`.
 
+### D-TS-048: Color hostnames always route to their node
+**Date:** 2026-09-25  
+**Context:** `use_backend theoshift_green if is_theoshift_blue` sent `blue.theoshift.com` to GREEN. qa-01 and STANDBY smoke could not hit the real STANDBY node.  
+**Decision:** Keep `blue.theoshift.com` → BLUE and `green.theoshift.com` → GREEN. Only `is_theoshift` (theoshift.com) follows LIVE. After `/release`, set qa-01 `STANDBY_URL` to the new STANDBY color host.  
+**Consequences:** Restored during v4.32.3 ship. `switch_traffic` must not rewrite the color-host lines.
+
 ---
 
 ## Shared Decisions
