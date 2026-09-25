@@ -58,3 +58,31 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 
 ### Links / Commands
 - Deploy STANDBY with runMigrations: true after Option C
+
+## 2026-09-25
+
+_Rolled from NOTES-TODAY.md_
+
+---
+date: 2026-09-25
+purpose: Scratchpad for today's discoveries (promote on /end-day)
+---
+
+## Today
+
+### Focus
+- Ship v4.32.3 case-insensitive overseer login
+
+### Discoveries / Notes
+- LIVE BLUE / STANDBY GREEN, both v4.32.3 (`185e2062`)
+- Color hostnames had been collapsed onto GREEN; restored per D-TS-048
+- qa-01 `STANDBY_URL` must track the current STANDBY color host after switch
+
+### Decisions to Promote
+- D-TS-048 recorded
+
+### Blockers / Risks
+- None. 0 NEW feedback.
+
+### Links / Commands
+- https://github.com/heybearc/theoshift/releases/tag/v4.32.3
