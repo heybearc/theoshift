@@ -257,6 +257,14 @@ export default function VolunteerManagementHelp({ userRole }: VolunteerManagemen
             </div>
 
             <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Why did my filters reset after I edited a volunteer?</h3>
+              <p className="text-gray-700">
+                They should not. Search, Inactive/Active/All, and other filters stay in place after you
+                change a volunteer. A confirmation message appears when the save succeeds.
+              </p>
+            </div>
+
+            <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Can I export the filtered list?</h3>
               <p className="text-gray-700">
                 Yes! When you export volunteer data, it respects your current filters, so you only

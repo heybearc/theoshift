@@ -275,6 +275,7 @@ For issues or questions:
 4. Contact the project maintainer for deployment access
 
 ## 📝 Version History
+- **v4.32.4** (2026-09-30) - Volunteers page keeps filters and search after you edit a volunteer
 - **v4.32.3** (2026-09-25) - Overseer login accepts email regardless of capitalization
 - **v4.32.2** (2026-09-15) - Positions day board is the default; volunteer PIN login removed
 - **v4.32.1** (2026-09-05) - Event clone parity (roster, oversight, shift days, fresh lanyards)
