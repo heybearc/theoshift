@@ -17,6 +17,15 @@ import {
 import PhoneInput from '../../../components/PhoneInput'
 import { displayPhone } from '@/lib/formatPhone'
 import { volunteerRosterWhere } from '@/lib/volunteerRoster'
+import {
+  applyVolunteerFiltersToUrl,
+  DEFAULT_VOLUNTEER_FILTERS,
+  parseVolunteerFiltersFromSearchParams,
+  readStoredVolunteerListState,
+  volunteerSearchParamsHaveListState,
+  writeStoredVolunteerListState,
+  type VolunteerPageFilters,
+} from '../../../lib/volunteerPageFilters'
 
 interface Event {
   id: string
@@ -87,11 +96,16 @@ interface EventVolunteersPageProps {
   terminology?: any
 }
 
-export default function EventAttendantsPage({ eventId, event, attendants, canManageContent, canEdit, canDelete, canManagePermissions, stats, moduleConfig, terminology }: EventVolunteersPageProps) {
+export default function EventAttendantsPage({ eventId, event, attendants, canManageContent, canEdit, canDelete, canManagePermissions, moduleConfig, terminology }: EventVolunteersPageProps) {
   const router = useRouter()
   const selectionAnchorIndexRef = useRef<number | null>(null)
+  const [roster, setRoster] = useState<Attendant[]>(attendants)
 
   useScrollRestoration(router.asPath, true)
+
+  useEffect(() => {
+    setRoster(attendants)
+  }, [attendants])
   const [showAddModal, setShowAddModal] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
   const [editingAttendant, setEditingAttendant] = useState<Attendant | null>(null)
@@ -180,7 +194,7 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
 
   // Sort attendants based on current sort field and direction
   const sortedAttendants = React.useMemo(() => {
-    return [...attendants].sort((a, b) => {
+    return [...roster].sort((a, b) => {
       let aValue: any = a[sortField as keyof typeof a]
       let bValue: any = b[sortField as keyof typeof b]
 
@@ -210,7 +224,7 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
         return bValue.localeCompare(aValue)
       }
     })
-  }, [attendants, sortField, sortDirection])
+  }, [roster, sortField, sortDirection])
 
   // Handle column header clicks for sorting
   const handleSort = (field: string) => {
@@ -234,69 +248,88 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
   )
   /** Snapshot of association IDs when emailing “selected” so sends aren’t affected if selection changes while the modal is open. */
   const [broadcastPinnedSelection, setBroadcastPinnedSelection] = useState<string[]>([])
-  const [filters, setFilters] = useState<{
-    search: string
-    congregation: string
-    isActive: 'all' | 'true' | 'false'
-    overseerId: string
-    keymanId: string
-    formsOfService: string[]
-    availability: 'all' | 'AVAILABLE' | 'NOT_AVAILABLE' | 'PARTIAL' | 'PENDING' | 'none'
-  }>({
-    search: '',
-    congregation: '',
-    isActive: 'true', // Default to Active only
-    overseerId: '',
-    keymanId: '',
-    formsOfService: [],
-    availability: 'all',
-  })
+  const [filters, setFilters] = useState<VolunteerPageFilters>({ ...DEFAULT_VOLUNTEER_FILTERS })
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(20)
   const [loading, setLoading] = useState(false)
   const [importResults, setImportResults] = useState<any>(null)
+  const [filtersHydrated, setFiltersHydrated] = useState(false)
+  const filtersRef = useRef(filters)
+  const pageRef = useRef(currentPage)
+  const perPageRef = useRef(itemsPerPage)
+  filtersRef.current = filters
+  pageRef.current = currentPage
+  perPageRef.current = itemsPerPage
 
-  // Restore filter state from URL parameters on component mount
+  const rosterStats = React.useMemo(
+    () => ({
+      total: roster.length,
+      active: roster.filter((a) => a.isActive).length,
+      inactive: roster.filter((a) => !a.isActive).length,
+    }),
+    [roster]
+  )
+
+  const resolveOversightName = (volunteerId: string | null) => {
+    if (!volunteerId) return null
+    const match = roster.find((a) => a.id === volunteerId)
+    if (!match) return null
+    return { id: match.id, firstName: match.firstName, lastName: match.lastName }
+  }
+
+  const applyRosterPatch = (volunteerId: string, patch: Partial<Attendant>) => {
+    setRoster((prev) =>
+      prev.map((row) => {
+        if (row.id === volunteerId) return { ...row, ...patch }
+        let next = row
+        if (patch.isOverseer === false && row.overseerId === volunteerId) {
+          next = { ...next, overseerId: null, overseer: null }
+        }
+        if (patch.isKeyman === false && row.keymanId === volunteerId) {
+          next = { ...next, keymanId: null, keyman: null }
+        }
+        return next
+      })
+    )
+  }
+
+  // Restore filter state from URL, then sessionStorage, before writing back
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search)
-      const search = urlParams.get('search') || ''
-      const congregation = urlParams.get('congregation') || ''
-      const isActive = (urlParams.get('isActive') as 'all' | 'true' | 'false') || 'true'
-      const overseerId = urlParams.get('overseerId') || ''
-      const keymanId = urlParams.get('keymanId') || ''
-      const formsOfService = urlParams.get('formsOfService')?.split(',').filter(Boolean) || []
-      const availabilityRaw = urlParams.get('availability') || 'all'
-      const availability = (
-        ['all', 'AVAILABLE', 'NOT_AVAILABLE', 'PARTIAL', 'PENDING', 'none'].includes(availabilityRaw)
-          ? availabilityRaw
-          : 'all'
-      ) as 'all' | 'AVAILABLE' | 'NOT_AVAILABLE' | 'PARTIAL' | 'PENDING' | 'none'
-      const page = parseInt(urlParams.get('page') || '1')
-      const perPage = parseInt(urlParams.get('perPage') || '20')
-      
-      // Only update if there are actual URL parameters to restore
-      if (search || congregation || isActive !== 'true' || overseerId || keymanId || formsOfService.length > 0 || availability !== 'all' || page !== 1 || perPage !== 20) {
-        setFilters({ search, congregation, isActive, overseerId, keymanId, formsOfService, availability })
-        setCurrentPage(page)
-        setItemsPerPage(perPage)
+    if (typeof window === 'undefined') return
+    const urlParams = new URLSearchParams(window.location.search)
+    if (volunteerSearchParamsHaveListState(urlParams)) {
+      const restored = parseVolunteerFiltersFromSearchParams(urlParams)
+      setFilters(restored)
+      setCurrentPage(parseInt(urlParams.get('page') || '1', 10) || 1)
+      setItemsPerPage(parseInt(urlParams.get('perPage') || '20', 10) || 20)
+    } else {
+      const stored = readStoredVolunteerListState(eventId)
+      if (stored) {
+        setFilters(stored.filters)
+        setCurrentPage(stored.page)
+        setItemsPerPage(stored.perPage)
       }
     }
-  }, [])
+    setFiltersHydrated(true)
+  }, [eventId])
+
+  useEffect(() => {
+    if (!filtersHydrated || typeof window === 'undefined') return
+    const url = new URL(window.location.href)
+    applyVolunteerFiltersToUrl(url, filters, currentPage, itemsPerPage)
+    const next = `${url.pathname}${url.search}`
+    if (`${window.location.pathname}${window.location.search}` !== next) {
+      window.history.replaceState(window.history.state, '', next)
+    }
+    writeStoredVolunteerListState(eventId, filters, currentPage, itemsPerPage)
+  }, [filters, currentPage, itemsPerPage, filtersHydrated, eventId])
 
   // Helper function to preserve state and reload
   const preserveStateAndReload = () => {
     try {
       const url = new URL(window.location.href)
-      if (filters.search) url.searchParams.set('search', filters.search)
-      if (filters.congregation) url.searchParams.set('congregation', filters.congregation)
-      if (filters.isActive !== 'true') url.searchParams.set('isActive', filters.isActive)
-      if (filters.overseerId) url.searchParams.set('overseerId', filters.overseerId)
-      if (filters.keymanId) url.searchParams.set('keymanId', filters.keymanId)
-      if (filters.formsOfService.length > 0) url.searchParams.set('formsOfService', filters.formsOfService.join(','))
-      if (filters.availability !== 'all') url.searchParams.set('availability', filters.availability)
-      url.searchParams.set('page', currentPage.toString())
-      url.searchParams.set('perPage', itemsPerPage.toString())
+      applyVolunteerFiltersToUrl(url, filtersRef.current, pageRef.current, perPageRef.current)
+      writeStoredVolunteerListState(eventId, filtersRef.current, pageRef.current, perPageRef.current)
       sessionStorage.setItem(
         `theoshift:scrollY:${url.pathname}${url.search}`,
         window.scrollY.toString()
@@ -305,6 +338,56 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
     } catch (error) {
       console.error('Error preserving state:', error)
       router.reload()
+    }
+  }
+
+  const handleOversightChange = async (
+    attendant: Attendant,
+    patch: { overseerId?: string | null; keymanId?: string | null }
+  ) => {
+    try {
+      const response = await fetch(`/api/events/${eventId}/volunteers/${attendant.id}/oversight`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patch),
+      })
+      if (!response.ok) {
+        const error = await response.json().catch(() => null)
+        notifyAlert(error?.error || 'Failed to update volunteer')
+        return
+      }
+      const result = await response.json().catch(() => null)
+      const association = result?.association
+      applyRosterPatch(attendant.id, {
+        overseerId:
+          association?.overseerId !== undefined
+            ? association.overseerId
+            : patch.overseerId !== undefined
+              ? patch.overseerId
+              : attendant.overseerId,
+        keymanId:
+          association?.keymanId !== undefined
+            ? association.keymanId
+            : patch.keymanId !== undefined
+              ? patch.keymanId
+              : attendant.keymanId,
+        overseer:
+          association?.overseer !== undefined
+            ? association.overseer
+            : patch.overseerId !== undefined
+              ? resolveOversightName(patch.overseerId)
+              : attendant.overseer,
+        keyman:
+          association?.keyman !== undefined
+            ? association.keyman
+            : patch.keymanId !== undefined
+              ? resolveOversightName(patch.keymanId)
+              : attendant.keyman,
+      })
+      toast.success('Volunteer updated')
+    } catch (error) {
+      console.error('Error updating volunteer oversight:', error)
+      notifyAlert('Failed to update volunteer')
     }
   }
 
@@ -426,7 +509,8 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
 
       const result = await response.json()
       if (result.success) {
-        notifyAlert(`Profile verification required for ${attendant.firstName} ${attendant.lastName}.\n\nThey will see a verification popup on their next login.`)
+        applyRosterPatch(attendant.id, { profileVerificationRequired: true })
+        toast.success(`Profile verification required for ${attendant.firstName} ${attendant.lastName}`)
       } else {
         notifyAlert(`Failed to set verification requirement: ${result.error}`)
       }
@@ -437,7 +521,7 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
 
   // Availability Click Handler
   const handleAvailabilityClick = (attendantId: string) => {
-    const attendant = attendants.find(a => a.id === attendantId)
+    const attendant = roster.find(a => a.id === attendantId)
     if (!attendant) return
     
     setAvailabilityModalAttendant(attendantId)
@@ -468,7 +552,14 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
         setAvailabilityModalAttendant(null)
         setAvailabilityStatus('')
         setAvailabilityNotes('')
-        preserveStateAndReload()
+        applyRosterPatch(availabilityModalAttendant, {
+          availability: {
+            status: availabilityStatus as NonNullable<Attendant['availability']>['status'],
+            notes: availabilityNotes.trim() || null,
+            respondedAt: new Date().toISOString(),
+          },
+        })
+        toast.success('Availability updated')
       } else {
         const error = await response.json()
         notifyAlert(error.error || 'Failed to update availability')
@@ -508,7 +599,7 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
     setBulkEmailJobKind('availability')
     try {
       const attendantIds = Array.from(selectedAttendants).map(associationId => {
-        const attendant = attendants.find(a => a.associationId === associationId)
+        const attendant = roster.find(a => a.associationId === associationId)
         return attendant?.id
       }).filter(Boolean)
 
@@ -525,17 +616,17 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
       const result = await response.json()
 
       if (response.ok) {
-        notifyAlert(
-          result.async
-            ? result.message ||
-                `✅ Queued availability requests for ${result.recipientCount ?? result.sent} volunteers`
-            : `✅ Availability requests sent to ${result.sent} attendants${result.failed > 0 ? `\n⚠️ ${result.failed} failed` : ''}`
-        )
         setShowBulkRequestModal(false)
         setSelectedAttendants(new Set())
         setBulkRequestDeadline('')
         setBulkRequestMessage('')
-        preserveStateAndReload()
+        setBulkEmailJobKind(null)
+        toast.success(
+          result.async
+            ? result.message ||
+                `Queued availability requests for ${result.recipientCount ?? result.sent} volunteers`
+            : `Availability requests sent to ${result.sent} volunteers`
+        )
       } else {
         setBulkEmailJobKind(null)
         notifyAlert(result.error || 'Failed to send availability requests')
@@ -588,10 +679,31 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
         setShowAddModal(false)
         if (payload.data?.alreadyOnEvent) {
           toast.info(payload.data.message || 'This volunteer is already on this event')
+        } else if (editingAttendant) {
+          const forms =
+            typeof formData.formsOfService === 'string'
+              ? formData.formsOfService.split(',').map((f) => f.trim()).filter(Boolean)
+              : formData.formsOfService
+          applyRosterPatch(editingAttendant.id, {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
+            congregation: formData.congregation,
+            notes: formData.notes || null,
+            formsOfService: forms,
+            isActive: formData.isActive,
+            isOverseer: formData.isOverseer,
+            isKeyman: formData.isKeyman,
+          })
+          toast.success('Volunteer updated')
         } else if (payload.data?.promotedFromIvs) {
           toast.success(payload.data.message || 'Added to volunteer roster (already on IVS)')
+          preserveStateAndReload()
+        } else {
+          toast.success('Volunteer added')
+          preserveStateAndReload()
         }
-        preserveStateAndReload()
       } else {
         notifyAlert(payload.error || 'Failed to save attendant')
       }
@@ -617,7 +729,23 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
       })
 
       if (response.ok) {
-        preserveStateAndReload()
+        setRoster((prev) =>
+          prev
+            .filter((row) => row.id !== attendant.id)
+            .map((row) => ({
+              ...row,
+              overseerId: row.overseerId === attendant.id ? null : row.overseerId,
+              overseer: row.overseerId === attendant.id ? null : row.overseer,
+              keymanId: row.keymanId === attendant.id ? null : row.keymanId,
+              keyman: row.keymanId === attendant.id ? null : row.keyman,
+            }))
+        )
+        setSelectedAttendants((prev) => {
+          const next = new Set(prev)
+          next.delete(attendant.associationId)
+          return next
+        })
+        toast.success('Volunteer removed')
       } else {
         const error = await response.json()
         notifyAlert(error.error || 'Failed to remove attendant')
@@ -772,7 +900,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
     })
   }
 
-  const activeVolunteersWithEmailCount = attendants.filter(
+  const activeVolunteersWithEmailCount = roster.filter(
     (a) => a.isActive && (a.email?.trim() ?? '') !== ''
   ).length
 
@@ -930,7 +1058,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
       
       for (const associationId of selectedAttendants) {
         // Find the attendant by association ID first
-        const attendant = attendants.find(att => att.associationId === associationId)
+        const attendant = roster.find(att => att.associationId === associationId)
         if (!attendant) {
           console.error(`❌ Could not find attendant for association ID: ${associationId}`)
           continue
@@ -1010,24 +1138,36 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
         console.error('Some updates failed:', failed)
         notifyAlert(`Bulk edit completed with ${successful.length} successful and ${failed.length} failed updates. Check console for details.`)
       } else {
+        const selectedIds = new Set(selectedAttendants)
+        setRoster((prev) =>
+          prev.map((row) => {
+            if (!selectedIds.has(row.associationId)) return row
+            const next = { ...row }
+            if (bulkEditData.isActive !== '') next.isActive = bulkEditData.isActive === 'true'
+            if (bulkEditData.congregation !== '') next.congregation = bulkEditData.congregation
+            if (bulkEditData.formsOfService !== '') {
+              next.formsOfService = bulkEditData.formsOfService.split(',').map((f) => f.trim()).filter(Boolean)
+            }
+            if (bulkEditData.profileVerificationRequired !== '') {
+              next.profileVerificationRequired = bulkEditData.profileVerificationRequired === 'true'
+            }
+            if (bulkEditData.overseerId !== null) {
+              next.overseerId = bulkEditData.overseerId === 'REMOVE' ? null : bulkEditData.overseerId
+              next.overseer = next.overseerId ? resolveOversightName(next.overseerId) : null
+            }
+            if (bulkEditData.keymanId !== null) {
+              next.keymanId = bulkEditData.keymanId === 'REMOVE' ? null : bulkEditData.keymanId
+              next.keyman = next.keymanId ? resolveOversightName(next.keymanId) : null
+            }
+            return next
+          })
+        )
+        toast.success(`Updated ${successful.length} volunteer${successful.length === 1 ? '' : 's'}`)
       }
       
       setShowBulkEditModal(false)
       setSelectedAttendants(new Set())
       setBulkEditData({ isActive: '', formsOfService: '', congregation: '', overseerId: null, keymanId: null, profileVerificationRequired: '' })
-      
-      // Preserve filter state and pagination in URL before reload
-      try {
-        const url = new URL(window.location.href)
-        if (filters.search) url.searchParams.set('search', filters.search)
-        if (filters.congregation) url.searchParams.set('congregation', filters.congregation)
-        if (filters.isActive !== 'all') url.searchParams.set('isActive', filters.isActive)
-        url.searchParams.set('page', currentPage.toString())
-        window.location.href = url.toString()
-      } catch (error) {
-        console.error('Error preserving filter state:', error)
-        preserveStateAndReload()
-      }
     } catch (error) {
       console.error('Bulk edit error:', error)
       notifyAlert('Failed to update attendants')
@@ -1098,7 +1238,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  All {stats.total}
+                  All {rosterStats.total}
                 </button>
                 <button
                   onClick={() => setFilters({ ...filters, isActive: 'true' })}
@@ -1108,7 +1248,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  Active {stats.active}
+                  Active {rosterStats.active}
                 </button>
                 <button
                   onClick={() => setFilters({ ...filters, isActive: 'false' })}
@@ -1118,7 +1258,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  Inactive {stats.inactive}
+                  Inactive {rosterStats.inactive}
                 </button>
               </div>
             </div>
@@ -1258,7 +1398,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                   >
                     <option value="">All Overseers</option>
                     <option value="none">No Overseer</option>
-                    {attendants.filter(att => att.isActive && att.isOverseer).map(overseer => (
+                    {roster.filter(att => att.isActive && att.isOverseer).map(overseer => (
                       <option key={overseer.id} value={overseer.id}>
                         {overseer.firstName} {overseer.lastName}
                       </option>
@@ -1282,7 +1422,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                   >
                     <option value="">All Keymen</option>
                     <option value="none">No Keyman</option>
-                    {attendants.filter(att => att.isActive && att.isKeyman).map(keyman => (
+                    {roster.filter(att => att.isActive && att.isKeyman).map(keyman => (
                       <option key={keyman.id} value={keyman.id}>
                         {keyman.firstName} {keyman.lastName}
                       </option>
@@ -1385,13 +1525,13 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
               )}
               {filters.overseerId && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-800">
-                  Overseer: {filters.overseerId === 'none' ? 'None' : attendants.find(a => a.id === filters.overseerId)?.firstName + ' ' + attendants.find(a => a.id === filters.overseerId)?.lastName}
+                  Overseer: {filters.overseerId === 'none' ? 'None' : roster.find(a => a.id === filters.overseerId)?.firstName + ' ' + roster.find(a => a.id === filters.overseerId)?.lastName}
                   <button onClick={() => setFilters({ ...filters, overseerId: '' })} className="ml-2 hover:text-purple-900">×</button>
                 </span>
               )}
               {filters.keymanId && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
-                  Keyman: {filters.keymanId === 'none' ? 'None' : attendants.find(a => a.id === filters.keymanId)?.firstName + ' ' + attendants.find(a => a.id === filters.keymanId)?.lastName}
+                  Keyman: {filters.keymanId === 'none' ? 'None' : roster.find(a => a.id === filters.keymanId)?.firstName + ' ' + roster.find(a => a.id === filters.keymanId)?.lastName}
                   <button onClick={() => setFilters({ ...filters, keymanId: '' })} className="ml-2 hover:text-green-900">×</button>
                 </span>
               )}
@@ -1446,7 +1586,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
               >
                 <option value="">All Overseers</option>
                 <option value="none">No Overseer</option>
-                {attendants.filter(att => 
+                {roster.filter(att => 
                   att.isActive && 
                   Array.isArray(att.formsOfService) && 
                   att.formsOfService.some(form => form.toLowerCase().includes('overseer'))
@@ -1466,7 +1606,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
               >
                 <option value="">All Keymen</option>
                 <option value="none">No Keyman</option>
-                {attendants.filter(att => 
+                {roster.filter(att => 
                   att.isActive && 
                   Array.isArray(att.formsOfService) && 
                   att.formsOfService.some(form => form.toLowerCase().includes('keyman'))
@@ -1518,13 +1658,13 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold">{stats.total}</span>
+                    <span className="text-white font-bold">{rosterStats.total}</span>
                   </div>
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Total Volunteers</dt>
-                    <dd className="text-lg font-medium text-gray-900">{stats.total}</dd>
+                    <dd className="text-lg font-medium text-gray-900">{rosterStats.total}</dd>
                   </dl>
                 </div>
               </div>
@@ -1539,13 +1679,13 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold">{stats.active}</span>
+                    <span className="text-white font-bold">{rosterStats.active}</span>
                   </div>
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Active</dt>
-                    <dd className="text-lg font-medium text-gray-900">{stats.active}</dd>
+                    <dd className="text-lg font-medium text-gray-900">{rosterStats.active}</dd>
                   </dl>
                 </div>
               </div>
@@ -1560,13 +1700,13 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold">{stats.inactive}</span>
+                    <span className="text-white font-bold">{rosterStats.inactive}</span>
                   </div>
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Inactive</dt>
-                    <dd className="text-lg font-medium text-gray-900">{stats.inactive}</dd>
+                    <dd className="text-lg font-medium text-gray-900">{rosterStats.inactive}</dd>
                   </dl>
                 </div>
               </div>
@@ -1650,29 +1790,13 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                   </label>
                                   <select
                                     value={attendant.overseerId || ''}
-                                    onChange={async (e) => {
-                                      const overseerId = e.target.value || null
-                                      try {
-                                        const response = await fetch(`/api/events/${eventId}/volunteers/${attendant.id}/oversight`, {
-                                          method: 'PUT',
-                                          headers: { 'Content-Type': 'application/json' },
-                                          body: JSON.stringify({ overseerId })
-                                        })
-                                        if (response.ok) {
-                                          preserveStateAndReload()
-                                        } else {
-                                          const error = await response.json().catch(() => null)
-                                          notifyAlert(error?.error || 'Failed to update overseer')
-                                        }
-                                      } catch (error) {
-                                        console.error('Error updating overseer:', error)
-                                        notifyAlert('Failed to update overseer')
-                                      }
+                                    onChange={(e) => {
+                                      void handleOversightChange(attendant, { overseerId: e.target.value || null })
                                     }}
                                     className="w-full text-sm border border-gray-300 rounded-md px-2 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px] touch-manipulation"
                                   >
                                     <option value="">No Overseer</option>
-                                    {attendants.filter(att => att.isActive && att.isOverseer).map(overseer => (
+                                    {roster.filter(att => att.isActive && att.isOverseer).map(overseer => (
                                       <option key={overseer.id} value={overseer.id}>
                                         {overseer.firstName} {overseer.lastName}
                                       </option>
@@ -1686,29 +1810,13 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                   </label>
                                   <select
                                     value={attendant.keymanId || ''}
-                                    onChange={async (e) => {
-                                      const keymanId = e.target.value || null
-                                      try {
-                                        const response = await fetch(`/api/events/${eventId}/volunteers/${attendant.id}/oversight`, {
-                                          method: 'PUT',
-                                          headers: { 'Content-Type': 'application/json' },
-                                          body: JSON.stringify({ keymanId })
-                                        })
-                                        if (response.ok) {
-                                          preserveStateAndReload()
-                                        } else {
-                                          const error = await response.json().catch(() => null)
-                                          notifyAlert(error?.error || 'Failed to update keyman')
-                                        }
-                                      } catch (error) {
-                                        console.error('Error updating keyman:', error)
-                                        notifyAlert('Failed to update keyman')
-                                      }
+                                    onChange={(e) => {
+                                      void handleOversightChange(attendant, { keymanId: e.target.value || null })
                                     }}
                                     className="w-full text-sm border border-gray-300 rounded-md px-2 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px] touch-manipulation"
                                   >
                                     <option value="">No Keyman</option>
-                                    {attendants.filter(att => att.isActive && att.isKeyman).map(keyman => (
+                                    {roster.filter(att => att.isActive && att.isKeyman).map(keyman => (
                                       <option key={keyman.id} value={keyman.id}>
                                         {keyman.firstName} {keyman.lastName}
                                       </option>
@@ -1909,29 +2017,13 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                         <td className="px-3 py-3 whitespace-nowrap hidden lg:table-cell">
                           <select
                             value={attendant.overseerId || ''}
-                            onChange={async (e) => {
-                              const overseerId = e.target.value || null
-                              try {
-                                const response = await fetch(`/api/events/${eventId}/volunteers/${attendant.id}/oversight`, {
-                                  method: 'PUT',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ overseerId })
-                                })
-                                if (response.ok) {
-                                  preserveStateAndReload()
-                                } else {
-                                  const error = await response.json().catch(() => null)
-                                  notifyAlert(error?.error || 'Failed to update overseer')
-                                }
-                              } catch (error) {
-                                console.error('Error updating overseer:', error)
-                                notifyAlert('Failed to update overseer')
-                              }
+                            onChange={(e) => {
+                              void handleOversightChange(attendant, { overseerId: e.target.value || null })
                             }}
                             className="text-xs border border-gray-300 rounded px-1 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                           >
                             <option value="">No Overseer</option>
-                            {attendants.filter(att => att.isActive && att.isOverseer).map(overseer => (
+                            {roster.filter(att => att.isActive && att.isOverseer).map(overseer => (
                               <option key={overseer.id} value={overseer.id}>
                                 {overseer.firstName} {overseer.lastName}
                               </option>
@@ -1941,29 +2033,13 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                         <td className="px-3 py-3 whitespace-nowrap hidden lg:table-cell">
                           <select
                             value={attendant.keymanId || ''}
-                            onChange={async (e) => {
-                              const keymanId = e.target.value || null
-                              try {
-                                const response = await fetch(`/api/events/${eventId}/volunteers/${attendant.id}/oversight`, {
-                                  method: 'PUT',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ keymanId })
-                                })
-                                if (response.ok) {
-                                  preserveStateAndReload()
-                                } else {
-                                  const error = await response.json().catch(() => null)
-                                  notifyAlert(error?.error || 'Failed to update keyman')
-                                }
-                              } catch (error) {
-                                console.error('Error updating keyman:', error)
-                                notifyAlert('Failed to update keyman')
-                              }
+                            onChange={(e) => {
+                              void handleOversightChange(attendant, { keymanId: e.target.value || null })
                             }}
                             className="text-xs border border-gray-300 rounded px-1 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                           >
                             <option value="">No Keyman</option>
-                            {attendants.filter(att => att.isActive && att.isKeyman).map(keyman => (
+                            {roster.filter(att => att.isActive && att.isKeyman).map(keyman => (
                               <option key={keyman.id} value={keyman.id}>
                                 {keyman.firstName} {keyman.lastName}
                               </option>
@@ -2458,7 +2534,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                         >
                           <option value="">No change</option>
                           <option value="REMOVE">Remove overseer</option>
-                          {attendants.filter(att => 
+                          {roster.filter(att => 
                             att.isActive && 
                             Array.isArray(att.formsOfService) && 
                             att.formsOfService.some(form => form.toLowerCase().includes('overseer'))
@@ -2481,7 +2557,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                         >
                           <option value="">No change</option>
                           <option value="REMOVE">Remove keyman</option>
-                          {attendants.filter(att => 
+                          {roster.filter(att => 
                             att.isActive && 
                             Array.isArray(att.formsOfService) && 
                             att.formsOfService.some(form => form.toLowerCase().includes('keyman'))

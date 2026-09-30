@@ -72,8 +72,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             id: association.id
           },
           data: {
-            overseerId: validatedData.overseerId,
-            keymanId: validatedData.keymanId
+            ...(validatedData.overseerId !== undefined ? { overseerId: validatedData.overseerId } : {}),
+            ...(validatedData.keymanId !== undefined ? { keymanId: validatedData.keymanId } : {}),
           }
         })
         
