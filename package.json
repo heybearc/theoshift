@@ -1,6 +1,6 @@
 {
   "name": "theoshift",
-  "version": "4.32.4",
+  "version": "4.32.5",
   "private": true,
   "scripts": {
     "dev": "next dev --port 3001",
