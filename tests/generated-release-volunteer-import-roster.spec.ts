@@ -49,7 +49,12 @@ test.describe('Generated release — bulk import lands on the volunteer roster',
     const listResponse = await page.request.get(`/api/events/${eventId}/volunteers`)
     expect(listResponse.ok()).toBeTruthy()
     const listBody = await listResponse.json()
-    const emails = (listBody.volunteers || []).map((volunteer: { email?: string }) => volunteer.email)
-    expect(emails).toContain(email)
+    const volunteers = listBody.volunteers || []
+    const imported = volunteers.find((volunteer: { email?: string }) => volunteer.email === email)
+    expect(imported?.email).toBe(email)
+
+    if (imported?.id) {
+      await page.request.delete(`/api/events/${eventId}/volunteers/${imported.id}`)
+    }
   })
 })
