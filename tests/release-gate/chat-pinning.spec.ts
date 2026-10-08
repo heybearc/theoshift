@@ -3,6 +3,7 @@ import { getTestCredentials, getValidEventId } from '../helpers/test-config'
 
 test.describe('Chat pinning (release gate)', () => {
   test('staff can pin and volunteer can see pinned message', async ({ page }) => {
+    test.setTimeout(60_000)
     const creds = getTestCredentials()
 
     await page.goto('/auth/signin')

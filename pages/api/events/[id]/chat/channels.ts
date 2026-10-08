@@ -44,29 +44,52 @@ async function ensureDefaultChannels(eventId: string) {
   }
 }
 
+function positionChannelName(position: { name: string; positionNumber: number }) {
+  const trimmed = position.name.trim()
+  return trimmed ? trimmed : `Position ${position.positionNumber}`
+}
+
 async function ensurePositionChannels(eventId: string) {
   const positions = await prisma.positions.findMany({
     where: { eventId, isActive: true },
     select: { id: true, name: true, positionNumber: true }
   })
-  for (const p of positions) {
-    const name = p.name?.trim() ? p.name.trim() : `Position ${p.positionNumber}`
-    await prisma.event_chat_channels.upsert({
-      where: {
-        eventId_type_positionId: {
-          eventId,
-          type: 'POSITION',
-          positionId: p.id
-        }
-      },
-      create: {
-        eventId,
-        type: 'POSITION',
-        positionId: p.id,
-        name
-      },
-      update: { name }
+  if (positions.length === 0) return
+
+  const existing = await prisma.event_chat_channels.findMany({
+    where: { eventId, type: 'POSITION', positionId: { not: null } },
+    select: { id: true, positionId: true, name: true }
+  })
+  const byPositionId = new Map(existing.map((channel) => [channel.positionId, channel]))
+
+  const missing: { eventId: string; type: 'POSITION'; positionId: string; name: string }[] = []
+  const renames: { id: string; name: string }[] = []
+  for (const position of positions) {
+    const name = positionChannelName(position)
+    const current = byPositionId.get(position.id)
+    if (!current) {
+      missing.push({ eventId, type: 'POSITION', positionId: position.id, name })
+    } else if (current.name !== name) {
+      renames.push({ id: current.id, name })
+    }
+  }
+
+  if (missing.length > 0) {
+    await prisma.event_chat_channels.createMany({
+      data: missing,
+      skipDuplicates: true
     })
+  }
+
+  if (renames.length > 0) {
+    await prisma.$transaction(
+      renames.map((channel) =>
+        prisma.event_chat_channels.update({
+          where: { id: channel.id },
+          data: { name: channel.name }
+        })
+      )
+    )
   }
 }
 
