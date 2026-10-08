@@ -368,7 +368,8 @@ async function handleBulkImportEventVolunteers(req: NextApiRequest, res: NextApi
             }
           })
 
-          // If not assigned, assign to event
+          // If not assigned, assign to event. onVolunteerRoster is required
+          // or the Volunteers page query hides the row.
           if (!existingAssignment) {
             await prisma.event_volunteers.create({
               data: {
@@ -377,11 +378,20 @@ async function handleBulkImportEventVolunteers(req: NextApiRequest, res: NextApi
                 volunteerId: existingVolunteer.id,
                 role: 'VOLUNTEER',
                 isActive: true,
+                onVolunteerRoster: true,
                 createdAt: new Date(),
                 updatedAt: new Date()
               }
             })
-          } else {
+          } else if (!existingAssignment.onVolunteerRoster || !existingAssignment.isActive) {
+            await prisma.event_volunteers.update({
+              where: { id: existingAssignment.id },
+              data: {
+                isActive: true,
+                onVolunteerRoster: true,
+                updatedAt: new Date()
+              }
+            })
           }
 
           updated++
@@ -425,6 +435,7 @@ async function handleBulkImportEventVolunteers(req: NextApiRequest, res: NextApi
               volunteerId: newVolunteer.id,
               role: 'VOLUNTEER',
               isActive: true,
+              onVolunteerRoster: true,
               createdAt: new Date(),
               updatedAt: new Date()
             }
