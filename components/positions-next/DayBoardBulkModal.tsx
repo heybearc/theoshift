@@ -3,6 +3,7 @@ import { createPositionService } from '../../lib/positionService'
 import { notifyAlert, toast } from '../../lib/ui/toast'
 import { formatEventDayLabel } from '../../lib/eventDates'
 import { toDateKey } from '../../lib/shiftConflict'
+import { listEventKeymen, listEventOverseers } from './eventOversightOptions'
 import type { Position, Shift, Volunteer } from './types'
 import { positionDisplayName, shiftLabel } from './types'
 
@@ -77,14 +78,8 @@ export default function DayBoardBulkModal({
   })
 
   const ids = positions.map((p) => p.id)
-  const overseers = attendants.filter((a) => a.isActive !== false && a.isOverseer)
-  const keymen = attendants.filter((a) => a.isActive !== false && a.isKeyman)
-  const people = attendants
-    .filter((a) => a.isActive !== false)
-    .slice()
-    .sort((a, b) =>
-      `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`)
-    )
+  const overseers = listEventOverseers(attendants)
+  const keymen = listEventKeymen(attendants)
   const dayLabel =
     activeDay === 'undated' ? 'undated shifts' : formatEventDayLabel(activeDay)
 
@@ -622,7 +617,7 @@ export default function DayBoardBulkModal({
                   className={`${fieldClass} mt-1`}
                 >
                   <option value="">No change</option>
-                  {people.map((person) => (
+                  {overseers.map((person) => (
                     <option key={person.id} value={person.id}>
                       {person.firstName} {person.lastName}
                     </option>
@@ -637,7 +632,7 @@ export default function DayBoardBulkModal({
                   className={`${fieldClass} mt-1`}
                 >
                   <option value="">No change</option>
-                  {people.map((person) => (
+                  {keymen.map((person) => (
                     <option key={`k-${person.id}`} value={person.id}>
                       {person.firstName} {person.lastName}
                     </option>

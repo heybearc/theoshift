@@ -91,7 +91,8 @@ export default function PositionsDayBoardHelp() {
               </li>
               <li>
                 Set <strong>shift</strong> overseer/keyman from More…, or station
-                oversight from the station header.
+                oversight from the station header. Those lists are the overseers
+                and keymen marked on this event.
               </li>
               <li>
                 <strong>Auto-assign</strong> fills open slots for the{' '}

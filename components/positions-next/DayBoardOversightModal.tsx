@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { createPositionService } from '../../lib/positionService'
 import { notifyAlert, toast } from '../../lib/ui/toast'
+import { listEventKeymen, listEventOverseers } from './eventOversightOptions'
 import type { Position, Volunteer } from './types'
 import { positionDisplayName } from './types'
 
@@ -26,16 +27,19 @@ export default function DayBoardOversightModal({
   const [saving, setSaving] = useState(false)
   const [search, setSearch] = useState('')
 
-  const options = useMemo(() => {
+  const overseers = useMemo(() => {
     const q = search.trim().toLowerCase()
-    return attendants
-      .filter((a) => {
-        if (!q) return true
-        return `${a.firstName} ${a.lastName}`.toLowerCase().includes(q)
-      })
-      .sort((a, b) =>
-        `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`)
-      )
+    return listEventOverseers(attendants).filter((person) => {
+      if (!q) return true
+      return `${person.firstName} ${person.lastName}`.toLowerCase().includes(q)
+    })
+  }, [attendants, search])
+  const keymen = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return listEventKeymen(attendants).filter((person) => {
+      if (!q) return true
+      return `${person.firstName} ${person.lastName}`.toLowerCase().includes(q)
+    })
   }, [attendants, search])
 
   const handleSave = async (e: React.FormEvent) => {
@@ -83,7 +87,7 @@ export default function DayBoardOversightModal({
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Filter people…"
+              placeholder="Filter overseers and keymen…"
               className="w-full rounded-md border border-gray-300 px-3 py-2 min-h-[44px] text-base sm:text-sm"
             />
             <div>
@@ -97,12 +101,15 @@ export default function DayBoardOversightModal({
                 required
               >
                 <option value="">Select…</option>
-                {options.map((a) => (
+                {overseers.map((a) => (
                   <option key={a.id} value={a.id}>
                     {a.firstName} {a.lastName}
                   </option>
                 ))}
               </select>
+              {overseers.length === 0 && (
+                <p className="mt-1 text-xs text-gray-500">No overseers on this event.</p>
+              )}
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
@@ -114,12 +121,15 @@ export default function DayBoardOversightModal({
                 className="w-full rounded-md border border-gray-300 px-3 py-2 min-h-[44px] text-base sm:text-sm"
               >
                 <option value="">None</option>
-                {options.map((a) => (
+                {keymen.map((a) => (
                   <option key={a.id} value={a.id}>
                     {a.firstName} {a.lastName}
                   </option>
                 ))}
               </select>
+              {keymen.length === 0 && (
+                <p className="mt-1 text-xs text-gray-500">No keymen on this event.</p>
+              )}
             </div>
           </div>
           <div className="flex justify-end gap-2 border-t border-gray-200 px-4 py-3">

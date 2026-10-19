@@ -5,6 +5,7 @@ import {
 } from '../../hooks/useConflicts'
 import { appConfirm } from '../../lib/ui/confirm'
 import { notifyAlert } from '../../lib/ui/toast'
+import { listEventKeymen, listEventOverseers } from './eventOversightOptions'
 import type { AssignTarget, Position, Volunteer } from './types'
 
 type Props = {
@@ -53,9 +54,15 @@ export default function DayBoardAssignModal({
     [attendants, target.shift, assignmentMap]
   )
 
+  const roster = useMemo(() => {
+    if (target.role === 'OVERSEER') return listEventOverseers(attendants)
+    if (target.role === 'KEYMAN') return listEventKeymen(attendants)
+    return attendants.filter((person) => person.isActive !== false)
+  }, [attendants, target.role])
+
   const candidates = useMemo(() => {
     const q = search.trim().toLowerCase()
-    return attendants
+    return roster
       .filter((a) => {
         if (!q) return true
         return `${a.firstName} ${a.lastName} ${a.congregation || ''}`
@@ -74,7 +81,7 @@ export default function DayBoardAssignModal({
         )
       })
       .slice(0, 40)
-  }, [attendants, search, conflictMap, preferredOverseerId, preferredKeymanId])
+  }, [roster, search, conflictMap, preferredOverseerId, preferredKeymanId])
 
   const roleLabel =
     target.role === 'OVERSEER'
@@ -205,7 +212,15 @@ export default function DayBoardAssignModal({
               )
             })}
             {candidates.length === 0 && (
-              <p className="py-6 text-center text-sm text-gray-500">No matches</p>
+              <p className="py-6 text-center text-sm text-gray-500">
+                {search.trim()
+                  ? 'No matches'
+                  : target.role === 'OVERSEER'
+                    ? 'No overseers on this event'
+                    : target.role === 'KEYMAN'
+                      ? 'No keymen on this event'
+                      : 'No matches'}
+              </p>
             )}
           </div>
         </div>
