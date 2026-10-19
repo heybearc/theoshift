@@ -32,6 +32,7 @@ EOF
       cat <<'EOF'
 tests/generated-release-volunteers-filter-persist.spec.ts
 tests/generated-release-volunteer-import-roster.spec.ts
+tests/generated-release-skip-changeme-availability.spec.ts
 EOF
       ;;
     auth)
