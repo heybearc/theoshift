@@ -15,6 +15,7 @@ import {
   getBulkEmailJob,
 } from '../../../../src/lib/bulkEmailJob'
 import { volunteerRosterWhere } from '../../../../src/lib/volunteerRoster'
+import { isPlaceholderEmail } from '../../../../src/lib/placeholderEmail'
 
 /**
  * Phase 4C: Bulk Availability Request API
@@ -111,12 +112,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Deduplicate by email so retries / duplicate rows cannot multiply sends
     const seenEmails = new Set<string>()
+    let skippedPlaceholder = 0
     attendants = attendants.filter((a) => {
       const key = (a.email || '').trim().toLowerCase()
       if (!key || seenEmails.has(key)) return false
       seenEmails.add(key)
+      if (isPlaceholderEmail(key)) {
+        skippedPlaceholder++
+        return false
+      }
       return true
     })
+
+    if (attendants.length === 0) {
+      return res.status(400).json({
+        error: skippedPlaceholder
+          ? `No availability emails to send. Skipped ${skippedPlaceholder} placeholder address${skippedPlaceholder === 1 ? '' : 'es'} containing “changeme”.`
+          : 'No attendants found to request from',
+        skippedPlaceholder,
+      })
+    }
 
     const JOB_KIND = 'availability'
     const jobKey = `${JOB_KIND}:${eventId}`
@@ -231,7 +246,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       estimatedSeconds,
       message: `Queued availability requests for ${n} volunteer${n === 1 ? '' : 's'} (~${Math.ceil(
         estimatedSeconds / 60
-      )} min at Gmail-safe pace). Abort from Volunteers if needed — do not click Send again.`,
+      )} min at Gmail-safe pace)${
+        skippedPlaceholder
+          ? `. Skipped ${skippedPlaceholder} placeholder address${skippedPlaceholder === 1 ? '' : 'es'}`
+          : ''
+      }. Abort from Volunteers if needed — do not click Send again.`,
+      skippedPlaceholder,
     })
 
   } catch (error: any) {

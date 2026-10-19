@@ -17,6 +17,7 @@ import {
 import PhoneInput from '../../../components/PhoneInput'
 import { displayPhone } from '@/lib/formatPhone'
 import { volunteerRosterWhere } from '@/lib/volunteerRoster'
+import { isPlaceholderEmail } from '@/lib/placeholderEmail'
 import {
   applyVolunteerFiltersToUrl,
   DEFAULT_VOLUNTEER_FILTERS,
@@ -582,13 +583,28 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
   const handleSendBulkRequest = async () => {
     if (selectedAttendants.size === 0) return
 
-    const count = selectedAttendants.size
+    const selected = Array.from(selectedAttendants)
+      .map((associationId) => roster.find((a) => a.associationId === associationId))
+      .filter((attendant): attendant is Volunteer => Boolean(attendant))
+    const skippedPlaceholder = selected.filter((attendant) =>
+      isPlaceholderEmail(attendant.email)
+    ).length
+    const recipientCount = selected.length - skippedPlaceholder
+    if (recipientCount === 0) {
+      notifyAlert(
+        'No availability emails to send. Addresses containing “changeme” are skipped.'
+      )
+      return
+    }
+
     const confirmed = await appConfirm({
       title: 'Send availability requests',
       message: formatBulkEmailConfirmMessage({
-        recipientCount: count,
-        estimatedSeconds: Math.ceil(count * 1.2),
-        scopeNote: 'Selected Volunteers roster people only (not IVS-only).',
+        recipientCount,
+        estimatedSeconds: Math.ceil(recipientCount * 1.2),
+        scopeNote: skippedPlaceholder
+          ? `Selected Volunteers roster people only (not IVS-only).\n${skippedPlaceholder} placeholder address${skippedPlaceholder === 1 ? '' : 'es'} containing “changeme” will be skipped.`
+          : 'Selected Volunteers roster people only (not IVS-only).',
       }),
       confirmLabel: 'Queue emails',
       cancelLabel: 'Cancel',
