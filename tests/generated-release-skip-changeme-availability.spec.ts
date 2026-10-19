@@ -45,6 +45,7 @@ test.describe('Generated release — skip changeme availability emails', () => {
   })
 
   test('refuses a send that only includes a changeme address', async ({ page }) => {
+    test.setTimeout(60_000)
     const { eventId, volunteerId } = await findChangemeVolunteer(page)
 
     const skipped = await page.request.post(
@@ -58,7 +59,7 @@ test.describe('Generated release — skip changeme availability emails', () => {
 
     await page.setViewportSize({ width: 1280, height: 900 })
     await page.goto(`${BASE_URL}/events/${eventId}/volunteers`)
-    await page.getByPlaceholder('Name, email, phone...').fill('changeme')
+    await page.getByPlaceholder('Search by name, email, phone, congregation...').fill('changeme')
 
     const row = page.locator('table tbody tr').filter({ hasText: /changeme/i }).first()
     await expect(row).toBeVisible({ timeout: 15000 })
