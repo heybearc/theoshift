@@ -100,6 +100,7 @@ interface EventVolunteersPageProps {
 export default function EventAttendantsPage({ eventId, event, attendants, canManageContent, canEdit, canDelete, canManagePermissions, moduleConfig, terminology }: EventVolunteersPageProps) {
   const router = useRouter()
   const selectionAnchorIndexRef = useRef<number | null>(null)
+  const shiftClickRef = useRef(false)
   const [roster, setRoster] = useState<Attendant[]>(attendants)
 
   useScrollRestoration(router.asPath, true)
@@ -899,13 +900,31 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
     window.URL.revokeObjectURL(url)
   }
 
-  // Bulk Edit Functions — use onChange (not preventDefault onClick) so the checkbox
-  // paints immediately; same pattern as IVS Approvals (v4.23.2).
+  // Shift-click selects the range in onChange. preventDefault on the click
+  // leaves the last box selected in state but unchecked on screen.
   const handleAttendantCheckboxChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     associationId: string,
     indexOnPage: number
   ) => {
+    const anchor = selectionAnchorIndexRef.current
+    const shift = shiftClickRef.current
+    shiftClickRef.current = false
+
+    if (shift && anchor !== null) {
+      const lo = Math.min(anchor, indexOnPage)
+      const hi = Math.max(anchor, indexOnPage)
+      const ids = paginatedAttendants.slice(lo, hi + 1).map((a) => a.associationId)
+      setSelectedAttendants((prev) => {
+        const next = new Set(prev)
+        ids.forEach((id) => next.add(id))
+        return next
+      })
+      selectionAnchorIndexRef.current = indexOnPage
+      e.target.checked = true
+      return
+    }
+
     selectionAnchorIndexRef.current = indexOnPage
     const checked = e.target.checked
     setSelectedAttendants((prev) => {
@@ -1040,20 +1059,9 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
   }
 
   const handleAttendantCheckboxShiftClick = (
-    e: React.MouseEvent<HTMLInputElement>,
-    indexOnPage: number
+    e: React.MouseEvent<HTMLInputElement>
   ) => {
-    if (!e.shiftKey || selectionAnchorIndexRef.current === null) return
-    e.preventDefault()
-    const lo = Math.min(selectionAnchorIndexRef.current, indexOnPage)
-    const hi = Math.max(selectionAnchorIndexRef.current, indexOnPage)
-    const ids = paginatedAttendants.slice(lo, hi + 1).map((a) => a.associationId)
-    setSelectedAttendants((prev) => {
-      const next = new Set(prev)
-      ids.forEach((id) => next.add(id))
-      return next
-    })
-    selectionAnchorIndexRef.current = indexOnPage
+    shiftClickRef.current = e.shiftKey
   }
 
   const handleBulkEdit = () => {
@@ -1763,7 +1771,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             onChange={(e) =>
                               handleAttendantCheckboxChange(e, attendant.associationId, index)
                             }
-                            onClick={(e) => handleAttendantCheckboxShiftClick(e, index)}
+                            onClick={(e) => handleAttendantCheckboxShiftClick(e)}
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                           />
                         </div>
@@ -1997,7 +2005,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             onChange={(e) =>
                               handleAttendantCheckboxChange(e, attendant.associationId, index)
                             }
-                            onClick={(e) => handleAttendantCheckboxShiftClick(e, index)}
+                            onClick={(e) => handleAttendantCheckboxShiftClick(e)}
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                           />
                         </td>

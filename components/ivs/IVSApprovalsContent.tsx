@@ -46,6 +46,7 @@ interface IVSApprovalsContentProps {
 export default function IVSApprovalsContent({ event, canEdit }: IVSApprovalsContentProps) {
   const router = useRouter()
   const selectionAnchorIndexRef = useRef<number | null>(null)
+  const shiftClickRef = useRef(false)
   const eventId = event.id
   const [volunteers, setVolunteers] = useState<IVSVolunteer[]>([])
   const [loading, setLoading] = useState(true)
@@ -450,6 +451,24 @@ export default function IVSApprovalsContent({ event, canEdit }: IVSApprovalsCont
     volunteerId: string,
     indexOnPage: number,
   ) => {
+    const anchor = selectionAnchorIndexRef.current
+    const shift = shiftClickRef.current
+    shiftClickRef.current = false
+
+    if (shift && anchor !== null) {
+      const lo = Math.min(anchor, indexOnPage)
+      const hi = Math.max(anchor, indexOnPage)
+      const ids = paginatedVolunteers.slice(lo, hi + 1).map((v) => v.id)
+      setSelectedVolunteers((prev) => {
+        const next = new Set(prev)
+        ids.forEach((id) => next.add(id))
+        return next
+      })
+      selectionAnchorIndexRef.current = indexOnPage
+      e.target.checked = true
+      return
+    }
+
     selectionAnchorIndexRef.current = indexOnPage
     const checked = e.target.checked
     setSelectedVolunteers((prev) => {
@@ -462,19 +481,8 @@ export default function IVSApprovalsContent({ event, canEdit }: IVSApprovalsCont
 
   const handleVolunteerCheckboxShiftClick = (
     e: React.MouseEvent<HTMLInputElement>,
-    indexOnPage: number,
   ) => {
-    if (!e.shiftKey || selectionAnchorIndexRef.current === null) return
-    e.preventDefault()
-    const lo = Math.min(selectionAnchorIndexRef.current, indexOnPage)
-    const hi = Math.max(selectionAnchorIndexRef.current, indexOnPage)
-    const ids = paginatedVolunteers.slice(lo, hi + 1).map((v) => v.id)
-    setSelectedVolunteers((prev) => {
-      const next = new Set(prev)
-      ids.forEach((id) => next.add(id))
-      return next
-    })
-    selectionAnchorIndexRef.current = indexOnPage
+    shiftClickRef.current = e.shiftKey
   }
 
   const allPageSelected =
@@ -762,7 +770,7 @@ export default function IVSApprovalsContent({ event, canEdit }: IVSApprovalsCont
                     type="checkbox"
                     checked={selectedVolunteers.has(volunteer.id)}
                     onChange={(e) => handleVolunteerCheckboxChange(e, volunteer.id, index)}
-                    onClick={(e) => handleVolunteerCheckboxShiftClick(e, index)}
+                    onClick={(e) => handleVolunteerCheckboxShiftClick(e)}
                     className="mt-1 h-5 w-5 shrink-0 cursor-pointer"
                   />
                   <div className="min-w-0 flex-1 space-y-1">
@@ -916,7 +924,7 @@ export default function IVSApprovalsContent({ event, canEdit }: IVSApprovalsCont
                         type="checkbox"
                         checked={selectedVolunteers.has(volunteer.id)}
                         onChange={(e) => handleVolunteerCheckboxChange(e, volunteer.id, index)}
-                        onClick={(e) => handleVolunteerCheckboxShiftClick(e, index)}
+                        onClick={(e) => handleVolunteerCheckboxShiftClick(e)}
                         className="cursor-pointer"
                       />
                     </td>
