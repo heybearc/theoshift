@@ -53,7 +53,12 @@ async function findEvent(page: Page): Promise<{
     if (!positionsResponse.ok()) continue
     const positionsBody = await positionsResponse.json()
     const positions = positionsBody?.positions
-    if (!Array.isArray(positions) || positions.length === 0) continue
+    if (
+      !Array.isArray(positions) ||
+      !positions.some((position: { isActive?: boolean }) => position.isActive !== false)
+    ) {
+      continue
+    }
 
     return {
       eventId: event.id,
@@ -78,7 +83,7 @@ test.describe('Generated release — event overseers on Positions', () => {
     await page.goto(`${BASE_URL}/events/${eventId}/positions-next`)
     await expect(page.getByText(/Stations by day/i).first()).toBeVisible({ timeout: 15000 })
 
-    const station = page.locator('button[aria-expanded]').first()
+    const station = page.locator('section button[aria-expanded]').first()
     await expect(station).toBeVisible()
     if ((await station.getAttribute('aria-expanded')) !== 'true') {
       await station.click()
