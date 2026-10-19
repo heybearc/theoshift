@@ -275,6 +275,7 @@ For issues or questions:
 4. Contact the project maintainer for deployment access
 
 ## 📝 Version History
+- **v4.33.1** (2026-10-19) - Choose which shifts get an overseer or keyman; availability email skips changeme addresses
 - **v4.33.0** (2026-10-19) - Day board bulk edit for stations, including shift overseer and keyman
 - **v4.32.5** (2026-10-08) - Imported volunteers appear on the roster; chat channel list no longer rewrites every position
 - **v4.32.4** (2026-09-30) - Volunteers page keeps filters and search after you edit a volunteer
