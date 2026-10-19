@@ -28,13 +28,13 @@ test.describe('Generated release — day board bulk tools', () => {
     await page.waitForLoadState('domcontentloaded')
     await expect(page.getByText(/Stations by day/i).first()).toBeVisible({ timeout: 15000 })
 
-    const selectVisible = page.getByRole('button', { name: /Select visible/i })
-    if (await selectVisible.isVisible().catch(() => false)) {
-      await selectVisible.click()
-      await page.getByRole('button', { name: /Bulk edit/i }).click()
+    const selectShifts = page.getByRole('button', { name: /Select shifts/i })
+    if (await selectShifts.isVisible().catch(() => false)) {
+      await selectShifts.click()
+      await page.getByRole('button', { name: /Set overseer\/keyman/i }).click()
       await expect(page.getByRole('heading', { name: /Bulk edit/i })).toBeVisible()
       await expect(page.getByText(/Shift overseer and keyman/i)).toBeVisible()
-      await expect(page.getByText(/Station overseer and keyman/i)).toBeVisible()
+      await expect(page.getByRole('button', { name: /All shifts/i })).toBeVisible()
       return
     }
 

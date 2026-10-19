@@ -1245,11 +1245,21 @@ export default function PositionsDayBoard({
                   onClick={selectVisibleStations}
                   className="inline-flex min-h-[44px] items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 touch-manipulation"
                 >
-                  Select visible
+                  Select stations
                 </button>
                 <button
                   type="button"
-                  onClick={() => setSelectedStations(new Set())}
+                  onClick={selectAllUndatedVisible}
+                  className="inline-flex min-h-[44px] items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 touch-manipulation"
+                >
+                  Select shifts
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedStations(new Set())
+                    setSelectedUndated(new Set())
+                  }}
                   className="inline-flex min-h-[44px] items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 touch-manipulation"
                 >
                   Clear selection
@@ -1257,6 +1267,20 @@ export default function PositionsDayBoard({
               </>
             )}
           </div>
+          {canManageContent && selectedUndated.size > 0 && (
+            <div className="flex flex-wrap items-center gap-2 rounded-md border border-indigo-200 bg-indigo-50 px-3 py-2">
+              <span className="text-sm font-medium text-indigo-950">
+                {selectedUndated.size} shift{selectedUndated.size === 1 ? '' : 's'} selected
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowBulkEdit(true)}
+                className="inline-flex min-h-[44px] items-center rounded-md bg-indigo-700 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-800 touch-manipulation"
+              >
+                Set overseer/keyman
+              </button>
+            </div>
+          )}
           {canManageContent && selectedStations.size > 0 && (
             <div className="flex flex-wrap items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2">
               <span className="text-sm font-medium text-blue-900">
@@ -1438,7 +1462,7 @@ export default function PositionsDayBoard({
                       <div key={rowKey} className="px-4 py-3">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                           <div className="flex gap-3">
-                            {activeDay === 'undated' && canManageContent && (
+                            {canManageContent && (
                               <label className="mt-1 inline-flex min-h-[44px] min-w-[44px] items-start touch-manipulation">
                                 <input
                                   type="checkbox"
@@ -1452,7 +1476,7 @@ export default function PositionsDayBoard({
                                     })
                                   }}
                                   className="mt-1 h-4 w-4"
-                                  aria-label="Select undated shift"
+                                  aria-label={`Select shift ${shiftLabel(shift)}`}
                                 />
                               </label>
                             )}
@@ -1803,14 +1827,26 @@ export default function PositionsDayBoard({
       {showBulkEdit && (
         <DayBoardBulkModal
           eventId={eventId}
-          positions={positions.filter((p) => selectedStations.has(p.id))}
+          positions={
+            selectedUndated.size > 0
+              ? positions.filter((p) =>
+                  (p.shifts || []).some((s) =>
+                    selectedUndated.has(`${p.id}:${s.id}`)
+                  )
+                )
+              : positions.filter((p) => selectedStations.has(p.id))
+          }
           attendants={attendants}
           activeDay={activeDay}
           eventDateKeys={eventDateKeys}
+          initialShiftKeys={
+            selectedUndated.size > 0 ? Array.from(selectedUndated) : undefined
+          }
           onClose={() => setShowBulkEdit(false)}
           onDone={() => {
             setShowBulkEdit(false)
             setSelectedStations(new Set())
+            setSelectedUndated(new Set())
             router.reload()
           }}
         />

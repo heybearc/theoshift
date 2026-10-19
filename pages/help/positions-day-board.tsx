@@ -98,10 +98,8 @@ export default function PositionsDayBoardHelp() {
                 <em>active day only</em>.
               </li>
               <li>
-                <strong>Select visible</strong> stations, then <strong>Bulk edit</strong>{' '}
-                to update area or status, apply a template, add a shift, change how many
-                volunteers a shift needs, set station overseer/keyman, or set the shift
-                overseer and keyman for the day you are viewing.
+                <strong>Select shifts</strong>, then <strong>Set overseer/keyman</strong>.
+                In Bulk edit, check the shifts you want before saving the people.
               </li>
               <li>
                 <strong>More…</strong> lists available volunteers, auto-assign for the

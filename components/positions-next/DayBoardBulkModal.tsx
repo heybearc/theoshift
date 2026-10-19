@@ -3,8 +3,8 @@ import { createPositionService } from '../../lib/positionService'
 import { notifyAlert, toast } from '../../lib/ui/toast'
 import { formatEventDayLabel } from '../../lib/eventDates'
 import { toDateKey } from '../../lib/shiftConflict'
-import type { Position, Volunteer } from './types'
-import { positionDisplayName } from './types'
+import type { Position, Shift, Volunteer } from './types'
+import { positionDisplayName, shiftLabel } from './types'
 
 type Props = {
   eventId: string
@@ -12,6 +12,7 @@ type Props = {
   attendants: Volunteer[]
   activeDay: string
   eventDateKeys: string[]
+  initialShiftKeys?: string[]
   onClose: () => void
   onDone: () => void
 }
@@ -29,6 +30,7 @@ export default function DayBoardBulkModal({
   attendants,
   activeDay,
   eventDateKeys,
+  initialShiftKeys,
   onClose,
   onDone,
 }: Props) {
@@ -53,6 +55,26 @@ export default function DayBoardBulkModal({
   const [stationKeymanId, setStationKeymanId] = useState('')
   const [shiftOverseerId, setShiftOverseerId] = useState('')
   const [shiftKeymanId, setShiftKeymanId] = useState('')
+  const dayShiftRows = useMemo(() => {
+    const rows: Array<{ key: string; label: string; shift: Shift; position: Position }> = []
+    for (const position of positions) {
+      for (const shift of position.shifts || []) {
+        const day = toDateKey(shift.shiftDate) || 'undated'
+        if (day !== activeDay) continue
+        rows.push({
+          key: `${position.id}:${shift.id}`,
+          label: `#${position.positionNumber} ${positionDisplayName(position)} · ${shiftLabel(shift)}`,
+          shift,
+          position,
+        })
+      }
+    }
+    return rows
+  }, [positions, activeDay])
+  const [pickedShifts, setPickedShifts] = useState<Set<string>>(() => {
+    if (initialShiftKeys && initialShiftKeys.length > 0) return new Set(initialShiftKeys)
+    return new Set(dayShiftRows.map((row) => row.key))
+  })
 
   const ids = positions.map((p) => p.id)
   const overseers = attendants.filter((a) => a.isActive !== false && a.isOverseer)
@@ -198,6 +220,10 @@ export default function DayBoardBulkModal({
         notifyAlert('Choose a shift overseer, a keyman, or both')
         return
       }
+      if (pickedShifts.size === 0) {
+        notifyAlert('Select at least one shift')
+        return
+      }
       let updated = 0
       let failed = 0
       const roles: Array<['OVERSEER' | 'KEYMAN', string]> = []
@@ -207,7 +233,8 @@ export default function DayBoardBulkModal({
       for (const position of positions) {
         const shifts = (position.shifts || []).filter((shift) => {
           const key = toDateKey(shift.shiftDate) || 'undated'
-          return key === activeDay
+          if (key !== activeDay) return false
+          return pickedShifts.has(`${position.id}:${shift.id}`)
         })
         for (const shift of shifts) {
           for (const [role, volunteerId] of roles) {
@@ -541,8 +568,51 @@ export default function DayBoardBulkModal({
           <section className="rounded-lg border border-indigo-200 bg-indigo-50 p-4">
             <h4 className="mb-1 font-medium text-indigo-950">Shift overseer and keyman</h4>
             <p className="mb-3 text-sm text-indigo-900">
-              Sets the person on every shift for the selected stations on {dayLabel}. An existing person in that role is replaced.
+              Choose the shifts on {dayLabel}, then set the people. An existing person in that role is replaced.
             </p>
+            <div className="mb-3 max-h-48 space-y-1 overflow-y-auto rounded-md bg-white p-2">
+              <div className="mb-1 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPickedShifts(new Set(dayShiftRows.map((row) => row.key)))}
+                  className="min-h-[44px] rounded-md border border-indigo-300 bg-white px-3 py-2 text-sm touch-manipulation"
+                >
+                  All shifts
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPickedShifts(new Set())}
+                  className="min-h-[44px] rounded-md border border-indigo-300 bg-white px-3 py-2 text-sm touch-manipulation"
+                >
+                  Clear shifts
+                </button>
+              </div>
+              {dayShiftRows.length === 0 ? (
+                <p className="px-1 py-2 text-sm text-gray-600">No shifts on {dayLabel}.</p>
+              ) : (
+                dayShiftRows.map((row) => (
+                  <label
+                    key={row.key}
+                    className="flex min-h-[44px] items-center gap-2 px-1 text-sm text-gray-800 touch-manipulation"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={pickedShifts.has(row.key)}
+                      onChange={() => {
+                        setPickedShifts((prev) => {
+                          const next = new Set(prev)
+                          if (next.has(row.key)) next.delete(row.key)
+                          else next.add(row.key)
+                          return next
+                        })
+                      }}
+                      className="h-4 w-4"
+                    />
+                    {row.label}
+                  </label>
+                ))
+              )}
+            </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="text-sm text-gray-700">
                 Shift overseer
