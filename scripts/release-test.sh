@@ -25,6 +25,7 @@ area_files() {
       cat <<'EOF'
 tests/generated-release-positions-day-board.spec.ts
 tests/generated-release-day-board-bulk.spec.ts
+tests/generated-release-event-overseers.spec.ts
 tests/conflict-detection.spec.ts
 EOF
       ;;
