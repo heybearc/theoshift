@@ -1268,7 +1268,7 @@ export default function PositionsDayBoard({
             )}
           </div>
           {canManageContent && selectedUndated.size > 0 && (
-            <div className="flex flex-wrap items-center gap-2 rounded-md border border-indigo-200 bg-indigo-50 px-3 py-2">
+            <div className="sticky top-0 z-20 flex flex-wrap items-center gap-2 rounded-md border border-indigo-200 bg-indigo-50 px-3 py-2">
               <span className="text-sm font-medium text-indigo-950">
                 {selectedUndated.size} shift{selectedUndated.size === 1 ? '' : 's'} selected
               </span>
@@ -1431,7 +1431,6 @@ export default function PositionsDayBoard({
                   )}
                 </header>
 
-                {isOpen && (
                 <div className="divide-y divide-gray-100 border-t border-gray-100">
                   {shifts.map((shift) => {
                     const rowKey = `${position.id}:${shift.id}`
@@ -1463,7 +1462,7 @@ export default function PositionsDayBoard({
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                           <div className="flex gap-3">
                             {canManageContent && (
-                              <label className="mt-1 inline-flex min-h-[44px] min-w-[44px] items-start touch-manipulation">
+                              <label className="mt-1 inline-flex min-h-[44px] shrink-0 items-center gap-2 text-sm font-medium text-gray-700 touch-manipulation">
                                 <input
                                   type="checkbox"
                                   checked={selectedUndated.has(rowKey)}
@@ -1475,9 +1474,10 @@ export default function PositionsDayBoard({
                                       return next
                                     })
                                   }}
-                                  className="mt-1 h-4 w-4"
+                                  className="h-4 w-4 shrink-0"
                                   aria-label={`Select shift ${shiftLabel(shift)}`}
                                 />
+                                Select
                               </label>
                             )}
                             <div>
@@ -1538,6 +1538,8 @@ export default function PositionsDayBoard({
                           </div>
                         </div>
 
+                        {isOpen && (
+                        <>
                         <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
                           <div
                             className={`h-1.5 rounded-full ${
@@ -1715,11 +1717,12 @@ export default function PositionsDayBoard({
                             )}
                           </>
                         )}
+                        </>
+                        )}
                       </div>
                     )
                   })}
                 </div>
-                )}
               </section>
             )
           })}

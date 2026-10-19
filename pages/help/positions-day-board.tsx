@@ -99,8 +99,9 @@ export default function PositionsDayBoardHelp() {
                 <em>active day only</em>.
               </li>
               <li>
+                Each shift on the day has a <strong>Select</strong> box, including
+                when the station’s assignment details are collapsed. Use{' '}
                 <strong>Select shifts</strong>, then <strong>Set overseer/keyman</strong>.
-                In Bulk edit, check the shifts you want before saving the people.
               </li>
               <li>
                 <strong>More…</strong> lists available volunteers, auto-assign for the
