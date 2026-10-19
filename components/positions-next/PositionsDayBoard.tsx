@@ -23,6 +23,9 @@ import DayBoardAssignModal from './DayBoardAssignModal'
 import DayBoardAddShiftModal from './DayBoardAddShiftModal'
 import DayBoardOversightModal from './DayBoardOversightModal'
 import DayBoardApplyTemplateModal from './DayBoardApplyTemplateModal'
+import DayBoardBulkModal from './DayBoardBulkModal'
+import DayBoardAvailableModal from './DayBoardAvailableModal'
+import { listUnassignedVolunteers } from './unassignedVolunteers'
 import {
   type AssignTarget,
   type DayKey,
@@ -62,11 +65,6 @@ export default function PositionsDayBoard({
 }: Props) {
   const router = useRouter()
   const positionService = useMemo(() => createPositionService(eventId), [eventId])
-  const { isExporting, handleExportPDF, handleExportExcel } = useExport({
-    eventId,
-    eventName,
-    positions: positions as any,
-  })
   const [activeDay, setActiveDay] = useState<DayKey>(
     eventDateKeys[0] || 'undated'
   )
@@ -101,6 +99,14 @@ export default function PositionsDayBoard({
   const [showBulkCreator, setShowBulkCreator] = useState(false)
   const [showApplyTemplate, setShowApplyTemplate] = useState(false)
   const [autoAssigning, setAutoAssigning] = useState(false)
+  const [selectedStations, setSelectedStations] = useState<Set<string>>(new Set())
+  const [showBulkEdit, setShowBulkEdit] = useState(false)
+  const [showAvailable, setShowAvailable] = useState(false)
+  const [overseerFilter, setOverseerFilter] = useState('all')
+  const [roleFilter, setRoleFilter] = useState<
+    'all' | 'overseers' | 'assistants' | 'keymen'
+  >('all')
+  const [bulkWorking, setBulkWorking] = useState(false)
   /** Manual expand overrides; absent key = default (open if underfilled). */
   const [expandOverride, setExpandOverride] = useState<Record<string, boolean>>(
     {}
@@ -126,10 +132,47 @@ export default function PositionsDayBoard({
     return keys
   }, [eventDateKeys, undatedShiftCount])
 
+  const overseerOptions = useMemo(() => {
+    const seen = new Map<string, string>()
+    for (const position of positions) {
+      const overseer = position.oversight?.[0]?.overseer
+      if (!overseer) continue
+      seen.set(overseer.id, `${overseer.firstName} ${overseer.lastName}`)
+    }
+    return Array.from(seen, ([id, name]) => ({ id, name })).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    )
+  }, [positions])
+
+  const availableVolunteers = useMemo(
+    () => listUnassignedVolunteers(positions, attendants),
+    [positions, attendants]
+  )
+
   const filteredPositions = useMemo(() => {
     const q = search.trim().toLowerCase()
     return positions.filter((p) => {
       if (!p.isActive && !showInactive) return false
+      if (
+        overseerFilter !== 'all' &&
+        !p.oversight?.some((o) => o.overseer?.id === overseerFilter)
+      ) {
+        return false
+      }
+      if (roleFilter === 'overseers') {
+        const has = (p.assignments || []).some((a) => a.role === 'OVERSEER')
+        if (!has) return false
+      } else if (roleFilter === 'keymen') {
+        const has = (p.assignments || []).some((a) => a.role === 'KEYMAN')
+        if (!has) return false
+      } else if (roleFilter === 'assistants') {
+        const has = (p.assignments || []).some(
+          (a) =>
+            (a.role === 'VOLUNTEER' || a.role === 'ATTENDANT') &&
+            a.volunteer?.user?.role === 'ASSISTANT_OVERSEER'
+        )
+        if (!has) return false
+      }
       if (!q) return true
       const name = (p.name || p.positionName || '').toLowerCase()
       const area = (p.area || '').toLowerCase()
@@ -139,7 +182,14 @@ export default function PositionsDayBoard({
         String(p.positionNumber).includes(q)
       )
     })
-  }, [positions, search, showInactive])
+  }, [positions, search, showInactive, overseerFilter, roleFilter])
+
+  const { isExporting, handleExportPDF, handleExportExcel } = useExport({
+    eventId,
+    eventName,
+    positions: filteredPositions as any,
+    overseerFilter: overseerFilter === 'all' ? null : overseerFilter,
+  })
 
   const stations = useMemo((): StationGroup[] => {
     const out: StationGroup[] = []
@@ -242,6 +292,10 @@ export default function PositionsDayBoard({
     else if (action === 'bulk') setShowBulkCreator(true)
     else if (action === 'template') setShowApplyTemplate(true)
     else if (action === 'auto') await handleAutoAssignDay()
+    else if (action === 'auto-all') await handleAutoAssignAll()
+    else if (action === 'available') setShowAvailable(true)
+    else if (action === 'clear-shifts') await handleClearAll('shifts')
+    else if (action === 'clear-assignments') await handleClearAll('assignments')
     else if (action === 'add-shift') {
       const first = filteredPositions.find((p) => p.isActive)
       if (!first) {
@@ -591,6 +645,105 @@ export default function PositionsDayBoard({
     }
   }
 
+  const handleAutoAssignAll = async () => {
+    const confirmed = await appConfirm({
+      title: 'Auto-assign (all days)',
+      message:
+        'Fill open slots across the whole event?\n\nThis uses every active station, not only the day you are viewing.',
+      confirmLabel: 'Auto-assign',
+      cancelLabel: 'Cancel',
+    })
+    if (!confirmed) return
+    setAutoAssigning(true)
+    try {
+      const engine = new AutoAssignmentEngine({
+        eventId,
+        positions: positions.filter((p) => p.isActive) as any,
+        attendants: attendants as any,
+      })
+      const result = await engine.execute()
+      notifyAlert(result.message)
+      router.reload()
+    } catch {
+      notifyAlert('Failed to auto-assign')
+    } finally {
+      setAutoAssigning(false)
+    }
+  }
+
+  const handleClearAll = async (kind: 'shifts' | 'assignments') => {
+    const shifts = kind === 'shifts'
+    const confirmed = await appConfirm({
+      title: shifts ? 'Clear all shifts' : 'Clear all assignments',
+      message: shifts
+        ? 'Remove every shift and its assignments from this event? This cannot be undone.'
+        : 'Remove every assignment from this event? Shifts stay. This cannot be undone.',
+      confirmLabel: shifts ? 'Clear shifts' : 'Clear assignments',
+      cancelLabel: 'Cancel',
+    })
+    if (!confirmed) return
+    setBulkWorking(true)
+    try {
+      const ok = shifts
+        ? await positionService.clearAllShifts()
+        : await positionService.clearAllAssignments()
+      if (!ok) {
+        notifyAlert(shifts ? 'Failed to clear shifts' : 'Failed to clear assignments')
+        return
+      }
+      toast.success(shifts ? 'Cleared all shifts' : 'Cleared all assignments')
+      router.reload()
+    } catch {
+      notifyAlert(shifts ? 'Failed to clear shifts' : 'Failed to clear assignments')
+    } finally {
+      setBulkWorking(false)
+    }
+  }
+
+  const handleBulkDeleteStations = async () => {
+    if (selectedStations.size === 0) return
+    const confirmed = await appConfirm({
+      title: 'Delete stations',
+      message: `Delete ${selectedStations.size} selected station${
+        selectedStations.size === 1 ? '' : 's'
+      }? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+    })
+    if (!confirmed) return
+    setBulkWorking(true)
+    try {
+      const result = await positionService.bulkDeletePositions(
+        Array.from(selectedStations)
+      )
+      if (result.successCount === 0) {
+        notifyAlert('Failed to delete stations')
+        return
+      }
+      toast.success(
+        `Deleted ${result.successCount} station${result.successCount === 1 ? '' : 's'}`
+      )
+      router.reload()
+    } catch {
+      notifyAlert('Failed to delete stations')
+    } finally {
+      setBulkWorking(false)
+    }
+  }
+
+  const toggleStationSelected = (positionId: string) => {
+    setSelectedStations((prev) => {
+      const next = new Set(prev)
+      if (next.has(positionId)) next.delete(positionId)
+      else next.add(positionId)
+      return next
+    })
+  }
+
+  const selectVisibleStations = () => {
+    setSelectedStations(new Set(stations.map((s) => s.position.id)))
+  }
+
   const runShiftMoreAction = async (
     action: string,
     position: Position,
@@ -801,13 +954,19 @@ export default function PositionsDayBoard({
                 >
                   Auto-assign ({dayScopedUnfilledCount})
                 </option>
+                <option value="auto-all">Auto-assign all days</option>
                 <option value="add-shift">Add shift</option>
                 <option value="notify">Send notifications</option>
                 {notifyJobActive && (
                   <option value="abort">Abort send</option>
                 )}
+                <option value="available">
+                  Available volunteers ({availableVolunteers.length})
+                </option>
                 <option value="pdf">Export PDF</option>
                 <option value="excel">Export Excel</option>
+                <option value="clear-assignments">Clear all assignments</option>
+                <option value="clear-shifts">Clear all shifts</option>
               </select>
 
               {/* Desktop: visible action buttons */}
@@ -877,21 +1036,31 @@ export default function PositionsDayBoard({
                 )}
                 <select
                   defaultValue=""
-                  disabled={isExporting}
+                  disabled={isExporting || bulkWorking || autoAssigning}
                   onChange={async (e) => {
                     const action = e.target.value
                     e.target.value = ''
                     if (action === 'pdf') await handleExportPDF()
                     if (action === 'excel') await handleExportExcel()
+                    if (action === 'available') setShowAvailable(true)
+                    if (action === 'auto-all') await handleAutoAssignAll()
+                    if (action === 'clear-shifts') await handleClearAll('shifts')
+                    if (action === 'clear-assignments') await handleClearAll('assignments')
                   }}
                   className="min-h-[44px] rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 touch-manipulation"
-                  aria-label="Export"
+                  aria-label="More actions"
                 >
                   <option value="">
-                    {isExporting ? 'Exporting…' : 'Export…'}
+                    {isExporting ? 'Exporting…' : 'More…'}
                   </option>
+                  <option value="available">
+                    Available volunteers ({availableVolunteers.length})
+                  </option>
+                  <option value="auto-all">Auto-assign all days</option>
                   <option value="pdf">Export PDF</option>
                   <option value="excel">Export Excel</option>
+                  <option value="clear-assignments">Clear all assignments</option>
+                  <option value="clear-shifts">Clear all shifts</option>
                 </select>
               </div>
             </>
@@ -904,6 +1073,38 @@ export default function PositionsDayBoard({
             className="w-full sm:w-64 px-3 py-2 min-h-[44px] text-base sm:text-sm border border-gray-300 rounded-md"
           />
           <div className="flex flex-wrap justify-end gap-3">
+            <label className="inline-flex min-h-[44px] items-center gap-2 text-sm text-gray-700 touch-manipulation">
+              Overseer
+              <select
+                value={overseerFilter}
+                onChange={(e) => setOverseerFilter(e.target.value)}
+                className="min-h-[44px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm"
+              >
+                <option value="all">All</option>
+                {overseerOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="inline-flex min-h-[44px] items-center gap-2 text-sm text-gray-700 touch-manipulation">
+              Role
+              <select
+                value={roleFilter}
+                onChange={(e) =>
+                  setRoleFilter(
+                    e.target.value as 'all' | 'overseers' | 'assistants' | 'keymen'
+                  )
+                }
+                className="min-h-[44px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm"
+              >
+                <option value="all">All</option>
+                <option value="overseers">Has shift overseer</option>
+                <option value="keymen">Has shift keyman</option>
+                <option value="assistants">Has assistant</option>
+              </select>
+            </label>
             <label className="inline-flex min-h-[44px] items-center gap-2 text-sm text-gray-700 touch-manipulation">
               <input
                 type="checkbox"
@@ -939,6 +1140,16 @@ export default function PositionsDayBoard({
           {dayCoverage.shifts} shift{dayCoverage.shifts === 1 ? '' : 's'}
           {underfilledOnly ? ' · underfilled only' : ''}
         </p>
+        {canManageContent && (
+          <button
+            type="button"
+            onClick={() => setShowAvailable(true)}
+            className="mt-2 inline-flex min-h-[44px] items-center text-sm font-medium text-purple-800 underline touch-manipulation"
+          >
+            {availableVolunteers.length} available volunteer
+            {availableVolunteers.length === 1 ? '' : 's'}
+          </button>
+        )}
         <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-100">
           <div
             className={`h-2 rounded-full ${
@@ -1027,7 +1238,48 @@ export default function PositionsDayBoard({
             >
               Collapse filled
             </button>
+            {canManageContent && (
+              <>
+                <button
+                  type="button"
+                  onClick={selectVisibleStations}
+                  className="inline-flex min-h-[44px] items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 touch-manipulation"
+                >
+                  Select visible
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedStations(new Set())}
+                  className="inline-flex min-h-[44px] items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 touch-manipulation"
+                >
+                  Clear selection
+                </button>
+              </>
+            )}
           </div>
+          {canManageContent && selectedStations.size > 0 && (
+            <div className="flex flex-wrap items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2">
+              <span className="text-sm font-medium text-blue-900">
+                {selectedStations.size} selected
+              </span>
+              <button
+                type="button"
+                disabled={bulkWorking}
+                onClick={() => setShowBulkEdit(true)}
+                className="inline-flex min-h-[44px] items-center rounded-md border border-blue-300 bg-white px-3 py-2 text-sm font-medium text-blue-800 touch-manipulation"
+              >
+                Bulk edit
+              </button>
+              <button
+                type="button"
+                disabled={bulkWorking}
+                onClick={handleBulkDeleteStations}
+                className="inline-flex min-h-[44px] items-center rounded-md border border-red-300 bg-white px-3 py-2 text-sm font-medium text-red-700 touch-manipulation"
+              >
+                Delete
+              </button>
+            </div>
+          )}
           {stations.map(({ position, shifts, filled: stationFilled, needed: stationNeeded }) => {
             const positionOverseer = position.oversight?.[0]?.overseer
             const isOpen = stationExpanded(
@@ -1041,6 +1293,17 @@ export default function PositionsDayBoard({
                 className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
               >
                 <header className="flex flex-col gap-2 bg-gray-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                  {canManageContent && (
+                    <label className="inline-flex min-h-[44px] min-w-[44px] items-center touch-manipulation">
+                      <input
+                        type="checkbox"
+                        checked={selectedStations.has(position.id)}
+                        onChange={() => toggleStationSelected(position.id)}
+                        className="h-4 w-4"
+                        aria-label={`Select ${positionDisplayName(position)}`}
+                      />
+                    </label>
+                  )}
                   <button
                     type="button"
                     onClick={() => toggleStation(position.id, isOpen)}
@@ -1535,6 +1798,29 @@ export default function PositionsDayBoard({
             />
           </div>
         </div>
+      )}
+
+      {showBulkEdit && (
+        <DayBoardBulkModal
+          eventId={eventId}
+          positions={positions.filter((p) => selectedStations.has(p.id))}
+          attendants={attendants}
+          activeDay={activeDay}
+          eventDateKeys={eventDateKeys}
+          onClose={() => setShowBulkEdit(false)}
+          onDone={() => {
+            setShowBulkEdit(false)
+            setSelectedStations(new Set())
+            router.reload()
+          }}
+        />
+      )}
+
+      {showAvailable && (
+        <DayBoardAvailableModal
+          volunteers={availableVolunteers}
+          onClose={() => setShowAvailable(false)}
+        />
       )}
     </div>
   )

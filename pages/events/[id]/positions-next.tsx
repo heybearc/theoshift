@@ -62,8 +62,8 @@ export default function PositionsNextPage({
                   Positions day board
                 </p>
                 <p className="text-sm text-indigo-900">
-                  Default layout for multi-day stations and per-shift overseers.
-                  Classic Positions is still available if you need it.
+                  Day board for multi-day stations, per-shift roles, and bulk setup.
+                  Classic list and grid remain available.
                 </p>
               </div>
               <Link

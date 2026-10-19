@@ -98,9 +98,18 @@ export default function PositionsDayBoardHelp() {
                 <em>active day only</em>.
               </li>
               <li>
-                Setup: <strong>Bulk create</strong> and{' '}
-                <strong>Apply template</strong> add stations/shifts without the
-                old multi-select toolbar.
+                <strong>Select visible</strong> stations, then <strong>Bulk edit</strong>{' '}
+                to update area or status, apply a template, add a shift, change how many
+                volunteers a shift needs, set station overseer/keyman, or set the shift
+                overseer and keyman for the day you are viewing.
+              </li>
+              <li>
+                <strong>More…</strong> lists available volunteers, auto-assign for the
+                whole event, PDF/Excel export, and clear-all actions.
+              </li>
+              <li>
+                Filter by station overseer or by whether a shift has an overseer, keyman,
+                or assistant.
               </li>
             </ul>
           </section>
@@ -113,8 +122,8 @@ export default function PositionsDayBoardHelp() {
                   Where did Clear All Shifts go?
                 </p>
                 <p>
-                  Destructive whole-event clears stay on classic Positions for
-                  now.
+                  Open <strong>More…</strong> on the day board. Clear all shifts and
+                  clear all assignments both ask you to confirm first.
                 </p>
               </div>
               <div>

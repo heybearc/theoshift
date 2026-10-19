@@ -5,7 +5,12 @@ export type AssignmentRole = 'VOLUNTEER' | 'OVERSEER' | 'KEYMAN'
 export type Assignment = {
   id: string
   role: string
-  volunteer?: { id: string; firstName: string; lastName: string } | null
+  volunteer?: {
+    id: string
+    firstName: string
+    lastName: string
+    user?: { role?: string } | null
+  } | null
   attendant?: { id: string; firstName: string; lastName: string } | null
   shift?: {
     id: string
@@ -58,6 +63,10 @@ export type Volunteer = {
   lastName: string
   congregation?: string | null
   isActive?: boolean
+  isOverseer?: boolean
+  isKeyman?: boolean
+  formsOfService?: unknown
+  user?: { role: string } | null
   overseerId?: string | null
   keymanId?: string | null
 }
