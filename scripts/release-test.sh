@@ -26,6 +26,7 @@ area_files() {
 tests/generated-release-positions-day-board.spec.ts
 tests/generated-release-day-board-bulk.spec.ts
 tests/generated-release-event-overseers.spec.ts
+tests/generated-release-shift-select-visible.spec.ts
 tests/conflict-detection.spec.ts
 EOF
       ;;
@@ -34,6 +35,7 @@ EOF
 tests/generated-release-volunteers-filter-persist.spec.ts
 tests/generated-release-volunteer-import-roster.spec.ts
 tests/generated-release-skip-changeme-availability.spec.ts
+tests/generated-release-shift-click-checkbox.spec.ts
 EOF
       ;;
     auth)

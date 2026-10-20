@@ -9,8 +9,8 @@ A fixed gate, plus the area the change touched, plus the generated test for that
 | Area | What it covers |
 |------|----------------|
 | `gate` | Pin a chat message, and assign or clear a keyman on Volunteers |
-| `positions` | Day board, shift bulk edit, event overseer and keyman lists, and assignment conflicts |
-| `volunteers` | Volunteer list filters, CSV import, and skipping changeme addresses on availability email |
+| `positions` | Day board, shift select, shift bulk edit, event overseer and keyman lists, and assignment conflicts |
+| `volunteers` | Volunteer list filters, shift-click selection, CSV import, and skipping changeme addresses on availability email |
 | `auth` | Overseer login when the email capitalization differs |
 | `full` | The complete Playwright suite |
 
