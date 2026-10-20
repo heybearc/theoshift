@@ -26,7 +26,7 @@ async function findEventWithShifts(page: Page): Promise<string> {
     const heading = page.getByText(/Stations by day/i).first()
     if (!(await heading.isVisible({ timeout: 8000 }).catch(() => false))) continue
 
-    const shiftBox = page.getByRole('checkbox', { name: /Select shift/i }).first()
+    const shiftBox = page.getByRole('checkbox', { name: /^Select shift /i }).first()
     if (await shiftBox.isVisible().catch(() => false)) return event.id!
 
     const days = page.getByRole('button').filter({ hasText: /Mon|Tue|Wed|Thu|Fri|Sat|Sun|No day/i })
@@ -51,6 +51,18 @@ test.describe('Generated release — shift select stays visible', () => {
     const eventId = await findEventWithShifts(page)
     await page.goto(`${BASE_URL}/events/${eventId}/positions-next`)
     await expect(page.getByText(/Stations by day/i).first()).toBeVisible({ timeout: 15000 })
-    await expect(page.getByRole('checkbox', { name: /Select shift/i }).first()).toBeVisible()
+    const section = page
+      .locator('section')
+      .filter({ has: page.getByRole('checkbox', { name: /^Select shift /i }) })
+      .first()
+    const shiftBox = section.getByRole('checkbox', { name: /^Select shift /i }).first()
+    const stationShifts = section.getByRole('checkbox', { name: /Select shifts at/i })
+    await expect(shiftBox).toBeVisible()
+    await expect(shiftBox).not.toBeChecked()
+
+    await stationShifts.click()
+    await expect(shiftBox).toBeChecked()
+    await expect(page.getByText(/\d+ shifts? selected/)).toBeVisible()
+    await expect(stationShifts).toBeChecked()
   })
 })

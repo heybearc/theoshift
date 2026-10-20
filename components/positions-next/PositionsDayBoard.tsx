@@ -101,6 +101,7 @@ export default function PositionsDayBoard({
   const [autoAssigning, setAutoAssigning] = useState(false)
   const [selectedStations, setSelectedStations] = useState<Set<string>>(new Set())
   const [showBulkEdit, setShowBulkEdit] = useState(false)
+  const [bulkTarget, setBulkTarget] = useState<'shifts' | 'stations'>('shifts')
   const [showAvailable, setShowAvailable] = useState(false)
   const [overseerFilter, setOverseerFilter] = useState('all')
   const [roleFilter, setRoleFilter] = useState<
@@ -740,6 +741,22 @@ export default function PositionsDayBoard({
     })
   }
 
+  const toggleStationShifts = (
+    positionId: string,
+    shifts: { id: string }[]
+  ) => {
+    const keys = shifts.map((shift) => `${positionId}:${shift.id}`)
+    setSelectedUndated((prev) => {
+      const next = new Set(prev)
+      const allOn = keys.length > 0 && keys.every((key) => next.has(key))
+      for (const key of keys) {
+        if (allOn) next.delete(key)
+        else next.add(key)
+      }
+      return next
+    })
+  }
+
   const selectVisibleStations = () => {
     setSelectedStations(new Set(stations.map((s) => s.position.id)))
   }
@@ -1274,7 +1291,10 @@ export default function PositionsDayBoard({
               </span>
               <button
                 type="button"
-                onClick={() => setShowBulkEdit(true)}
+                onClick={() => {
+                  setBulkTarget('shifts')
+                  setShowBulkEdit(true)
+                }}
                 className="inline-flex min-h-[44px] items-center rounded-md bg-indigo-700 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-800 touch-manipulation"
               >
                 Set overseer/keyman
@@ -1289,7 +1309,10 @@ export default function PositionsDayBoard({
               <button
                 type="button"
                 disabled={bulkWorking}
-                onClick={() => setShowBulkEdit(true)}
+                onClick={() => {
+                  setBulkTarget('stations')
+                  setShowBulkEdit(true)
+                }}
                 className="inline-flex min-h-[44px] items-center rounded-md border border-blue-300 bg-white px-3 py-2 text-sm font-medium text-blue-800 touch-manipulation"
               >
                 Bulk edit
@@ -1317,14 +1340,30 @@ export default function PositionsDayBoard({
                 className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
               >
                 <header className="flex flex-col gap-2 bg-gray-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                  {canManageContent && (
-                    <label className="inline-flex min-h-[44px] min-w-[44px] items-center touch-manipulation">
+                  {canManageContent && shifts.length > 0 && (
+                    <label className="relative z-10 inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center self-start touch-manipulation">
                       <input
                         type="checkbox"
-                        checked={selectedStations.has(position.id)}
-                        onChange={() => toggleStationSelected(position.id)}
+                        ref={(el) => {
+                          if (!el) return
+                          const keys = shifts.map(
+                            (shift) => `${position.id}:${shift.id}`
+                          )
+                          const selectedCount = keys.filter((key) =>
+                            selectedUndated.has(key)
+                          ).length
+                          el.indeterminate =
+                            selectedCount > 0 && selectedCount < keys.length
+                        }}
+                        checked={shifts.every((shift) =>
+                          selectedUndated.has(`${position.id}:${shift.id}`)
+                        )}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={() =>
+                          toggleStationShifts(position.id, shifts)
+                        }
                         className="h-4 w-4"
-                        aria-label={`Select ${positionDisplayName(position)}`}
+                        aria-label={`Select shifts at ${positionDisplayName(position)}`}
                       />
                     </label>
                   )}
@@ -1383,6 +1422,19 @@ export default function PositionsDayBoard({
                       </span>
                     </span>
                   </button>
+                  {canManageContent && (
+                    <label className="inline-flex min-h-[44px] shrink-0 items-center gap-2 text-sm text-gray-600 touch-manipulation">
+                      <input
+                        type="checkbox"
+                        checked={selectedStations.has(position.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={() => toggleStationSelected(position.id)}
+                        className="h-4 w-4"
+                        aria-label={`Select station ${positionDisplayName(position)}`}
+                      />
+                      Station
+                    </label>
+                  )}
                   {canManageContent && isOpen && (
                     <div className="flex flex-wrap gap-2 sm:pl-8">
                       {position.isActive ? (
@@ -1462,10 +1514,11 @@ export default function PositionsDayBoard({
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                           <div className="flex gap-3">
                             {canManageContent && (
-                              <label className="mt-1 inline-flex min-h-[44px] shrink-0 items-center gap-2 text-sm font-medium text-gray-700 touch-manipulation">
+                              <label className="relative z-10 mt-1 inline-flex min-h-[44px] shrink-0 items-center gap-2 text-sm font-medium text-gray-700 touch-manipulation">
                                 <input
                                   type="checkbox"
                                   checked={selectedUndated.has(rowKey)}
+                                  onClick={(e) => e.stopPropagation()}
                                   onChange={() => {
                                     setSelectedUndated((prev) => {
                                       const next = new Set(prev)
@@ -1831,19 +1884,19 @@ export default function PositionsDayBoard({
         <DayBoardBulkModal
           eventId={eventId}
           positions={
-            selectedUndated.size > 0
-              ? positions.filter((p) =>
+            bulkTarget === 'stations'
+              ? positions.filter((p) => selectedStations.has(p.id))
+              : positions.filter((p) =>
                   (p.shifts || []).some((s) =>
                     selectedUndated.has(`${p.id}:${s.id}`)
                   )
                 )
-              : positions.filter((p) => selectedStations.has(p.id))
           }
           attendants={attendants}
           activeDay={activeDay}
           eventDateKeys={eventDateKeys}
           initialShiftKeys={
-            selectedUndated.size > 0 ? Array.from(selectedUndated) : undefined
+            bulkTarget === 'shifts' ? Array.from(selectedUndated) : undefined
           }
           onClose={() => setShowBulkEdit(false)}
           onDone={() => {
