@@ -5,6 +5,7 @@ import EventPageWrapper from '../../../components/EventPageWrapper'
 import CreateCountSessionModal from '../../../components/CreateCountSessionModal'
 import EditCountSessionModal from '../../../components/EditCountSessionModal'
 import { useEffect, useState } from 'react'
+import { useShiftRangeSelection } from '../../../hooks/useShiftRangeSelection'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { getViewAsHeaders } from '@/lib/viewAsClient'
@@ -121,6 +122,7 @@ export default function CountTimesPage({ eventId, event, countSessions, canManag
   const [volunteers, setVolunteers] = useState<VolunteerOption[]>([])
   const [selectedBulkVolunteerId, setSelectedBulkVolunteerId] = useState('')
   const [selectedBulkPositions, setSelectedBulkPositions] = useState<Set<string>>(new Set())
+  const stationRange = useShiftRangeSelection()
   const [savingAssignments, setSavingAssignments] = useState(false)
   const [groupDrafts, setGroupDrafts] = useState<CountGroupDraft[]>([])
   const [groupSaveMessage, setGroupSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -471,13 +473,23 @@ export default function CountTimesPage({ eventId, event, countSessions, canManag
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {assignmentPositions.map((position) => (
+                      {assignmentPositions.map((position, index) => (
                         <div key={position.id} className="bg-white border border-gray-200 rounded p-3">
                           <label className="flex items-center gap-2 mb-2 text-sm">
                             <input
                               type="checkbox"
                               checked={selectedBulkPositions.has(position.id)}
+                              onClick={(e) => stationRange.markClick(e)}
                               onChange={(e) => {
+                                const ids = assignmentPositions.map((row) => row.id)
+                                const handled = stationRange.consumeRange(e, index, (lo, hi) => {
+                                  setSelectedBulkPositions((prev) => {
+                                    const next = new Set(prev)
+                                    ids.slice(lo, hi + 1).forEach((id) => next.add(id))
+                                    return next
+                                  })
+                                })
+                                if (handled) return
                                 setSelectedBulkPositions((prev) => {
                                   const next = new Set(prev)
                                   if (e.target.checked) next.add(position.id)

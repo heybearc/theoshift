@@ -8,6 +8,7 @@ import VolunteerDetailsPopup from '../../../components/VolunteerDetailsPopup'
 import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { useScrollRestoration } from '../../../hooks/useScrollRestoration'
+import { useShiftRangeSelection } from '../../../hooks/useShiftRangeSelection'
 import { notifyAlert, toast } from '../../../lib/ui/toast'
 import { appConfirm, appConfirmMessage } from '../../../lib/ui/confirm'
 import {
@@ -99,8 +100,7 @@ interface EventVolunteersPageProps {
 
 export default function EventAttendantsPage({ eventId, event, attendants, canManageContent, canEdit, canDelete, canManagePermissions, moduleConfig, terminology }: EventVolunteersPageProps) {
   const router = useRouter()
-  const selectionAnchorIndexRef = useRef<number | null>(null)
-  const shiftClickRef = useRef(false)
+  const rowRange = useShiftRangeSelection()
   const [roster, setRoster] = useState<Attendant[]>(attendants)
 
   useScrollRestoration(router.asPath, true)
@@ -900,32 +900,22 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
     window.URL.revokeObjectURL(url)
   }
 
-  // Shift-click selects the range in onChange. preventDefault on the click
-  // leaves the last box selected in state but unchecked on screen.
+  const pageIds = paginatedAttendants.map((a) => a.associationId)
+
   const handleAttendantCheckboxChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     associationId: string,
     indexOnPage: number
   ) => {
-    const anchor = selectionAnchorIndexRef.current
-    const shift = shiftClickRef.current
-    shiftClickRef.current = false
-
-    if (shift && anchor !== null) {
-      const lo = Math.min(anchor, indexOnPage)
-      const hi = Math.max(anchor, indexOnPage)
-      const ids = paginatedAttendants.slice(lo, hi + 1).map((a) => a.associationId)
+    const handled = rowRange.consumeRange(e, indexOnPage, (lo, hi) => {
       setSelectedAttendants((prev) => {
         const next = new Set(prev)
-        ids.forEach((id) => next.add(id))
+        pageIds.slice(lo, hi + 1).forEach((id) => next.add(id))
         return next
       })
-      selectionAnchorIndexRef.current = indexOnPage
-      e.target.checked = true
-      return
-    }
+    })
+    if (handled) return
 
-    selectionAnchorIndexRef.current = indexOnPage
     const checked = e.target.checked
     setSelectedAttendants((prev) => {
       const next = new Set(prev)
@@ -933,6 +923,66 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
       else next.delete(associationId)
       return next
     })
+  }
+
+  const exportFilteredVolunteers = () => {
+    const csvCell = (value: string) => {
+      if (/[",\n\r]/.test(value)) return `"${value.replace(/"/g, '""')}"`
+      return value
+    }
+    const personName = (person?: { firstName: string; lastName: string } | null) =>
+      person ? `${person.firstName} ${person.lastName}`.trim() : ''
+    const availabilityLabel: Record<string, string> = {
+      AVAILABLE: 'Available',
+      NOT_AVAILABLE: 'Not available',
+      PARTIAL: 'Partial',
+      PENDING: 'Pending',
+    }
+    const header = [
+      'First name',
+      'Last name',
+      'Email',
+      'Phone',
+      'Congregation',
+      'Status',
+      'Overseer',
+      'Keyman',
+      'Availability',
+      'Forms of service',
+      'Assignments',
+      'Notes',
+    ]
+    const lines = filteredAttendants.map((attendant) =>
+      [
+        attendant.firstName,
+        attendant.lastName,
+        attendant.email || '',
+        displayPhone(attendant.phone),
+        attendant.congregation || '',
+        attendant.isActive ? 'Active' : 'Inactive',
+        personName(attendant.overseer),
+        personName(attendant.keyman),
+        attendant.availability?.status
+          ? availabilityLabel[attendant.availability.status] || attendant.availability.status
+          : '',
+        Array.isArray(attendant.formsOfService) ? attendant.formsOfService.join('; ') : '',
+        (attendant.assignments || []).map((assignment) => assignment.positionName).join('; '),
+        attendant.notes || '',
+      ]
+        .map((cell) => csvCell(String(cell ?? '')))
+        .join(',')
+    )
+    const csv = `\uFEFF${header.map(csvCell).join(',')}\n${lines.join('\n')}\n`
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    const safeName = event.name.replace(/[^\w.-]+/g, '-').replace(/^-|-$/g, '') || 'event'
+    a.href = url
+    a.download = `${safeName}-volunteers.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
   }
 
   const activeVolunteersWithEmailCount = roster.filter(
@@ -1038,7 +1088,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
   }
 
   const handleSelectAll = () => {
-    selectionAnchorIndexRef.current = null
+    rowRange.clearAnchor()
     // With exactly one visible row, the header checkbox matches the row checkbox. A second
     // header click would otherwise clear the only selection — surprising when emailing one volunteer.
     if (filteredAttendants.length === 1) {
@@ -1061,7 +1111,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
   const handleAttendantCheckboxShiftClick = (
     e: React.MouseEvent<HTMLInputElement>
   ) => {
-    shiftClickRef.current = e.shiftKey
+    rowRange.markClick(e)
   }
 
   const handleBulkEdit = () => {
@@ -1309,6 +1359,15 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                   Import
+                </button>
+                <button
+                  type="button"
+                  onClick={exportFilteredVolunteers}
+                  disabled={loading || filteredAttendants.length === 0}
+                  title="Download the volunteers that match the current filters"
+                  className="inline-flex items-center px-3 py-2 bg-white hover:bg-gray-50 disabled:bg-gray-100 text-gray-800 text-sm font-medium rounded-md border border-gray-300 transition-colors"
+                >
+                  Export list
                 </button>
                 <button
                   type="button"

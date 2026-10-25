@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react'
+import { useShiftRangeSelection } from '../../hooks/useShiftRangeSelection'
 import { createPositionService } from '../../lib/positionService'
 import { notifyAlert, toast } from '../../lib/ui/toast'
 import type { Position } from './types'
@@ -43,6 +44,7 @@ export default function DayBoardApplyTemplateModal({
   const [templateType, setTemplateType] = useState('allday')
   const [volunteersNeeded, setVolunteersNeeded] = useState(1)
   const [applying, setApplying] = useState(false)
+  const stationRange = useShiftRangeSelection()
 
   const toggle = (id: string) => {
     setSelected((prev) => {
@@ -160,7 +162,7 @@ export default function DayBoardApplyTemplateModal({
               </div>
             </div>
             <div className="max-h-48 space-y-1 overflow-y-auto rounded-md border border-gray-200 p-2">
-              {active.map((p) => (
+              {active.map((p, index) => (
                 <label
                   key={p.id}
                   className="flex min-h-[44px] items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-gray-50 touch-manipulation"
@@ -168,7 +170,18 @@ export default function DayBoardApplyTemplateModal({
                   <input
                     type="checkbox"
                     checked={selected.has(p.id)}
-                    onChange={() => toggle(p.id)}
+                    onClick={(e) => stationRange.markClick(e)}
+                    onChange={(e) => {
+                      const ids = active.map((row) => row.id)
+                      const handled = stationRange.consumeRange(e, index, (lo, hi) => {
+                        setSelected((prev) => {
+                          const next = new Set(prev)
+                          ids.slice(lo, hi + 1).forEach((id) => next.add(id))
+                          return next
+                        })
+                      })
+                      if (!handled) toggle(p.id)
+                    }}
                     className="h-4 w-4"
                   />
                   <span>

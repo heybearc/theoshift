@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react'
+import { useShiftRangeSelection } from '../../hooks/useShiftRangeSelection'
 import { createPositionService } from '../../lib/positionService'
 import { notifyAlert, toast } from '../../lib/ui/toast'
 import { formatEventDayLabel } from '../../lib/eventDates'
@@ -76,6 +77,7 @@ export default function DayBoardBulkModal({
     if (initialShiftKeys && initialShiftKeys.length > 0) return new Set(initialShiftKeys)
     return new Set(dayShiftRows.map((row) => row.key))
   })
+  const shiftRange = useShiftRangeSelection()
 
   const ids = positions.map((p) => p.id)
   const overseers = listEventOverseers(attendants)
@@ -585,7 +587,7 @@ export default function DayBoardBulkModal({
               {dayShiftRows.length === 0 ? (
                 <p className="px-1 py-2 text-sm text-gray-600">No shifts on {dayLabel}.</p>
               ) : (
-                dayShiftRows.map((row) => (
+                dayShiftRows.map((row, index) => (
                   <label
                     key={row.key}
                     className="flex min-h-[44px] items-center gap-2 px-1 text-sm text-gray-800 touch-manipulation"
@@ -593,11 +595,21 @@ export default function DayBoardBulkModal({
                     <input
                       type="checkbox"
                       checked={pickedShifts.has(row.key)}
-                      onChange={() => {
+                      onClick={(e) => shiftRange.markClick(e)}
+                      onChange={(e) => {
+                        const ids = dayShiftRows.map((item) => item.key)
+                        const handled = shiftRange.consumeRange(e, index, (lo, hi) => {
+                          setPickedShifts((prev) => {
+                            const next = new Set(prev)
+                            ids.slice(lo, hi + 1).forEach((id) => next.add(id))
+                            return next
+                          })
+                        })
+                        if (handled) return
                         setPickedShifts((prev) => {
                           const next = new Set(prev)
-                          if (next.has(row.key)) next.delete(row.key)
-                          else next.add(row.key)
+                          if (e.target.checked) next.add(row.key)
+                          else next.delete(row.key)
                           return next
                         })
                       }}

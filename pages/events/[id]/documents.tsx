@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import EventPageWrapper from '../../../components/EventPageWrapper'
 import { useEffect, useState } from 'react'
+import { useShiftRangeSelection } from '../../../hooks/useShiftRangeSelection'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
@@ -64,6 +65,7 @@ export default function EventDocumentsPage({ eventId, event, documents, canEdit,
   const [publishType, setPublishType] = useState<'all' | 'individual'>('all')
   const [selectedAttendants, setSelectedAttendants] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
+  const publishRange = useShiftRangeSelection()
 
   const [uploadData, setUploadData] = useState({
     title: '',
@@ -514,12 +516,22 @@ export default function EventDocumentsPage({ eventId, event, documents, canEdit,
                         className="w-full px-3 py-2 border border-gray-300 rounded-md mb-3"
                       />
                       <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-md">
-                        {filteredAttendants.map((attendant) => (
+                        {filteredAttendants.map((attendant, index) => (
                           <label key={attendant.id} className="flex items-center p-3 hover:bg-gray-50">
                             <input
                               type="checkbox"
                               checked={selectedAttendants.includes(attendant.id)}
+                              onClick={(e) => publishRange.markClick(e)}
                               onChange={(e) => {
+                                const ids = filteredAttendants.map((row) => row.id)
+                                const handled = publishRange.consumeRange(e, index, (lo, hi) => {
+                                  setSelectedAttendants((prev) => {
+                                    const next = new Set(prev)
+                                    ids.slice(lo, hi + 1).forEach((id) => next.add(id))
+                                    return Array.from(next)
+                                  })
+                                })
+                                if (handled) return
                                 if (e.target.checked) {
                                   setSelectedAttendants([...selectedAttendants, attendant.id])
                                 } else {

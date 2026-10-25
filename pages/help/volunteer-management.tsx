@@ -267,8 +267,8 @@ export default function VolunteerManagementHelp({ userRole }: VolunteerManagemen
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Can I export the filtered list?</h3>
               <p className="text-gray-700">
-                Yes! When you export volunteer data, it respects your current filters, so you only
-                export the volunteers you're currently viewing.
+                Yes. On Volunteers, choose <strong>Export list</strong>. The file includes everyone
+                who matches the current filters, including people on later pages.
               </p>
             </div>
 

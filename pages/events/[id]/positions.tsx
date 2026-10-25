@@ -10,6 +10,7 @@ import { AutoAssignmentEngine } from '../../../lib/autoAssignmentEngine'
 import { createPositionService } from '../../../lib/positionService'
 import { exportService } from '../../../lib/exportService'
 import { usePositions } from '../../../hooks/usePositions'
+import { useShiftRangeSelection } from '../../../hooks/useShiftRangeSelection'
 import { useAssignments } from '../../../hooks/useAssignments'
 import { useBulkOperations } from '../../../hooks/useBulkOperations'
 import { useShifts } from '../../../hooks/useShifts'
@@ -1494,6 +1495,7 @@ export default function EventPositionsPage({ eventId, event, positions: initialP
   // Get session data
   const { data: session } = useSession()
   const isAdmin = session?.user?.role === 'ADMIN'
+  const positionRange = useShiftRangeSelection()
 
   // Helper function to reload page while preserving showInactive state
   const reloadWithState = () => {
@@ -2169,7 +2171,7 @@ export default function EventPositionsPage({ eventId, event, positions: initialP
                 </button>
               </div>
             ) : (
-              getFilteredPositionsWithOverseer().map((position) => {
+              getFilteredPositionsWithOverseer().map((position, index) => {
                 // Slot-based completion (respects volunteersNeeded, default 1)
                 const { filled: assignedShifts, needed: totalShifts, percentage: completionPercentage } =
                   getPositionSlotFillRatio(position.shifts, position.assignments)
@@ -2187,7 +2189,17 @@ export default function EventPositionsPage({ eventId, event, positions: initialP
                           <input
                             type="checkbox"
                             checked={selectedPositions.has(position.id)}
+                            onClick={(e) => positionRange.markClick(e)}
                             onChange={(e) => {
+                              const ids = getFilteredPositionsWithOverseer().map((row) => row.id)
+                              const handled = positionRange.consumeRange(e, index, (lo, hi) => {
+                                setSelectedPositions((prev) => {
+                                  const next = new Set(prev)
+                                  ids.slice(lo, hi + 1).forEach((id) => next.add(id))
+                                  return next
+                                })
+                              })
+                              if (handled) return
                               const newSelected = new Set(selectedPositions)
                               if (e.target.checked) {
                                 newSelected.add(position.id)

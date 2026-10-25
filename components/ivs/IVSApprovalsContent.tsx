@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
+import { useShiftRangeSelection } from '../../hooks/useShiftRangeSelection'
 import { useRouter } from 'next/router'
 import { useScrollRestoration } from '../../hooks/useScrollRestoration'
 import EditVolunteerModal from '../EditVolunteerModal'
@@ -45,8 +46,7 @@ interface IVSApprovalsContentProps {
 
 export default function IVSApprovalsContent({ event, canEdit }: IVSApprovalsContentProps) {
   const router = useRouter()
-  const selectionAnchorIndexRef = useRef<number | null>(null)
-  const shiftClickRef = useRef(false)
+  const rowRange = useShiftRangeSelection()
   const eventId = event.id
   const [volunteers, setVolunteers] = useState<IVSVolunteer[]>([])
   const [loading, setLoading] = useState(true)
@@ -446,30 +446,22 @@ export default function IVSApprovalsContent({ event, canEdit }: IVSApprovalsCont
       ? sortedVolunteers
       : sortedVolunteers.slice(startIndex, endIndex)
 
+  const pageIds = paginatedVolunteers.map((v) => v.id)
+
   const handleVolunteerCheckboxChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     volunteerId: string,
     indexOnPage: number,
   ) => {
-    const anchor = selectionAnchorIndexRef.current
-    const shift = shiftClickRef.current
-    shiftClickRef.current = false
-
-    if (shift && anchor !== null) {
-      const lo = Math.min(anchor, indexOnPage)
-      const hi = Math.max(anchor, indexOnPage)
-      const ids = paginatedVolunteers.slice(lo, hi + 1).map((v) => v.id)
+    const handled = rowRange.consumeRange(e, indexOnPage, (lo, hi) => {
       setSelectedVolunteers((prev) => {
         const next = new Set(prev)
-        ids.forEach((id) => next.add(id))
+        pageIds.slice(lo, hi + 1).forEach((id) => next.add(id))
         return next
       })
-      selectionAnchorIndexRef.current = indexOnPage
-      e.target.checked = true
-      return
-    }
+    })
+    if (handled) return
 
-    selectionAnchorIndexRef.current = indexOnPage
     const checked = e.target.checked
     setSelectedVolunteers((prev) => {
       const next = new Set(prev)
@@ -482,7 +474,7 @@ export default function IVSApprovalsContent({ event, canEdit }: IVSApprovalsCont
   const handleVolunteerCheckboxShiftClick = (
     e: React.MouseEvent<HTMLInputElement>,
   ) => {
-    shiftClickRef.current = e.shiftKey
+    rowRange.markClick(e)
   }
 
   const allPageSelected =
@@ -490,7 +482,7 @@ export default function IVSApprovalsContent({ event, canEdit }: IVSApprovalsCont
     paginatedVolunteers.every((v) => selectedVolunteers.has(v.id))
 
   const handleSelectAll = () => {
-    selectionAnchorIndexRef.current = null
+    rowRange.clearAnchor()
     const pageIds = paginatedVolunteers.map((v) => v.id)
     const everyPageRowSelected =
       pageIds.length > 0 && pageIds.every((id) => selectedVolunteers.has(id))

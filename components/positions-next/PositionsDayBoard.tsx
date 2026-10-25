@@ -16,6 +16,7 @@ import {
   formatBulkEmailConfirmMessage,
 } from '../../lib/bulkEmailClient'
 import { useExport } from '../../hooks/useExport'
+import { useShiftRangeSelection } from '../../hooks/useShiftRangeSelection'
 import ShiftInlineEditor from '../ShiftInlineEditor'
 import CreatePositionModal from '../CreatePositionModal'
 import BulkPositionCreator from '../positions/BulkPositionCreator'
@@ -100,6 +101,9 @@ export default function PositionsDayBoard({
   const [showApplyTemplate, setShowApplyTemplate] = useState(false)
   const [autoAssigning, setAutoAssigning] = useState(false)
   const [selectedStations, setSelectedStations] = useState<Set<string>>(new Set())
+  const stationRange = useShiftRangeSelection()
+  const shiftRange = useShiftRangeSelection()
+  const stationShiftRange = useShiftRangeSelection()
   const [showBulkEdit, setShowBulkEdit] = useState(false)
   const [bulkTarget, setBulkTarget] = useState<'shifts' | 'stations'>('shifts')
   const [showAvailable, setShowAvailable] = useState(false)
@@ -219,6 +223,14 @@ export default function PositionsDayBoard({
     }
     return out
   }, [filteredPositions, activeDay, underfilledOnly, showInactive])
+
+  const visibleShiftKeys = useMemo(
+    () =>
+      stations.flatMap((station) =>
+        station.shifts.map((shift) => `${station.position.id}:${shift.id}`)
+      ),
+    [stations]
+  )
 
   const inactiveCount = useMemo(
     () => positions.filter((p) => !p.isActive).length,
@@ -1327,7 +1339,7 @@ export default function PositionsDayBoard({
               </button>
             </div>
           )}
-          {stations.map(({ position, shifts, filled: stationFilled, needed: stationNeeded }) => {
+          {stations.map(({ position, shifts, filled: stationFilled, needed: stationNeeded }, stationIndex) => {
             const positionOverseer = position.oversight?.[0]?.overseer
             const isOpen = stationExpanded(
               position.id,
@@ -1358,10 +1370,28 @@ export default function PositionsDayBoard({
                         checked={shifts.every((shift) =>
                           selectedUndated.has(`${position.id}:${shift.id}`)
                         )}
-                        onClick={(e) => e.stopPropagation()}
-                        onChange={() =>
-                          toggleStationShifts(position.id, shifts)
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          stationShiftRange.markClick(e)
+                        }}
+                        onChange={(e) => {
+                          const handled = stationShiftRange.consumeRange(
+                            e,
+                            stationIndex,
+                            (lo, hi) => {
+                              setSelectedUndated((prev) => {
+                                const next = new Set(prev)
+                                for (const station of stations.slice(lo, hi + 1)) {
+                                  for (const shift of station.shifts) {
+                                    next.add(`${station.position.id}:${shift.id}`)
+                                  }
+                                }
+                                return next
+                              })
+                            }
+                          )
+                          if (!handled) toggleStationShifts(position.id, shifts)
+                        }}
                         className="h-4 w-4"
                         aria-label={`Select shifts at ${positionDisplayName(position)}`}
                       />
@@ -1427,8 +1457,25 @@ export default function PositionsDayBoard({
                       <input
                         type="checkbox"
                         checked={selectedStations.has(position.id)}
-                        onClick={(e) => e.stopPropagation()}
-                        onChange={() => toggleStationSelected(position.id)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          stationRange.markClick(e)
+                        }}
+                        onChange={(e) => {
+                          const ids = stations.map((station) => station.position.id)
+                          const handled = stationRange.consumeRange(
+                            e,
+                            stationIndex,
+                            (lo, hi) => {
+                              setSelectedStations((prev) => {
+                                const next = new Set(prev)
+                                ids.slice(lo, hi + 1).forEach((id) => next.add(id))
+                                return next
+                              })
+                            }
+                          )
+                          if (!handled) toggleStationSelected(position.id)
+                        }}
                         className="h-4 w-4"
                         aria-label={`Select station ${positionDisplayName(position)}`}
                       />
@@ -1518,8 +1565,26 @@ export default function PositionsDayBoard({
                                 <input
                                   type="checkbox"
                                   checked={selectedUndated.has(rowKey)}
-                                  onClick={(e) => e.stopPropagation()}
-                                  onChange={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    shiftRange.markClick(e)
+                                  }}
+                                  onChange={(e) => {
+                                    const index = visibleShiftKeys.indexOf(rowKey)
+                                    const handled = shiftRange.consumeRange(
+                                      e,
+                                      index,
+                                      (lo, hi) => {
+                                        setSelectedUndated((prev) => {
+                                          const next = new Set(prev)
+                                          visibleShiftKeys
+                                            .slice(lo, hi + 1)
+                                            .forEach((key) => next.add(key))
+                                          return next
+                                        })
+                                      }
+                                    )
+                                    if (handled) return
                                     setSelectedUndated((prev) => {
                                       const next = new Set(prev)
                                       if (next.has(rowKey)) next.delete(rowKey)
