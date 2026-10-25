@@ -1,8 +1,8 @@
 # TheoShift Plan
 
-**Last updated:** 2026-10-15  
+**Last updated:** 2026-10-24  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.32.5 LIVE** (GREEN). CSV import shows on the volunteer roster. Chat channel load no longer rewrites every position. Positions day board is the default. PIN login removed.
+**Status:** **v4.33.4 LIVE** (BLUE `10.92.3.24`). STANDBY is GREEN `10.92.3.22`. Day-board bulk edit, shift select, and event-scoped oversight lists are shipped. Positions day board is the default. PIN login removed.
 
 ---
 
@@ -23,8 +23,15 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Idle** — pick next: mobile Positions/Volunteers, FB-036, or chat increment. v4.32.5 is live on GREEN; STANDBY is BLUE.
+- **Idle** — pick next: mobile Positions/Volunteers, FB-036, FB-039, or chat increment. v4.33.4 is live on BLUE; STANDBY is GREEN.
 - **Mobile readiness across TheoShift** — Positions + Volunteers pages next (narrow viewport). Early Check-In volunteer path done through **v4.29.7**.
+
+### Recently Completed (2026-10-19 → 2026-10-20)
+- ✅ **v4.33.4** — Station checkbox selects that day’s shifts; shipped + synced (`3176ea58`)
+- ✅ **v4.33.3** — Shift select on collapsed stations; shift-click range includes the last box
+- ✅ **v4.33.2** — Oversight lists limited to this event’s overseers and keymen
+- ✅ **v4.33.1** — Choose shifts for overseer/keyman; availability mail skips changeme addresses
+- ✅ **v4.33.0** — Classic Positions bulk tools on the day board
 
 ### Recently Completed (2026-10-08)
 - ✅ **v4.32.5** — Bulk CSV import sets `onVolunteerRoster`, so imported people show on the Volunteers page. Chat `GET /channels` creates missing position channels in one batch instead of upserting every position. qa-01 gate passed; shipped + synced (`dc3b934d`)
@@ -263,7 +270,7 @@ Feedback **FB-036** closed as deferred; all scope lives in this section until an
 ## Known Issues
 
 ### Current
-- **qa-01 standby URL** — `detect-standby.sh` cannot read HAProxy and uses `.env.test`. After the 2026-10-08 switch, STANDBY is BLUE. `STANDBY_URL` must be `https://blue.theoshift.com` or the next gate hits LIVE.
+- **qa-01 standby URL** — `detect-standby.sh` cannot read HAProxy and uses `.env.test`. After the 2026-10-20 switch, STANDBY is GREEN. `STANDBY_URL` must be `https://green.theoshift.com` or the next gate hits LIVE.
 - **Volunteer Login via Node IP** — Cannot test volunteer login on STANDBY via node IP (http://10.92.3.24:3001)
   - Root cause: NEXTAUTH_URL=https://theoshift.com forces Secure cookies (HTTPS only)
   - Browser rejects secure cookies over HTTP connection to node IP
@@ -373,7 +380,7 @@ Feedback **FB-036** closed as deferred; all scope lives in this section until an
 
 ## Version History
 
-**Current:** v4.32.3 (case-insensitive overseer login; LIVE BLUE + STANDBY GREEN)  
+**Current:** v4.33.4 (station checkbox selects that day’s shifts; LIVE BLUE + STANDBY GREEN)  
 **Previous:** v4.30.0 (IVS intake initial ship) / v4.29.14 (early check-in scroll)  
 **Baseline:** v4.0.0 (production-ready platform)
 
