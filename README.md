@@ -275,6 +275,7 @@ For issues or questions:
 4. Contact the project maintainer for deployment access
 
 ## 📝 Version History
+- **v4.33.5** (2026-10-24) - Shift-click checks the last box on every list, and Volunteers can export the filtered list
 - **v4.33.4** (2026-10-20) - The station box on Positions selects that day's shifts
 - **v4.33.3** (2026-10-19) - Shift Select stays visible, and shift-click checks the last box
 - **v4.33.2** (2026-10-19) - Position oversight lists only the overseers and keymen on this event
