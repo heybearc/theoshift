@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-26  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.33.6 LIVE** (BLUE `10.92.3.24`). STANDBY is GREEN `10.92.3.22`. Bulk create on Positions opens again. Positions day board is the default. PIN login removed.
+**Status:** **v4.33.7 LIVE** (GREEN `10.92.3.22`). STANDBY is BLUE `10.92.3.24`. Collapsed stations on Positions stay one row until opened.
 
 ---
 
@@ -23,10 +23,11 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Idle** — pick next: mobile Positions/Volunteers, FB-036, FB-039, or chat increment. v4.33.6 is live on BLUE; STANDBY is GREEN.
+- **Idle** — pick next: mobile Positions/Volunteers, FB-036, FB-039, or chat increment. v4.33.7 is live on GREEN; STANDBY is BLUE.
 - **Mobile readiness across TheoShift** — Positions + Volunteers pages next (narrow viewport). Early Check-In volunteer path done through **v4.29.7**.
 
 ### Recently Completed (2026-10-26)
+- ✅ **v4.33.7** — Collapsed stations stay one row. Station checkbox sets this day’s overseer and keyman. Shipped + synced (`5e0acd65`)
 - ✅ **v4.33.6** — Bulk create on Positions opens and lists shift patterns. Shipped + synced (`03cbb210`)
 
 ### Recently Completed (2026-10-24 → 2026-10-25)
