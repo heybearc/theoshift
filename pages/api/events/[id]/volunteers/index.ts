@@ -343,7 +343,8 @@ async function handleBulkImportEventVolunteers(req: NextApiRequest, res: NextApi
             }
           }
 
-          // Update existing volunteer
+          // Update existing volunteer. A blank notes cell must not erase a note
+          // already saved on the profile.
           await prisma.volunteers.update({
             where: { id: existingVolunteer.id },
             data: {
@@ -353,7 +354,9 @@ async function handleBulkImportEventVolunteers(req: NextApiRequest, res: NextApi
                 ? normalizePhoneForStorage(volunteerData.phone) || null
                 : null,
               congregation: volunteerData.congregation || '',
-              notes: volunteerData.notes || null,
+              ...(typeof volunteerData.notes === 'string' && volunteerData.notes.trim()
+                ? { notes: volunteerData.notes.trim() }
+                : {}),
               formsOfService: formsOfService,
               isActive: volunteerData.isActive !== false,
               updatedAt: new Date()

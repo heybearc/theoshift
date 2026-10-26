@@ -146,7 +146,10 @@ async function handleUpdateVolunteer(req: NextApiRequest, res: NextApiResponse, 
     if (lastName !== undefined) updateData.lastName = lastName
     if (email !== undefined) updateData.email = email
     if (phone !== undefined) updateData.phone = phone ? normalizePhoneForStorage(phone) || null : null
-    if (notes !== undefined) updateData.notes = notes || null
+    if (notes !== undefined) {
+      const text = typeof notes === 'string' ? notes.trim() : ''
+      updateData.notes = text || null
+    }
     if (congregation !== undefined) updateData.congregation = congregation || ''
     if (processedFormsOfService.length > 0) updateData.formsOfService = processedFormsOfService
     

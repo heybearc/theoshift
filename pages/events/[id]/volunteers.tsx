@@ -475,7 +475,18 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
   }
 
   // Edit Attendant Handler
-  const handleEditAttendant = (attendant: Attendant) => {
+  const handleEditAttendant = async (attendant: Attendant) => {
+    let notes = attendant.notes || ''
+    try {
+      const response = await fetch(`/api/events/${eventId}/volunteers/${attendant.id}`)
+      if (response.ok) {
+        const body = await response.json()
+        const saved = body?.data?.notes
+        notes = typeof saved === 'string' ? saved : ''
+      }
+    } catch {
+      notes = attendant.notes || ''
+    }
     setFormData({
       firstName: attendant.firstName,
       lastName: attendant.lastName,
@@ -485,12 +496,12 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
       formsOfService: Array.isArray(attendant.formsOfService) 
         ? attendant.formsOfService.join(', ') 
         : attendant.formsOfService || '',
-      notes: attendant.notes || '',
+      notes,
       isActive: attendant.isActive,
       isOverseer: attendant.isOverseer ?? false,
       isKeyman: attendant.isKeyman ?? false
     })
-    setEditingAttendant(attendant)
+    setEditingAttendant({ ...attendant, notes: notes || null })
     setShowAddModal(true)
   }
 
@@ -679,7 +690,7 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
       let payload: {
         error?: string
         success?: boolean
-        data?: { message?: string; alreadyOnEvent?: boolean; promotedFromIvs?: boolean }
+        data?: { message?: string; alreadyOnEvent?: boolean; promotedFromIvs?: boolean; notes?: string | null }
       } = {}
       try {
         if (raw) payload = JSON.parse(raw)
@@ -701,13 +712,17 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
             typeof formData.formsOfService === 'string'
               ? formData.formsOfService.split(',').map((f) => f.trim()).filter(Boolean)
               : formData.formsOfService
+          const savedNotes =
+            typeof payload.data?.notes === 'string'
+              ? payload.data.notes
+              : formData.notes.trim() || null
           applyRosterPatch(editingAttendant.id, {
             firstName: formData.firstName,
             lastName: formData.lastName,
             email: formData.email,
             phone: formData.phone,
             congregation: formData.congregation,
-            notes: formData.notes || null,
+            notes: savedNotes,
             formsOfService: forms,
             isActive: formData.isActive,
             isOverseer: formData.isOverseer,
@@ -1300,10 +1315,10 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
         {/* Compact Header with Inline Stats */}
         <div className="mb-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <div className="flex items-center gap-4">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
               <h2 className="text-2xl font-bold text-gray-900">Volunteers</h2>
               {/* Inline Stats Pills */}
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => setFilters({ ...filters, isActive: 'all' })}
                   className={`px-3 py-2 min-h-[44px] rounded-full text-sm font-medium transition-colors touch-manipulation ${
@@ -1823,7 +1838,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                       className="border border-gray-200 rounded-lg p-4 shadow-sm"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="pt-1">
+                        <label className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center touch-manipulation">
                           <input
                             type="checkbox"
                             checked={selectedAttendants.has(attendant.associationId)}
@@ -1831,9 +1846,10 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                               handleAttendantCheckboxChange(e, attendant.associationId, index)
                             }
                             onClick={(e) => handleAttendantCheckboxShiftClick(e)}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            aria-label={`Select ${attendant.firstName} ${attendant.lastName}`}
+                            className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                           />
-                        </div>
+                        </label>
 
                         <div className="min-w-0 flex-1">
                           <VolunteerDetailsPopup
@@ -1841,10 +1857,10 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             onEdit={() => handleEditAttendant(attendant)}
                           >
                             <div className="min-w-0">
-                              <div className="text-base font-semibold text-gray-900 hover:text-blue-600 transition-colors truncate">
+                              <div className="text-base font-semibold text-gray-900 hover:text-blue-600 transition-colors break-words">
                                 {attendant.firstName} {attendant.lastName}
                               </div>
-                              <div className="text-sm text-gray-600 truncate">
+                              <div className="text-sm text-gray-600 break-all">
                                 {attendant.email}
                               </div>
                             </div>
@@ -1862,6 +1878,11 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                               isKeyman={attendant.isKeyman}
                               onAvailabilityClick={() => handleAvailabilityClick(attendant.id)}
                             />
+                            {attendant.notes?.trim() && (
+                              <p className="mt-2 whitespace-pre-wrap break-words text-sm text-gray-800">
+                                {attendant.notes}
+                              </p>
+                            )}
                           </div>
 
                           {canManageContent && (
@@ -2091,11 +2112,16 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                                 isKeyman={attendant.isKeyman}
                                 onAvailabilityClick={() => handleAvailabilityClick(attendant.id)}
                               />
+                              {attendant.notes?.trim() && (
+                                <p className="mt-1 whitespace-pre-wrap break-words text-xs text-gray-700">
+                                  {attendant.notes}
+                                </p>
+                              )}
                             </div>
                           </VolunteerDetailsPopup>
                         </td>
-                        <td className="px-3 py-3 whitespace-nowrap hidden lg:table-cell">
-                          <div className="text-sm text-gray-900 truncate">{attendant.email}</div>
+                        <td className="px-3 py-3 hidden lg:table-cell">
+                          <div className="text-sm text-gray-900 break-all">{attendant.email}</div>
                         </td>
                         <td className="px-3 py-3 whitespace-nowrap hidden lg:table-cell">
                           <select
@@ -2307,13 +2333,13 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
 
         {/* Add/Edit Attendant Modal */}
         {showAddModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-10 mx-auto p-6 border max-w-2xl w-full mx-4 shadow-lg rounded-md bg-white">
-              <div className="mt-3">
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-600/50 px-4 py-4 sm:py-10">
+            <div className="mx-auto flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-md border bg-white shadow-lg">
+              <div className="mt-3 min-h-0 flex-1 overflow-y-auto p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
                   {editingAttendant ? 'Edit Volunteer' : 'Add New Volunteer'}
                 </h3>
-                <form onSubmit={handleSaveAttendant}>
+                <form id="volunteer-profile-form" onSubmit={handleSaveAttendant}>
                   <div className="space-y-4">
                     {/* Name Fields - Side by Side */}
                     <div className="grid grid-cols-2 gap-4">
@@ -2447,9 +2473,12 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                         value={formData.notes}
                         onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                         rows={3}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         placeholder="Additional notes or comments"
+                        className="mt-1 block w-full min-h-[88px] px-3 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Saved on this person’s profile and shown on the volunteer list.
+                      </p>
                     </div>
                     <div>
                       <label className="flex items-center">
@@ -2466,24 +2495,25 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                       </p>
                     </div>
                   </div>
-                  <div className="flex justify-end space-x-3 mt-6">
-                    <button
-                      type="button"
-                      onClick={() => setShowAddModal(false)}
-                      disabled={loading}
-                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:bg-gray-100"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-md"
-                    >
-                      {loading ? 'Saving...' : (editingAttendant ? 'Update' : 'Add')} Volunteer
-                    </button>
-                  </div>
                 </form>
+              </div>
+              <div className="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  disabled={loading}
+                  className="min-h-[44px] rounded-md border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 touch-manipulation"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  form="volunteer-profile-form"
+                  disabled={loading}
+                  className="min-h-[44px] rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-400 touch-manipulation"
+                >
+                  {loading ? 'Saving...' : (editingAttendant ? 'Update' : 'Add')} Volunteer
+                </button>
               </div>
             </div>
           </div>
@@ -3039,12 +3069,12 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                       <label className="text-xs text-gray-500">Congregation</label>
                       <p className="text-sm text-gray-900">{viewingAttendant.congregation}</p>
                     </div>
-                    {viewingAttendant.notes && (
-                      <div className="md:col-span-2">
-                        <label className="text-xs text-gray-500">Notes</label>
-                        <p className="text-sm text-gray-900 whitespace-pre-wrap">{viewingAttendant.notes}</p>
-                      </div>
-                    )}
+                    <div className="md:col-span-2">
+                      <label className="text-xs text-gray-500">Notes</label>
+                      <p className="text-sm text-gray-900 whitespace-pre-wrap break-words">
+                        {viewingAttendant.notes?.trim() || 'No notes yet'}
+                      </p>
+                    </div>
                     <div>
                       <label className="text-xs text-gray-500">Status</label>
                       <p className="text-sm">

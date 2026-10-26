@@ -1414,7 +1414,7 @@ export default function PositionsDayBoard({
                       </svg>
                     </span>
                     <span>
-                      <span className="block text-base font-semibold text-gray-900">
+                      <span className="block break-words text-base font-semibold text-gray-900">
                         #{position.positionNumber}{' '}
                         {positionDisplayName(position)}
                         {!position.isActive && (
@@ -1446,7 +1446,7 @@ export default function PositionsDayBoard({
                   </button>
                   </div>
                   {canManageContent && isOpen && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                       {position.isActive ? (
                         <>
                           <button
@@ -1563,7 +1563,7 @@ export default function PositionsDayBoard({
                               </label>
                             )}
                             <div>
-                              <p className="font-medium text-gray-900">
+                              <p className="break-words font-medium text-gray-900">
                                 {shiftLabel(shift)}
                                 {!toDateKey(shift.shiftDate) &&
                                 eventDateKeys.length > 1 ? (
@@ -1759,7 +1759,7 @@ export default function PositionsDayBoard({
                             </div>
 
                             {canManageContent && (
-                              <div className="mt-2 flex flex-wrap items-center gap-2">
+                              <div className="mt-2 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center">
                                 <button
                                   type="button"
                                   onClick={() =>
@@ -1769,7 +1769,7 @@ export default function PositionsDayBoard({
                                       role: 'VOLUNTEER',
                                     })
                                   }
-                                  className="inline-flex min-h-[44px] items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 touch-manipulation"
+                                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 touch-manipulation sm:w-auto"
                                 >
                                   Assign
                                 </button>
@@ -1786,7 +1786,7 @@ export default function PositionsDayBoard({
                                       shift
                                     )
                                   }}
-                                  className="min-h-[44px] rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 touch-manipulation"
+                                  className="min-h-[44px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-800 touch-manipulation sm:w-auto sm:text-sm"
                                   aria-label="More shift actions"
                                 >
                                   <option value="">More…</option>
