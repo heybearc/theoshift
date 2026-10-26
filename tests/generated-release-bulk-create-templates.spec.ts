@@ -36,9 +36,14 @@ test.describe('Generated release — bulk create shift patterns', () => {
     await page.getByRole('button', { name: 'Bulk create' }).click()
     const response = await templates
     expect(response.ok()).toBeTruthy()
+    const body = await response.json()
+    expect(Array.isArray(body.data)).toBe(true)
 
     await expect(page.getByRole('heading', { name: 'Bulk Create Positions' })).toBeVisible()
-    await expect(page.getByRole('option', { name: 'No shifts (positions only)' })).toBeVisible()
+    const pattern = page.locator('select').filter({
+      has: page.locator('option', { hasText: 'No shifts (positions only)' })
+    })
+    await expect(pattern).toBeVisible()
     await expect(page.getByText('f.find is not a function')).toHaveCount(0)
     await expect(page.getByText('Error Boundary')).toHaveCount(0)
   })
