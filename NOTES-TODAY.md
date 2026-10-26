@@ -1,5 +1,5 @@
 ---
-date: 2026-10-24
+date: 2026-10-26
 purpose: Scratchpad for today's discoveries (promote on /end-day)
 ---
 
@@ -9,10 +9,10 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - Mid-day checkpoint. No feature work in this session.
 
 ### Discoveries / Notes
-- Repo is **v4.33.4** (`3176ea58`). LIVE **BLUE** `10.92.3.24`, STANDBY **GREEN** `10.92.3.22`. Last switch and standby deploy succeeded 2026-10-20. Both nodes healthy.
-- Shipped since the 2026-10-15 context snapshot: day-board bulk edit (v4.33.0), shift overseer/keyman choice and changeme email skip (v4.33.1), event-scoped oversight lists (v4.33.2), collapsed shift select and shift-click range (v4.33.3), station checkbox selects that day’s shifts (v4.33.4).
-- Working tree was clean except a stale `NOTES-TODAY.md` date. No undeployed feature work.
-- qa-01 `STANDBY_URL` in context still said BLUE. After the 2026-10-20 switch, STANDBY is GREEN (`https://green.theoshift.com`).
+- Repo is **v4.33.5** (`2d8193c8`). LIVE **GREEN** `10.92.3.22`, STANDBY **BLUE** `10.92.3.24`. Switch 2026-10-25; standby deploy succeeded. Both nodes healthy.
+- v4.33.5 keeps shift-click checked on every multi-select and exports the filtered volunteer list.
+- Working tree clean on `main`. No undeployed feature work.
+- qa-01 `STANDBY_URL` must be `https://blue.theoshift.com` after the 2026-10-25 switch.
 
 ### Decisions to Promote
 - None.
@@ -21,5 +21,5 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - **FB-039** (URGENT, IN_PROGRESS) — title “Note”. One open urgent item. 2 URGENT already RESOLVED.
 
 ### Links / Commands
-- STANDBY: `https://green.theoshift.com`
-- LIVE: `https://theoshift.com` (BLUE)
+- STANDBY: `https://blue.theoshift.com`
+- LIVE: `https://theoshift.com` (GREEN)

@@ -1,8 +1,8 @@
 # TheoShift Plan
 
-**Last updated:** 2026-10-24  
+**Last updated:** 2026-10-26  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.33.4 LIVE** (BLUE `10.92.3.24`). STANDBY is GREEN `10.92.3.22`. Day-board bulk edit, shift select, and event-scoped oversight lists are shipped. Positions day board is the default. PIN login removed.
+**Status:** **v4.33.5 LIVE** (GREEN `10.92.3.22`). STANDBY is BLUE `10.92.3.24`. Day-board bulk edit, shift select, filtered volunteer export, and event-scoped oversight lists are shipped. Positions day board is the default. PIN login removed.
 
 ---
 
@@ -23,8 +23,11 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Idle** — pick next: mobile Positions/Volunteers, FB-036, FB-039, or chat increment. v4.33.4 is live on BLUE; STANDBY is GREEN.
+- **Idle** — pick next: mobile Positions/Volunteers, FB-036, FB-039, or chat increment. v4.33.5 is live on GREEN; STANDBY is BLUE.
 - **Mobile readiness across TheoShift** — Positions + Volunteers pages next (narrow viewport). Early Check-In volunteer path done through **v4.29.7**.
+
+### Recently Completed (2026-10-24 → 2026-10-25)
+- ✅ **v4.33.5** — Shift-click stays checked on every multi-select; volunteer CSV export uses the current filters. Shipped + synced (`2d8193c8`)
 
 ### Recently Completed (2026-10-19 → 2026-10-20)
 - ✅ **v4.33.4** — Station checkbox selects that day’s shifts; shipped + synced (`3176ea58`)
