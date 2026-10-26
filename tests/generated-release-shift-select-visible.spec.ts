@@ -1,8 +1,7 @@
 /**
- * Generated release test: each shift on the day board has a Select box
- * without opening the station first.
+ * Collapsed stations stay one row. Shift Select appears after the station is opened.
  */
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect, type Page, type Locator } from '@playwright/test'
 import { loginAsAdmin } from './login-helper'
 import { getBaseUrl } from './helpers/test-config'
 
@@ -16,7 +15,7 @@ function eventList(body: unknown): EventRow[] {
   return record?.data?.events || record?.events || []
 }
 
-async function findEventWithShifts(page: Page): Promise<string> {
+async function openDayBoardWithStations(page: Page): Promise<void> {
   const eventsResponse = await page.request.get(`${BASE_URL}/api/events`)
   expect(eventsResponse.ok()).toBeTruthy()
   const events = eventList(await eventsResponse.json()).filter((event) => event?.id).slice(0, 8)
@@ -25,44 +24,68 @@ async function findEventWithShifts(page: Page): Promise<string> {
     await page.goto(`${BASE_URL}/events/${event.id}/positions-next`)
     const heading = page.getByText(/Stations by day/i).first()
     if (!(await heading.isVisible({ timeout: 8000 }).catch(() => false))) continue
-
-    const shiftBox = page.getByRole('checkbox', { name: /^Select shift /i }).first()
-    if (await shiftBox.isVisible().catch(() => false)) return event.id!
-
-    const days = page.getByRole('button').filter({ hasText: /Mon|Tue|Wed|Thu|Fri|Sat|Sun|No day/i })
-    const dayCount = await days.count()
-    for (let i = 0; i < dayCount; i++) {
-      await days.nth(i).click()
-      if (await shiftBox.isVisible().catch(() => false)) return event.id!
-    }
+    const station = page.locator('section').filter({
+      has: page.getByRole('checkbox', { name: /Select station /i })
+    }).first()
+    if (await station.isVisible().catch(() => false)) return
   }
 
-  throw new Error('No day board with a shift Select box')
+  throw new Error('No day board with a station checkbox')
 }
 
-test.describe('Generated release — shift select stays visible', () => {
+async function collapsedStation(page: Page): Promise<{ section: Locator; header: Locator }> {
+  const sections = page.locator('section').filter({
+    has: page.getByRole('checkbox', { name: /Select station /i })
+  })
+  const count = await sections.count()
+  for (let i = 0; i < count; i++) {
+    const section = sections.nth(i)
+    if (await section.getByText('No shifts this day').count()) continue
+    const header = section.locator('button[aria-expanded]').first()
+    if ((await header.getAttribute('aria-expanded')) === 'false') {
+      return { section, header }
+    }
+  }
+  for (let i = 0; i < count; i++) {
+    const section = sections.nth(i)
+    if (await section.getByText('No shifts this day').count()) continue
+    const header = section.locator('button[aria-expanded]').first()
+    await header.click()
+    await expect(header).toHaveAttribute('aria-expanded', 'false')
+    return { section, header }
+  }
+  throw new Error('No station with shifts on this day')
+}
+
+test.describe('Day board collapsed stations', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page)
   })
 
-  test('a shift Select box is visible on the day board', async ({ page }) => {
+  test('a collapsed station hides its shifts until opened', async ({ page }) => {
     test.setTimeout(90_000)
     await page.setViewportSize({ width: 1280, height: 900 })
-    const eventId = await findEventWithShifts(page)
-    await page.goto(`${BASE_URL}/events/${eventId}/positions-next`)
-    await expect(page.getByText(/Stations by day/i).first()).toBeVisible({ timeout: 15000 })
-    const section = page
-      .locator('section')
-      .filter({ has: page.getByRole('checkbox', { name: /^Select shift /i }) })
-      .first()
-    const shiftBox = section.getByRole('checkbox', { name: /^Select shift /i }).first()
-    const stationShifts = section.getByRole('checkbox', { name: /Select shifts at/i })
-    await expect(shiftBox).toBeVisible()
-    await expect(shiftBox).not.toBeChecked()
+    await openDayBoardWithStations(page)
 
-    await stationShifts.click()
-    await expect(shiftBox).toBeChecked()
-    await expect(page.getByText(/\d+ shifts? selected/)).toBeVisible()
-    await expect(stationShifts).toBeChecked()
+    const { section, header } = await collapsedStation(page)
+    await expect(section.getByRole('checkbox', { name: /Select station /i })).toBeVisible()
+    await expect(section.getByRole('checkbox', { name: /^Select shift /i })).toHaveCount(0)
+    await expect(section.getByRole('checkbox', { name: /Select shifts at/i })).toHaveCount(0)
+
+    await header.click()
+    await expect(header).toHaveAttribute('aria-expanded', 'true')
+    await expect(section.getByRole('checkbox', { name: /^Select shift /i }).first()).toBeVisible()
+  })
+
+  test('the station box can set overseer and keyman for this day', async ({ page }) => {
+    test.setTimeout(90_000)
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await openDayBoardWithStations(page)
+
+    const { section } = await collapsedStation(page)
+    await section.getByRole('checkbox', { name: /Select station /i }).check()
+    await page.getByRole('button', { name: 'Set overseer/keyman' }).click()
+    await expect(page.getByRole('heading', { name: /Bulk edit/i })).toBeVisible()
+    await expect(page.getByText(/Shift overseer and keyman/i)).toBeVisible()
   })
 })

@@ -103,9 +103,9 @@ export default function PositionsDayBoard({
   const [selectedStations, setSelectedStations] = useState<Set<string>>(new Set())
   const stationRange = useShiftRangeSelection()
   const shiftRange = useShiftRangeSelection()
-  const stationShiftRange = useShiftRangeSelection()
   const [showBulkEdit, setShowBulkEdit] = useState(false)
   const [bulkTarget, setBulkTarget] = useState<'shifts' | 'stations'>('shifts')
+  const [bulkShiftKeys, setBulkShiftKeys] = useState<string[] | undefined>(undefined)
   const [showAvailable, setShowAvailable] = useState(false)
   const [overseerFilter, setOverseerFilter] = useState('all')
   const [roleFilter, setRoleFilter] = useState<
@@ -753,22 +753,6 @@ export default function PositionsDayBoard({
     })
   }
 
-  const toggleStationShifts = (
-    positionId: string,
-    shifts: { id: string }[]
-  ) => {
-    const keys = shifts.map((shift) => `${positionId}:${shift.id}`)
-    setSelectedUndated((prev) => {
-      const next = new Set(prev)
-      const allOn = keys.length > 0 && keys.every((key) => next.has(key))
-      for (const key of keys) {
-        if (allOn) next.delete(key)
-        else next.add(key)
-      }
-      return next
-    })
-  }
-
   const selectVisibleStations = () => {
     setSelectedStations(new Set(stations.map((s) => s.position.id)))
   }
@@ -1304,6 +1288,7 @@ export default function PositionsDayBoard({
               <button
                 type="button"
                 onClick={() => {
+                  setBulkShiftKeys(Array.from(selectedUndated))
                   setBulkTarget('shifts')
                   setShowBulkEdit(true)
                 }}
@@ -1316,8 +1301,30 @@ export default function PositionsDayBoard({
           {canManageContent && selectedStations.size > 0 && (
             <div className="flex flex-wrap items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2">
               <span className="text-sm font-medium text-blue-900">
-                {selectedStations.size} selected
+                {selectedStations.size} station{selectedStations.size === 1 ? '' : 's'} selected
               </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const keys: string[] = []
+                  for (const station of stations) {
+                    if (!selectedStations.has(station.position.id)) continue
+                    for (const shift of station.shifts) {
+                      keys.push(`${station.position.id}:${shift.id}`)
+                    }
+                  }
+                  if (keys.length === 0) {
+                    notifyAlert('Those stations have no shifts on this day.')
+                    return
+                  }
+                  setBulkShiftKeys(keys)
+                  setBulkTarget('shifts')
+                  setShowBulkEdit(true)
+                }}
+                className="inline-flex min-h-[44px] items-center rounded-md bg-indigo-700 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-800 touch-manipulation"
+              >
+                Set overseer/keyman
+              </button>
               <button
                 type="button"
                 disabled={bulkWorking}
@@ -1352,51 +1359,6 @@ export default function PositionsDayBoard({
                 className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
               >
                 <header className="flex flex-col gap-2 bg-gray-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                  {canManageContent && shifts.length > 0 && (
-                    <label className="relative z-10 inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center self-start touch-manipulation">
-                      <input
-                        type="checkbox"
-                        ref={(el) => {
-                          if (!el) return
-                          const keys = shifts.map(
-                            (shift) => `${position.id}:${shift.id}`
-                          )
-                          const selectedCount = keys.filter((key) =>
-                            selectedUndated.has(key)
-                          ).length
-                          el.indeterminate =
-                            selectedCount > 0 && selectedCount < keys.length
-                        }}
-                        checked={shifts.every((shift) =>
-                          selectedUndated.has(`${position.id}:${shift.id}`)
-                        )}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          stationShiftRange.markClick(e)
-                        }}
-                        onChange={(e) => {
-                          const handled = stationShiftRange.consumeRange(
-                            e,
-                            stationIndex,
-                            (lo, hi) => {
-                              setSelectedUndated((prev) => {
-                                const next = new Set(prev)
-                                for (const station of stations.slice(lo, hi + 1)) {
-                                  for (const shift of station.shifts) {
-                                    next.add(`${station.position.id}:${shift.id}`)
-                                  }
-                                }
-                                return next
-                              })
-                            }
-                          )
-                          if (!handled) toggleStationShifts(position.id, shifts)
-                        }}
-                        className="h-4 w-4"
-                        aria-label={`Select shifts at ${positionDisplayName(position)}`}
-                      />
-                    </label>
-                  )}
                   <button
                     type="button"
                     onClick={() => toggleStation(position.id, isOpen)}
@@ -1530,6 +1492,7 @@ export default function PositionsDayBoard({
                   )}
                 </header>
 
+                {isOpen && (
                 <div className="divide-y divide-gray-100 border-t border-gray-100">
                   {shifts.map((shift) => {
                     const rowKey = `${position.id}:${shift.id}`
@@ -1841,6 +1804,7 @@ export default function PositionsDayBoard({
                     )
                   })}
                 </div>
+                )}
               </section>
             )
           })}
@@ -1961,7 +1925,7 @@ export default function PositionsDayBoard({
           activeDay={activeDay}
           eventDateKeys={eventDateKeys}
           initialShiftKeys={
-            bulkTarget === 'shifts' ? Array.from(selectedUndated) : undefined
+            bulkTarget === 'shifts' ? bulkShiftKeys : undefined
           }
           onClose={() => setShowBulkEdit(false)}
           onDone={() => {
