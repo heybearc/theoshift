@@ -1,8 +1,8 @@
 // TheoShift Service Worker
-// Version 2.0.3 — staff /api/events/* and /_next/* bypass SW (no synthetic 503 offline responses)
+// Version 2.0.4 — chat alerts use the event name as the notification title
 
-const STATIC_CACHE = 'theoshift-static-v2.0.3';
-const DATA_CACHE = 'theoshift-data-v2.0.3';
+const STATIC_CACHE = 'theoshift-static-v2.0.4';
+const DATA_CACHE = 'theoshift-data-v2.0.4';
 const OFFLINE_URL = '/offline.html';
 
 // Static assets to precache on install
@@ -247,8 +247,11 @@ function openPendingDB() {
 self.addEventListener('push', (event) => {
   try {
     const data = event.data ? event.data.json() : {};
-    const title = data?.channelName ? `TheoShift: ${data.channelName}` : 'TheoShift'
-    const body = data?.bodyPreview || 'New message'
+    const eventName = typeof data?.eventName === 'string' ? data.eventName.trim() : ''
+    const channelName = typeof data?.channelName === 'string' ? data.channelName.trim() : ''
+    const preview = data?.bodyPreview || 'New message'
+    const title = eventName || (channelName ? `TheoShift: ${channelName}` : 'TheoShift')
+    const body = eventName && channelName ? `${channelName}: ${preview}` : preview
     const url = data?.url || '/'
 
     event.waitUntil(

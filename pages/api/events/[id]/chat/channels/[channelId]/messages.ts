@@ -317,10 +317,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           select: { endpoint: true, p256dh: true, auth: true, userId: true, volunteerId: true }
         })
 
+        const eventRow = await prisma.events.findUnique({
+          where: { id: eventId },
+          select: { name: true }
+        })
+
         const payloadBase = {
           v: 1,
           kind: 'chat:new-message',
           eventId,
+          eventName: eventRow?.name || '',
           channelId,
           channelName: channel.name,
           messageId: message.id,

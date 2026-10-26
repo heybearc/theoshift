@@ -68,9 +68,9 @@ test.describe('v4.15.0: Service Worker', () => {
     const response = await page.request.get('/sw.js')
     expect(response.status()).toBe(200)
     const body = await response.text()
-    expect(body).toContain('Version 2.0.3')
-    expect(body).toContain('theoshift-static-v2.0.3')
-    expect(body).toContain('theoshift-data-v2.0.3')
+    expect(body).toContain('Version 2.0.4')
+    expect(body).toContain('theoshift-static-v2.0.4')
+    expect(body).toContain('theoshift-data-v2.0.4')
   })
 
   test('sw.js contains stale-while-revalidate for volunteer API routes', async ({ page }) => {

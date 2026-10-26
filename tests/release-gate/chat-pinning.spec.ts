@@ -2,43 +2,12 @@ import { test, expect } from '@playwright/test'
 import { getTestCredentials, getValidEventId } from '../helpers/test-config'
 
 test.describe('Chat pinning (release gate)', () => {
-  test('staff can pin and volunteer can see pinned message', async ({ page }) => {
+  test('staff can pin a direct message and the volunteer can see it', async ({ page }) => {
     test.setTimeout(60_000)
     const creds = getTestCredentials()
     let eventId = ''
     let channelId = ''
     let messageId = ''
-
-    await page.route('**/api/events/*/chat/channels/**', async (route) => {
-      const request = route.request()
-      const url = request.url()
-      const isProbe =
-        request.method() === 'POST' &&
-        (url.includes('/messages') || url.includes('/pin'))
-      if (!isProbe) {
-        await route.continue()
-        return
-      }
-      const response = await route.fetch({
-        headers: {
-          ...request.headers(),
-          'x-theoshift-release-gate': '1',
-        },
-      })
-      if (url.includes('/messages') && !url.includes('/pin')) {
-        const match = url.match(/channels\/([^/]+)\/messages/)
-        if (match) channelId = match[1]
-        const json = await response.json().catch(() => null)
-        if (json?.data?.id) messageId = json.data.id
-        await route.fulfill({
-          status: response.status(),
-          headers: response.headers(),
-          json: json ?? {},
-        })
-        return
-      }
-      await route.fulfill({ response })
-    })
 
     try {
       await page.goto('/auth/signin')
@@ -50,12 +19,56 @@ test.describe('Chat pinning (release gate)', () => {
 
       eventId = await getValidEventId(page)
 
+      const channelsRes = await page.request.get(`/api/events/${eventId}/chat/channels`)
+      expect(channelsRes.ok()).toBeTruthy()
+      const channelsJson: any = await channelsRes.json()
+      const selfVolunteerId = channelsJson?.data?.linkedVolunteerId
+      expect(
+        typeof selfVolunteerId,
+        'The release check only messages the signed-in account. That account needs a volunteer on this event.'
+      ).toBe('string')
+
+      const stamp = Date.now()
+      const createRes = await page.request.post(`/api/events/${eventId}/volunteers`, {
+        data: {
+          firstName: 'Pin',
+          lastName: 'Probe',
+          email: 'pin.probe.release@example.com',
+          phone: '555-0100',
+          congregation: 'Test Congregation',
+          formsOfService: ['Elder'],
+        },
+      })
+      expect(createRes.ok()).toBeTruthy()
+      const created: any = await createRes.json()
+      const probeVolunteerId = created?.data?.id || created?.volunteer?.id || created?.id
+      expect(typeof probeVolunteerId).toBe('string')
+
+      const dmRes = await page.request.post(`/api/events/${eventId}/chat/direct-message`, {
+        data: { peerVolunteerId: probeVolunteerId },
+      })
+      expect(dmRes.ok()).toBeTruthy()
+      const dmJson: any = await dmRes.json()
+      channelId = dmJson?.data?.channel?.id
+      expect(typeof channelId).toBe('string')
+      expect(dmJson?.data?.channel?.type).toBe('VOLUNTEER_DM')
+
+      const msg = `Pin test ${stamp}`
+      const sendRes = await page.request.post(
+        `/api/events/${eventId}/chat/channels/${channelId}/messages`,
+        {
+          headers: { 'x-view-as-volunteer-id': probeVolunteerId as string },
+          data: { body: msg },
+        }
+      )
+      expect(sendRes.ok()).toBeTruthy()
+      const sendJson: any = await sendRes.json()
+      messageId = sendJson?.data?.id
+      expect(typeof messageId).toBe('string')
+
       await page.goto(`/events/${eventId}/chat`)
       await expect(page.locator('text=Staff Chat')).toBeVisible({ timeout: 15000 })
-
-      const msg = `Pin test ${Date.now()}`
-      await page.getByPlaceholder(/Send a message/i).fill(msg)
-      await page.click('button:has-text("Send")')
+      await page.getByRole('button', { name: /Pin Probe/ }).click()
       await expect(page.locator(`text=${msg}`)).toBeVisible({ timeout: 15000 })
 
       const messageCard = page.locator('div.bg-white.border.border-gray-200.rounded-md.p-2', { hasText: msg }).first()
@@ -66,40 +79,13 @@ test.describe('Chat pinning (release gate)', () => {
       await expect(page.getByText('Pinned message', { exact: true })).toBeVisible({ timeout: 15000 })
       await expect(page.locator('div.bg-amber-50').locator(`text=${msg}`)).toBeVisible({ timeout: 15000 })
 
-      const volsRes = await page.request.get(`/api/events/${eventId}/volunteers`)
-      expect(volsRes.ok()).toBeTruthy()
-      const volsJson: any = await volsRes.json()
-      let volunteerId = volsJson?.volunteers?.[0]?.id
-
-      if (!volunteerId) {
-        const createRes = await page.request.post(`/api/events/${eventId}/volunteers`, {
-          data: {
-            firstName: 'Test',
-            lastName: 'Volunteer',
-            email: `test.volunteer.${Date.now()}@example.com`,
-            phone: '555-0100',
-            congregation: 'Test Congregation',
-            formsOfService: ['Elder'],
-          },
-        })
-        expect(createRes.ok()).toBeTruthy()
-        const created: any = await createRes.json()
-        volunteerId = created?.data?.id || created?.volunteer?.id || created?.id
-      }
-
-      expect(typeof volunteerId).toBe('string')
-      expect(channelId).not.toBe('')
-
-      const viewAsHeaders = { 'x-view-as-volunteer-id': volunteerId as string }
-      const messagesAsVolunteerRes = await page.request.get(
+      const messagesAsSelf = await page.request.get(
         `/api/events/${eventId}/chat/channels/${channelId}/messages?limit=50`,
-        { headers: viewAsHeaders }
+        { headers: { 'x-view-as-volunteer-id': selfVolunteerId as string } }
       )
-      expect(messagesAsVolunteerRes.ok()).toBeTruthy()
-      const messagesAsVolunteerJson: any = await messagesAsVolunteerRes.json()
-      const pinned = messagesAsVolunteerJson?.data?.pinnedMessage
-      expect(typeof pinned?.body).toBe('string')
-      expect(pinned.body).toContain(msg)
+      expect(messagesAsSelf.ok()).toBeTruthy()
+      const messagesJson: any = await messagesAsSelf.json()
+      expect(messagesJson?.data?.pinnedMessage?.body).toContain(msg)
     } finally {
       if (eventId && channelId && messageId) {
         await page.request.delete(
@@ -109,4 +95,3 @@ test.describe('Chat pinning (release gate)', () => {
     }
   })
 })
-
