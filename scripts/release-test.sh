@@ -27,6 +27,7 @@ tests/generated-release-positions-day-board.spec.ts
 tests/generated-release-day-board-bulk.spec.ts
 tests/generated-release-event-overseers.spec.ts
 tests/generated-release-shift-select-visible.spec.ts
+tests/generated-release-bulk-create-templates.spec.ts
 tests/conflict-detection.spec.ts
 EOF
       ;;
@@ -61,7 +62,7 @@ detect_areas() {
     echo full
     return
   fi
-  if printf '%s\n' "$files" | grep -Eq 'positions-next/|pages/events/\[id\]/positions|pages/api/events/\[id\]/positions|pages/api/events/\[id\]/assignments'; then
+  if printf '%s\n' "$files" | grep -Eq 'positions-next/|pages/events/\[id\]/positions|pages/api/events/\[id\]/positions|pages/api/events/\[id\]/assignments|components/positions/BulkPositionCreator|pages/api/shift-templates'; then
     areas+=(positions)
   fi
   if printf '%s\n' "$files" | grep -Eq 'pages/events/\[id\]/volunteers|pages/api/events/\[id\]/availability|src/lib/placeholderEmail|pages/api/volunteer/'; then
