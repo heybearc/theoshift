@@ -2,20 +2,21 @@
 
 **Last updated:** 2026-10-26  
 **Branch:** `main`  
-**Production:** **LIVE** **BLUE** `10.92.3.24` · **STANDBY** **GREEN** `10.92.3.22` — both **v4.33.8** (`a108daa0`). Switch #98 and sync 2026-10-26.
+**Production:** **LIVE** **GREEN** `10.92.3.22` · **STANDBY** **BLUE** `10.92.3.24` — both **v4.33.9** (`2865d196`). Switch #99 and sync 2026-10-26.
 
 ---
 
 ## Current Task
 
-**Idle after v4.33.8** — pick next backlog item (mobile Positions/Volunteers, FB-036, or FB-039).
+**Idle after v4.33.9** — pick next backlog item (FB-036, or the next mobile admin tables).
 
 ### What I'm doing right now
 
-Nothing in progress. v4.33.8 is live. No undeployed work on `main`.
+Nothing in progress. v4.33.9 is live. No undeployed work on `main`.
 
 ### Recent completions
 
+- ✅ **v4.33.9** — Volunteer notes stay on the list; phone layout for Positions and Volunteers (`2865d196`, released 2026-10-26)
 - ✅ **v4.33.8** — Phone chat alerts use the event name; station checkbox is on the left (`a108daa0`, released 2026-10-26)
 - ✅ **v4.33.7** — Collapsed stations stay one row; Station box sets this day’s overseer/keyman (`5e0acd65`, released 2026-10-26)
 - ✅ **v4.33.6** — Bulk create on Positions opens again (`03cbb210`, released 2026-10-26)
@@ -29,12 +30,12 @@ Nothing in progress. v4.33.8 is live. No undeployed work on `main`.
 
 ### Next steps
 
-1. Triage `/admin/feedback`. Open urgent: **FB-039** (IN_PROGRESS, title “Note”).
-2. Pick next: mobile Positions/Volunteers, FB-036 profile fields, or chat increment.
+1. Pick next: **FB-036** volunteer age and photo, or mobile admin tables.
+2. FB-039 (volunteer notes) is resolved in v4.33.9.
 
 ## Exact next command
 
-Open `/admin/feedback` or start the next backlog item on STANDBY (`https://green.theoshift.com`).
+Open `/admin/feedback` or start the next backlog item on STANDBY (`https://blue.theoshift.com`).
 
 ---
 
@@ -49,5 +50,5 @@ Open `/admin/feedback` or start the next backlog item on STANDBY (`https://green
 - Blue-green via HAProxy; do not assume container color without `get_deployment_status`.
 - If MCP `haproxy.backend` is `error`, read `use_backend … if is_theoshift` before `/release` (D-TS-047).
 - Color hostnames must stay on their node: `blue.theoshift.com` → BLUE, `green.theoshift.com` → GREEN (D-TS-048). After a switch, set qa-01 `STANDBY_URL=` to the new STANDBY color host.
-- qa-01 `detect-standby.sh` cannot read HAProxy (Proxmox CT 136 is missing on that host) and falls back to `STANDBY_URL` in `/opt/tests/theoshift/.env.test`. After the 2026-10-26 v4.33.8 switch, STANDBY is GREEN, so that value must be `https://green.theoshift.com`. Fetch tags before the gate if the baseline is a new tag.
+- qa-01 `detect-standby.sh` cannot read HAProxy (Proxmox CT 136 is missing on that host) and falls back to `STANDBY_URL` in `/opt/tests/theoshift/.env.test`. After the 2026-10-26 v4.33.9 switch, STANDBY is BLUE, so that value must be `https://blue.theoshift.com`. Fetch tags before the gate if the baseline is a new tag.
 - qa-01 clone can be left dirty on `package-lock.json` after `npm install`. `git checkout -- package-lock.json` before the gate if the script reports a dirty tree.

@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-26  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.33.8 LIVE** (BLUE `10.92.3.24`). STANDBY is GREEN `10.92.3.22`. Phone chat alerts use the event name.
+**Status:** **v4.33.9 LIVE** (GREEN `10.92.3.22`). STANDBY is BLUE `10.92.3.24`. Volunteer notes stay on the list.
 
 ---
 
@@ -23,10 +23,11 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Idle** — pick next: mobile Positions/Volunteers, FB-036, or FB-039. v4.33.8 is live on BLUE; STANDBY is GREEN.
-- **Mobile readiness across TheoShift** — Positions + Volunteers pages next (narrow viewport). Early Check-In volunteer path done through **v4.29.7**.
+- **Idle** — pick next: FB-036 (age and photo) or mobile admin tables. v4.33.9 is live on GREEN; STANDBY is BLUE.
+- **Mobile readiness across TheoShift** — Positions and Volunteers phone layout shipped in v4.33.9. Next mobile pass is admin tables. Early Check-In volunteer path done through **v4.29.7**.
 
 ### Recently Completed (2026-10-26)
+- ✅ **v4.33.9** — Volunteer notes stay on the list. Phone layout for Positions and Volunteers. Shipped + synced (`2865d196`)
 - ✅ **v4.33.8** — Phone chat alerts use the event name. Station checkbox is on the left. Shipped + synced (`a108daa0`)
 - ✅ **v4.33.7** — Collapsed stations stay one row. Station checkbox sets this day’s overseer and keyman. Shipped + synced (`5e0acd65`)
 - ✅ **v4.33.6** — Bulk create on Positions opens and lists shift patterns. Shipped + synced (`03cbb210`)
