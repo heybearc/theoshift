@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { getTestCredentials, getValidEventId } from '../helpers/test-config'
+import { getTestCredentials } from '../helpers/test-config'
 
 test.describe('Chat pinning (release gate)', () => {
   test('staff can pin a direct message and the volunteer can see it', async ({ page }) => {
@@ -17,16 +17,29 @@ test.describe('Chat pinning (release gate)', () => {
       await page.click('button[type="submit"]:has-text("Sign In")')
       await page.waitForURL(/\/events/, { timeout: 15000 })
 
-      eventId = await getValidEventId(page)
+      const eventsRes = await page.request.get('/api/events')
+      expect(eventsRes.ok()).toBeTruthy()
+      const eventsBody: any = await eventsRes.json()
+      const events = eventsBody?.data?.events || eventsBody?.events || eventsBody
+      expect(Array.isArray(events)).toBeTruthy()
 
-      const channelsRes = await page.request.get(`/api/events/${eventId}/chat/channels`)
-      expect(channelsRes.ok()).toBeTruthy()
-      const channelsJson: any = await channelsRes.json()
-      const selfVolunteerId = channelsJson?.data?.linkedVolunteerId
+      let selfVolunteerId = ''
+      for (const event of events) {
+        if (!event?.id) continue
+        const channelsRes = await page.request.get(`/api/events/${event.id}/chat/channels`)
+        if (!channelsRes.ok()) continue
+        const channelsJson: any = await channelsRes.json()
+        const linked = channelsJson?.data?.linkedVolunteerId
+        if (typeof linked === 'string' && linked) {
+          eventId = event.id
+          selfVolunteerId = linked
+          break
+        }
+      }
       expect(
-        typeof selfVolunteerId,
-        'The release check only messages the signed-in account. That account needs a volunteer on this event.'
-      ).toBe('string')
+        selfVolunteerId,
+        'The release check only messages the signed-in account. That account needs to be a volunteer on an event.'
+      ).not.toBe('')
 
       const stamp = Date.now()
       const createRes = await page.request.post(`/api/events/${eventId}/volunteers`, {
