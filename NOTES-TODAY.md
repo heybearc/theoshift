@@ -9,10 +9,9 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - Mid-day checkpoint. No feature work in this session.
 
 ### Discoveries / Notes
-- Repo is **v4.33.5** (`2d8193c8`). LIVE **GREEN** `10.92.3.22`, STANDBY **BLUE** `10.92.3.24`. Switch 2026-10-25; standby deploy succeeded. Both nodes healthy.
-- v4.33.5 keeps shift-click checked on every multi-select and exports the filtered volunteer list.
-- Working tree clean on `main`. No undeployed feature work.
-- qa-01 `STANDBY_URL` must be `https://blue.theoshift.com` after the 2026-10-25 switch.
+- Repo is **v4.33.6** (`03cbb210`). LIVE **BLUE** `10.92.3.24`, STANDBY **GREEN** `10.92.3.22`. Switch and sync 2026-10-26. Both nodes healthy.
+- Positions **Bulk create** opens again. qa-01 positions gate passed on STANDBY before the switch.
+- qa-01 `STANDBY_URL` set to `https://green.theoshift.com` after the switch.
 
 ### Decisions to Promote
 - None.
@@ -21,5 +20,5 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - **FB-039** (URGENT, IN_PROGRESS) — title “Note”. One open urgent item. 2 URGENT already RESOLVED.
 
 ### Links / Commands
-- STANDBY: `https://blue.theoshift.com`
-- LIVE: `https://theoshift.com` (GREEN)
+- STANDBY: `https://green.theoshift.com`
+- LIVE: `https://theoshift.com` (BLUE)
