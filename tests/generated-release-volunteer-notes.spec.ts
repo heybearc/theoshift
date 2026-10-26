@@ -40,13 +40,14 @@ test('a saved volunteer note stays on the list', async ({ page }) => {
     const saved = await saveRes.json()
     expect(saved?.data?.notes).toBe(note)
 
+    const noteOnList = page.locator('div.lg\\:hidden').getByText(note)
     await page.goto(`/events/${eventId}/volunteers`)
     await page.getByPlaceholder(/Search by name, email/i).first().fill('note.probe.release@example.com')
-    await expect(page.getByText(note)).toBeVisible({ timeout: 15000 })
+    await expect(noteOnList).toBeVisible({ timeout: 15000 })
 
     await page.reload()
     await page.getByPlaceholder(/Search by name, email/i).first().fill('note.probe.release@example.com')
-    await expect(page.getByText(note)).toBeVisible({ timeout: 15000 })
+    await expect(noteOnList).toBeVisible({ timeout: 15000 })
   } finally {
     await page.request.put(`/api/events/${eventId}/volunteers/${volunteerId}`, {
       data: { notes: '' },
