@@ -16,7 +16,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === 'GET') {
-      return await handleGetTemplates(req, res)
+      const userId = (session.user as { id?: string } | undefined)?.id
+      return await handleGetTemplates(res, userId)
     }
 
     return res.status(405).json({ success: false, error: 'Method not allowed' })
@@ -26,13 +27,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
-async function handleGetTemplates(req: NextApiRequest, res: NextApiResponse) {
+async function handleGetTemplates(res: NextApiResponse, userId?: string) {
   try {
     const templates = await prisma.shift_templates.findMany({
       where: {
         OR: [
           { isSystemTemplate: true },
-          { createdBy: (req as any).session?.user?.id }
+          ...(userId ? [{ createdBy: userId }] : [])
         ]
       },
       orderBy: [
@@ -47,7 +48,7 @@ async function handleGetTemplates(req: NextApiRequest, res: NextApiResponse) {
         id: template.id,
         name: template.name,
         description: template.description,
-        shifts: template.shifts,
+        shifts: Array.isArray(template.shifts) ? template.shifts : [],
         isSystemTemplate: template.isSystemTemplate
       }))
     })

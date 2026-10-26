@@ -13,6 +13,31 @@ interface ShiftTemplate {
   isSystemTemplate: boolean
 }
 
+export function normalizeShiftTemplates(payload: unknown): ShiftTemplate[] {
+  const rows = Array.isArray(payload)
+    ? payload
+    : payload && typeof payload === 'object'
+      ? Object.entries(payload as Record<string, unknown>).map(([id, value]) => ({
+          id,
+          ...(value && typeof value === 'object' ? (value as object) : {})
+        }))
+      : []
+
+  return rows.flatMap((row) => {
+    if (!row || typeof row !== 'object') return []
+    const template = row as Record<string, unknown>
+    const id = typeof template.id === 'string' ? template.id : ''
+    if (!id) return []
+    return [{
+      id,
+      name: typeof template.name === 'string' ? template.name : id,
+      description: typeof template.description === 'string' ? template.description : '',
+      shifts: Array.isArray(template.shifts) ? template.shifts as ShiftTemplate['shifts'] : [],
+      isSystemTemplate: Boolean(template.isSystemTemplate)
+    }]
+  })
+}
+
 interface BulkPositionCreatorProps {
   eventId: string
   onSuccess: (result: any) => void
@@ -40,8 +65,8 @@ export default function BulkPositionCreator({ eventId, onSuccess, onCancel }: Bu
       })
       const data = await response.json()
       
-      if (data.success) {
-        setTemplates(data.data)
+      if (response.ok && data.success) {
+        setTemplates(normalizeShiftTemplates(data.data))
         // Don't default to any template - let user choose
         // setShiftTemplateId('') // Keep empty by default
       } else {
