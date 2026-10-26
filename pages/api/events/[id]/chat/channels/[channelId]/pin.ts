@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { canAccessChatChannel } from '@/lib/chatAccess'
 import { checkEventAccess } from '@/lib/eventAccess'
 import { broadcastToChannel } from '@/lib/chatRealtime'
+import { isReleaseGateChatProbe } from '@/lib/chatReleaseGate'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -41,14 +42,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const rawMessageId = req.body?.messageId
   const messageId = typeof rawMessageId === 'string' && rawMessageId.length > 0 ? rawMessageId : null
 
+  let skipPinBroadcast = false
   if (messageId) {
     const message = await prisma.event_chat_messages.findFirst({
       where: { id: messageId, channelId, deletedAt: null },
-      select: { id: true }
+      select: { id: true, body: true }
     })
     if (!message) {
       return res.status(404).json({ success: false, error: 'Message not found in this channel' })
     }
+    skipPinBroadcast = isReleaseGateChatProbe(req.headers['x-theoshift-release-gate'], message.body)
   }
 
   await prisma.event_chat_channels.update({
@@ -56,7 +59,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     data: { pinnedMessageId: messageId }
   })
 
-  broadcastToChannel(channelId, { type: 'pin:update', channelId, pinnedMessageId: messageId })
+  if (!skipPinBroadcast) {
+    broadcastToChannel(channelId, { type: 'pin:update', channelId, pinnedMessageId: messageId })
+  }
 
   return res.status(200).json({
     success: true,

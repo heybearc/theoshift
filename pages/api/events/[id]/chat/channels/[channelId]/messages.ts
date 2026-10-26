@@ -6,6 +6,7 @@ import { canAccessChatChannel } from '@/lib/chatAccess'
 import { checkEventAccess } from '@/lib/eventAccess'
 import { getActiveLinkedVolunteerId } from '@/lib/eventVolunteerIdentity'
 import { broadcastToChannel, broadcastToEvent } from '@/lib/chatRealtime'
+import { isReleaseGateChatProbe } from '@/lib/chatReleaseGate'
 import { sendWebPush } from '@/lib/webPush'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -198,6 +199,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     })
 
+    const releaseGateProbe = isReleaseGateChatProbe(
+      req.headers['x-theoshift-release-gate'],
+      body
+    )
+
+    if (!releaseGateProbe) {
     broadcastToChannel(channelId, { type: 'message:new', channelId, message })
     broadcastToEvent(eventId, { type: 'channel:activity', eventId, channelId, createdAt: message.createdAt })
 
@@ -349,6 +356,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // ignore
       }
     })()
+    }
 
     return res.status(201).json({ success: true, data: message })
   }

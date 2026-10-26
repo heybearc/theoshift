@@ -541,7 +541,9 @@ export default function EventStaffChatPage({
       setError(data.error || 'Failed to pin message')
       return
     }
-    setPinnedMessageId(data.data?.pinnedMessageId || null)
+    const pinnedId = data.data?.pinnedMessageId || null
+    setPinnedMessageId(pinnedId)
+    setPinnedMessage(pinnedId ? messages.find((m) => m.id === pinnedId) || null : null)
   }
 
   const unpinChannel = async () => {
