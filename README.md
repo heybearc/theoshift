@@ -275,6 +275,7 @@ For issues or questions:
 4. Contact the project maintainer for deployment access
 
 ## 📝 Version History
+- **v4.33.9** (2026-10-26) - Volunteer notes stay on the list, and Positions and Volunteers are easier on a phone
 - **v4.33.8** (2026-10-26) - The station checkbox sits on the left, and phone chat alerts show the event name
 - **v4.33.7** (2026-10-26) - A collapsed station on Positions is one row until you open it
 - **v4.33.6** (2026-10-26) - Bulk create on Positions opens again
