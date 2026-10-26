@@ -1358,11 +1358,41 @@ export default function PositionsDayBoard({
                 key={position.id}
                 className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
               >
-                <header className="flex flex-col gap-2 bg-gray-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <header className="flex flex-col gap-2 bg-gray-50 px-3 py-3 sm:flex-row sm:items-center">
+                  <div className="flex min-w-0 flex-1 items-center gap-1">
+                  {canManageContent && (
+                    <label className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center touch-manipulation">
+                      <input
+                        type="checkbox"
+                        checked={selectedStations.has(position.id)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          stationRange.markClick(e)
+                        }}
+                        onChange={(e) => {
+                          const ids = stations.map((station) => station.position.id)
+                          const handled = stationRange.consumeRange(
+                            e,
+                            stationIndex,
+                            (lo, hi) => {
+                              setSelectedStations((prev) => {
+                                const next = new Set(prev)
+                                ids.slice(lo, hi + 1).forEach((id) => next.add(id))
+                                return next
+                              })
+                            }
+                          )
+                          if (!handled) toggleStationSelected(position.id)
+                        }}
+                        className="h-4 w-4"
+                        aria-label={`Select station ${positionDisplayName(position)}`}
+                      />
+                    </label>
+                  )}
                   <button
                     type="button"
                     onClick={() => toggleStation(position.id, isOpen)}
-                    className="flex min-h-[44px] flex-1 items-start gap-2 text-left touch-manipulation"
+                    className="flex min-h-[44px] min-w-0 flex-1 items-start gap-2 text-left touch-manipulation"
                     aria-expanded={isOpen}
                   >
                     <span
@@ -1414,38 +1444,9 @@ export default function PositionsDayBoard({
                       </span>
                     </span>
                   </button>
-                  {canManageContent && (
-                    <label className="inline-flex min-h-[44px] shrink-0 items-center gap-2 text-sm text-gray-600 touch-manipulation">
-                      <input
-                        type="checkbox"
-                        checked={selectedStations.has(position.id)}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          stationRange.markClick(e)
-                        }}
-                        onChange={(e) => {
-                          const ids = stations.map((station) => station.position.id)
-                          const handled = stationRange.consumeRange(
-                            e,
-                            stationIndex,
-                            (lo, hi) => {
-                              setSelectedStations((prev) => {
-                                const next = new Set(prev)
-                                ids.slice(lo, hi + 1).forEach((id) => next.add(id))
-                                return next
-                              })
-                            }
-                          )
-                          if (!handled) toggleStationSelected(position.id)
-                        }}
-                        className="h-4 w-4"
-                        aria-label={`Select station ${positionDisplayName(position)}`}
-                      />
-                      Station
-                    </label>
-                  )}
+                  </div>
                   {canManageContent && isOpen && (
-                    <div className="flex flex-wrap gap-2 sm:pl-8">
+                    <div className="flex flex-wrap gap-2">
                       {position.isActive ? (
                         <>
                           <button

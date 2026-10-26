@@ -68,7 +68,11 @@ test.describe('Day board collapsed stations', () => {
     await openDayBoardWithStations(page)
 
     const { section, header } = await collapsedStation(page)
-    await expect(section.getByRole('checkbox', { name: /Select station /i })).toBeVisible()
+    const checkbox = section.getByRole('checkbox', { name: /Select station /i })
+    await expect(checkbox).toBeVisible()
+    const checkboxBox = await checkbox.boundingBox()
+    const headerBox = await header.boundingBox()
+    expect(checkboxBox && headerBox && checkboxBox.x < headerBox.x).toBeTruthy()
     await expect(section.getByRole('checkbox', { name: /^Select shift /i })).toHaveCount(0)
     await expect(section.getByRole('checkbox', { name: /Select shifts at/i })).toHaveCount(0)
 

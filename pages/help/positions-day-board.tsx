@@ -99,12 +99,12 @@ export default function PositionsDayBoardHelp() {
                 <em>active day only</em>.
               </li>
               <li>
-                A collapsed station is one row: the name, how full it is, and
-                the <strong>Station</strong> box. That box is for bulk edit,
-                delete, and <strong>Set overseer/keyman</strong> on this day’s
-                shifts. Open the station to see each shift and its own{' '}
-                <strong>Select</strong> box. <strong>Select shifts</strong>{' '}
-                still selects every shift on the day.
+                A collapsed station is one row: a checkbox, the name, and how
+                full it is. The checkbox is for bulk edit, delete, and{' '}
+                <strong>Set overseer/keyman</strong> on this day’s shifts. Open
+                the station to see each shift and its own <strong>Select</strong>{' '}
+                box. <strong>Select shifts</strong> still selects every shift
+                on the day.
               </li>
               <li>
                 <strong>More…</strong> lists available volunteers, auto-assign for the
