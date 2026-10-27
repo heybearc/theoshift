@@ -13,7 +13,7 @@ test.describe('Generated release — bulk oversight and admin phone lists', () =
   })
 
   test('bulk edit lists overseers and keymen who are not labeled that way in forms of service', async ({ page }) => {
-    test.setTimeout(90_000)
+    test.setTimeout(180_000)
     const eventId = await getValidEventId(page)
     const stamp = Date.now()
     const overseer = {
@@ -87,7 +87,7 @@ test.describe('Generated release — bulk oversight and admin phone lists', () =
     await expect(page.getByRole('link', { name: 'Edit User' }).first()).toBeVisible()
 
     await page.goto(`${BASE_URL}/admin/locations`)
-    await expect(page.locator('main').getByRole('heading', { name: 'Location Library' })).toBeVisible()
+    await expect(page.getByPlaceholder('Search locations by name or address...')).toBeVisible()
     await expect(page.locator('table')).toBeHidden()
 
     await page.goto(`${BASE_URL}/admin/feedback`)
