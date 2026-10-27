@@ -181,6 +181,7 @@ export default function AdminLocationsPage() {
               No locations found. Create one when adding an event!
             </div>
           ) : (
+            <>
             <div className="md:hidden divide-y divide-gray-200">
               {locations.map((location) => (
                 <div key={location.id} className={`p-4 space-y-3 ${!location.isActive ? 'bg-gray-50' : ''}`}>
@@ -348,6 +349,7 @@ export default function AdminLocationsPage() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </div>
       </div>
