@@ -2647,11 +2647,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                         >
                           <option value="">No change</option>
                           <option value="REMOVE">Remove overseer</option>
-                          {roster.filter(att => 
-                            att.isActive && 
-                            Array.isArray(att.formsOfService) && 
-                            att.formsOfService.some(form => form.toLowerCase().includes('overseer'))
-                          ).map(overseer => (
+                          {roster.filter(att => att.isActive && att.isOverseer).map(overseer => (
                             <option key={overseer.id} value={overseer.id}>
                               {overseer.firstName} {overseer.lastName}
                             </option>
@@ -2670,11 +2666,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                         >
                           <option value="">No change</option>
                           <option value="REMOVE">Remove keyman</option>
-                          {roster.filter(att => 
-                            att.isActive && 
-                            Array.isArray(att.formsOfService) && 
-                            att.formsOfService.some(form => form.toLowerCase().includes('keyman'))
-                          ).map(keyman => (
+                          {roster.filter(att => att.isActive && att.isKeyman).map(keyman => (
                             <option key={keyman.id} value={keyman.id}>
                               {keyman.firstName} {keyman.lastName}
                             </option>

@@ -160,22 +160,19 @@ export default function UsersPage({ users: initialUsers, pagination: initialPagi
     >
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <div></div>
-          <div className="flex space-x-3">
-            <Link
-              href="/admin/users/invite"
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-            >
-              📧 Invite Users
-            </Link>
-            <Link
-              href="/admin/users/bulk"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-            >
-              Bulk Operations
-            </Link>
-          </div>
+        <div className="flex flex-col sm:flex-row sm:justify-end gap-3 mb-6">
+          <Link
+            href="/admin/users/invite"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg text-sm font-medium text-center min-h-[44px] touch-manipulation"
+          >
+            📧 Invite Users
+          </Link>
+          <Link
+            href="/admin/users/bulk"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg text-sm font-medium text-center min-h-[44px] touch-manipulation"
+          >
+            Bulk Operations
+          </Link>
         </div>
 
         {/* Search and Filter */}
@@ -186,14 +183,14 @@ export default function UsersPage({ users: initialUsers, pagination: initialPagi
               placeholder="Search by name or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
             />
           </div>
           <div>
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
             >
               <option value="">All Roles</option>
               <option value="ADMIN">Admin</option>
@@ -205,7 +202,7 @@ export default function UsersPage({ users: initialUsers, pagination: initialPagi
           </div>
           <button
             type="submit"
-            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors min-h-[44px] touch-manipulation"
           >
             🔍 Search
           </button>
@@ -227,7 +224,85 @@ export default function UsersPage({ users: initialUsers, pagination: initialPagi
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
+              <div className="md:hidden divide-y divide-gray-200">
+                {users.map((user) => {
+                  const invited = Boolean(user.inviteToken && !user.passwordHash)
+                  const statusLabel = invited ? 'Invited' : user.isActive ? 'Active' : 'Inactive'
+                  const statusClass = invited
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : user.isActive
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  return (
+                    <div key={user.id} className="p-4 space-y-3">
+                      <div className="min-w-0">
+                        <div className="text-base font-semibold text-gray-900 break-words">
+                          {user.firstName} {user.lastName}
+                        </div>
+                        <div className="text-sm text-gray-600 break-all">{user.email}</div>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
+                          {formatRole(user.role)}
+                        </span>
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusClass}`}>
+                          {statusLabel}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-700 break-words">
+                        {user.volunteer ? (
+                          <span className="text-green-700">
+                            Linked: {user.volunteer.firstName} {user.volunteer.lastName}
+                          </span>
+                        ) : (
+                          <span className="text-gray-500">No volunteer linked</span>
+                        )}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Created {format(parseISO(user.createdAt), 'MMM d, yyyy')}
+                      </div>
+                      <div className="grid grid-cols-1 gap-2">
+                        <Link
+                          href={`/admin/users/${user.id}/edit`}
+                          className="text-center px-3 py-3 border border-gray-300 rounded-md text-sm font-medium text-gray-800 min-h-[44px] touch-manipulation"
+                        >
+                          Edit User
+                        </Link>
+                        {invited && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => resendInvitation(user.id, user.email)}
+                              className="px-3 py-3 rounded-md text-sm font-medium text-blue-800 bg-blue-50 min-h-[44px] touch-manipulation"
+                            >
+                              Resend Invitation
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => cancelInvitation(user.id, user.email)}
+                              className="px-3 py-3 rounded-md text-sm font-medium text-red-800 bg-red-50 min-h-[44px] touch-manipulation"
+                            >
+                              Cancel Invitation
+                            </button>
+                          </>
+                        )}
+                        {!invited && (
+                          <button
+                            type="button"
+                            onClick={() => toggleUserStatus(user.id, user.isActive)}
+                            className={`px-3 py-3 rounded-md text-sm font-medium min-h-[44px] touch-manipulation ${
+                              user.isActive ? 'text-red-800 bg-red-50' : 'text-green-800 bg-green-50'
+                            }`}
+                          >
+                            {user.isActive ? 'Deactivate' : 'Activate'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
@@ -356,7 +431,7 @@ export default function UsersPage({ users: initialUsers, pagination: initialPagi
               {/* Pagination */}
               {pagination.pages > 1 && (
                 <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="text-sm text-gray-700">
                       Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
                       {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}

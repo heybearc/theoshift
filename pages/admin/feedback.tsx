@@ -279,7 +279,7 @@ export default function FeedbackManagementPage() {
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap gap-2">
             {[
               { key: 'all', label: 'All Feedback' },
               { key: 'new', label: 'New' },
@@ -290,7 +290,7 @@ export default function FeedbackManagementPage() {
               <button
                 key={filterOption.key}
                 onClick={() => setFilter(filterOption.key)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors min-h-[44px] touch-manipulation ${
                   filter === filterOption.key
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -319,10 +319,10 @@ export default function FeedbackManagementPage() {
           ) : (
             <div className="divide-y divide-gray-200">
               {filteredFeedback.map((item) => (
-                <div key={item.id} className="p-6 hover:bg-gray-50 cursor-pointer">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
+                <div key={item.id} className="p-4 sm:p-6 hover:bg-gray-50">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
                         {item.feedbackNumber && (
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-800 text-white">
                             {item.feedbackNumber}
@@ -342,7 +342,7 @@ export default function FeedbackManagementPage() {
                       <h4 className="text-lg font-medium text-gray-900 mb-2">{item.title}</h4>
                       <p className="text-gray-600 mb-3 line-clamp-2">{item.description}</p>
                       
-                      <div className="flex items-center text-sm text-gray-500 space-x-4">
+                      <div className="flex flex-col gap-1 text-sm text-gray-500 sm:flex-row sm:flex-wrap sm:gap-x-4">
                         <span>👤 {item.submittedBy.name} ({item.submittedBy.role})</span>
                         <span>📧 {item.submittedBy.email}</span>
                         <span>📅 {new Date(item.submittedAt).toLocaleDateString()}</span>
@@ -352,13 +352,13 @@ export default function FeedbackManagementPage() {
                       </div>
                     </div>
                     
-                    <div className="flex space-x-2">
+                    <div className="shrink-0">
                       <button 
                         onClick={() => {
                           setSelectedFeedback(item)
                           setShowDetailsModal(true)
                         }}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+                        className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded text-sm min-h-[44px] touch-manipulation"
                       >
                         View Details
                       </button>

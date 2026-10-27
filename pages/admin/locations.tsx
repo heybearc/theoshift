@@ -133,7 +133,7 @@ export default function AdminLocationsPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search locations by name or address..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
               />
             </div>
             <div className="flex items-center">
@@ -181,7 +181,74 @@ export default function AdminLocationsPage() {
               No locations found. Create one when adding an event!
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="md:hidden divide-y divide-gray-200">
+              {locations.map((location) => (
+                <div key={location.id} className={`p-4 space-y-3 ${!location.isActive ? 'bg-gray-50' : ''}`}>
+                  <div className="min-w-0">
+                    <div className="text-base font-semibold text-gray-900 break-words">{location.name}</div>
+                    <div className="text-sm text-gray-600 break-words">
+                      {location.address || 'No address'}
+                    </div>
+                    {location.latitude && location.longitude && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-sm text-gray-700">
+                    <span>
+                      {location._count?.events || 0} event{location._count?.events !== 1 ? 's' : ''}
+                    </span>
+                    {location.isActive ? (
+                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                        Active
+                      </span>
+                    ) : (
+                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                        Inactive
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleViewDetails(location.id)}
+                      className="px-3 py-3 rounded-md border border-gray-300 text-sm font-medium text-gray-800 min-h-[44px] touch-manipulation"
+                    >
+                      View
+                    </button>
+                    {location.latitude && location.longitude && (
+                      <a
+                        href={`https://www.google.com/maps?q=${location.latitude},${location.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-center px-3 py-3 rounded-md border border-gray-300 text-sm font-medium text-blue-800 min-h-[44px] touch-manipulation"
+                      >
+                        Map
+                      </a>
+                    )}
+                    {location.isActive ? (
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(location.id)}
+                        className="px-3 py-3 rounded-md text-sm font-medium text-red-800 bg-red-50 min-h-[44px] touch-manipulation"
+                      >
+                        Deactivate
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleReactivate(location.id)}
+                        className="px-3 py-3 rounded-md text-sm font-medium text-green-800 bg-green-50 min-h-[44px] touch-manipulation"
+                      >
+                        Reactivate
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="hidden md:block overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
