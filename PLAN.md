@@ -1,8 +1,8 @@
 # TheoShift Plan
 
-**Last updated:** 2026-10-26  
+**Last updated:** 2026-10-27  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.33.9 LIVE** (GREEN `10.92.3.22`). STANDBY is BLUE `10.92.3.24`. Volunteer notes stay on the list.
+**Status:** **v4.33.10 LIVE** (BLUE `10.92.3.24`). STANDBY is GREEN `10.92.3.22`. Bulk edit can assign an overseer or keyman.
 
 ---
 
@@ -23,8 +23,11 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Idle** — pick next: FB-036 (age and photo) or mobile admin tables. v4.33.9 is live on GREEN; STANDBY is BLUE.
-- **Mobile readiness across TheoShift** — Positions and Volunteers phone layout shipped in v4.33.9. Next mobile pass is admin tables. Early Check-In volunteer path done through **v4.29.7**.
+- **Idle** — next is FB-036 (age and photo). v4.33.10 is live on BLUE; STANDBY is GREEN.
+- **Mobile readiness across TheoShift** — Users, Locations, and Feedback phone layouts shipped in v4.33.10. Positions and Volunteers shipped in v4.33.9. Early Check-In volunteer path done through **v4.29.7**.
+
+### Recently Completed (2026-10-27)
+- ✅ **v4.33.10** — Bulk edit lists event overseers and keymen. Phone layout for Users, Locations, and Feedback. Shipped + synced (`cb3628ed`)
 
 ### Recently Completed (2026-10-26)
 - ✅ **v4.33.9** — Volunteer notes stay on the list. Phone layout for Positions and Volunteers. Shipped + synced (`2865d196`)
@@ -221,7 +224,7 @@ This follows the usual small-team pattern: **one system of record in the app**, 
   - Targets: `/events/[id]/positions`, `/events/[id]/volunteers`
   - Acceptance: 44px controls, clear primary actions, no clipped text, safe-area friendly on iOS.
 
-- **Mobile optimization: Admin tables** — Pick the top 3 admin surfaces used on phones and apply the same patterns (stacked toolbars, card lists under `md`, overflow scroll with momentum when needed).
+- **Mobile optimization: Admin tables** — Users, Locations, and Feedback shipped in v4.33.10 (card lists and stacked actions on a phone).
   
 - **Enhanced Reporting** — Additional export formats and report types
   - Volunteer attendance reports
