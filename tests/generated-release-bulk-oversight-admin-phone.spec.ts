@@ -13,7 +13,7 @@ test.describe('Generated release — bulk oversight and admin phone lists', () =
   })
 
   test('bulk edit lists overseers and keymen who are not labeled that way in forms of service', async ({ page }) => {
-    test.setTimeout(240_000)
+    test.setTimeout(120_000)
     const eventId = await getValidEventId(page)
     const stamp = Date.now()
     const overseer = {
@@ -61,7 +61,8 @@ test.describe('Generated release — bulk oversight and admin phone lists', () =
       const search = page.getByPlaceholder(/Search by name, email/i).first()
       await search.waitFor({ timeout: 30_000 })
       await search.fill(assignee.email)
-      await page.getByRole('checkbox', { name: `Select ${assignee.firstName} ${assignee.lastName}` }).check()
+      const row = page.getByRole('row', { name: new RegExp(assignee.lastName) })
+      await row.getByRole('checkbox').check({ timeout: 20_000 })
       await page.getByRole('button', { name: 'Bulk Edit' }).click()
 
       const overseerSelect = page.locator('label', { hasText: 'Assign Overseer' }).locator('..').locator('select')
@@ -71,26 +72,19 @@ test.describe('Generated release — bulk oversight and admin phone lists', () =
       await expect(keymanSelect.locator('option', { hasText: 'Remove keyman' })).toHaveCount(1)
       await expect(keymanSelect.locator('option', { hasText: `${keyman.firstName} ${keyman.lastName}` })).toHaveCount(1)
     } finally {
-      await page.evaluate(
-        async ({ base, eventId: id, ids }) => {
-          await Promise.all(
-            ids.map((volunteerId) => {
-              const controller = new AbortController()
-              const timer = setTimeout(() => controller.abort(), 8000)
-              return fetch(`${base}/api/events/${id}/volunteers/${volunteerId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ isActive: false }),
-                signal: controller.signal,
-              })
-                .catch(() => undefined)
-                .finally(() => clearTimeout(timer))
-            })
-          )
-        },
-        { base: BASE_URL, eventId, ids: created }
+      const rosterRes = await page.request.get(`${BASE_URL}/api/events/${eventId}/volunteers`)
+      const rosterBody = await rosterRes.json()
+      const people = rosterBody?.data?.volunteers || rosterBody?.volunteers || rosterBody?.data || []
+      const probes = (Array.isArray(people) ? people : []).filter((person) =>
+        /^bulk\.(overseer|keyman|assignee)\./i.test(String(person?.email || ''))
       )
+      for (const person of probes) {
+        if (!person?.id) continue
+        await page.request.put(`${BASE_URL}/api/events/${eventId}/volunteers/${person.id}`, {
+          data: { isActive: false },
+          timeout: 20_000,
+        })
+      }
     }
   })
 
