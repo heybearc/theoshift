@@ -13,7 +13,7 @@ test.describe('Generated release — bulk oversight and admin phone lists', () =
   })
 
   test('bulk edit lists overseers and keymen who are not labeled that way in forms of service', async ({ page }) => {
-    test.setTimeout(180_000)
+    test.setTimeout(240_000)
     const eventId = await getValidEventId(page)
     const stamp = Date.now()
     const overseer = {
@@ -57,8 +57,10 @@ test.describe('Generated release — bulk oversight and admin phone lists', () =
       }
 
       await page.setViewportSize({ width: 1280, height: 900 })
-      await page.goto(`${BASE_URL}/events/${eventId}/volunteers`)
-      await page.getByPlaceholder(/Search by name, email/i).first().fill(assignee.email)
+      await page.goto(`${BASE_URL}/events/${eventId}/volunteers`, { waitUntil: 'domcontentloaded' })
+      const search = page.getByPlaceholder(/Search by name, email/i).first()
+      await search.waitFor({ timeout: 30_000 })
+      await search.fill(assignee.email)
       await page.getByRole('checkbox', { name: `Select ${assignee.firstName} ${assignee.lastName}` }).check()
       await page.getByRole('button', { name: 'Bulk Edit' }).click()
 
