@@ -69,12 +69,26 @@ test.describe('Generated release — bulk oversight and admin phone lists', () =
       await expect(keymanSelect.locator('option', { hasText: 'Remove keyman' })).toHaveCount(1)
       await expect(keymanSelect.locator('option', { hasText: `${keyman.firstName} ${keyman.lastName}` })).toHaveCount(1)
     } finally {
-      for (const id of created) {
-        await page.request.put(`${BASE_URL}/api/events/${eventId}/volunteers/${id}`, {
-          data: { isActive: false },
-          timeout: 15_000,
-        })
-      }
+      await page.evaluate(
+        async ({ base, eventId: id, ids }) => {
+          await Promise.all(
+            ids.map((volunteerId) => {
+              const controller = new AbortController()
+              const timer = setTimeout(() => controller.abort(), 8000)
+              return fetch(`${base}/api/events/${id}/volunteers/${volunteerId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ isActive: false }),
+                signal: controller.signal,
+              })
+                .catch(() => undefined)
+                .finally(() => clearTimeout(timer))
+            })
+          )
+        },
+        { base: BASE_URL, eventId, ids: created }
+      )
     }
   })
 
