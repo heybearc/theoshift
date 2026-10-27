@@ -71,7 +71,8 @@ test.describe('Generated release — bulk oversight and admin phone lists', () =
     } finally {
       for (const id of created) {
         await page.request.put(`${BASE_URL}/api/events/${eventId}/volunteers/${id}`, {
-          data: { isActive: false, isOverseer: false, isKeyman: false },
+          data: { isActive: false },
+          timeout: 15_000,
         })
       }
     }
@@ -86,7 +87,7 @@ test.describe('Generated release — bulk oversight and admin phone lists', () =
     await expect(page.getByRole('link', { name: 'Edit User' }).first()).toBeVisible()
 
     await page.goto(`${BASE_URL}/admin/locations`)
-    await expect(page.getByRole('heading', { name: 'Location Library' })).toBeVisible()
+    await expect(page.locator('main').getByRole('heading', { name: 'Location Library' })).toBeVisible()
     await expect(page.locator('table')).toBeHidden()
 
     await page.goto(`${BASE_URL}/admin/feedback`)
