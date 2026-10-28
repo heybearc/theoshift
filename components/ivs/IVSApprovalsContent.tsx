@@ -18,6 +18,7 @@ import {
 } from '@/lib/ivsEarlyCheckin'
 import { EarlyEntryDayControls } from './EarlyEntryDayControls'
 import IvsDepartmentContactsPanel from './IvsDepartmentContactsPanel'
+import SelectionBar from '../SelectionBar'
 import { notifyAlert, toast } from '../../lib/ui/toast'
 import { appConfirm, appConfirmMessage } from '../../lib/ui/confirm'
 
@@ -567,30 +568,25 @@ export default function IVSApprovalsContent({ event, canEdit }: IVSApprovalsCont
           )}
         </div>
 
-        {selectedVolunteers.size > 0 && (
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:ml-auto sm:w-auto w-full">
-            <span className="text-sm text-gray-600 sm:whitespace-nowrap">
-              {selectedVolunteers.size} selected
-            </span>
-            <select
-              aria-label="Bulk actions"
-              onChange={(e) => {
-                if (e.target.value) {
-                  handleBulkAction(e.target.value)
-                  e.target.value = ''
-                }
-              }}
-              className="w-full sm:w-auto min-h-[44px] px-3 py-2 border rounded-md bg-purple-600 text-white hover:bg-purple-700 text-base"
-            >
-              <option value="">Bulk actions</option>
-              <option value="setStatus">Set status…</option>
-              <option value="setEarlyEntry">Set early entry…</option>
-              <option value="changeRound">Change round…</option>
-              <option value="changeDepartment">Change department name…</option>
-              <option value="changeCongregation">Change congregation name…</option>
-            </select>
-          </div>
-        )}
+        <SelectionBar count={selectedVolunteers.size} singular="volunteer">
+          <select
+            aria-label="Bulk actions"
+            onChange={(e) => {
+              if (e.target.value) {
+                handleBulkAction(e.target.value)
+                e.target.value = ''
+              }
+            }}
+            className="w-full sm:w-auto min-h-[44px] px-3 py-2 border rounded-md bg-purple-600 text-white hover:bg-purple-700 text-base"
+          >
+            <option value="">Bulk actions</option>
+            <option value="setStatus">Set status…</option>
+            <option value="setEarlyEntry">Set early entry…</option>
+            <option value="changeRound">Change round…</option>
+            <option value="changeDepartment">Change department name…</option>
+            <option value="changeCongregation">Change congregation name…</option>
+          </select>
+        </SelectionBar>
       </div>
 
       {/* Search Bar */}
@@ -750,7 +746,10 @@ export default function IVSApprovalsContent({ event, canEdit }: IVSApprovalsCont
                 onChange={handleSelectAll}
                 className="h-5 w-5 shrink-0 cursor-pointer"
               />
-              <span>Select all on this page ({paginatedVolunteers.length})</span>
+              <span>
+                Select all on this page ({paginatedVolunteers.length})
+                {selectedVolunteers.size > 0 ? ` · ${selectedVolunteers.size} selected` : ''}
+              </span>
             </label>
             {paginatedVolunteers.map((volunteer, index) => (
               <div

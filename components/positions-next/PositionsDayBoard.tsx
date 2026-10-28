@@ -9,6 +9,7 @@ import { toDateKey } from '../../lib/shiftConflict'
 import { sortShiftsByTime } from '../../lib/shiftSort'
 import { createPositionService } from '../../lib/positionService'
 import { AutoAssignmentEngine } from '../../lib/autoAssignmentEngine'
+import SelectionBar from '../SelectionBar'
 import { notifyAlert, toast } from '../../lib/ui/toast'
 import { appConfirm } from '../../lib/ui/confirm'
 import {
@@ -866,8 +867,24 @@ export default function PositionsDayBoard({
     setSelectedUndated(keys)
   }
 
+  const selectedCountParts = [
+    selectedStations.size > 0
+      ? `${selectedStations.size} station${selectedStations.size === 1 ? '' : 's'}`
+      : null,
+    selectedUndated.size > 0
+      ? `${selectedUndated.size} shift${selectedUndated.size === 1 ? '' : 's'}`
+      : null,
+  ].filter((part): part is string => part !== null)
+
   return (
     <div className="space-y-4">
+      <SelectionBar
+        count={selectedStations.size + selectedUndated.size}
+        singular="item"
+        label={
+          selectedCountParts.length > 0 ? `${selectedCountParts.join(', ')} selected` : undefined
+        }
+      />
       {eventDateKeys.length > 1 && undatedShiftCount > 0 && (
         <div className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
           <p>

@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import Head from 'next/head'
 import Link from 'next/link'
 import EventPageWrapper from '../../../components/EventPageWrapper'
+import SelectionBar from '../../../components/SelectionBar'
 import BulkPositionCreator from '../../../components/BulkPositionCreator'
 import PositionGridView from '../../../components/PositionGridView'
 import { AutoAssignmentEngine } from '../../../lib/autoAssignmentEngine'
@@ -1913,12 +1914,8 @@ export default function EventPositionsPage({ eventId, event, positions: initialP
                 )}
               </div>
 
-              {/* Bulk Operations Bar (contextual) */}
-              {canManageContent && selectedPositions.size > 0 && (
-                <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-                  <span className="text-sm text-blue-700 font-medium">
-                    {selectedPositions.size} selected
-                  </span>
+              {canManageContent && (
+                <SelectionBar count={selectedPositions.size} singular="position">
                   <button
                     onClick={() => setShowTemplateModal(true)}
                     className="text-xs bg-white hover:bg-gray-50 text-blue-700 px-2 py-1 rounded font-medium border border-blue-300"
@@ -1943,7 +1940,7 @@ export default function EventPositionsPage({ eventId, event, positions: initialP
                   >
                     Clear
                   </button>
-                </div>
+                </SelectionBar>
               )}
             </div>
           </div>

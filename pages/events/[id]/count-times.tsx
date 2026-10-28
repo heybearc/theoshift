@@ -2,6 +2,7 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import EventPageWrapper from '../../../components/EventPageWrapper'
+import SelectionBar from '../../../components/SelectionBar'
 import CreateCountSessionModal from '../../../components/CreateCountSessionModal'
 import EditCountSessionModal from '../../../components/EditCountSessionModal'
 import { useEffect, useState } from 'react'
@@ -437,6 +438,10 @@ export default function CountTimesPage({ eventId, event, countSessions, canManag
                       <button onClick={() => setAssignmentSessionId(null)} className="px-3 py-1 bg-white border border-gray-300 rounded text-sm">Close</button>
                     </div>
 
+                    <SelectionBar
+                      count={assignmentSessionId ? selectedBulkPositions.size : 0}
+                      singular="station"
+                    />
                     <div className="flex flex-wrap items-center gap-2 bg-white p-3 rounded border border-indigo-100">
                       <select
                         value={selectedBulkVolunteerId}
@@ -462,7 +467,8 @@ export default function CountTimesPage({ eventId, event, countSessions, canManag
                         }}
                         className="px-3 py-2 bg-indigo-600 text-white rounded text-sm"
                       >
-                        Assign Volunteer To Selected Stations
+                        Assign volunteer to selected stations
+                        {selectedBulkPositions.size > 0 ? ` (${selectedBulkPositions.size})` : ''}
                       </button>
                     </div>
 

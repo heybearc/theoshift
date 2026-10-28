@@ -2,6 +2,7 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import EventPageWrapper from '../../../components/EventPageWrapper'
+import SelectionBar from '../../../components/SelectionBar'
 import FilterPresets from '../../../components/FilterPresets'
 import { VolunteerBadges } from '../../../components/VolunteerBadges'
 import VolunteerDetailsPopup from '../../../components/VolunteerDetailsPopup'
@@ -1413,55 +1414,45 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
             )}
           </div>
           
-          {/* Bulk Actions Toolbar */}
-          {selectedAttendants.size > 0 && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-blue-900">
-                  {selectedAttendants.size} volunteer{selectedAttendants.size !== 1 ? 's' : ''} selected
-                </span>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={handleBulkEdit}
-                    disabled={loading}
-                    className="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 text-blue-700 text-sm font-medium rounded-md border border-blue-300 transition-colors"
-                  >
-                    <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Bulk Edit
-                  </button>
-                  <button 
-                    onClick={handleBulkAvailabilityRequest}
-                    disabled={loading}
-                    className="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 text-blue-700 text-sm font-medium rounded-md border border-blue-300 transition-colors"
-                  >
-                    <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    Request Availability
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => openBroadcastEmailModal('selected')}
-                    disabled={loading}
-                    className="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 text-blue-700 text-sm font-medium rounded-md border border-blue-300 transition-colors"
-                  >
-                    <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    Email selected
-                  </button>
-                  <button 
-                    onClick={() => setSelectedAttendants(new Set())}
-                    className="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-md border border-gray-300 transition-colors"
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          <SelectionBar count={selectedAttendants.size} singular="volunteer">
+            <button
+              onClick={handleBulkEdit}
+              disabled={loading}
+              className="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 text-blue-700 text-sm font-medium rounded-md border border-blue-300 transition-colors"
+            >
+              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Bulk Edit
+            </button>
+            <button
+              onClick={handleBulkAvailabilityRequest}
+              disabled={loading}
+              className="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 text-blue-700 text-sm font-medium rounded-md border border-blue-300 transition-colors"
+            >
+              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Request Availability
+            </button>
+            <button
+              type="button"
+              onClick={() => openBroadcastEmailModal('selected')}
+              disabled={loading}
+              className="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 text-blue-700 text-sm font-medium rounded-md border border-blue-300 transition-colors"
+            >
+              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Email selected
+            </button>
+            <button
+              onClick={() => setSelectedAttendants(new Set())}
+              className="inline-flex items-center px-3 py-1.5 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-md border border-gray-300 transition-colors"
+            >
+              Clear
+            </button>
+          </SelectionBar>
         </div>
 
         {/* Compact Filter Bar */}
@@ -1815,7 +1806,14 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
         {/* Volunteers List (Cards on mobile, table on desktop) */}
         <div className="bg-white shadow rounded-lg overflow-visible">
           <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Volunteers List</h3>
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <h3 className="text-lg font-medium text-gray-900">Volunteers List</h3>
+              {selectedAttendants.size > 0 && (
+                <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-sm font-semibold text-blue-900">
+                  {selectedAttendants.size} selected
+                </span>
+              )}
+            </div>
             
             {attendants.length === 0 ? (
               <div className="text-center py-8">
@@ -2020,6 +2018,11 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                           type="checkbox"
                           checked={selectedAttendants.size === filteredAttendants.length && filteredAttendants.length > 0}
                           onChange={handleSelectAll}
+                          aria-label={
+                            selectedAttendants.size > 0
+                              ? `${selectedAttendants.size} volunteers selected`
+                              : 'Select all volunteers'
+                          }
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
                       </th>

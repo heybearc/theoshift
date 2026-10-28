@@ -548,8 +548,8 @@ export default function EventDocumentsPage({ eventId, event, documents, canEdit,
                         ))}
                       </div>
                       {publishType === 'individual' && (
-                        <p className="text-sm text-gray-600 mt-2">
-                          {selectedAttendants.length} attendant(s) selected
+                        <p className="text-sm font-semibold text-blue-900 mt-2">
+                          {selectedAttendants.length} volunteer{selectedAttendants.length === 1 ? '' : 's'} selected
                         </p>
                       )}
                     </div>
