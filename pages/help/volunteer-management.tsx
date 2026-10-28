@@ -34,7 +34,8 @@ export default function VolunteerManagementHelp({ userRole }: VolunteerManagemen
           <p className="text-gray-700 mb-4">
             Open an event and go to the <strong>Volunteers</strong> section. Use <strong>Email volunteers</strong>{' '}
             (near Add / Import) to message <strong>all active roster volunteers</strong> who have an email on file, or
-            select rows and use <strong>Email selected</strong> in the blue toolbar.
+            select rows and use <strong>Email selected</strong> on the bar at the bottom of the screen.
+            That bar also shows how many people are selected.
           </p>
           <p className="text-gray-700 mb-4">
             Before sending, TheoShift shows how many people will receive the email and an estimated time.
@@ -261,6 +262,23 @@ export default function VolunteerManagementHelp({ userRole }: VolunteerManagemen
               <p className="text-gray-700">
                 They should not. Search, Inactive/Active/All, and other filters stay in place after you
                 change a volunteer. A confirmation message appears when the save succeeds.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">How do I see how many people are selected?</h3>
+              <p className="text-gray-700">
+                Check one or more rows. A bar at the bottom of the screen shows the count, such as
+                &quot;3 volunteers selected,&quot; and stays there while you scroll. The same count
+                appears next to Volunteers List.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">How do I change how many volunteers are on the page?</h3>
+              <p className="text-gray-700">
+                Under the list, use <strong>Per page</strong>. You can show 10, 20, 25, 50, 100, or
+                all of them. Previous and Next appear when there is more than one page.
               </p>
             </div>
 
