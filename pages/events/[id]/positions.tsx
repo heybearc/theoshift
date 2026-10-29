@@ -2430,6 +2430,11 @@ export default function EventPositionsPage({ eventId, event, positions: initialP
                                     Position overseer: {positionOversight.overseer.firstName} {positionOversight.overseer.lastName}
                                   </p>
                                 ) : null)}
+                                {!isEditing && !shiftKeymanAssign && positionOversight?.keyman && (
+                                  <p className="text-xs text-gray-500 mb-1">
+                                    Position keyman: {positionOversight.keyman.firstName} {positionOversight.keyman.lastName}
+                                  </p>
+                                )}
                                 {/* Shift Leadership Assignments */}
                                 {shiftLeadershipAssignments.length > 0 && (
                                   <div className="mb-2">

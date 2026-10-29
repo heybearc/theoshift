@@ -28,13 +28,17 @@ export function clampVolunteersNeeded(raw: unknown): number {
   return Math.max(1, Math.min(50, Math.floor(n)))
 }
 
-/** Count people assigned to a shift (includes OVERSEER/KEYMAN — they fill a body slot). */
+/** Count shift volunteers. Overseer and keyman are oversight, not a filled slot. */
 export function countShiftAssignments(
   assignments: AssignmentCapacityLike[] | null | undefined,
   shiftId: string
 ): number {
   if (!assignments?.length) return 0
-  return assignments.filter(a => (a.shift?.id || a.shiftId) === shiftId).length
+  return assignments.filter(a => {
+    if ((a.shift?.id || a.shiftId) !== shiftId) return false
+    const role = (a.role || '').toUpperCase()
+    return role !== 'OVERSEER' && role !== 'KEYMAN'
+  }).length
 }
 
 export function getOpenShiftSlots(

@@ -1365,6 +1365,21 @@ export default function PositionsDayBoard({
           )}
           {stations.map(({ position, shifts, filled: stationFilled, needed: stationNeeded }, stationIndex) => {
             const positionOverseer = position.oversight?.[0]?.overseer
+            const positionKeyman = position.oversight?.[0]?.keyman
+            const shiftKeymanNames = new Set<string>()
+            for (const shift of shifts) {
+              const assigned = (position.assignments || []).find(
+                (a) => a.role === 'KEYMAN' && a.shift?.id === shift.id
+              )
+              if (assigned) shiftKeymanNames.add(personName(assigned))
+            }
+            const keymanSummary = positionKeyman
+              ? `${positionKeyman.firstName} ${positionKeyman.lastName}`
+              : shiftKeymanNames.size === 1
+                ? [...shiftKeymanNames][0]
+                : shiftKeymanNames.size > 1
+                  ? `${shiftKeymanNames.size} keymen`
+                  : ''
             const isOpen = stationExpanded(
               position.id,
               stationFilled,
@@ -1458,6 +1473,7 @@ export default function PositionsDayBoard({
                         {positionOverseer
                           ? ` · Overseer ${positionOverseer.firstName} ${positionOverseer.lastName}`
                           : ''}
+                        {keymanSummary ? ` · Keyman ${keymanSummary}` : ''}
                       </span>
                     </span>
                   </button>
@@ -1730,10 +1746,14 @@ export default function PositionsDayBoard({
                                   </button>
                                 )}
                               </p>
-                              {(keyman || canManageContent) && (
+                              {(keyman || positionKeyman || canManageContent) && (
                                 <p>
                                   <span className="text-gray-500">Keyman · </span>
-                                  {keyman ? personName(keyman) : '—'}
+                                  {keyman
+                                    ? personName(keyman)
+                                    : positionKeyman
+                                      ? `${positionKeyman.firstName} ${positionKeyman.lastName} (position)`
+                                      : '—'}
                                   {canManageContent && keyman && (
                                     <button
                                       type="button"
