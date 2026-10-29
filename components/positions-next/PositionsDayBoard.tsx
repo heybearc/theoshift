@@ -1548,10 +1548,6 @@ export default function PositionsDayBoard({
                       (a) => a.role === 'KEYMAN'
                     )
                     const isEditing = editingShiftKey === rowKey
-                    const pct = Math.min(
-                      100,
-                      Math.round((filled / Math.max(needed, 1)) * 100)
-                    )
 
                     return (
                       <div key={rowKey} className="px-4 py-3">
@@ -1655,19 +1651,6 @@ export default function PositionsDayBoard({
 
                         {isOpen && (
                         <>
-                        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
-                          <div
-                            className={`h-1.5 rounded-full ${
-                              pct >= 100
-                                ? 'bg-green-500'
-                                : pct > 0
-                                  ? 'bg-amber-400'
-                                  : 'bg-gray-300'
-                            }`}
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-
                         {isEditing && canManageContent ? (
                           <ShiftInlineEditor
                             initial={{
@@ -1727,73 +1710,68 @@ export default function PositionsDayBoard({
                           />
                         ) : (
                           <>
-                            <div className="mt-2 space-y-1 text-sm text-gray-800">
-                              <p>
-                                <span className="text-gray-500">Overseer · </span>
-                                {overseer
-                                  ? personName(overseer)
-                                  : positionOverseer
-                                    ? `${positionOverseer.firstName} ${positionOverseer.lastName} (position)`
-                                    : '—'}
-                                {canManageContent && overseer && (
-                                  <button
-                                    type="button"
-                                    disabled={removingId === overseer.id}
-                                    onClick={() => handleRemove(overseer)}
-                                    className="ml-2 text-xs text-red-600 hover:text-red-800 min-h-[44px] px-1 touch-manipulation"
+                            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-900">
+                              <span className="text-gray-500">Assigned</span>
+                              {volunteers.length === 0 ? (
+                                <span className="text-gray-500">None</span>
+                              ) : (
+                                volunteers.map((v) => (
+                                  <span
+                                    key={v.id}
+                                    className="inline-flex items-center gap-1 font-medium"
                                   >
-                                    Remove
-                                  </button>
+                                    {personName(v)}
+                                    {canManageContent && (
+                                      <button
+                                        type="button"
+                                        disabled={removingId === v.id}
+                                        onClick={() => handleRemove(v)}
+                                        className="text-xs font-normal text-red-600 hover:text-red-800 min-h-[44px] px-1 touch-manipulation"
+                                      >
+                                        Remove
+                                      </button>
+                                    )}
+                                  </span>
+                                ))
+                              )}
+                            </div>
+                            {(overseer || keyman) && (
+                              <p className="mt-0.5 text-xs text-gray-500">
+                                {overseer && (
+                                  <>
+                                    <span>Overseer · </span>
+                                    {personName(overseer)}
+                                    {canManageContent && (
+                                      <button
+                                        type="button"
+                                        disabled={removingId === overseer.id}
+                                        onClick={() => handleRemove(overseer)}
+                                        className="ml-1 text-red-600 hover:text-red-800 min-h-[44px] px-1 touch-manipulation"
+                                      >
+                                        Remove
+                                      </button>
+                                    )}
+                                  </>
+                                )}
+                                {keyman && (
+                                  <>
+                                    {overseer ? <span className="mx-1">·</span> : null}
+                                    <span>Keyman · </span>
+                                    {personName(keyman)}
+                                    {canManageContent && (
+                                      <button
+                                        type="button"
+                                        disabled={removingId === keyman.id}
+                                        onClick={() => handleRemove(keyman)}
+                                        className="ml-1 text-red-600 hover:text-red-800 min-h-[44px] px-1 touch-manipulation"
+                                      >
+                                        Remove
+                                      </button>
+                                    )}
+                                  </>
                                 )}
                               </p>
-                              {(keyman || positionKeyman || canManageContent) && (
-                                <p>
-                                  <span className="text-gray-500">Keyman · </span>
-                                  {keyman
-                                    ? personName(keyman)
-                                    : positionKeyman
-                                      ? `${positionKeyman.firstName} ${positionKeyman.lastName} (position)`
-                                      : '—'}
-                                  {canManageContent && keyman && (
-                                    <button
-                                      type="button"
-                                      disabled={removingId === keyman.id}
-                                      onClick={() => handleRemove(keyman)}
-                                      className="ml-2 text-xs text-red-600 hover:text-red-800 min-h-[44px] px-1 touch-manipulation"
-                                    >
-                                      Remove
-                                    </button>
-                                  )}
-                                </p>
-                              )}
-                              <div>
-                                <span className="text-gray-500">Assigned · </span>
-                                {volunteers.length === 0 ? (
-                                  <span className="text-gray-500">None</span>
-                                ) : (
-                                  <ul className="mt-1 space-y-0.5">
-                                    {volunteers.map((v) => (
-                                      <li
-                                        key={v.id}
-                                        className="flex flex-wrap items-center gap-2"
-                                      >
-                                        <span>{personName(v)}</span>
-                                        {canManageContent && (
-                                          <button
-                                            type="button"
-                                            disabled={removingId === v.id}
-                                            onClick={() => handleRemove(v)}
-                                            className="text-xs text-red-600 hover:text-red-800 min-h-[44px] px-1 touch-manipulation"
-                                          >
-                                            Remove
-                                          </button>
-                                        )}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-                              </div>
-                            </div>
+                            )}
 
                             {canManageContent && (
                               <div className="mt-2 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center">
