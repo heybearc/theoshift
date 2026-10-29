@@ -5,6 +5,7 @@ import { prisma } from '../../../src/lib/prisma'
 import { toDateOnlyStringUTC } from '../../../src/lib/calendarDate'
 import { verifyVolunteerIvsEarlyCheckinAccessForIds } from '@/lib/ivsVolunteerEarlyCheckinAccess'
 import { getViewAsVolunteerId } from '@/lib/countAssignmentsShared'
+import { volunteerVisibleCountSessions } from '@/lib/volunteerCountVisibility'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -417,6 +418,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ]
     })
 
+    const assignedCountTimes = new Map<string, Date | null>()
+    for (const group of volunteerGroups) {
+      assignedCountTimes.set(group.countSessionId, group.countSession.countTime ?? null)
+    }
+    for (const session of activeCountSessions) {
+      if (!assignedCountTimes.has(session.id)) {
+        assignedCountTimes.set(session.id, session.countTime ?? null)
+      }
+    }
+    const countVisibility = volunteerVisibleCountSessions(
+      [...assignedCountTimes.entries()].map(([id, countTime]) => ({ id, countTime })),
+      now
+    )
+    const visibleCountGroups = volunteerGroups.filter((group) =>
+      countVisibility.visibleIds.has(group.countSessionId)
+    )
+    const visibleCountSessions = activeCountSessions.filter((session) =>
+      countVisibility.visibleIds.has(session.id)
+    )
+
     return res.status(200).json({
       success: true,
       data: {
@@ -441,7 +462,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         isIVSTeamMember: !!ivsTeamMember,
         canSubmitIvsRequests,
         assignments,
-        activeCountGroups: volunteerGroups.map((g) => ({
+        activeCountGroups: visibleCountGroups.map((g) => ({
           sessionId: g.countSessionId,
           sessionName: g.countSession.sessionName,
           countTime: g.countSession.countTime ? g.countSession.countTime.toISOString() : null,
@@ -463,7 +484,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           existingCount: g.entry?.attendeeCount ?? null,
           existingNotes: g.entry?.notes ?? null
         })),
-        activeCountSessions: activeCountSessions.map(session => ({
+        activeCountSessions: visibleCountSessions.map(session => ({
           id: session.id,
           sessionName: session.sessionName,
           countTime: session.countTime ? session.countTime.toISOString() : null,
@@ -478,7 +499,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           createdAt: ann.createdAt ? ann.createdAt.toISOString() : null
         })),
         documents: documents,
-        oversightContacts
+        oversightContacts,
+        nextCountAvailableAt: countVisibility.nextRevealAt
+          ? countVisibility.nextRevealAt.toISOString()
+          : null
       }
     })
   } catch (error) {

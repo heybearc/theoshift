@@ -94,6 +94,8 @@ interface MobileVolunteerDashboardProps {
   oversightContacts: OversightContact[]
   activeCountSessions?: CountSession[]
   activeCountGroups?: ActiveCountGroupSummary[]
+  /** When the next assigned count replaces the one on screen. */
+  nextCountAvailableAt?: string | null
   documents?: Document[]
   availabilityRequests: AvailabilityRequest[]
   onAvailabilityResponse: (requestId: string, status: string, notes?: string) => Promise<void>
@@ -118,6 +120,7 @@ export default function MobileVolunteerDashboard({
   oversightContacts,
   activeCountSessions = [],
   activeCountGroups = [],
+  nextCountAvailableAt = null,
   documents = [],
   availabilityRequests,
   onAvailabilityResponse,
@@ -373,6 +376,11 @@ export default function MobileVolunteerDashboard({
                 <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
                   📊 Attendance counts
                 </h3>
+                {nextCountAvailableAt && (
+                  <p className="text-sm text-gray-600 mb-3">
+                    Your next count replaces this one at {new Date(nextCountAvailableAt).toLocaleString()}. Refresh this page then.
+                  </p>
+                )}
                 {activeCountGroups.length > 0 && (
                   <div className="space-y-3 mb-4">
                     {activeCountGroups.map((group) => (

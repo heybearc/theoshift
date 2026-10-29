@@ -142,6 +142,8 @@ interface DashboardData {
   oversightContacts: OversightContact[]
   activeCountSessions?: CountSession[]
   activeCountGroups?: ActiveCountGroup[]
+  /** When the next assigned count replaces the one on screen. */
+  nextCountAvailableAt?: string | null
   isIVSTeamMember?: boolean
   canSubmitIvsRequests?: boolean
 }
@@ -1069,6 +1071,7 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
           oversightContacts={dashboardData.oversightContacts}
           activeCountSessions={dashboardData.activeCountSessions}
           activeCountGroups={dashboardData.activeCountGroups}
+          nextCountAvailableAt={dashboardData.nextCountAvailableAt}
           documents={dashboardData.documents}
           availabilityRequests={availabilityRequests}
           onAvailabilityResponse={handleAvailabilityResponse}
@@ -1509,6 +1512,12 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
                     <p className="text-sm text-gray-600 mt-1">
                       Count tasks assigned to you for this event (group sections or individual stations).
                     </p>
+                    {dashboardData.nextCountAvailableAt && (
+                      <p className="text-sm text-gray-600 mt-2">
+                        Your next count replaces this one at{' '}
+                        {new Date(dashboardData.nextCountAvailableAt).toLocaleString()}. Refresh this page then.
+                      </p>
+                    )}
                   </div>
                   <div className="p-6">
                     {countSuccess && (
