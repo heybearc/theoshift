@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-28  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.33.11 LIVE** (GREEN `10.92.3.22`). STANDBY is BLUE `10.92.3.24`. Selected rows show a count; Volunteers keeps the page-size control.
+**Status:** **v4.33.12 LIVE** (BLUE `10.92.3.24`). STANDBY is GREEN `10.92.3.22`. The station card shows its keyman, and the filled count is the shift only.
 
 ---
 
@@ -23,10 +23,11 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Idle** — next is FB-036 (age and photo). v4.33.11 is live on GREEN; STANDBY is BLUE.
+- **Idle** — next is FB-036 (age and photo). v4.33.12 is live on BLUE; STANDBY is GREEN.
 - **Mobile readiness across TheoShift** — Users, Locations, and Feedback phone layouts shipped in v4.33.10. Positions and Volunteers shipped in v4.33.9. Early Check-In volunteer path done through **v4.29.7**.
 
 ### Recently Completed (2026-10-28)
+- ✅ **v4.33.12** — Station card shows the keyman. Filled count is the shift volunteers, not the overseer or keyman. Shipped + synced (`39d2623f`)
 - ✅ **v4.33.11** — Selection count stays on screen. Volunteers page size and pagination stay under the list. Shipped + synced (`78a82424`)
 
 ### Recently Completed (2026-10-27)

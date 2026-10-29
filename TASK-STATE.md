@@ -2,20 +2,21 @@
 
 **Last updated:** 2026-10-28  
 **Branch:** `main`  
-**Production:** **LIVE** **GREEN** `10.92.3.22` · **STANDBY** **BLUE** `10.92.3.24` — both **v4.33.11** (`78a82424`). Switch #101 and sync 2026-10-28.
+**Production:** **LIVE** **BLUE** `10.92.3.24` · **STANDBY** **GREEN** `10.92.3.22` — both **v4.33.12** (`39d2623f`). Switch #102 and sync 2026-10-28.
 
 ---
 
 ## Current Task
 
-**Idle after v4.33.11** — next backlog is FB-036 (volunteer age and photo).
+**Idle after v4.33.12** — next backlog is FB-036 (volunteer age and photo).
 
 ### What I'm doing right now
 
-Nothing in progress. v4.33.11 is live. No undeployed app work on `main`.
+Nothing in progress. v4.33.12 is live. No undeployed app work on `main`.
 
 ### Recent completions
 
+- ✅ **v4.33.12** — Station card shows the keyman; filled count is the shift, not the overseer (`39d2623f`, released 2026-10-28)
 - ✅ **v4.33.11** — Selected-row count stays on screen; Volunteers page size stays available (`78a82424`, released 2026-10-28)
 - ✅ **v4.33.10** — Bulk edit lists overseers and keymen; phone layout for Users, Locations, and Feedback (`cb3628ed`, released 2026-10-27)
 - ✅ **v4.33.9** — Volunteer notes stay on the list; phone layout for Positions and Volunteers (`2865d196`, released 2026-10-26)
@@ -36,7 +37,7 @@ Nothing in progress. v4.33.11 is live. No undeployed app work on `main`.
 
 ## Exact next command
 
-Open `/admin/feedback` or start FB-036 on STANDBY (`https://blue.theoshift.com`).
+Open `/admin/feedback` or start FB-036 on STANDBY (`https://green.theoshift.com`).
 
 ---
 
@@ -51,5 +52,5 @@ Open `/admin/feedback` or start FB-036 on STANDBY (`https://blue.theoshift.com`)
 - Blue-green via HAProxy; do not assume container color without `get_deployment_status`.
 - If MCP `haproxy.backend` is `error`, read `use_backend … if is_theoshift` before `/release` (D-TS-047).
 - Color hostnames must stay on their node: `blue.theoshift.com` → BLUE, `green.theoshift.com` → GREEN (D-TS-048). After a switch, set qa-01 `STANDBY_URL=` to the new STANDBY color host.
-- qa-01 `detect-standby.sh` cannot read HAProxy (Proxmox CT 136 is missing on that host) and falls back to `STANDBY_URL` in `/opt/tests/theoshift/.env.test`. After the 2026-10-28 v4.33.11 switch, STANDBY is BLUE, so that value must be `https://blue.theoshift.com`. Fetch tags before the gate if the baseline is a new tag.
+- qa-01 `detect-standby.sh` cannot read HAProxy (Proxmox CT 136 is missing on that host) and falls back to `STANDBY_URL` in `/opt/tests/theoshift/.env.test`. After the 2026-10-28 v4.33.12 switch, STANDBY is GREEN, so that value must be `https://green.theoshift.com`. Fetch tags before the gate if the baseline is a new tag.
 - qa-01 clone can be left dirty on `package-lock.json` after `npm install`. `git checkout -- package-lock.json` before the gate if the script reports a dirty tree.
