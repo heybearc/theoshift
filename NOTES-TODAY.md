@@ -33,3 +33,12 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - qa-01 `STANDBY_URL` must move to `https://blue.theoshift.com` before the next gate.
 - Urgent new feedback: 0.
 - Next: FB-036 still blocked on age format, visibility, and photo storage.
+
+## 2026-10-29
+
+- Shipped v4.33.12 (`39d2623f`). LIVE BLUE `10.92.3.24`. STANDBY GREEN synced. Switch #102.
+- STANDBY only, not shipped: assigned names on the shift line (`d586a675`); Set overseer/keyman includes checked stations (`44cb4ddc`); volunteers prefetch and service-worker 503 (`2ddf3841`).
+- Positions does not call `volunteers?isActive&overseerId&perPage=-1`. That URL is the Volunteers page. The tab prefetch ran the heavy roster query.
+- qa-01 `STANDBY_URL` is already `https://green.theoshift.com`.
+- Urgent new feedback: 0.
+- Next: review green, then `/ship`. FB-036 still blocked.

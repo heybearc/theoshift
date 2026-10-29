@@ -1,8 +1,8 @@
 # TheoShift Plan
 
-**Last updated:** 2026-10-28  
+**Last updated:** 2026-10-29  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.33.12 LIVE** (BLUE `10.92.3.24`). STANDBY is GREEN `10.92.3.22`. The station card shows its keyman, and the filled count is the shift only.
+**Status:** **v4.33.12 LIVE** (BLUE `10.92.3.24`). STANDBY GREEN `10.92.3.22` is ahead (`2ddf3841`): shift names on one line, Set overseer/keyman includes checked stations, volunteers prefetch no longer 503s.
 
 ---
 
@@ -23,7 +23,7 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Idle** — next is FB-036 (age and photo). v4.33.12 is live on BLUE; STANDBY is GREEN.
+- **Review STANDBY, then ship.** FB-036 (age and photo) still blocked. LIVE is v4.33.12 on BLUE; STANDBY is GREEN.
 - **Mobile readiness across TheoShift** — Users, Locations, and Feedback phone layouts shipped in v4.33.10. Positions and Volunteers shipped in v4.33.9. Early Check-In volunteer path done through **v4.29.7**.
 
 ### Recently Completed (2026-10-28)

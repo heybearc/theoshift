@@ -1,18 +1,18 @@
 # TheoShift Task State
 
-**Last updated:** 2026-10-28  
+**Last updated:** 2026-10-29  
 **Branch:** `main`  
-**Production:** **LIVE** **BLUE** `10.92.3.24` · **STANDBY** **GREEN** `10.92.3.22` — both **v4.33.12** (`39d2623f`). Switch #102 and sync 2026-10-28.
+**Production:** **LIVE** **BLUE** `10.92.3.24` **v4.33.12** (`39d2623f`). **STANDBY** **GREEN** `10.92.3.22` is ahead (`2ddf3841`), not released. Switch #102.
 
 ---
 
 ## Current Task
 
-**Idle after v4.33.12** — next backlog is FB-036 (volunteer age and photo).
+**Standby fixes after v4.33.12** — ship when the day board looks right. FB-036 still blocked.
 
 ### What I'm doing right now
 
-Nothing in progress. v4.33.12 is live. No undeployed app work on `main`.
+Nothing in progress. STANDBY has the shift line, the overseer-button fix, and the volunteers 503 fix. LIVE is still v4.33.12.
 
 ### Recent completions
 
@@ -33,11 +33,12 @@ Nothing in progress. v4.33.12 is live. No undeployed app work on `main`.
 
 ### Next steps
 
-1. Pick next: **FB-036** volunteer age and photo.
+1. Review STANDBY (`https://green.theoshift.com`), then `/ship`.
+2. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
 
 ## Exact next command
 
-Open `/admin/feedback` or start FB-036 on STANDBY (`https://green.theoshift.com`).
+Open Positions on `https://green.theoshift.com` and check a station, then `/ship` if it looks right.
 
 ---
 
