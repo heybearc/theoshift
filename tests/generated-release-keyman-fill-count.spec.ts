@@ -28,11 +28,11 @@ async function findEvent(request: APIRequestContext): Promise<{
   day: string
   keyman: Volunteer
   overseers: Volunteer[]
+  positionNumber: number
 }> {
   const eventsResponse = await request.get(`${BASE_URL}/api/events`)
   expect(eventsResponse.ok()).toBeTruthy()
   const events = eventList(await eventsResponse.json()).filter((event) => event.id)
-  const failures: string[] = []
 
   for (const event of events) {
     const day = dateKey(event.startDate)
@@ -44,20 +44,27 @@ async function findEvent(request: APIRequestContext): Promise<{
     const overseers = volunteers.filter((person) => person.isOverseer)
     if (!keyman || overseers.length === 0) continue
 
-    const positionNumber = 10000 + (Date.now() % 50000)
-    const created = await request.post(`${BASE_URL}/api/events/${event.id}/positions`, {
-      data: { positionNumber, name: `Gate keyman fill ${positionNumber}` },
-    })
-    if (!created.ok()) {
-      failures.push(`${event.id} ${created.status()} ${(await created.text()).slice(0, 180)}`)
-      continue
+    const positionsResponse = await request.get(
+      `${BASE_URL}/api/events/${event.id}/positions?limit=1000&includeInactive=true`
+    )
+    if (!positionsResponse.ok()) continue
+    const used = new Set(
+      (((await positionsResponse.json())?.positions || []) as Array<{ positionNumber?: number }>).map(
+        (position) => position.positionNumber
+      )
+    )
+    let positionNumber = 0
+    for (let n = 1000; n >= 1; n--) {
+      if (!used.has(n)) {
+        positionNumber = n
+        break
+      }
     }
-    const positionId = (await created.json())?.position?.id as string
-    await request.delete(`${BASE_URL}/api/events/${event.id}/positions/${positionId}`)
-    return { eventId: event.id as string, day, keyman, overseers }
+    if (!positionNumber) continue
+    return { eventId: event.id as string, day, keyman, overseers, positionNumber }
   }
 
-  throw new Error(failures[0] || 'No event with a keyman and an overseer')
+  throw new Error('No event with a keyman, an overseer, and an open station number')
 }
 
 test.describe('Generated release — keyman on the card and shift fill', () => {
@@ -68,7 +75,7 @@ test.describe('Generated release — keyman on the card and shift fill', () => {
   test('the station shows its keyman and an overseer leaves the shift open', async ({ page }) => {
     test.setTimeout(90_000)
     const fixture = await findEvent(page.request)
-    const positionNumber = 10000 + (Date.now() % 50000)
+    const positionNumber = fixture.positionNumber
     const positionName = `Gate keyman fill ${positionNumber}`
     let positionId: string | null = null
     let createdAssignmentId: string | null = null
@@ -81,7 +88,7 @@ test.describe('Generated release — keyman on the card and shift fill', () => {
         },
       })
       expect(created.ok()).toBeTruthy()
-      positionId = (await created.json())?.position?.id || null
+      positionId = (await created.json())?.data?.id || null
       expect(positionId).toBeTruthy()
 
       const shift = await page.request.post(
