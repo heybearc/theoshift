@@ -306,6 +306,7 @@ export default function EventPageLayout({
               )}
               <Link
                 href={`/events/${event.id}/volunteers`}
+                prefetch={false}
                 className={`flex-shrink-0 px-3 sm:px-4 py-2.5 text-sm font-medium whitespace-nowrap min-h-[44px] flex items-center touch-manipulation ${
                   currentPage === 'volunteers'
                     ? 'text-blue-600 border-b-2 border-blue-600'

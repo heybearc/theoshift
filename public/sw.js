@@ -1,8 +1,8 @@
 // TheoShift Service Worker
-// Version 2.0.4 — chat alerts use the event name as the notification title
+// Version 2.0.5 — staff event pages are not turned into a synthetic 503
 
-const STATIC_CACHE = 'theoshift-static-v2.0.4';
-const DATA_CACHE = 'theoshift-data-v2.0.4';
+const STATIC_CACHE = 'theoshift-static-v2.0.5';
+const DATA_CACHE = 'theoshift-data-v2.0.5';
 const OFFLINE_URL = '/offline.html';
 
 // Static assets to precache on install
@@ -44,7 +44,7 @@ function isVolunteerPage(url) {
 
 // Install event - precache static assets and volunteer pages
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing v2.0.3...');
+  console.log('[SW] Installing v2.0.5...');
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
@@ -62,7 +62,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating v2.0.3...');
+  console.log('[SW] Activating v2.0.5...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -102,10 +102,9 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Staff / admin / general APIs (everything except volunteer offline list): bypass SW entirely.
-  // Otherwise Strategy 3 returns synthetic Response(status 503) when fetch() rejects, which
-  // breaks pages like /events/[id]/volunteers that call /api/events/.../volunteers.
-  if (pathname.startsWith('/api/') && !isVolunteerApiRoute(url)) {
+  // Staff pages and APIs bypass the worker. Strategy 3 used to answer a failed
+  // background fetch of /events/.../volunteers?… with a made-up 503.
+  if (!isVolunteerApiRoute(url) && !isVolunteerPage(url)) {
     return
   }
 
@@ -158,33 +157,6 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-
-  // Strategy 3: Network-first for everything else, fallback to cache
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (response.status === 200) {
-          const responseToCache = response.clone();
-          caches.open(STATIC_CACHE).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) return cachedResponse;
-          if (event.request.mode === 'navigate') {
-            return caches.match(OFFLINE_URL);
-          }
-          return new Response('Offline', {
-            status: 503,
-            statusText: 'Service Unavailable',
-            headers: new Headers({ 'Content-Type': 'text/plain' })
-          });
-        });
-      })
-  );
 });
 
 // Background sync - retry failed check-ins when back online

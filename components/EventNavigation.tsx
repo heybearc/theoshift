@@ -70,6 +70,7 @@ export default function EventNavigation({
         
         <Link
           href={`/events/${eventId}/volunteers`}
+          prefetch={false}
           className="w-full flex items-center justify-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors"
         >
           👥 View {terminology.volunteer}s

@@ -3251,46 +3251,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       select: { settings: true }
     })
     
-    // Fetch event with position assignments (NEW SYSTEM - same as positions page)
     const eventData = await prisma.events.findUnique({
       where: { id: id as string },
-      include: {
-        positions: {
-          include: {
-            assignments: {
-              include: {
-                volunteer: {
-                  select: {
-                    id: true,
-                    firstName: true,
-                    lastName: true,
-                    email: true,
-                    phone: true,
-                    congregation: true,
-                    formsOfService: true,
-                    isActive: true,
-                    createdAt: true
-                  }
-                },
-                overseer: {
-                  select: {
-                    id: true,
-                    firstName: true,
-                    lastName: true
-                  }
-                },
-                keyman: {
-                  select: {
-                    id: true,
-                    firstName: true,
-                    lastName: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      select: {
+        id: true,
+        name: true,
+        eventType: true,
+        startDate: true,
+        endDate: true,
+        status: true,
+      },
     })
     
     if (!eventData) {
@@ -3445,34 +3415,36 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       });
     });
     
-    // Then, add assignment info for those who have assignments
-    eventData.positions?.forEach(position => {
-      position.assignments?.forEach(assignment => {
-        const attendantData = assignment.volunteer
-        if (attendantData && attendantMap.has(attendantData.id)) {
-          const attendant = attendantMap.get(attendantData.id);
-          
-          // Update oversight info if this is an oversight assignment (but don't override association data)
-          const overseerData = assignment.overseer
-          const keymanData = assignment.keyman
-          
-          if (assignment.role === 'OVERSEER' && overseerData && !attendant.overseerId) {
-            attendant.overseerId = overseerData.id;
-            attendant.overseer = overseerData;
-          }
-          if (assignment.role === 'KEYMAN' && keymanData && !attendant.keymanId) {
-            attendant.keymanId = keymanData.id;
-            attendant.keyman = keymanData;
-          }
-          
-          // Add assignment info
-          attendant.assignments.push({
-            positionName: position.name,
-            role: assignment.role
-          });
-        }
-      });
-    });
+    const assignmentRows = await prisma.position_assignments.findMany({
+      where: { positions: { eventId: id as string } },
+      select: {
+        role: true,
+        volunteer: { select: { id: true } },
+        positions: { select: { name: true } },
+        overseer: { select: { id: true, firstName: true, lastName: true } },
+        keyman: { select: { id: true, firstName: true, lastName: true } },
+      },
+    })
+
+    for (const assignment of assignmentRows) {
+      const attendantId = assignment.volunteer?.id
+      if (!attendantId || !attendantMap.has(attendantId)) continue
+      const attendant = attendantMap.get(attendantId)
+
+      if (assignment.role === 'OVERSEER' && assignment.overseer && !attendant.overseerId) {
+        attendant.overseerId = assignment.overseer.id
+        attendant.overseer = assignment.overseer
+      }
+      if (assignment.role === 'KEYMAN' && assignment.keyman && !attendant.keymanId) {
+        attendant.keymanId = assignment.keyman.id
+        attendant.keyman = assignment.keyman
+      }
+
+      attendant.assignments.push({
+        positionName: assignment.positions.name,
+        role: assignment.role,
+      })
+    }
     
     const attendants = Array.from(attendantMap.values());
 
