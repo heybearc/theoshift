@@ -59,7 +59,9 @@ test.describe('Generated release — one count at a time', () => {
     const { eventId } = await findFixture(page.request)
     const response = await page.goto(`${BASE_URL}/events/${eventId}/volunteers`)
     expect(response?.status() ?? 0).toBeLessThan(500)
-    await expect(page.getByRole('heading', { name: 'Volunteers' })).toBeVisible({ timeout: 20000 })
+    await expect(page.getByRole('heading', { name: 'Volunteers', exact: true })).toBeVisible({
+      timeout: 20000,
+    })
   })
 
   test('a later active count stays off the volunteer dashboard', async ({ page }) => {
