@@ -275,6 +275,7 @@ For issues or questions:
 4. Contact the project maintainer for deployment access
 
 ## 📝 Version History
+- **v4.33.13** (2026-10-29) - Volunteers see one count at a time, and the shift line shows who is assigned
 - **v4.33.12** (2026-10-28) - The station card shows its keyman, and the filled count is the shift only
 - **v4.33.11** (2026-10-28) - Selected rows show a count, and Volunteers keeps the page-size control on screen
 - **v4.33.10** (2026-10-27) - Bulk edit can assign an overseer or keyman, and Users, Locations, and Feedback are easier on a phone

@@ -69,6 +69,7 @@ export default function CountTimesPage({ userRole }: CountTimesProps) {
                     <ul className="space-y-2 text-sm text-gray-600">
                       <li>• <strong>Assign Counters:</strong> Designate responsible individuals for each area</li>
                       <li>• <strong>Set Count Times:</strong> Establish when counts will be taken</li>
+                      <li>• <strong>One count at a time:</strong> A volunteer assigned to more than one count sees only the current count until the next count time</li>
                       <li>• <strong>Create Count Groups:</strong> Combine related stations (for example, Section A) into one shared count entry</li>
                       <li>• <strong>Set Primary + Secondary:</strong> Assign both counters so either can submit the agreed number</li>
                       <li>• <strong>Prepare Materials:</strong> Ensure counting sheets and devices are ready</li>
