@@ -192,6 +192,10 @@ export default function DayBoardBulkModal({
         notifyAlert('Choose a station overseer, a keyman, or both')
         return
       }
+      if (positions.length === 0) {
+        notifyAlert('No stations are included in this edit')
+        return
+      }
       let updated = 0
       for (const position of positions) {
         const current = position.oversight?.[0]

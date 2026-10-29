@@ -1933,7 +1933,7 @@ export default function PositionsDayBoard({
               ? positions.filter((p) => selectedStations.has(p.id))
               : positions.filter((p) =>
                   (p.shifts || []).some((s) =>
-                    selectedUndated.has(`${p.id}:${s.id}`)
+                    (bulkShiftKeys || []).includes(`${p.id}:${s.id}`)
                   )
                 )
           }
