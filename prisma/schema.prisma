@@ -975,6 +975,7 @@ enum DocumentCategory {
 enum EventPermissionRole {
   ADMIN
   COORDINATOR
+  SUPPORT
   VIEWER
 }
 
@@ -1095,6 +1096,7 @@ enum UserRole {
   OVERSEER
   ASSISTANT_OVERSEER
   KEYMAN
+  SUPPORT
   VOLUNTEER
   ATTENDANT // Legacy value still in database - will be migrated later
 }

@@ -3530,7 +3530,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     }
 
     // Only ADMIN, OVERSEER, ASSISTANT_OVERSEER, KEYMAN can access
-    if (!['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(session.user?.role || '')) {
+    if (!['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'].includes(session.user?.role || '')) {
       return {
         redirect: {
           destination: '/auth/signin',
@@ -3539,7 +3539,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       }
     }
 
-    const canManage = session.user?.role === 'ADMIN' || session.user?.role === 'OVERSEER'
+    const canManage = ['ADMIN', 'OVERSEER', 'SUPPORT'].includes(session.user?.role || '')
 
     // Check event-specific permissions
     const { canManageEvent, canDeleteEvent, canManagePermissions } = await import('../../../src/lib/eventAccess')

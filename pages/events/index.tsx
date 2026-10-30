@@ -353,7 +353,7 @@ export default function EventsPage() {
                         📋 Manage
                       </Link>
                       {session?.user?.role &&
-                        ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(session.user.role) && (
+                        ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'].includes(session.user.role) && (
                           <div className="flex flex-col gap-2">
                             <Link
                               href={`/events/${event.id}/edit`}
@@ -458,7 +458,7 @@ export default function EventsPage() {
                             >
                               📋 Manage
                             </Link>
-                            {session?.user?.role && ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(session.user.role) && (
+                            {session?.user?.role && ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'].includes(session.user.role) && (
                               <>
                                 <Link
                                   href={`/events/${event.id}/edit`}

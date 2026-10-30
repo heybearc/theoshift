@@ -26,73 +26,73 @@ export default function HelpPage({ userRole }: HelpPageProps) {
       id: 'creating-events',
       title: '📅 Creating Your First Event',
       description: 'Step-by-step guide for new event coordinators',
-      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN']
+      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT']
     },
     {
       id: 'event-management',
       title: '📅 Event Management',
       description: 'Managing existing events, editing details, and exporting data',
-      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN']
+      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT']
     },
     {
       id: 'event-settings',
       title: '⚙️ Event Settings & Modules',
       description: 'Customize modules and terminology for each event',
-      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN']
+      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT']
     },
     {
       id: 'cloning-events',
       title: '📋 Cloning Events',
       description: 'Duplicate events with granular control over what gets copied',
-      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN']
+      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT']
     },
     {
       id: 'event-permissions',
       title: '🔐 Event Permissions',
       description: 'Understanding and managing who can access your events',
-      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN']
+      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT']
     },
     {
       id: 'volunteer-management',
       title: '👥 Volunteer Management',
       description: 'Finding, filtering, and managing volunteers',
-      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN']
+      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT']
     },
     {
       id: 'filter-presets',
       title: '⭐ Saved Filter Presets',
       description: 'Save and reuse your favorite filter combinations',
-      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN']
+      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT']
     },
     {
       id: 'department-templates',
       title: '🎯 Department Templates',
       description: 'Understanding and using department templates',
-      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN']
+      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT']
     },
     {
       id: 'position-templates',
       title: '📋 Position Templates',
       description: 'Create multiple positions instantly using templates',
-      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN']
+      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT']
     },
     {
       id: 'managing-assignments',
       title: '📋 Managing Assignments',
       description: 'How to assign volunteers to positions and manage schedules',
-      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN']
+      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT']
     },
     {
       id: 'positions-day-board',
       title: 'Stations by day (Positions)',
       description: 'Default Positions layout for multi-day stations, assign, and setup tools',
-      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN']
+      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT']
     },
     {
       id: 'count-times',
       title: '⏱️ Count Times',
       description: 'Recording and managing attendance counts',
-      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN']
+      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT']
     },
     {
       id: 'volunteer-portal',
@@ -134,7 +134,7 @@ export default function HelpPage({ userRole }: HelpPageProps) {
       id: 'ivs',
       title: '📋 IVS Module',
       description: 'Manage International Volunteer Service volunteers with Approvals and Early Check-In tabs',
-      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN']
+      roles: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT']
     },
     {
       id: 'mobile-features',

@@ -9,7 +9,7 @@ interface Props {
 }
 
 export default function EventChatHelpPage({ userRole }: Props) {
-  const isStaff = ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(userRole)
+  const isStaff = ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'].includes(userRole)
 
   return (
     <HelpLayout>

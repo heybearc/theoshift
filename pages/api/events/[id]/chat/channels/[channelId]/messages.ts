@@ -397,9 +397,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(403).json({ success: false, error: 'Only staff can moderate messages' })
     }
 
-    const isSystemStaff = ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(access.actor.role)
+    const isSystemStaff = ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'].includes(access.actor.role)
     const eventPermission = await checkEventAccess(access.actor.id, eventId, 'COORDINATOR')
-    const isEventStaff = !!eventPermission && ['ADMIN', 'COORDINATOR'].includes(eventPermission.role)
+    const isEventStaff = !!eventPermission && ['ADMIN', 'COORDINATOR', 'SUPPORT'].includes(eventPermission.role)
 
     if (!isSystemStaff && !isEventStaff) {
       return res.status(403).json({ success: false, error: 'Insufficient permissions to moderate messages' })

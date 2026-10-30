@@ -40,7 +40,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
 
     // Admin, Overseer, Assistant Overseer, Keyman go to event selection
-    if (['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(session.user?.role || '')) {
+    if (['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'].includes(session.user?.role || '')) {
       return {
         redirect: {
           destination: '/events/select',

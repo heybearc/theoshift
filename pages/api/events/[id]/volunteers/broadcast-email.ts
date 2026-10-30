@@ -48,7 +48,7 @@ async function handleBroadcastEmail(req: NextApiRequest, res: NextApiResponse) {
 
   if (
     !actor ||
-    !['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(actor.role)
+    !['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'].includes(actor.role)
   ) {
     return res.status(403).json({ success: false, error: 'Insufficient permissions' })
   }

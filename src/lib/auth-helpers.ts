@@ -71,6 +71,6 @@ export async function withAdminAuth(handler: (session: any) => Promise<NextRespo
  */
 export async function withOverseerAuth(handler: (session: any) => Promise<NextResponse>) {
   return withSimpleAuth(handler, { 
-    requireRole: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'] 
+    requireRole: ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'] 
   })
 }

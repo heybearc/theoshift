@@ -254,7 +254,7 @@ export default function SignIn() {
           <div className="mb-4 p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
             <p className="text-sm text-blue-700">
               {role === 'oversight' 
-                ? '👔 Signing in as Oversight (Admin, Overseer, Assistant)'
+                ? '👔 Signing in as Oversight or Support'
                 : '🙋 Signing in as Volunteer'
               }
             </p>

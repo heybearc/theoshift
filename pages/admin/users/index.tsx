@@ -142,6 +142,8 @@ export default function UsersPage({ users: initialUsers, pagination: initialPagi
         return 'bg-blue-100 text-blue-800'
       case 'KEYMAN':
         return 'bg-yellow-100 text-yellow-800'
+      case 'SUPPORT':
+        return 'bg-teal-100 text-teal-800'
       case 'VOLUNTEER':
         return 'bg-green-100 text-green-800'
       default:
@@ -197,6 +199,7 @@ export default function UsersPage({ users: initialUsers, pagination: initialPagi
               <option value="OVERSEER">Overseer</option>
               <option value="ASSISTANT_OVERSEER">Assistant Overseer</option>
               <option value="KEYMAN">Keyman</option>
+              <option value="SUPPORT">Support</option>
               <option value="VOLUNTEER">Volunteer</option>
             </select>
           </div>

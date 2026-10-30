@@ -44,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       case 'POST':
         if (blockSimulatedMutation(req, res)) return
         // Only ADMIN, OVERSEER, ASSISTANT_OVERSEER, and KEYMAN can create count sessions
-        if (!['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(user.role)) {
+        if (!['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'].includes(user.role)) {
           return res.status(403).json({ error: 'Insufficient permissions' })
         }
         return await handlePost(req, res, eventId, user.id)

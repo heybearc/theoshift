@@ -7,7 +7,7 @@ import path from 'path'
 import { getDocumentAbsolutePath } from '@/lib/documentFileStorage'
 import { tryPipeUploadFromPeers } from '@/lib/uploadPeerFallback'
 
-const STAFF_ROLES = ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'] as const
+const STAFF_ROLES = ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'] as const
 
 const EXT_TO_CONTENT_TYPE: Record<string, string> = {
   '.pdf': 'application/pdf',

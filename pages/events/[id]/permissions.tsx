@@ -178,6 +178,7 @@ export default function EventPermissionsPage() {
     switch (role) {
       case 'ADMIN': return 'bg-red-100 text-red-800'
       case 'COORDINATOR': return 'bg-orange-100 text-orange-800'
+      case 'SUPPORT': return 'bg-teal-100 text-teal-800'
       case 'VIEWER': return 'bg-blue-100 text-blue-800'
       default: return 'bg-gray-100 text-gray-800'
     }
@@ -288,6 +289,7 @@ export default function EventPermissionsPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   <option value="VIEWER">Viewer - Read-only access</option>
+                  <option value="SUPPORT">Support - Help manage this event</option>
                   <option value="COORDINATOR">Coordinator - Full event management</option>
                   <option value="ADMIN">Admin - Full control + event settings</option>
                 </select>
@@ -349,6 +351,7 @@ export default function EventPermissionsPage() {
                           className="px-2 py-1 border border-gray-300 rounded text-sm"
                         >
                           <option value="VIEWER">VIEWER</option>
+                          <option value="SUPPORT">SUPPORT</option>
                           <option value="COORDINATOR">COORDINATOR</option>
                           <option value="ADMIN">ADMIN</option>
                         </select>
@@ -412,6 +415,7 @@ export default function EventPermissionsPage() {
           <ul className="text-sm text-blue-800 space-y-1">
             <li><strong>ADMIN:</strong> Full control - can edit event details, delete event, and manage permissions</li>
             <li><strong>COORDINATOR:</strong> Can manage volunteers, positions, assignments, and documents</li>
+            <li><strong>SUPPORT:</strong> Can help manage volunteers, positions, and assignments for this event</li>
             <li><strong>VIEWER:</strong> Read-only access (for training/observation)</li>
           </ul>
         </div>

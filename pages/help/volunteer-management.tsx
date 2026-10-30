@@ -335,7 +335,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   // Only admins, overseers, and keymen can access volunteer management
-  if (!['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(session.user?.role || '')) {
+  if (!['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'].includes(session.user?.role || '')) {
     return {
       redirect: {
         destination: '/help',

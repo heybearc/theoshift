@@ -32,9 +32,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(403).json({ success: false, error: 'Staff access required' })
   }
 
-  const isSystemStaff = ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(access.actor.role)
+  const isSystemStaff = ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'].includes(access.actor.role)
   const eventPermission = await checkEventAccess(access.actor.id, eventId, 'COORDINATOR')
-  const isEventStaff = !!eventPermission && ['ADMIN', 'COORDINATOR'].includes(eventPermission.role)
+  const isEventStaff = !!eventPermission && ['ADMIN', 'COORDINATOR', 'SUPPORT'].includes(eventPermission.role)
   if (!isSystemStaff && !isEventStaff) {
     return res.status(403).json({ success: false, error: 'Insufficient permissions to pin messages' })
   }

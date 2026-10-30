@@ -61,7 +61,7 @@ export async function loadPositionsPageProps(
     }
 
     if (
-      !['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(
+      !['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'].includes(
         session.user?.role || ''
       )
     ) {

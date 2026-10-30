@@ -36,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // Only ADMIN, OVERSEER, ASSISTANT_OVERSEER, KEYMAN can modify announcements
-  if (!['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(user.role)) {
+  if (!['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'].includes(user.role)) {
     return res.status(403).json({ error: 'Insufficient permissions' })
   }
 

@@ -7,7 +7,7 @@ export const CreateUserSchema = z.object({
   email: z.string().email('Invalid email address'),
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
-  role: z.enum(['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'VOLUNTEER']),
+  role: z.enum(['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT', 'VOLUNTEER']),
   phone: z.string().optional(),
   isActive: z.boolean().default(true)
 })
@@ -18,7 +18,7 @@ export const UserQuerySchema = z.object({
   page: z.string().optional(),
   limit: z.string().optional(),
   search: z.string().optional(),
-  role: z.enum(['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'VOLUNTEER']).optional(),
+  role: z.enum(['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT', 'VOLUNTEER']).optional(),
   isActive: z.boolean().optional()
 })
 

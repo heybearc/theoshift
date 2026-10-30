@@ -1,6 +1,12 @@
 import { prisma } from './prisma'
 
-export type EventPermissionRole = 'ADMIN' | 'COORDINATOR' | 'VIEWER'
+export type EventPermissionRole = 'ADMIN' | 'COORDINATOR' | 'SUPPORT' | 'VIEWER'
+
+const EVENT_MANAGER_ROLES = ['ADMIN', 'COORDINATOR', 'SUPPORT'] as const
+
+function isEventManagerRole(role: string | null | undefined): boolean {
+  return !!role && (EVENT_MANAGER_ROLES as readonly string[]).includes(role)
+}
 export type EventScopeType = 'DEPARTMENT' | 'STATION_RANGE' | 'POSITION'
 
 export interface EventPermission {
@@ -42,6 +48,7 @@ export async function checkEventAccess(
   const roleHierarchy: Record<EventPermissionRole, number> = {
     ADMIN: 3,
     COORDINATOR: 2,
+    SUPPORT: 2,
     VIEWER: 1
   }
 
@@ -68,7 +75,7 @@ export async function canManageAttendants(
   if (!permission) return false
 
   // ADMIN and COORDINATOR can manage volunteers
-  return ['ADMIN', 'COORDINATOR'].includes(permission.role)
+  return isEventManagerRole(permission.role)
 }
 
 /** Platform roles that may use IVS Approvals without an event COORDINATOR row (overseer/keyman parity with export). */
@@ -124,7 +131,7 @@ export async function canManagePosition(
   if (!permission) return false
 
   // ADMIN and COORDINATOR can manage all positions
-  return ['ADMIN', 'COORDINATOR'].includes(permission.role)
+  return isEventManagerRole(permission.role)
 }
 
 /**
@@ -138,7 +145,7 @@ export async function canManageAssignments(
 ): Promise<boolean> {
   const permission = await checkEventAccess(userId, eventId, 'COORDINATOR')
   if (!permission) return false
-  return ['ADMIN', 'COORDINATOR'].includes(permission.role)
+  return isEventManagerRole(permission.role)
 }
 
 /**
@@ -154,7 +161,7 @@ export async function canEditAssignment(
   if (!permission) return false
 
   // ADMIN and COORDINATOR can edit all assignments
-  return ['ADMIN', 'COORDINATOR'].includes(permission.role)
+  return isEventManagerRole(permission.role)
 }
 
 /**
@@ -214,7 +221,7 @@ export async function canManageDocuments(
   if (!permission) return false
 
   // ADMIN and COORDINATOR can manage documents
-  return ['ADMIN', 'COORDINATOR'].includes(permission.role)
+  return isEventManagerRole(permission.role)
 }
 
 /**

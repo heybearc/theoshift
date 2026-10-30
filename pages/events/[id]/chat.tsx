@@ -1213,7 +1213,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     select: { role: true }
   })
   const canNotifyChatLaunch =
-    !!notifyUser && ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN'].includes(notifyUser.role)
+    !!notifyUser && ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'].includes(notifyUser.role)
 
   return {
     props: {

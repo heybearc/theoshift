@@ -67,6 +67,20 @@ export default function EventPermissionsPage({ userRole }: EventPermissionsProps
                 </div>
               </div>
 
+              {/* SUPPORT */}
+              <div className="bg-white border-l-4 border-teal-500 rounded-lg p-6">
+                <div className="flex items-center mb-3">
+                  <span className="bg-teal-100 text-teal-800 px-3 py-1 rounded-full text-sm font-semibold mr-3">
+                    SUPPORT
+                  </span>
+                  <span className="text-gray-600">Event help</span>
+                </div>
+                <p className="text-gray-700 mb-3">
+                  Support can sign in and help manage volunteers, positions, and assignments for events they are added to.
+                  This is the role to use when a sister is helping with an event.
+                </p>
+              </div>
+
               {/* COORDINATOR */}
               <div className="bg-white border-l-4 border-blue-500 rounded-lg p-6">
                 <div className="flex items-center mb-3">
@@ -235,6 +249,7 @@ export default function EventPermissionsPage({ userRole }: EventPermissionsProps
             <ul className="space-y-2 text-green-800">
               <li>✅ Grant ADMIN role to 2-3 trusted coordinators for backup</li>
               <li>✅ Use COORDINATOR role for day-to-day event management</li>
+              <li>✅ Use SUPPORT for a sister who helps manage volunteers and assignments on an event</li>
               <li>✅ Use VIEWER role for training new coordinators</li>
               <li>✅ Review permissions regularly and remove access when no longer needed</li>
               <li>✅ Keep at least 2 Admins per event to avoid lockouts</li>
