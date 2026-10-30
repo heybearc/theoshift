@@ -52,3 +52,10 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - qa-01 `STANDBY_URL` is `https://green.theoshift.com`, which matches STANDBY after the switch.
 - Urgent new feedback: 0.
 - Next: FB-036 still blocked on age format, visibility, and photo storage.
+- Shipped v4.34.0 (`bb4dfdbd`) then v4.35.0 (`75315d46`). LIVE GREEN `10.92.3.22` CT 132. STANDBY BLUE `10.92.3.24` CT 134 synced. Switch #107.
+- GREEN was suspended by a backup earlier today. Traffic stayed on BLUE until this release.
+- Support is a user role and an event permission. It cannot create or delete events or change permissions.
+- Amber Allen and Shannon Hamm are Support on the October circuit assembly. They need to sign out and sign in again.
+- qa-01 `STANDBY_URL` is now `https://blue.theoshift.com`.
+- Release gate passed on GREEN before the switch: 5 suite tests plus the Support grant test. qa-01 lockfile was dirty; cleared with checkout before the rerun.
+- Urgent new feedback: 0.

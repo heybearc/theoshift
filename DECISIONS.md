@@ -641,6 +641,12 @@ This document tracks significant technical decisions made during development.
 **Decision:** Keep `blue.theoshift.com` → BLUE and `green.theoshift.com` → GREEN. Only `is_theoshift` (theoshift.com) follows LIVE. After `/release`, set qa-01 `STANDBY_URL` to the new STANDBY color host.  
 **Consequences:** Restored during v4.32.3 ship. `switch_traffic` must not rewrite the color-host lines.
 
+### D-TS-049: Support role for sisters helping with an event
+**Date:** 2026-10-30  
+**Context:** Invitees with a Volunteer user role were sent to the volunteer dashboard when they signed in on the Oversight tab, even when they had event access. Calling them Overseer or Keyman was the wrong title.  
+**Decision:** Support is a user role and an event permission. Support can sign in on the Oversight tab and manage volunteers, positions, and assignments on granted events. Support cannot create or delete events or manage permissions. Do not store the Support role on an account until the live build understands it.  
+**Consequences:** Shipped **v4.35.0**. Amber Allen and Shannon Hamm are Support on the October circuit assembly.
+
 ---
 
 ## Shared Decisions
