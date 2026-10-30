@@ -6,15 +6,43 @@ import { canAccessEventChat } from '@/lib/chatAccess'
 import { sortEventChatChannels } from '@/lib/chatChannelSort'
 import { getActiveLinkedVolunteerId } from '@/lib/eventVolunteerIdentity'
 
-async function archiveLegacyAnnouncementChannels(eventId: string) {
-  await prisma.event_chat_channels.updateMany({
-    where: { eventId, type: 'EVENT_ANNOUNCEMENTS', isArchived: false },
-    data: { isArchived: true }
+async function ensureAnnouncementsChannel(eventId: string) {
+  const existing = await prisma.event_chat_channels.findMany({
+    where: { eventId, type: 'EVENT_ANNOUNCEMENTS' },
+    orderBy: { updatedAt: 'desc' },
+    select: { id: true, isArchived: true }
   })
+
+  if (existing.length === 0) {
+    await prisma.event_chat_channels.create({
+      data: {
+        eventId,
+        type: 'EVENT_ANNOUNCEMENTS',
+        name: 'Announcements'
+      }
+    })
+    return
+  }
+
+  const primary = existing[0]
+  if (primary.isArchived) {
+    await prisma.event_chat_channels.update({
+      where: { id: primary.id },
+      data: { isArchived: false }
+    })
+  }
+
+  const extraIds = existing.slice(1).filter((channel) => !channel.isArchived).map((channel) => channel.id)
+  if (extraIds.length > 0) {
+    await prisma.event_chat_channels.updateMany({
+      where: { id: { in: extraIds } },
+      data: { isArchived: true }
+    })
+  }
 }
 
 async function ensureDefaultChannels(eventId: string) {
-  await archiveLegacyAnnouncementChannels(eventId)
+  await ensureAnnouncementsChannel(eventId)
 
   const general = await prisma.event_chat_channels.findFirst({
     where: { eventId, type: 'EVENT_GENERAL', isArchived: false }
@@ -148,6 +176,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ...(chatAccess.actor.kind === 'volunteer'
         ? {
             OR: [
+              { type: 'EVENT_ANNOUNCEMENTS' },
               { type: 'EVENT_GENERAL' },
               {
                 type: 'POSITION',
@@ -164,6 +193,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         : {
             OR: [
+              { type: 'EVENT_ANNOUNCEMENTS' },
               { type: 'EVENT_GENERAL' },
               { type: 'POSITION' },
               { type: 'STAFF_INTERNAL' },

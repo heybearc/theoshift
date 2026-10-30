@@ -7,6 +7,7 @@ import { format, parseISO } from 'date-fns'
 import { formatCalendarDateLabel } from '@/lib/calendarDate'
 import dynamic from 'next/dynamic'
 import AnnouncementBanner from '../../components/AnnouncementBanner'
+import PinnedAnnouncementBanner from '../../components/PinnedAnnouncementBanner'
 import VolunteerPdfViewer from '../../components/VolunteerPdfViewer'
 import EarlyCheckinPanel from '../../components/EarlyCheckinPanel'
 import IvsVolunteerRequestPanel from '../../components/IvsVolunteerRequestPanel'
@@ -1168,6 +1169,7 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <PinnedAnnouncementBanner eventId={dashboardData.event.id} className="mb-6" />
           {/* Welcome Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">

@@ -123,6 +123,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const channelRow = access.channel
 
+    if (channelRow.type === 'EVENT_ANNOUNCEMENTS' && access.actor.kind === 'volunteer') {
+      return res.status(403).json({ success: false, error: 'Only organizers can post in Announcements' })
+    }
+
     let dmVolunteerSenderId: string | null = null
     if (channelRow.type === 'VOLUNTEER_DM') {
       if (access.actor.kind === 'volunteer') {
@@ -271,7 +275,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           )
             .map((a) => a.volunteerId)
             .filter(Boolean)
-        } else if (channel.type === 'EVENT_GENERAL') {
+        } else if (channel.type === 'EVENT_GENERAL' || channel.type === 'EVENT_ANNOUNCEMENTS') {
           volunteerIds = (
             await prisma.event_volunteers.findMany({
               where: { eventId, isActive: true, volunteerId: { not: null } },

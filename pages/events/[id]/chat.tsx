@@ -528,7 +528,12 @@ export default function EventStaffChatPage({
 
   const pinMessage = async (messageId: string) => {
     if (!selectedChannelId) return
-    const ok = await appConfirmMessage('Pin this message to the top of the channel?')
+    const isAnnouncement = selectedChannel?.type === 'EVENT_ANNOUNCEMENTS'
+    const ok = await appConfirmMessage(
+      isAnnouncement
+        ? "Pin this message? It stays on every volunteer dashboard until that volunteer taps I've read this."
+        : 'Pin this message to the top of the channel?'
+    )
     if (!ok) return
 
     const res = await fetch(`/api/events/${event.id}/chat/channels/${selectedChannelId}/pin`, {
@@ -548,7 +553,12 @@ export default function EventStaffChatPage({
 
   const unpinChannel = async () => {
     if (!selectedChannelId || !pinnedMessageId) return
-    const ok = await appConfirmMessage('Unpin the current pinned message for this channel?')
+    const isAnnouncement = selectedChannel?.type === 'EVENT_ANNOUNCEMENTS'
+    const ok = await appConfirmMessage(
+      isAnnouncement
+        ? 'Unpin this announcement? It will leave volunteer dashboards.'
+        : 'Unpin the current pinned message for this channel?'
+    )
     if (!ok) return
 
     const res = await fetch(`/api/events/${event.id}/chat/channels/${selectedChannelId}/pin`, {
@@ -1038,6 +1048,11 @@ export default function EventStaffChatPage({
                   <div className="border-b border-gray-200 pb-3 mb-3 flex items-center justify-between gap-3">
                     <div>
                       <h2 className="text-lg font-semibold text-gray-900">{selectedChannel.name}</h2>
+                      {selectedChannel.type === 'EVENT_ANNOUNCEMENTS' && (
+                        <p className="text-xs text-gray-500">
+                          Volunteers can read this channel. Pin a message to keep it on their dashboard until they acknowledge it.
+                        </p>
+                      )}
                       {selectedChannel.type === 'STAFF_INTERNAL' && (
                         <p className="text-xs text-gray-500">Staff-internal channel. Volunteers cannot see these messages.</p>
                       )}

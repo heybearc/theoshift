@@ -105,8 +105,8 @@ export default function VolunteerChatPage() {
   const primarySidebarChannels = useMemo(() => {
     const primary = channels.filter((c) => c.type !== 'POSITION')
     const rank = (t: ChatChannel['type']) => {
-      if (t === 'EVENT_GENERAL') return 0
-      if (t === 'EVENT_ANNOUNCEMENTS') return 1
+      if (t === 'EVENT_ANNOUNCEMENTS') return 0
+      if (t === 'EVENT_GENERAL') return 1
       if (t === 'VOLUNTEER_DM') return 2
       return 9
     }
@@ -964,6 +964,11 @@ export default function VolunteerChatPage() {
                     <div className="border-b border-gray-200 pb-3 mb-3">
                       <h2 className="text-lg font-semibold text-gray-900">{selectedChannel.name}</h2>
                       <p className="text-xs text-gray-500">{selectedChannel.type.replace('_', ' ')}</p>
+                      {selectedChannel.type === 'EVENT_ANNOUNCEMENTS' && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Updates from organizers. A pinned message also stays on your dashboard until you acknowledge it.
+                        </p>
+                      )}
                       {selectedChannel.type === 'VOLUNTEER_DM' && (
                         <p className="text-xs text-gray-500 mt-1">Direct message — only you and the other volunteer can see this.</p>
                       )}
@@ -999,6 +1004,10 @@ export default function VolunteerChatPage() {
                       ))}
                     </div>
 
+                    {selectedChannel.type === 'EVENT_ANNOUNCEMENTS' ? (
+                      <p className="text-sm text-gray-600">Only organizers can post in Announcements.</p>
+                    ) : (
+                    <>
                     {typingActors.length > 0 && (
                       <p className="text-xs text-gray-500 mb-1">
                         {typingActors.map((a) => a.label).join(', ')} typing…
@@ -1040,6 +1049,8 @@ export default function VolunteerChatPage() {
                         {sending ? 'Sending...' : 'Send'}
                       </button>
                     </div>
+                    </>
+                    )}
                   </>
                 )}
               </div>

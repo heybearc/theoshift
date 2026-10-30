@@ -7,6 +7,7 @@ import VolunteerPdfViewer from './VolunteerPdfViewer'
 import IvsVolunteerRequestPanel from './IvsVolunteerRequestPanel'
 import { displayPhone } from '@/lib/formatPhone'
 import { notifyAlert } from '../lib/ui/toast'
+import PinnedAnnouncementBanner from './PinnedAnnouncementBanner'
 
 interface Assignment {
   id: string
@@ -340,6 +341,8 @@ export default function MobileVolunteerDashboard({
           )}
         </div>
       </div>
+
+      <PinnedAnnouncementBanner eventId={event.id} className="px-4 pt-4" />
 
       {/* Tab Content */}
       <div className="p-4">

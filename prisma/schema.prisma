@@ -168,6 +168,7 @@ model volunteers {
   chat_messages                event_chat_messages[]                @relation("event_chat_messages_sender_volunteer")
   chat_reads                   event_chat_reads[]
   chat_push_subscriptions      event_chat_push_subscriptions[]
+  chat_pin_acknowledgments     event_chat_pin_acknowledgments[]
 }
 
 model count_sessions {
@@ -880,10 +881,23 @@ model event_chat_messages {
   senderUser        users?       @relation("event_chat_messages_sender_user", fields: [senderUserId], references: [id], onDelete: SetNull)
   senderVolunteer   volunteers?  @relation("event_chat_messages_sender_volunteer", fields: [senderVolunteerId], references: [id], onDelete: SetNull)
   pinnedInChannels  event_chat_channels[] @relation("ChannelPinnedMessage")
+  pinAcknowledgments event_chat_pin_acknowledgments[]
 
   @@index([channelId, createdAt])
   @@index([senderUserId])
   @@index([senderVolunteerId])
+}
+
+model event_chat_pin_acknowledgments {
+  id             String   @id @default(uuid())
+  messageId      String   @map("message_id")
+  volunteerId    String   @map("volunteer_id")
+  acknowledgedAt DateTime @default(now()) @map("acknowledged_at")
+  message        event_chat_messages @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  volunteer      volunteers          @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, volunteerId])
+  @@index([volunteerId])
 }
 
 model event_chat_reads {
