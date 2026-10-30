@@ -648,10 +648,30 @@ export default function CountTimesPage({ eventId, event, countSessions, canManag
                               return
                             }
 
+                            const groups = groupDrafts.map((group) => ({
+                              ...(group.id ? { id: group.id } : {}),
+                              name: group.name.trim(),
+                              primaryVolunteerId: group.primaryVolunteerId || null,
+                              secondaryVolunteerId: group.secondaryVolunteerId || null,
+                              positionIds: group.positionIds,
+                            }))
+                            if (groups.some((group) => !group.name)) {
+                              const message = 'Each count group needs a name'
+                              setError(message)
+                              setGroupSaveMessage({ type: 'error', text: message })
+                              return
+                            }
+                            if (groups.some((group) => group.positionIds.length === 0)) {
+                              const message = 'Each count group needs at least one station'
+                              setError(message)
+                              setGroupSaveMessage({ type: 'error', text: message })
+                              return
+                            }
+
                             const response = await fetch(`/api/events/${eventId}/count-sessions/${assignmentSessionId}/groups`, {
                               method: 'PUT',
                               headers: { 'Content-Type': 'application/json', ...getViewAsHeaders() },
-                              body: JSON.stringify({ groups: groupDrafts })
+                              body: JSON.stringify({ groups })
                             })
                             const data = await response.json()
                             if (!response.ok || !data.success) {

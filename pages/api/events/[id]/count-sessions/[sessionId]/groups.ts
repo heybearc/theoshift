@@ -1,22 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { z } from 'zod'
 import { prisma } from '../../../../../../src/lib/prisma'
 import { blockSimulatedMutation, getSessionUser, isPrivilegedCounterRole } from '@/lib/countAssignments'
+import { putCountGroupsSchema } from '@/lib/countGroupPayload'
 import {
   compareSuggestionRank,
   countSessionToTargetMinutes,
   suggestionRankForAssignment,
 } from '@/lib/countTimeSuggestions'
-
-const putGroupsSchema = z.object({
-  groups: z.array(z.object({
-    id: z.string().optional(),
-    name: z.string().min(1),
-    primaryVolunteerId: z.string().uuid().nullable().optional(),
-    secondaryVolunteerId: z.string().uuid().nullable().optional(),
-    positionIds: z.array(z.string().uuid()).min(1)
-  }))
-})
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -111,9 +101,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(403).json({ error: 'Only ADMIN/OVERSEER/KEYMAN can manage groups' })
       }
 
-      const parsed = putGroupsSchema.safeParse(req.body)
+      const parsed = putCountGroupsSchema.safeParse(req.body)
       if (!parsed.success) {
-        return res.status(400).json({ error: 'Invalid payload', details: parsed.error.errors })
+        const missingStations = parsed.error.issues.some((issue) => issue.path.includes('positionIds'))
+        return res.status(400).json({
+          error: missingStations
+            ? 'Each count group needs at least one station'
+            : 'Invalid payload',
+          details: parsed.error.errors,
+        })
       }
 
       const flatPositionIds = parsed.data.groups.flatMap((group) => group.positionIds)
