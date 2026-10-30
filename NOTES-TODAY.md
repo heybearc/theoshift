@@ -42,3 +42,13 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - qa-01 `STANDBY_URL` is already `https://green.theoshift.com`.
 - Urgent new feedback: 0.
 - Next: review green, then `/ship`. FB-036 still blocked.
+
+## 2026-10-30
+
+- Shipped v4.33.13 (`8a1bbe3c`) then v4.33.14 (`09746a01`). LIVE BLUE `10.92.3.24` CT 134. STANDBY GREEN `10.92.3.22` CT 132 synced. Switch #104.
+- Volunteers assigned to more than one count see only the current count until the next count time. Counts less than an hour apart wait out that hour.
+- Count groups save when a counter is left blank. Empty string was rejected as an invalid payload, so new groups never stuck.
+- Browser `content.js` “No Listener” errors are an extension, not the app. Volunteer and availability saves succeeded.
+- qa-01 `STANDBY_URL` is `https://green.theoshift.com`, which matches STANDBY after the switch.
+- Urgent new feedback: 0.
+- Next: FB-036 still blocked on age format, visibility, and photo storage.

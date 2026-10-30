@@ -1,21 +1,23 @@
 # TheoShift Task State
 
-**Last updated:** 2026-10-29  
+**Last updated:** 2026-10-30  
 **Branch:** `main`  
-**Production:** **LIVE** **BLUE** `10.92.3.24` **v4.33.12** (`39d2623f`). **STANDBY** **GREEN** `10.92.3.22` is ahead (`2ddf3841`), not released. Switch #102.
+**Production:** **LIVE** **BLUE** `10.92.3.24` **v4.33.14** (`09746a01`). **STANDBY** **GREEN** `10.92.3.22` synced. Switch #104.
 
 ---
 
 ## Current Task
 
-**Standby fixes after v4.33.12** — ship when the day board looks right. FB-036 still blocked.
+Nothing in progress. FB-036 still blocked.
 
 ### What I'm doing right now
 
-Nothing in progress. STANDBY has the shift line, the overseer-button fix, and the volunteers 503 fix. LIVE is still v4.33.12.
+Nothing in progress. v4.33.13 and v4.33.14 are live and synced.
 
 ### Recent completions
 
+- ✅ **v4.33.14** — Count groups save when a counter is left blank (`09746a01`, released 2026-10-29)
+- ✅ **v4.33.13** — Volunteers see one count at a time; shift line shows who is assigned (`8a1bbe3c`, released 2026-10-29)
 - ✅ **v4.33.12** — Station card shows the keyman; filled count is the shift, not the overseer (`39d2623f`, released 2026-10-28)
 - ✅ **v4.33.11** — Selected-row count stays on screen; Volunteers page size stays available (`78a82424`, released 2026-10-28)
 - ✅ **v4.33.10** — Bulk edit lists overseers and keymen; phone layout for Users, Locations, and Feedback (`cb3628ed`, released 2026-10-27)
@@ -33,12 +35,11 @@ Nothing in progress. STANDBY has the shift line, the overseer-button fix, and th
 
 ### Next steps
 
-1. Review STANDBY (`https://green.theoshift.com`), then `/ship`.
-2. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
+1. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
 
 ## Exact next command
 
-Open Positions on `https://green.theoshift.com` and check a station, then `/ship` if it looks right.
+None until FB-036 choices are made.
 
 ---
 
@@ -53,5 +54,5 @@ Open Positions on `https://green.theoshift.com` and check a station, then `/ship
 - Blue-green via HAProxy; do not assume container color without `get_deployment_status`.
 - If MCP `haproxy.backend` is `error`, read `use_backend … if is_theoshift` before `/release` (D-TS-047).
 - Color hostnames must stay on their node: `blue.theoshift.com` → BLUE, `green.theoshift.com` → GREEN (D-TS-048). After a switch, set qa-01 `STANDBY_URL=` to the new STANDBY color host.
-- qa-01 `detect-standby.sh` cannot read HAProxy (Proxmox CT 136 is missing on that host) and falls back to `STANDBY_URL` in `/opt/tests/theoshift/.env.test`. After the 2026-10-28 v4.33.12 switch, STANDBY is GREEN, so that value must be `https://green.theoshift.com`. Fetch tags before the gate if the baseline is a new tag.
+- qa-01 `detect-standby.sh` cannot read HAProxy (Proxmox CT 136 is missing on that host) and falls back to `STANDBY_URL` in `/opt/tests/theoshift/.env.test`. After the 2026-10-29 v4.33.14 switch, STANDBY is GREEN. `STANDBY_URL` is already `https://green.theoshift.com`. Fetch tags before the gate if the baseline is a new tag.
 - qa-01 clone can be left dirty on `package-lock.json` after `npm install`. `git checkout -- package-lock.json` before the gate if the script reports a dirty tree.
