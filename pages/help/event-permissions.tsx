@@ -24,7 +24,7 @@ export default function EventPermissionsPage({ userRole }: EventPermissionsProps
           <h2 className="text-xl font-semibold text-blue-900 mb-3">What Are Event Permissions?</h2>
           <p className="text-blue-800 mb-3">
             Event permissions control who can view and manage specific events. Each person can be 
-            granted one of three permission levels, giving them different capabilities within the event.
+            granted one of four permission levels, giving them different capabilities within the event.
           </p>
           <p className="text-blue-800">
             <strong>New in v3.9.0:</strong> We've simplified permissions from 5 roles to 3 roles, 
