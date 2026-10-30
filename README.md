@@ -275,6 +275,7 @@ For issues or questions:
 4. Contact the project maintainer for deployment access
 
 ## 📝 Version History
+- **v4.34.0** (2026-10-30) - A pinned announcement stays on the volunteer dashboard until it is acknowledged
 - **v4.33.14** (2026-10-29) - A count group saves when a counter is left blank
 - **v4.33.13** (2026-10-29) - Volunteers see one count at a time, and the shift line shows who is assigned
 - **v4.33.12** (2026-10-28) - The station card shows its keyman, and the filled count is the shift only

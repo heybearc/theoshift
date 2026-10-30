@@ -73,6 +73,7 @@ export default function VolunteerPortalHelp({ userRole }: VolunteerPortalHelpPro
               <li><strong>Event Information:</strong> Details about events you're assigned to</li>
               <li><strong>Confirmation Status:</strong> Whether you've confirmed or declined assignments</li>
               <li><strong>Quick Actions:</strong> Confirm assignments, view details, contact coordinators</li>
+              <li><strong>Pinned announcements:</strong> A message pinned in Announcements stays on your dashboard until you tap I've read this</li>
             </ul>
           </div>
 
