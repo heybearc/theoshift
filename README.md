@@ -275,6 +275,7 @@ For issues or questions:
 4. Contact the project maintainer for deployment access
 
 ## 📝 Version History
+- **v4.38.0** (2026-10-31) - Keymen and overseers can see their volunteers, positions, assignments, and count times in the phone app
 - **v4.37.0** (2026-10-30) - The phone app adds availability, documents, profile, and early check-in
 - **v4.35.0** (2026-10-30) - Sisters can be given a Support role to help manage an event
 - **v4.34.0** (2026-10-30) - A pinned announcement stays on the volunteer dashboard until it is acknowledged
