@@ -6,7 +6,11 @@ import { sendDocumentPublishEmail, isEmailConfigured } from './email'
  * Documents published to the whole roster are a snapshot. A brother assigned
  * later does not have a publication row until this runs.
  */
-export async function grantAllPublishedDocuments(eventId: string, volunteerId: string): Promise<number> {
+export async function grantAllPublishedDocuments(
+  eventId: string,
+  volunteerId: string,
+  options?: { notify?: boolean }
+): Promise<number> {
   const [docs, event, volunteer] = await Promise.all([
     prisma.event_documents.findMany({
       where: { eventId, isActive: true, publishedTo: 'all' },
@@ -49,7 +53,7 @@ export async function grantAllPublishedDocuments(eventId: string, volunteerId: s
   )
 
   const email = volunteer?.email?.trim()
-  if (email && event) {
+  if (options?.notify !== false && email && event) {
     void notifyGrantedDocuments({
       eventId,
       eventName: event.name,

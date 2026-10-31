@@ -4,6 +4,7 @@ import { prisma } from '../../../src/lib/prisma'
 import { toDateOnlyStringUTC } from '../../../src/lib/calendarDate'
 import { verifyVolunteerIvsEarlyCheckinAccessForIds } from '@/lib/ivsVolunteerEarlyCheckinAccess'
 import { viewerCanSeeArrivals } from '@/lib/arrivals'
+import { grantAllPublishedDocuments } from '@/lib/grantPublishedDocuments'
 import { getViewAsVolunteerId } from '@/lib/countAssignmentsShared'
 import { volunteerVisibleCountSessions } from '@/lib/volunteerCountVisibility'
 
@@ -34,6 +35,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!volunteer) {
       return res.status(404).json({ success: false, error: 'Volunteer not found' })
+    }
+
+    const assignmentCount = await prisma.position_assignments.count({
+      where: { volunteerId: vid, positions: { eventId: eid } },
+    })
+    if (assignmentCount > 0) {
+      try {
+        await grantAllPublishedDocuments(eid, vid, { notify: false })
+      } catch (grantError) {
+        console.error('Could not grant documents already published to everyone', grantError)
+      }
     }
 
     // Get published documents for THIS EVENT ONLY
