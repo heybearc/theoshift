@@ -12,6 +12,16 @@ export default function MobileFeaturesHelp() {
 
         <hr />
 
+        <h2>📲 TheoShift phone app</h2>
+        <p>
+          If you have the TheoShift app on an iPhone or Android phone, sign in with the same email link as the website.
+          Assignments and chat are on their own tabs. <strong>More</strong> has availability, documents, and your email and phone.
+          Early check-in is there when you are on the event roster and the event uses early entry.
+        </p>
+        <p>
+          The app is not in the App Store or Google Play yet. Use the website until someone gives you the app.
+        </p>
+
         <h2>📱 Mobile Volunteer Dashboard</h2>
         
         <p>

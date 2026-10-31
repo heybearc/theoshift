@@ -125,7 +125,7 @@ export default function VolunteerPortalHelp({ userRole }: VolunteerPortalHelpPro
               <li>Install as a Progressive Web App (PWA) for offline access</li>
             </ul>
             <p className="text-gray-700 mt-3">
-              If you have the TheoShift app on your phone, sign in with the same email link. The app shows your assignments and event chat.
+              If you have the TheoShift app on your phone, sign in with the same email link. The app shows your assignments, event chat, availability, documents, and profile. Early check-in appears when you are on that event roster.
             </p>
             <p className="text-gray-700 mt-3">
               Learn more in the <Link href="/help/mobile-features" className="text-blue-600 hover:underline">Mobile Features</Link> guide.
