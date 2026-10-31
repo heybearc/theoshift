@@ -1,4 +1,5 @@
 import { GetServerSideProps } from 'next'
+import Link from 'next/link'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import EventPageWrapper from '../../../components/EventPageWrapper'
@@ -28,8 +29,12 @@ import {
   readStoredVolunteerListState,
   volunteerSearchParamsHaveListState,
   writeStoredVolunteerListState,
+  careFiltersForViewer,
   type VolunteerPageFilters,
 } from '../../../lib/volunteerPageFilters'
+import { eventStationHref } from '../../../lib/eventPositionsHref'
+import { formatEventDayLabel } from '../../../lib/eventDates'
+import { toDateKey } from '../../../lib/shiftConflict'
 
 interface Event {
   id: string
@@ -74,8 +79,17 @@ interface Volunteer {
     respondedAt: string | null
   } | null
   assignments?: Array<{
+    positionId: string
     positionName: string
     role: string
+    area: string
+    day: string
+    when: string
+  }>
+  counts?: Array<{
+    sessionId: string
+    label: string
+    when: string
   }>
 }
 
@@ -98,9 +112,60 @@ interface EventVolunteersPageProps {
   stats: VolunteerStats
   moduleConfig?: any
   terminology?: any
+  viewerVolunteerId: string | null
+  viewerRole: string
 }
 
-export default function EventAttendantsPage({ eventId, event, attendants, canManageContent, canEdit, canDelete, canManagePermissions, moduleConfig, terminology }: EventVolunteersPageProps) {
+function AssignmentGlance({
+  eventId,
+  assignments,
+  counts,
+  showCounts,
+}: {
+  eventId: string
+  assignments: NonNullable<Volunteer['assignments']>
+  counts: NonNullable<Volunteer['counts']>
+  showCounts: boolean
+}) {
+  if (assignments.length === 0 && (!showCounts || counts.length === 0)) {
+    return <span className="text-xs text-gray-400">No assignments</span>
+  }
+  return (
+    <div className="space-y-1 text-xs">
+      {assignments.map((assignment) => (
+        <div key={`${assignment.positionId}-${assignment.day}-${assignment.when}`}>
+          <Link
+            href={eventStationHref(eventId, assignment.positionId, assignment.day)}
+            className="font-medium text-blue-700 hover:underline"
+          >
+            {assignment.positionName}
+            {assignment.day ? ` · ${formatEventDayLabel(assignment.day)}` : ''}
+            {assignment.when ? ` · ${assignment.when}` : ''}
+          </Link>
+          {assignment.area ? <span className="text-gray-500"> · {assignment.area}</span> : null}
+          {assignment.role !== 'VOLUNTEER' ? (
+            <span className="ml-1 text-gray-500">({assignment.role})</span>
+          ) : null}
+        </div>
+      ))}
+      {showCounts
+        ? counts.map((count) => (
+            <div key={`${count.sessionId}-${count.label}`}>
+              <Link
+                href={`/events/${eventId}/count-times/${count.sessionId}`}
+                className="font-medium text-blue-700 hover:underline"
+              >
+                Counter: {count.label}
+                {count.when ? ` · ${count.when}` : ''}
+              </Link>
+            </div>
+          ))
+        : null}
+    </div>
+  )
+}
+
+export default function EventAttendantsPage({ eventId, event, attendants, canManageContent, canEdit, canDelete, canManagePermissions, moduleConfig, terminology, viewerVolunteerId, viewerRole }: EventVolunteersPageProps) {
   const router = useRouter()
   const rowRange = useShiftRangeSelection()
   const [roster, setRoster] = useState<Attendant[]>(attendants)
@@ -313,10 +378,14 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
         setFilters(stored.filters)
         setCurrentPage(stored.page)
         setItemsPerPage(stored.perPage)
+      } else {
+        const me = attendants.find((row) => row.id === viewerVolunteerId)
+        const care = careFiltersForViewer(viewerRole, viewerVolunteerId, me)
+        if (care) setFilters(care)
       }
     }
     setFiltersHydrated(true)
-  }, [eventId])
+  }, [eventId, attendants, viewerVolunteerId, viewerRole])
 
   useEffect(() => {
     if (!filtersHydrated || typeof window === 'undefined') return
@@ -968,6 +1037,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
       'Availability',
       'Forms of service',
       'Assignments',
+      'Counter',
       'Notes',
     ]
     const lines = filteredAttendants.map((attendant) =>
@@ -985,6 +1055,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
           : '',
         Array.isArray(attendant.formsOfService) ? attendant.formsOfService.join('; ') : '',
         (attendant.assignments || []).map((assignment) => assignment.positionName).join('; '),
+        (attendant.counts || []).map((count) => count.label).join('; '),
         attendant.notes || '',
       ]
         .map((cell) => csvCell(String(cell ?? '')))
@@ -1973,12 +2044,14 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             </div>
                           )}
 
-                          {attendant.assignments && attendant.assignments.length > 0 && (
-                            <div className="mt-3 text-sm text-gray-700">
-                              <span className="font-medium">Assignments:</span>{' '}
-                              <span>{attendant.assignments.length}</span>
-                            </div>
-                          )}
+                          <div className="mt-3">
+                            <AssignmentGlance
+                              eventId={eventId}
+                              assignments={attendant.assignments || []}
+                              counts={attendant.counts || []}
+                              showCounts={moduleConfig?.countTimes !== false}
+                            />
+                          </div>
                         </div>
 
                         {canManageContent && (
@@ -2203,20 +2276,12 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                           </select>
                         </td>
                         <td className="px-3 py-3 hidden xl:table-cell">
-                          {attendant.assignments && attendant.assignments.length > 0 ? (
-                            <div className="text-xs space-y-1">
-                              {attendant.assignments.map((assignment: any, idx: number) => (
-                                <div key={idx} className="text-gray-700">
-                                  <span className="font-medium">{assignment.positionName}</span>
-                                  {assignment.role !== 'VOLUNTEER' && (
-                                    <span className="ml-1 text-gray-500">({assignment.role})</span>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-xs text-gray-400">No assignments</span>
-                          )}
+                          <AssignmentGlance
+                            eventId={eventId}
+                            assignments={attendant.assignments || []}
+                            counts={attendant.counts || []}
+                            showCounts={moduleConfig?.countTimes !== false}
+                          />
                         </td>
                         <td className="px-3 py-3 whitespace-nowrap text-sm font-medium">
                           {canManageContent && (
@@ -3456,7 +3521,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         isOverseer: association?.isOverseer ?? false,
         isKeyman: association?.isKeyman ?? false,
         availability: availability || null,
-        assignments: []
+        assignments: [],
+        counts: []
       });
     });
     
@@ -3465,7 +3531,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       select: {
         role: true,
         volunteer: { select: { id: true } },
-        positions: { select: { name: true } },
+        positions: { select: { id: true, name: true, area: true } },
+        shift: { select: { startTime: true, endTime: true, isAllDay: true, shiftDate: true } },
         overseer: { select: { id: true, firstName: true, lastName: true } },
         keyman: { select: { id: true, firstName: true, lastName: true } },
       },
@@ -3485,11 +3552,94 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         attendant.keyman = assignment.keyman
       }
 
+      const shift = assignment.shift
+      const when = !shift
+        ? ''
+        : shift.isAllDay
+          ? 'All day'
+          : [shift.startTime, shift.endTime].filter(Boolean).join('–')
       attendant.assignments.push({
+        positionId: assignment.positions.id,
         positionName: assignment.positions.name,
         role: assignment.role,
+        area: assignment.positions.area || '',
+        day: toDateKey(shift?.shiftDate) || '',
+        when,
       })
     }
+
+    const rosterIds = Array.from(attendantMap.keys())
+    const formatCountWhen = (at: Date | null) => {
+      if (!at) return ''
+      return new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/New_York',
+        weekday: 'short',
+        hour: 'numeric',
+        minute: '2-digit',
+      }).format(at)
+    }
+    if (rosterIds.length > 0) {
+      const [countGroups, stationCounts] = await Promise.all([
+        prisma.count_session_groups.findMany({
+          where: {
+            countSession: { eventId: id as string, isActive: true, status: 'ACTIVE' },
+            OR: [
+              { primaryVolunteerId: { in: rosterIds } },
+              { secondaryVolunteerId: { in: rosterIds } },
+            ],
+          },
+          select: {
+            name: true,
+            primaryVolunteerId: true,
+            secondaryVolunteerId: true,
+            countSession: { select: { id: true, sessionName: true, countTime: true } },
+          },
+        }),
+        prisma.count_session_position_assignees.findMany({
+          where: {
+            volunteerId: { in: rosterIds },
+            isSuggested: false,
+            countSession: { eventId: id as string, isActive: true, status: 'ACTIVE' },
+          },
+          select: {
+            volunteerId: true,
+            countSession: { select: { id: true, sessionName: true, countTime: true } },
+            position: { select: { name: true } },
+          },
+        }),
+      ])
+      const seen = new Map<string, Set<string>>()
+      const addCount = (volunteerId: string | null | undefined, sessionId: string, label: string, when: string) => {
+        if (!volunteerId || !attendantMap.has(volunteerId)) return
+        const keys = seen.get(volunteerId) || new Set<string>()
+        const key = `${sessionId}:${label}`
+        if (keys.has(key)) return
+        keys.add(key)
+        seen.set(volunteerId, keys)
+        attendantMap.get(volunteerId).counts.push({ sessionId, label, when })
+      }
+      for (const group of countGroups) {
+        const when = formatCountWhen(group.countSession.countTime)
+        const label = group.name || group.countSession.sessionName
+        addCount(group.primaryVolunteerId, group.countSession.id, `${label} · Primary`, when)
+        addCount(group.secondaryVolunteerId, group.countSession.id, `${label} · Partner`, when)
+      }
+      for (const row of stationCounts) {
+        addCount(
+          row.volunteerId,
+          row.countSession.id,
+          row.position?.name || row.countSession.sessionName,
+          formatCountWhen(row.countSession.countTime)
+        )
+      }
+    }
+
+    const viewerVolunteer = session.user?.id
+      ? await prisma.volunteers.findFirst({
+          where: { userId: session.user.id },
+          select: { id: true },
+        })
+      : null
     
     const attendants = Array.from(attendantMap.values());
 
@@ -3531,7 +3681,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
               announcements: (eventSettings!.settings as any).modules.announcements ?? true,
             }
           : null,
-        terminology: (eventSettings?.settings as any)?.terminology || null
+        terminology: (eventSettings?.settings as any)?.terminology || null,
+        viewerVolunteerId: viewerVolunteer?.id || null,
+        viewerRole: session.user?.role || '',
       }
     };
   } catch (error) {

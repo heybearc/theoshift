@@ -1,4 +1,6 @@
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { eventStationHref } from '../lib/eventPositionsHref'
 
 type Person = {
   id: string
@@ -8,8 +10,8 @@ type Person = {
   checkedIn: boolean
   lanyardBadge: string | null
   positionIds: string[]
-  assignments: Array<{ positionId: string; positionName: string; when: string }>
-  countTimes: Array<{ label: string; when: string }>
+  assignments: Array<{ positionId: string; positionName: string; area: string; day: string; when: string }>
+  countTimes: Array<{ sessionId: string; label: string; when: string }>
 }
 
 type PeopleResponse = {
@@ -153,8 +155,14 @@ export default function VolunteerPeoplePanel({
                 <ul className="mt-2 space-y-1 text-sm text-gray-800">
                   {person.assignments.map((assignment) => (
                     <li key={`${person.id}-${assignment.positionId}-${assignment.when}`}>
-                      {assignment.positionName}
-                      {assignment.when ? ` · ${assignment.when}` : ''}
+                      <Link
+                        href={eventStationHref(eventId, assignment.positionId, assignment.day)}
+                        className="font-medium text-blue-700 hover:underline"
+                      >
+                        {assignment.positionName}
+                        {assignment.when ? ` · ${assignment.when}` : ''}
+                      </Link>
+                      {assignment.area ? <span className="text-gray-600"> · {assignment.area}</span> : null}
                     </li>
                   ))}
                 </ul>
@@ -162,9 +170,14 @@ export default function VolunteerPeoplePanel({
               {showCountTimes && person.countTimes.length > 0 ? (
                 <ul className="mt-2 space-y-1 text-sm text-gray-800">
                   {person.countTimes.map((count) => (
-                    <li key={`${person.id}-count-${count.label}-${count.when}`}>
-                      Count: {count.label}
-                      {count.when ? ` · ${count.when}` : ''}
+                    <li key={`${person.id}-count-${count.sessionId}-${count.label}`}>
+                      <Link
+                        href={`/events/${eventId}/count-times/${count.sessionId}`}
+                        className="font-medium text-blue-700 hover:underline"
+                      >
+                        Counter: {count.label}
+                        {count.when ? ` · ${count.when}` : ''}
+                      </Link>
                     </li>
                   ))}
                 </ul>

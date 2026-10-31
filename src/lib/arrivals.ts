@@ -1,15 +1,19 @@
 import { ConventionDay } from '@prisma/client'
 import { prisma } from './prisma'
 import { toDateOnlyStringUTC } from './calendarDate'
+import { toDateKey } from '../../lib/shiftConflict'
 import { DEFAULT_CONVENTION_TIMEZONE, getCurrentConventionDay } from './ivsEarlyCheckin'
 
 export type ArrivalAssignment = {
   positionId: string
   positionName: string
+  area: string
+  day: string
   when: string
 }
 
 export type ArrivalCount = {
+  sessionId: string
   label: string
   when: string
 }
@@ -243,7 +247,7 @@ export async function listArrivals(
               positionId: true,
               keymanId: true,
               overseerId: true,
-              positions: { select: { name: true, positionNumber: true } },
+              positions: { select: { name: true, positionNumber: true, area: true } },
               shift: {
                 select: { name: true, startTime: true, endTime: true, isAllDay: true, shiftDate: true },
               },
@@ -305,6 +309,8 @@ export async function listArrivals(
     list.push({
       positionId: row.positionId,
       positionName: row.positions?.name || 'Position',
+      area: row.positions?.area || '',
+      day: toDateKey(row.shift?.shiftDate) || '',
       when: formatShiftWhen(row.shift),
     })
     assignmentsByVolunteer.set(row.volunteerId, list)
@@ -325,11 +331,20 @@ export async function listArrivals(
   for (const group of countGroups) {
     const when = formatCountWhen(group.countSession.countTime)
     const label = group.name || group.countSession.sessionName
-    addCount(group.primaryVolunteerId, group.countSession.id, { label: `${label} · Primary`, when })
-    addCount(group.secondaryVolunteerId, group.countSession.id, { label: `${label} · Partner`, when })
+    addCount(group.primaryVolunteerId, group.countSession.id, {
+      sessionId: group.countSession.id,
+      label: `${label} · Primary`,
+      when,
+    })
+    addCount(group.secondaryVolunteerId, group.countSession.id, {
+      sessionId: group.countSession.id,
+      label: `${label} · Partner`,
+      when,
+    })
   }
   for (const row of stationCounts) {
     addCount(row.volunteerId, row.countSession.id, {
+      sessionId: row.countSession.id,
       label: row.position?.name || row.countSession.sessionName,
       when: formatCountWhen(row.countSession.countTime),
     })

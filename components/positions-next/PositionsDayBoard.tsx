@@ -118,9 +118,26 @@ export default function PositionsDayBoard({
     {}
   )
 
+  const focusStationId =
+    router.isReady && typeof router.query.station === 'string' ? router.query.station : ''
+
   useEffect(() => {
-    setExpandOverride({})
-  }, [activeDay])
+    if (!router.isReady) return
+    if (focusStationId) setUnderfilledOnly(false)
+    const requestedDay = typeof router.query.day === 'string' ? router.query.day : ''
+    if (requestedDay) {
+      setActiveDay(requestedDay)
+      return
+    }
+    if (!focusStationId) return
+    const position = positions.find((item) => item.id === focusStationId)
+    const day = (position?.shifts || []).map((shift) => toDateKey(shift.shiftDate)).find(Boolean)
+    if (day) setActiveDay(day)
+  }, [router.isReady, router.query.day, focusStationId, positions])
+
+  useEffect(() => {
+    setExpandOverride(focusStationId ? { [focusStationId]: true } : {})
+  }, [activeDay, focusStationId])
 
   const undatedShiftCount = useMemo(() => {
     let n = 0
@@ -224,6 +241,11 @@ export default function PositionsDayBoard({
     }
     return out
   }, [filteredPositions, activeDay, underfilledOnly, showInactive])
+
+  useEffect(() => {
+    if (!focusStationId) return
+    document.getElementById(`station-${focusStationId}`)?.scrollIntoView({ block: 'center' })
+  }, [focusStationId, activeDay, stations])
 
   const visibleShiftKeys = useMemo(
     () =>
@@ -1388,7 +1410,10 @@ export default function PositionsDayBoard({
             return (
               <section
                 key={position.id}
-                className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
+                id={`station-${position.id}`}
+                className={`overflow-hidden rounded-lg border bg-white shadow-sm ${
+                  position.id === focusStationId ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'
+                }`}
               >
                 <header className="flex flex-col gap-2 bg-gray-50 px-3 py-3 sm:flex-row sm:items-center">
                   <div className="flex min-w-0 flex-1 items-center gap-1">

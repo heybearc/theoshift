@@ -8,6 +8,23 @@ export type VolunteerPageFilters = {
   availability: 'all' | 'AVAILABLE' | 'NOT_AVAILABLE' | 'PARTIAL' | 'PENDING' | 'none'
 }
 
+/** First visit for a keyman or overseer: show the people under their care. */
+export function careFiltersForViewer(
+  role: string,
+  volunteerId: string | null | undefined,
+  person: { isKeyman?: boolean; isOverseer?: boolean } | null | undefined
+): VolunteerPageFilters | null {
+  if (!volunteerId || !person) return null
+  if (role !== 'KEYMAN' && role !== 'OVERSEER' && role !== 'ASSISTANT_OVERSEER') return null
+  if (person.isKeyman && !person.isOverseer) {
+    return { ...DEFAULT_VOLUNTEER_FILTERS, keymanId: volunteerId }
+  }
+  if (person.isOverseer) {
+    return { ...DEFAULT_VOLUNTEER_FILTERS, overseerId: volunteerId }
+  }
+  return null
+}
+
 export const DEFAULT_VOLUNTEER_FILTERS: VolunteerPageFilters = {
   search: '',
   congregation: '',

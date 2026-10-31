@@ -96,6 +96,9 @@ export default function VolunteerManagementHelp({ userRole }: VolunteerManagemen
               <p className="text-gray-700">
                 Use the "Filter by Keyman" dropdown to see only volunteers assigned to a specific keyman.
                 You can also select "No Keyman" to find volunteers without a keyman assignment.
+                Each assignment name opens that station on Positions, including the area when one is set, so you can show a volunteer where they stand and change the shift.
+                A counter assignment is listed under the station and opens that count session.
+                A keyman or overseer who signs in sees the people under their care on the first visit. They can clear the filter to see everyone.
               </p>
             </div>
 
