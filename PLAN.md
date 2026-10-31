@@ -1,8 +1,8 @@
 # TheoShift Plan
 
-**Last updated:** 2026-10-30  
+**Last updated:** 2026-10-31  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.36.0 LIVE** (BLUE `10.92.3.24`). STANDBY GREEN `10.92.3.22` synced (`a4bbf879`).
+**Status:** **v4.38.0 LIVE** (BLUE `10.92.3.24`). STANDBY GREEN `10.92.3.22` synced (`84574e9e`).
 
 ---
 
@@ -23,9 +23,13 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Volunteer phone app** — sign-in, assignments, and chat shipped in v4.36.0. Next: availability, documents, pinned announcement, early check-in. Not in the App Store or Google Play.
-- **FB-036 (age and photo) still blocked.** LIVE is v4.36.0 on BLUE; STANDBY GREEN is synced.
+- **Volunteer phone app** — through v4.38.0 on production: sign-in, assignments, chat, availability, documents, profile, early check-in, and My volunteers. Not in the App Store or Google Play. Website still lacks My volunteers.
+- **FB-036 (age and photo) still blocked.** LIVE is v4.38.0 on BLUE; STANDBY GREEN is synced.
 - **Mobile readiness across TheoShift** — Users, Locations, and Feedback phone layouts shipped in v4.33.10. Positions and Volunteers shipped in v4.33.9. Early Check-In volunteer path done through **v4.29.7**.
+
+### Recently Completed (2026-10-31)
+- ✅ **v4.38.0** — My volunteers for keymen and overseers. Documents published to everyone follow a later position assignment. Shipped + synced (`84574e9e`)
+- ✅ **v4.37.0** — Phone availability, documents, profile, and early check-in. Shipped + synced (`5d03f922`)
 
 ### Recently Completed (2026-10-30)
 - ✅ **v4.36.0** — Volunteer phone app. Email-link sign-in, assignments, and event chat. Shipped + synced (`a4bbf879`)

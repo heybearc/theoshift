@@ -66,3 +66,14 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - qa-01 `STANDBY_URL` set to `https://green.theoshift.com`. Gate baseline must be the commit, not the annotated tag object.
 - Release gate passed on BLUE before the switch: 5 suite tests plus 4 phone sign-in tests. qa-01 lockfile was dirty; cleared with checkout before the rerun.
 - Urgent new feedback: 0.
+
+## 2026-10-31
+
+- Shipped v4.37.0 (`5d03f922`) then v4.38.0 (`84574e9e`). LIVE BLUE `10.92.3.24` CT 134. STANDBY GREEN `10.92.3.22` CT 132 synced. Switch #110.
+- Phone app More: availability, documents, profile, early check-in, and My volunteers. My positions filters the oversight list. Count times show when assigned.
+- A later position assignment receives documents that were published to everyone. Selected-only documents do not.
+- My volunteers is not on the website. Dashboard, chat, documents, availability, profile, and early check-in already are.
+- Release gates passed on standby. qa-01 lockfile was dirty once; cleared with checkout. Positions gate was clicking a hidden nav link; it now uses the event Positions link.
+- Next gate needs qa-01 `STANDBY_URL=https://green.theoshift.com`.
+- Urgent new feedback: 0.
+- Next: add My volunteers to the website volunteer dashboard. FB-036 still blocked.

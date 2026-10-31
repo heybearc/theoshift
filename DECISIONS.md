@@ -652,6 +652,11 @@ This document tracks significant technical decisions made during development.
 **Decision:** One Expo app for iPhone and Android. It signs in with the existing email link and calls TheoShift APIs. Do not replace event chat with Mattermost, Rocket.Chat, or Matrix. Staff tools stay on the website.  
 **Consequences:** Shipped **v4.36.0** (sign-in, assignments, chat). Stores and push are later. Supersedes D-TS-034 for the volunteer client.
 
+### D-TS-051: Documents published to everyone follow a later assignment
+**Date:** 2026-10-31  
+**Decision:** Publishing to everyone is not frozen. Assigning a brother to a position grants those documents. Individually published documents stay limited to the people selected. My volunteers (assignments, count times, check-in, lanyard, My positions) ships in the phone app first.  
+**Consequences:** Shipped **v4.38.0**. The website volunteer dashboard does not have My volunteers yet.
+
 ---
 
 ## Shared Decisions
