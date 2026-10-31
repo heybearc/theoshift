@@ -31,6 +31,7 @@ Theocratic Shift Scheduler is a comprehensive web application designed to manage
 - **Volunteer Dashboard** - Assignment info, oversight contact, count times; published **documents** open in an in-app viewer on desktop and mobile (v4.19.0+)
 - **Station diagram (optional)** - On Documents, choose one PDF or image of your stations. Assignments then include **Show on diagram** with the station name. Leave it blank and volunteers do not see it (v4.40.0+)
 - **Assignment links** - On Volunteers, an assignment name opens that station on Positions, and a counter assignment opens the count (v4.40.0+)
+- **Lanyard history** - Checking a badge back in keeps who had it. On Lanyards, look up a badge number or choose **History** (v4.41.0+)
 - **Volunteer Portal** - Self-service login and assignment viewing; **magic link** email entry is case-insensitive (v4.19.0+)
 
 ### Position & Assignment Management
@@ -277,6 +278,7 @@ For issues or questions:
 4. Contact the project maintainer for deployment access
 
 ## 📝 Version History
+- **v4.41.0** (2026-10-31) - Lanyard check-in keeps who had the badge so you can look it up later
 - **v4.40.0** (2026-10-31) - Assignments open the station, and an optional station diagram shows a volunteer where to stand
 - **v4.39.0** (2026-10-31) - Staff can open one keyman or overseer's people, and group counts show who submitted them
 - **v4.38.0** (2026-10-31) - Keymen and overseers can see their volunteers, positions, assignments, and count times in the phone app
