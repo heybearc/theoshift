@@ -1,57 +1,13 @@
-import { useEffect, useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { apiRequest } from '@/lib/api'
+import { router } from 'expo-router'
 import { useAuth } from '@/lib/auth'
+import { profileNeedsAttention, useDashboard } from '@/lib/dashboard'
 import { useVolunteerEvents } from '@/lib/events'
 
-type Assignment = {
-  id: string
-  positionName: string
-  location?: string
-  startTime: string
-  endTime: string
-  overseer?: string
-  keyman?: string
-}
-
-type Dashboard = {
-  event: { name: string }
-  assignments: Assignment[]
-}
-
 export default function AssignmentsScreen() {
-  const { token, volunteer, apiBase, signOut } = useAuth()
+  const { volunteer, signOut } = useAuth()
   const { events, eventId, setEventId, loading: eventsLoading, error: eventsError, reload } = useVolunteerEvents()
-  const [dashboard, setDashboard] = useState<Dashboard | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    if (!token || !volunteer || !eventId) {
-      setDashboard(null)
-      return
-    }
-    let cancelled = false
-    setLoading(true)
-    setError('')
-    apiRequest<{ data: Dashboard }>(
-      apiBase,
-      `/api/volunteer/dashboard?volunteerId=${encodeURIComponent(volunteer.id)}&eventId=${encodeURIComponent(eventId)}`,
-      { token }
-    )
-      .then((result) => {
-        if (!cancelled) setDashboard(result.data)
-      })
-      .catch((err: Error) => {
-        if (!cancelled) setError(err.message)
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [token, volunteer, apiBase, eventId])
+  const { data: dashboard, loading, error } = useDashboard()
 
   const name = volunteer ? `${volunteer.firstName} ${volunteer.lastName}`.trim() : ''
 
@@ -85,6 +41,12 @@ export default function AssignmentsScreen() {
             )
           })}
         </View>
+      ) : null}
+
+      {profileNeedsAttention(dashboard?.volunteer) ? (
+        <Pressable style={styles.banner} onPress={() => router.push('/more/profile')}>
+          <Text style={styles.bannerText}>Confirm your email and phone</Text>
+        </Pressable>
       ) : null}
 
       {dashboard?.event ? <Text style={styles.eventTitle}>{dashboard.event.name}</Text> : null}
@@ -130,6 +92,8 @@ const styles = StyleSheet.create({
   eventChipSelected: { backgroundColor: '#1e40af', borderColor: '#1e40af' },
   eventChipText: { color: '#334155', fontWeight: '600' },
   eventChipTextSelected: { color: '#fff' },
+  banner: { marginTop: 16, backgroundColor: '#eff6ff', borderRadius: 12, padding: 12, borderWidth: 1, borderColor: '#bfdbfe' },
+  bannerText: { color: '#1e3a8a', fontWeight: '700' },
   eventTitle: { marginTop: 20, fontSize: 16, fontWeight: '700', color: '#1e3a8a' },
   card: { marginTop: 12, backgroundColor: '#fff', borderRadius: 14, padding: 14, borderWidth: 1, borderColor: '#e2e8f0' },
   position: { fontSize: 17, fontWeight: '700', color: '#0f172a' },

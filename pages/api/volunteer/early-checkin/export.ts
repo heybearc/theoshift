@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '../../auth/[...nextauth]'
+import { getApiSession } from '@/lib/apiSession'
 import { prisma } from '@/lib/prisma'
 import {
   CONVENTION_DAYS,
@@ -21,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const session = await getServerSession(req, res, authOptions)
+    const session = await getApiSession(req, res)
     if (!session?.user?.id) {
       return res.status(401).json({ success: false, message: 'Unauthorized' })
     }

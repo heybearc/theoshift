@@ -23,6 +23,7 @@ type AuthContextValue = {
   setApiBase: (value: string) => void
   requestLink: (email: string) => Promise<void>
   completeLink: (url: string) => Promise<void>
+  updateVolunteer: (patch: Partial<VolunteerProfile>) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -104,6 +105,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setVolunteer(result.data.volunteer)
   }
 
+  async function updateVolunteer(patch: Partial<VolunteerProfile>) {
+    if (!volunteer) return
+    const next = { ...volunteer, ...patch }
+    await SecureStore.setItemAsync(VOLUNTEER_KEY, JSON.stringify(next))
+    setVolunteer(next)
+  }
+
   async function signOut() {
     await SecureStore.deleteItemAsync(TOKEN_KEY)
     await SecureStore.deleteItemAsync(VOLUNTEER_KEY)
@@ -111,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setVolunteer(null)
   }
 
-  const value = { ready, token, volunteer, apiBase, setApiBase, requestLink, completeLink, signOut }
+  const value = { ready, token, volunteer, apiBase, setApiBase, requestLink, completeLink, updateVolunteer, signOut }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
