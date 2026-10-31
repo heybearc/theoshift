@@ -12,14 +12,25 @@ type PositionRow = {
   }
 }
 
+type PersonName = { firstName: string; lastName: string }
+
+function personName(person: PersonName | null | undefined): string | null {
+  if (!person) return null
+  const name = `${person.firstName} ${person.lastName}`.trim()
+  return name || null
+}
+
 type GroupRow = {
   id: string
   name: string
+  primaryVolunteer?: PersonName | null
+  secondaryVolunteer?: PersonName | null
   entry: {
     attendeeCount: number | null
     notes: string | null
     enteredAt: Date | null
-    enteredByUser: { firstName: string; lastName: string } | null
+    enteredByUser: PersonName | null
+    enteredByVolunteer?: PersonName | null
   } | null
   positions: Array<{
     positionId: string
@@ -89,11 +100,12 @@ export function buildCountSubmissionSummaries(
       source = 'per_station'
     }
 
-    let submittedBy: string | null = null
-    if (g.entry?.enteredByUser) {
-      const u = g.entry.enteredByUser
-      submittedBy = `${u.firstName} ${u.lastName}`.trim()
-    } else if (pcsInGroup.length) {
+    let submittedBy: string | null =
+      personName(g.entry?.enteredByUser) || personName(g.entry?.enteredByVolunteer)
+    if (!submittedBy) {
+      submittedBy = personName(g.primaryVolunteer) || personName(g.secondaryVolunteer)
+    }
+    if (!submittedBy && pcsInGroup.length) {
       const names = [
         ...new Set(pcsInGroup.map((pc) => resolveActorName(pc.countedBy)).filter(Boolean)),
       ] as string[]

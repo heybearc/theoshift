@@ -169,6 +169,7 @@ model volunteers {
   chat_reads                   event_chat_reads[]
   chat_push_subscriptions      event_chat_push_subscriptions[]
   chat_pin_acknowledgments     event_chat_pin_acknowledgments[]
+  entered_count_group_entries  count_group_entries[]                 @relation("count_group_entries_entered_by_volunteer")
 }
 
 model count_sessions {
@@ -583,13 +584,15 @@ model count_group_entries {
   id             String               @id @default(uuid())
   groupId        String               @unique
   attendeeCount  Int?
-  notes          String?
-  enteredBy      String?
-  enteredAt      DateTime             @default(now())
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
-  group          count_session_groups @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  enteredByUser  users?               @relation("count_group_entries_entered_by", fields: [enteredBy], references: [id], onDelete: SetNull)
+  notes                 String?
+  enteredBy             String?
+  enteredByVolunteerId  String?
+  enteredAt             DateTime             @default(now())
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  group                 count_session_groups @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  enteredByUser         users?               @relation("count_group_entries_entered_by", fields: [enteredBy], references: [id], onDelete: SetNull)
+  enteredByVolunteer    volunteers?          @relation("count_group_entries_entered_by_volunteer", fields: [enteredByVolunteerId], references: [id], onDelete: SetNull)
 }
 
 model count_session_position_assignees {

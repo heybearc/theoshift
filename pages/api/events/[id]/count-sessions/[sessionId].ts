@@ -94,9 +94,12 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse, eventId: str
         include: {
           entry: {
             include: {
-              enteredByUser: { select: { firstName: true, lastName: true } }
+              enteredByUser: { select: { firstName: true, lastName: true } },
+              enteredByVolunteer: { select: { firstName: true, lastName: true } },
             }
           },
+          primaryVolunteer: { select: { firstName: true, lastName: true } },
+          secondaryVolunteer: { select: { firstName: true, lastName: true } },
           positions: {
             include: {
               position: {

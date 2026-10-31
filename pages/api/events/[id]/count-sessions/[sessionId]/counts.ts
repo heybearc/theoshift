@@ -129,6 +129,7 @@ async function handlePost(
     }
 
     const enteredByUserId = await resolveUserIdForCountEnteredBy(userId, role)
+    const enteredByVolunteerId = await resolveVolunteerIdForSessionUser(userId, role)
 
     const entry = await prisma.count_group_entries.upsert({
       where: { groupId: data.groupId },
@@ -137,12 +138,14 @@ async function handlePost(
         attendeeCount: data.attendeeCount ?? null,
         notes: data.notes,
         enteredBy: enteredByUserId,
+        enteredByVolunteerId,
         enteredAt: new Date()
       },
       update: {
         attendeeCount: data.attendeeCount ?? null,
         notes: data.notes,
         enteredBy: enteredByUserId,
+        enteredByVolunteerId,
         enteredAt: new Date(),
         updatedAt: new Date()
       }
