@@ -84,12 +84,27 @@ function formatShiftWhen(shift: {
   return [day, shift.name, times].filter(Boolean).join(' · ')
 }
 
-export async function listArrivals(eventId: string, viewerVolunteerId: string): Promise<{
+export async function eventUsesIvsCheckIn(eventId: string): Promise<boolean> {
+  const event = await prisma.events.findUnique({
+    where: { id: eventId },
+    select: { settings: true },
+  })
+  const modules = (event?.settings as { modules?: { ivsModule?: boolean } } | null)?.modules
+  return modules?.ivsModule === true
+}
+
+export async function listArrivals(
+  eventId: string,
+  viewerVolunteerId: string,
+  options?: { includeCheckIn?: boolean }
+): Promise<{
   scope: 'event' | 'mine'
   today: ConventionDay | null
+  showCheckIn: boolean
   myPositions: ArrivalPosition[]
   people: ArrivalPerson[]
 } | null> {
+  const includeCheckIn = options?.includeCheckIn === true
   const allowed = await viewerCanSeeArrivals(eventId, viewerVolunteerId)
   if (!allowed) return null
 
@@ -155,8 +170,12 @@ export async function listArrivals(eventId: string, viewerVolunteerId: string): 
       volunteer: { isActive: true },
     },
     select: {
-      checkedInAt: true,
-      earlyCheckins: { select: { conventionDay: true, checkedInAt: true } },
+      ...(includeCheckIn
+        ? {
+            checkedInAt: true,
+            earlyCheckins: { select: { conventionDay: true, checkedInAt: true } },
+          }
+        : {}),
       volunteer: {
         select: { id: true, firstName: true, lastName: true, congregation: true },
       },
@@ -183,10 +202,17 @@ export async function listArrivals(eventId: string, viewerVolunteerId: string): 
     .filter((row) => row.volunteer)
     .map((row) => {
       const volunteer = row.volunteer!
-      const dayCheckIn = today
-        ? row.earlyCheckins.find((checkIn) => checkIn.conventionDay === today)
-        : undefined
-      const checkedInAt = dayCheckIn?.checkedInAt || (!today ? row.checkedInAt : null)
+      const checkInRow = row as {
+        checkedInAt?: Date | null
+        earlyCheckins?: Array<{ conventionDay: ConventionDay; checkedInAt: Date }>
+      }
+      const dayCheckIn =
+        includeCheckIn && today
+          ? checkInRow.earlyCheckins?.find((checkIn) => checkIn.conventionDay === today)
+          : undefined
+      const checkedInAt = includeCheckIn
+        ? dayCheckIn?.checkedInAt || (!today ? checkInRow.checkedInAt : null)
+        : null
       return {
         id: volunteer.id,
         firstName: volunteer.firstName,
@@ -321,5 +347,5 @@ export async function listArrivals(eventId: string, viewerVolunteerId: string): 
     })
     .sort((a, b) => `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`))
 
-  return { scope, today, myPositions, people }
+  return { scope, today, showCheckIn: includeCheckIn, myPositions, people }
 }

@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getApiSession } from '@/lib/apiSession'
-import { listArrivals } from '@/lib/arrivals'
+import { eventUsesIvsCheckIn, listArrivals } from '@/lib/arrivals'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -17,7 +17,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ success: false, error: 'Event ID required' })
   }
 
-  const result = await listArrivals(eventId, session.user.id)
+  const includeCheckIn = await eventUsesIvsCheckIn(eventId)
+  const result = await listArrivals(eventId, session.user.id, { includeCheckIn })
   if (!result) {
     return res.status(403).json({ success: false, error: 'Not authorized to view arrivals' })
   }

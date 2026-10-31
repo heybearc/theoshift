@@ -32,6 +32,7 @@ export default function ArrivalsScreen() {
   const [people, setPeople] = useState<Arrival[]>([])
   const [myPositionIds, setMyPositionIds] = useState<string[]>([])
   const [scope, setScope] = useState<'event' | 'mine'>('mine')
+  const [showCheckIn, setShowCheckIn] = useState(false)
   const [filter, setFilter] = useState<FilterId>('all')
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
@@ -43,10 +44,12 @@ export default function ArrivalsScreen() {
       people: Arrival[]
       scope: 'event' | 'mine'
       myPositions: Array<{ id: string }>
+      showCheckIn?: boolean
     }>(apiBase, `/api/volunteer/arrivals?eventId=${encodeURIComponent(eventId)}`, { token })
     setPeople(result.people || [])
     setMyPositionIds((result.myPositions || []).map((position) => position.id))
     setScope(result.scope === 'event' ? 'event' : 'mine')
+    setShowCheckIn(result.showCheckIn === true)
   }, [token, eventId, apiBase])
 
   useFocusEffect(
@@ -81,13 +84,17 @@ export default function ArrivalsScreen() {
 
   const checkedInCount = visible.filter((person) => person.checkedIn).length
   const lanyardCount = visible.filter((person) => person.lanyardBadge).length
-  const filters = FILTERS.filter((item) => item.id !== 'mine' || myPositionIds.length > 0)
+  const filters = FILTERS.filter((item) => {
+    if (item.id === 'mine') return myPositionIds.length > 0
+    if (item.id === 'missing-checkin') return showCheckIn
+    return true
+  })
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <Text style={styles.summary}>
-        {scope === 'event' ? 'Everyone on this event' : 'Volunteers assigned to you'} · {checkedInCount} checked in ·{' '}
-        {lanyardCount} with a lanyard
+        {scope === 'event' ? 'Everyone on this event' : 'Volunteers assigned to you'}
+        {showCheckIn ? ` · ${checkedInCount} checked in` : ''} · {lanyardCount} with a lanyard
       </Text>
       <View style={styles.filters}>
         {filters.map((item) => {
@@ -124,7 +131,9 @@ export default function ArrivalsScreen() {
             {person.lastName}, {person.firstName}
           </Text>
           {person.congregation ? <Text style={styles.meta}>{person.congregation}</Text> : null}
-          <Text style={styles.status}>{person.checkedIn ? 'Checked in' : 'Not checked in'}</Text>
+          {showCheckIn ? (
+            <Text style={styles.status}>{person.checkedIn ? 'Checked in' : 'Not checked in'}</Text>
+          ) : null}
           <Text style={styles.status}>
             {person.lanyardBadge ? `Lanyard ${person.lanyardBadge}` : 'No lanyard'}
           </Text>

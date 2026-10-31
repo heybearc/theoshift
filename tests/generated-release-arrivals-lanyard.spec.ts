@@ -14,6 +14,11 @@ test('arrivals require a volunteer sign-in', async ({ request }) => {
   expect(bearer.status()).toBe(401)
 })
 
+test('staff people list requires a sign-in', async ({ request }) => {
+  const response = await request.get('/api/events/someone/people?focusId=someone')
+  expect(response.status()).toBe(401)
+})
+
 test('a new position assignment requires a sign-in before documents can be granted', async ({ request }) => {
   const response = await request.post('/api/events/someone/assignments', {
     data: { volunteerId: 'someone', positionId: 'position', shiftId: 'shift' },

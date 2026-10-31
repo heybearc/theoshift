@@ -4,6 +4,7 @@ import { authOptions } from '../../api/auth/[...nextauth]'
 import EventPageWrapper from '../../../components/EventPageWrapper'
 import SelectionBar from '../../../components/SelectionBar'
 import FilterPresets from '../../../components/FilterPresets'
+import VolunteerPeoplePanel from '../../../components/VolunteerPeoplePanel'
 import { VolunteerBadges } from '../../../components/VolunteerBadges'
 import VolunteerDetailsPopup from '../../../components/VolunteerDetailsPopup'
 import React, { useState, useEffect, useRef } from 'react'
@@ -103,6 +104,7 @@ export default function EventAttendantsPage({ eventId, event, attendants, canMan
   const router = useRouter()
   const rowRange = useShiftRangeSelection()
   const [roster, setRoster] = useState<Attendant[]>(attendants)
+  const [peopleFocusId, setPeopleFocusId] = useState('')
 
   useScrollRestoration(router.asPath, true)
 
@@ -1266,6 +1268,9 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
     }
   }
 
+  const peopleLeader = roster.find((att) => att.id === peopleFocusId)
+  const peopleFocusName = peopleLeader ? `${peopleLeader.firstName} ${peopleLeader.lastName}` : ''
+
   return (
     <EventPageWrapper
       event={{
@@ -1479,6 +1484,33 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
               
               {/* Quick Filters */}
               <div className="flex flex-wrap items-center gap-2">
+                <div className="relative w-full sm:w-auto">
+                  <select
+                    value={peopleFocusId}
+                    onChange={(e) => setPeopleFocusId(e.target.value)}
+                    aria-label="View one keyman or overseer's people"
+                    className="w-full px-3 py-2 pr-10 min-h-[44px] border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
+                  >
+                    <option value="">Full roster</option>
+                    {roster
+                      .filter((att) => att.isActive && (att.isOverseer || att.isKeyman))
+                      .sort((a, b) => `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`))
+                      .map((leader) => (
+                        <option key={leader.id} value={leader.id}>
+                          {leader.lastName}, {leader.firstName}
+                          {leader.isOverseer ? ' · Overseer' : ' · Keyman'}
+                        </option>
+                      ))}
+                  </select>
+                  <svg
+                    className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
                 <div className="relative w-full sm:w-auto">
                   <select
                     value={filters.overseerId}
@@ -1803,7 +1835,19 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
           </button>
         </div>
 
+        {peopleFocusId ? (
+          <VolunteerPeoplePanel
+            eventId={eventId}
+            focusId={peopleFocusId}
+            focusName={peopleFocusName || 'this brother'}
+            search={filters.search}
+            showLanyards={moduleConfig?.lanyards === true}
+            showCountTimes={moduleConfig?.countTimes === true}
+          />
+        ) : null}
+
         {/* Volunteers List (Cards on mobile, table on desktop) */}
+        {!peopleFocusId ? (
         <div className="bg-white shadow rounded-lg overflow-visible">
           <div className="px-4 py-5 sm:p-6">
             <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -2330,6 +2374,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
           {/* Room for the last row's actions menu, and for the selection bar when it is open */}
           <div className={selectedAttendants.size > 0 ? 'h-36' : 'h-24'} />
         </div>
+        ) : null}
 
         {/* Add/Edit Attendant Modal */}
         {showAddModal && (
