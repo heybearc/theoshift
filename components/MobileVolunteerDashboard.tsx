@@ -15,10 +15,19 @@ interface Assignment {
   positionName: string
   startTime: string
   endTime: string
+  shiftName?: string
   location?: string
   instructions?: string
   overseer?: string
   keyman?: string
+  completeSchedule?: Array<{
+    volunteerName: string
+    isCurrentUser: boolean
+    shiftName: string
+    startTime: string
+    endTime: string
+    isAllDay: boolean
+  }>
 }
 
 interface Event {
@@ -510,25 +519,59 @@ export default function MobileVolunteerDashboard({
                   {/* Expanded Details */}
                   {expandedAssignment === assignment.id && (
                     <div className="px-4 pb-4 border-t border-gray-100 bg-gray-50">
+                      {assignment.shiftName ? (
+                        <p className="mt-3 text-sm text-gray-700">
+                          <span className="font-medium">Shift:</span> {assignment.shiftName}
+                        </p>
+                      ) : null}
+                      {assignment.completeSchedule && assignment.completeSchedule.length > 0 ? (
+                        <div className="mt-3">
+                          <p className="text-xs font-medium text-gray-700 mb-2">Who is on this position</p>
+                          <div className="space-y-1">
+                            {assignment.completeSchedule.map((schedule, idx) => (
+                              <div
+                                key={idx}
+                                className={`text-sm p-2 rounded ${
+                                  schedule.isCurrentUser
+                                    ? 'bg-blue-50 border border-blue-200 font-medium text-blue-900'
+                                    : 'bg-white text-gray-700'
+                                }`}
+                              >
+                                <span>{schedule.volunteerName}</span>
+                                {schedule.isCurrentUser ? <span className="ml-1 text-blue-600">(You)</span> : null}
+                                <span className="mx-1">·</span>
+                                <span>
+                                  {schedule.shiftName ? `${schedule.shiftName}` : ''}
+                                  {schedule.shiftName && (schedule.isAllDay || schedule.startTime) ? ' · ' : ''}
+                                  {schedule.isAllDay
+                                    ? 'All Day'
+                                    : schedule.startTime
+                                      ? `${formatTime(schedule.startTime)}${schedule.endTime ? ` - ${formatTime(schedule.endTime)}` : ''}`
+                                      : ''}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
                       {assignment.instructions && (
                         <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                          <p className="text-xs font-medium text-blue-900 mb-1">📝 Instructions:</p>
+                          <p className="text-xs font-medium text-blue-900 mb-1">Instructions</p>
                           <p className="text-sm text-gray-700">{assignment.instructions}</p>
                         </div>
                       )}
-                      
                       {(assignment.overseer || assignment.keyman) && (
                         <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-100">
-                          <p className="text-xs font-medium text-purple-900 mb-2">Position Oversight:</p>
+                          <p className="text-xs font-medium text-purple-900 mb-2">Position oversight</p>
                           <div className="space-y-1">
                             {assignment.overseer && (
                               <p className="text-sm text-gray-700">
-                                <span className="font-medium">👤 Overseer:</span> {assignment.overseer}
+                                <span className="font-medium">Overseer:</span> {assignment.overseer}
                               </p>
                             )}
                             {assignment.keyman && (
                               <p className="text-sm text-gray-700">
-                                <span className="font-medium">🔑 Keyman:</span> {assignment.keyman}
+                                <span className="font-medium">Keyman:</span> {assignment.keyman}
                               </p>
                             )}
                           </div>

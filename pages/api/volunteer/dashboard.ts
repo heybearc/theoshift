@@ -141,6 +141,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Get complete schedule for each position (FB-003: Complete schedule visibility)
     const positionIds = positionAssignments.map(a => a.positions.id)
+    const positionOversight = positionIds.length
+      ? await prisma.position_oversight_assignments.findMany({
+          where: { positionId: { in: positionIds } },
+          select: {
+            positionId: true,
+            overseer: { select: { firstName: true, lastName: true } },
+            keyman: { select: { firstName: true, lastName: true } },
+          },
+        })
+      : []
+    const oversightByPosition = new Map(positionOversight.map((row) => [row.positionId, row]))
     const allPositionAssignments = await prisma.position_assignments.findMany({
       where: {
         positionId: {
@@ -180,7 +191,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const positionSchedule = allPositionAssignments
         .filter(a => a.positionId === assignment.positions.id)
         .map(a => ({
-          volunteerName: `${a.volunteer.firstName} ${a.volunteer.lastName}`,
+          volunteerName: a.volunteer
+            ? `${a.volunteer.firstName} ${a.volunteer.lastName}`
+            : 'Volunteer',
           isCurrentUser: a.volunteerId === vid,
           shiftName: a.shift?.name || '',
           startTime: a.shift?.isAllDay ? 'All Day' : (a.shift?.startTime || ''),
@@ -188,16 +201,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           isAllDay: a.shift?.isAllDay || false
         }))
       
+      const stationOversight = oversightByPosition.get(assignment.positions.id)
+      const overseerName = assignment.overseer
+        ? `${assignment.overseer.firstName} ${assignment.overseer.lastName}`
+        : stationOversight?.overseer
+          ? `${stationOversight.overseer.firstName} ${stationOversight.overseer.lastName}`
+          : undefined
+      const keymanName = assignment.keyman
+        ? `${assignment.keyman.firstName} ${assignment.keyman.lastName}`
+        : stationOversight?.keyman
+          ? `${stationOversight.keyman.firstName} ${stationOversight.keyman.lastName}`
+          : undefined
+
       return {
         id: assignment.id,
         positionId: assignment.positions.id,
         positionName: assignment.positions.name,
         location: assignment.positions.area || undefined,
+        shiftName: shiftName || undefined,
         startTime: isAllDay ? 'All Day' : (assignment.shift?.startTime || shiftName || ''),
         endTime: isAllDay ? '' : (assignment.shift?.endTime || ''),
         instructions: undefined,
-        overseer: assignment.overseer ? `${assignment.overseer.firstName} ${assignment.overseer.lastName}` : undefined,
-        keyman: assignment.keyman ? `${assignment.keyman.firstName} ${assignment.keyman.lastName}` : undefined,
+        overseer: overseerName,
+        keyman: keymanName,
         completeSchedule: positionSchedule
       }
     })

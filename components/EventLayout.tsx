@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import packageJson from '../package.json'
 import MobileNav from './MobileNav'
 import BottomNav from './BottomNav'
+import PWABottomNav from './PWABottomNav'
 import dynamic from 'next/dynamic'
 import FloatingActionButton from './FloatingActionButton'
 import QuickVolunteerLookup from './QuickVolunteerLookup'
@@ -44,17 +45,20 @@ export default function EventLayout({
   const [showVolunteerLookup, setShowVolunteerLookup] = useState(false)
   const [showAssignmentForm, setShowAssignmentForm] = useState(false)
   const [showQRScanner, setShowQRScanner] = useState(false)
-  const [viewAsVolunteerActive, setViewAsVolunteerActive] = useState(false)
+  const [viewAsVolunteerId, setViewAsVolunteerIdState] = useState<string | null>(null)
 
   useEffect(() => {
-    const sync = () => setViewAsVolunteerActive(!!getViewAsVolunteerId())
+    const sync = () => setViewAsVolunteerIdState(getViewAsVolunteerId())
     sync()
     window.addEventListener('theoshift-view-as-volunteer-changed', sync)
     return () => window.removeEventListener('theoshift-view-as-volunteer-changed', sync)
   }, [router.asPath])
 
-  const hideStaffQuickFab =
-    typeof router.query.viewAsVolunteerId === 'string' || viewAsVolunteerActive
+  const viewAsFromQuery =
+    typeof router.query.viewAsVolunteerId === 'string' ? router.query.viewAsVolunteerId : null
+  const activeViewAsVolunteerId = viewAsFromQuery || viewAsVolunteerId
+  const hideStaffQuickFab = !!activeViewAsVolunteerId
+  const volunteerPhoneNav = hideStaffQuickFab || session?.user?.role === 'VOLUNTEER'
 
   const handleSignOut = () => {
     // Don't specify callbackUrl - let next-auth use the current origin
@@ -244,8 +248,16 @@ export default function EventLayout({
         </div>
       </footer>
 
-      {/* Bottom Navigation for Mobile */}
-      <BottomNav selectedEventId={selectedEvent?.id} />
+      {volunteerPhoneNav ? (
+        <PWABottomNav
+          eventId={selectedEvent?.id}
+          viewAsVolunteerId={activeViewAsVolunteerId}
+          showCheckIn={false}
+          showDisabledCheckIn={false}
+        />
+      ) : (
+        <BottomNav selectedEventId={selectedEvent?.id} />
+      )}
 
       {/* Floating Action Button with Quick Actions */}
       {selectedEvent && !hideStaffQuickFab && (

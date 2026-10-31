@@ -8,6 +8,8 @@ interface PWABottomNavProps {
   viewAsVolunteerId?: string | null
   /** When false, Check-In looks disabled and does not navigate */
   showCheckIn?: boolean
+  /** When false, a disabled Check-In tab is left off the bar */
+  showDisabledCheckIn?: boolean
 }
 
 export default function PWABottomNav({
@@ -15,6 +17,7 @@ export default function PWABottomNav({
   eventId: eventIdProp,
   viewAsVolunteerId: viewAsProp,
   showCheckIn = false,
+  showDisabledCheckIn = true,
 }: PWABottomNavProps) {
   const router = useRouter()
   const [eventId, setEventId] = useState<string | null>(eventIdProp ?? null)
@@ -116,7 +119,9 @@ export default function PWABottomNav({
       style={{ paddingBottom: 'max(0px, env(safe-area-inset-bottom))' }}
     >
       <div className="flex items-stretch">
-        {tabs.map((tab) => {
+        {tabs
+          .filter((tab) => tab.id !== 'checkin' || tab.enabled || showDisabledCheckIn)
+          .map((tab) => {
           const isActive = currentTab === tab.id
           const className = `flex-1 flex flex-col items-center justify-center py-2 min-h-[56px] touch-manipulation select-none transition-colors ${
             !tab.enabled

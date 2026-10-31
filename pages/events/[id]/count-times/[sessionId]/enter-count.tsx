@@ -428,7 +428,7 @@ export default function EnterCountPage() {
           </div>
         )}
 
-        {countSession && (
+        {privilegedCounterView && countSession && (
           <div className="mb-8 max-w-full">
             <h2 className="text-lg font-semibold text-gray-900 mb-3 text-left">Recorded submissions</h2>
             <CountSubmissionSummaries
