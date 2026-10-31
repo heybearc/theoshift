@@ -77,3 +77,13 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - Next gate needs qa-01 `STANDBY_URL=https://green.theoshift.com`.
 - Urgent new feedback: 0.
 - Next: add My volunteers to the website volunteer dashboard. FB-036 still blocked.
+
+### Mid-day
+- Shipped v4.39.0 (`9cbf69f8`). LIVE GREEN `10.92.3.22` CT 132. STANDBY BLUE `10.92.3.24` CT 134 synced. Switch #111.
+- Staff Volunteers page opens one keyman or overseer's people. Check-in shows only when IVS is on.
+- View-as on a phone uses the volunteer bar. Enter count shows that person's assignment. Opening an assignment shows the shift and oversight.
+- Group counts store the volunteer who submitted. Older rows show the group's primary counter when no name was stored.
+- Release gate passed. Schema change ran the smoke plus release-gate suite, then the new submitter tests. qa-01 lockfile was dirty; cleared with checkout.
+- Next gate needs qa-01 `STANDBY_URL=https://blue.theoshift.com`.
+- Urgent new feedback: 0.
+- Next: FB-036 still blocked. Recommend a new session (v4.39.0 shipped).
