@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getServerSession } from 'next-auth'
 import jwt from 'jsonwebtoken'
-import { authOptions } from '../../../auth/[...nextauth]'
+import { getApiSession } from '@/lib/apiSession'
 import { canAccessEventChat } from '@/lib/chatAccess'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -14,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ success: false, error: 'Event ID is required' })
   }
 
-  const session = await getServerSession(req, res, authOptions)
+  const session = await getApiSession(req, res)
   if (!session?.user?.email) {
     return res.status(401).json({ success: false, error: 'Unauthorized' })
   }

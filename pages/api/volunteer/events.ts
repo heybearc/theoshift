@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next'
+import { getApiSession } from '@/lib/apiSession'
 import { prisma } from '../../../src/lib/prisma'
 import { handleApiError } from '@/lib/apiError'
 import { toDateOnlyStringUTC } from '../../../src/lib/calendarDate'
@@ -9,10 +10,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    const session = await getApiSession(req, res)
+    if (!session?.user?.id) {
+      return res.status(401).json({ success: false, error: 'Unauthorized' })
+    }
+
     const { volunteerId } = req.query
 
     if (!volunteerId || typeof volunteerId !== 'string') {
       return res.status(400).json({ success: false, error: 'Volunteer ID is required' })
+    }
+
+    if (session.user.role === 'VOLUNTEER' && volunteerId !== session.user.id) {
+      return res.status(403).json({ success: false, error: 'Access denied' })
     }
 
     // Fetch events for this volunteer using the mapped table name

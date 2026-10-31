@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '../auth/[...nextauth]'
+import { getApiSession } from '@/lib/apiSession'
 import { prisma } from '../../../src/lib/prisma'
 import { toDateOnlyStringUTC } from '../../../src/lib/calendarDate'
 import { verifyVolunteerIvsEarlyCheckinAccessForIds } from '@/lib/ivsVolunteerEarlyCheckinAccess'
@@ -12,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ success: false, error: 'Method not allowed' })
   }
 
-  const session = await getServerSession(req, res, authOptions)
+  const session = await getApiSession(req, res)
   if (!session?.user?.id) {
     return res.status(401).json({ success: false, error: 'Unauthorized' })
   }

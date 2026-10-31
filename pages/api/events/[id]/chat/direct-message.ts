@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '../../../auth/[...nextauth]'
+import { getApiSession } from '@/lib/apiSession'
 import { prisma } from '@/lib/prisma'
 import { canAccessEventChat } from '@/lib/chatAccess'
 import { getActiveLinkedVolunteerId, orderedVolunteerPair } from '@/lib/eventVolunteerIdentity'
@@ -15,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ success: false, error: 'Event ID is required' })
   }
 
-  const session = await getServerSession(req, res, authOptions)
+  const session = await getApiSession(req, res)
   if (!session?.user?.email) {
     return res.status(401).json({ success: false, error: 'Unauthorized' })
   }

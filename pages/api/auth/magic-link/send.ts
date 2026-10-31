@@ -4,15 +4,13 @@ import { findVolunteerByEmailCaseInsensitive } from '@/lib/volunteerEmailLookup'
 import nodemailer from 'nodemailer'
 import crypto from 'crypto'
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { email: rawEmail } = req.body
+  const { email: rawEmail, client } = req.body
+  const forMobileApp = client === 'mobile'
 
   if (!rawEmail || typeof rawEmail !== 'string') {
     return res.status(400).json({ error: 'Email is required' })
@@ -27,22 +25,19 @@ export default async function handler(
 
     const email = volunteer.email
 
-    // Generate secure token
     const token = crypto.randomBytes(32).toString('hex')
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000)
 
-    // Store token in database
     await prisma.verificationToken.create({
       data: {
         identifier: email,
         token,
-        expires
-      }
+        expires,
+      },
     })
 
-    // Get email configuration
     const emailConfig = await prisma.system_settings.findFirst({
-      where: { key: 'email_config' }
+      where: { key: 'email_config' },
     })
 
     if (!emailConfig) {
@@ -51,7 +46,6 @@ export default async function handler(
 
     const { authType, config } = JSON.parse(emailConfig.value as string)
 
-    // Create transporter
     let transporter
     if (authType === 'gmail') {
       transporter = nodemailer.createTransport({
@@ -61,8 +55,8 @@ export default async function handler(
         requireTLS: true,
         auth: {
           user: config.gmailEmail,
-          pass: config.gmailAppPassword
-        }
+          pass: config.gmailAppPassword,
+        },
       })
     } else {
       transporter = nodemailer.createTransport({
@@ -72,41 +66,33 @@ export default async function handler(
         requireTLS: !config.smtpSecure,
         auth: {
           user: config.smtpUser,
-          pass: config.smtpPassword
-        }
+          pass: config.smtpPassword,
+        },
       })
     }
 
     const envBase = process.env.NEXTAUTH_URL?.replace(/\/$/, '')
     const xfProto = req.headers['x-forwarded-proto']
-    const proto =
-      typeof xfProto === 'string'
-        ? xfProto.split(',')[0].trim().toLowerCase()
-        : ''
+    const proto = typeof xfProto === 'string' ? xfProto.split(',')[0].trim().toLowerCase() : ''
     const xfHost = req.headers['x-forwarded-host']
-    const host =
-      (typeof xfHost === 'string' ? xfHost.split(',')[0].trim() : '') ||
-      req.headers.host ||
-      'localhost'
-    const inferredBase =
-      proto === 'https' || proto === 'http'
-        ? `${proto}://${host}`
-        : `http://${host}`
+    const host = (typeof xfHost === 'string' ? xfHost.split(',')[0].trim() : '') || req.headers.host || 'localhost'
+    const inferredBase = proto === 'https' || proto === 'http' ? `${proto}://${host}` : `http://${host}`
     const baseUrl = envBase || inferredBase
 
-    const magicLink = `${baseUrl}/api/auth/magic-link/verify?token=${token}&email=${encodeURIComponent(email)}`
+    const magicLink = forMobileApp
+      ? `${baseUrl}/auth/open-app?token=${token}&email=${encodeURIComponent(email)}`
+      : `${baseUrl}/api/auth/magic-link/verify?token=${token}&email=${encodeURIComponent(email)}`
 
     const fromEmail =
-      config.fromEmail ||
-      config.gmailEmail ||
-      config.smtpUser ||
-      process.env.EMAIL_FROM ||
-      process.env.SMTP_USER
+      config.fromEmail || config.gmailEmail || config.smtpUser || process.env.EMAIL_FROM || process.env.SMTP_USER
     if (!fromEmail || typeof fromEmail !== 'string') {
       throw new Error('Email "from" address not configured (fromEmail / gmailEmail / smtpUser)')
     }
 
-    // Send email
+    const intro = forMobileApp
+      ? 'You requested to sign in to the TheoShift app. Open the link on your phone and TheoShift will finish signing you in.'
+      : 'You requested to sign in to your TheoShift volunteer dashboard. Click the button below to continue.'
+
     await transporter.sendMail({
       from: `"TheoShift Team" <${fromEmail}>`,
       to: email,
@@ -122,31 +108,35 @@ export default async function handler(
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
             <div style="background-color: #10b981; color: white; padding: 30px 20px; text-align: center;">
               <h1 style="margin: 0; font-size: 24px; font-weight: bold;">Sign in to TheoShift</h1>
-              <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Click the button below to access your volunteer dashboard.</p>
+              <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">${
+                forMobileApp ? 'Open this link on the phone where the app is installed.' : 'Click the button below to access your volunteer dashboard.'
+              }</p>
             </div>
 
             <div style="padding: 30px 20px;">
               <h2 style="color: #374151; margin: 0 0 20px 0;">Hello ${volunteer.firstName}!</h2>
               
               <p style="color: #6b7280; line-height: 1.6; margin: 0 0 20px 0;">
-                You requested to sign in to your TheoShift volunteer dashboard. Click the button below to continue.
+                ${intro}
               </p>
 
               <div style="text-align: center; margin: 30px 0;">
                 <a href="${magicLink}" style="display: inline-block; background-color: #10b981; color: white; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; font-size: 16px;">
-                  🔐 Sign In to TheoShift
+                  Sign In to TheoShift
                 </a>
               </div>
 
               <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
                 <p style="color: #92400e; margin: 0; line-height: 1.6; font-size: 14px;">
-                  ⚡ <strong>Security Notice:</strong> This link will expire in 24 hours and can only be used once. If you didn't request this, you can safely ignore this email.
+                  <strong>Security Notice:</strong> This link will expire in 24 hours and can only be used once. If you didn't request this, you can safely ignore this email.
                 </p>
               </div>
 
               <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin: 20px 0;">
                 <p style="color: #6b7280; line-height: 1.6; margin: 0; font-size: 14px;">
-                  <strong>Can't click the button?</strong> Copy and paste this link into your browser:<br>
+                  <strong>Can't click the button?</strong> Copy and paste this link into your browser${
+                    forMobileApp ? ' or into the TheoShift app' : ''
+                  }:<br>
                   <a href="${magicLink}" style="color: #3b82f6; word-break: break-all;">${magicLink}</a>
                 </p>
               </div>
@@ -159,7 +149,7 @@ export default async function handler(
           </div>
         </body>
         </html>
-      `
+      `,
     })
 
     return res.status(200).json({ success: true, message: 'Magic link sent to your email' })

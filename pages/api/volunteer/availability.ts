@@ -1,15 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '../auth/[...nextauth]'
+import { getApiSession, type ApiSession } from '@/lib/apiSession'
 import { toDateOnlyStringUTC } from '../../../src/lib/calendarDate'
 import { prisma } from '../../../src/lib/prisma'
 import { getViewAsVolunteerId } from '@/lib/countAssignmentsShared'
 import { blockSimulatedMutation } from '@/lib/countAssignments'
 
-function resolveTargetVolunteerId(
-  session: NonNullable<Awaited<ReturnType<typeof getServerSession>>>,
-  req: NextApiRequest
-): string | null {
+function resolveTargetVolunteerId(session: ApiSession, req: NextApiRequest): string | null {
   if (session.user.role === 'VOLUNTEER') {
     return session.user.id
   }
@@ -20,7 +16,7 @@ function resolveTargetVolunteerId(
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, authOptions)
+  const session = await getApiSession(req, res)
 
   if (!session?.user) {
     return res.status(401).json({ success: false, error: 'Unauthorized' })
