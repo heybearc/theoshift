@@ -647,6 +647,11 @@ This document tracks significant technical decisions made during development.
 **Decision:** Support is a user role and an event permission. Support can sign in on the Oversight tab and manage volunteers, positions, and assignments on granted events. Support cannot create or delete events or manage permissions. Do not store the Support role on an account until the live build understands it.  
 **Consequences:** Shipped **v4.35.0**. Amber Allen and Shannon Hamm are Support on the October circuit assembly.
 
+### D-TS-050: Volunteer phone app uses TheoShift, not a separate chat server
+**Date:** 2026-10-30  
+**Decision:** One Expo app for iPhone and Android. It signs in with the existing email link and calls TheoShift APIs. Do not replace event chat with Mattermost, Rocket.Chat, or Matrix. Staff tools stay on the website.  
+**Consequences:** Shipped **v4.36.0** (sign-in, assignments, chat). Stores and push are later. Supersedes D-TS-034 for the volunteer client.
+
 ---
 
 ## Shared Decisions

@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-30  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.35.0 LIVE** (GREEN `10.92.3.22`). STANDBY BLUE `10.92.3.24` synced (`75315d46`).
+**Status:** **v4.36.0 LIVE** (BLUE `10.92.3.24`). STANDBY GREEN `10.92.3.22` synced (`a4bbf879`).
 
 ---
 
@@ -23,10 +23,12 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **FB-036 (age and photo) still blocked.** LIVE is v4.35.0 on GREEN; STANDBY BLUE is synced.
+- **Volunteer phone app** — sign-in, assignments, and chat shipped in v4.36.0. Next: availability, documents, pinned announcement, early check-in. Not in the App Store or Google Play.
+- **FB-036 (age and photo) still blocked.** LIVE is v4.36.0 on BLUE; STANDBY GREEN is synced.
 - **Mobile readiness across TheoShift** — Users, Locations, and Feedback phone layouts shipped in v4.33.10. Positions and Volunteers shipped in v4.33.9. Early Check-In volunteer path done through **v4.29.7**.
 
 ### Recently Completed (2026-10-30)
+- ✅ **v4.36.0** — Volunteer phone app. Email-link sign-in, assignments, and event chat. Shipped + synced (`a4bbf879`)
 - ✅ **v4.35.0** — Support role. Sisters can sign in and help manage an event without being an overseer. Shipped + synced (`75315d46`)
 - ✅ **v4.34.0** — Pinned announcement stays on the volunteer dashboard until acknowledged. Shipped + synced (`bb4dfdbd`)
 

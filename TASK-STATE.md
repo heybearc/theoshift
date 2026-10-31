@@ -2,20 +2,21 @@
 
 **Last updated:** 2026-10-30  
 **Branch:** `main`  
-**Production:** **LIVE** **GREEN** `10.92.3.22` **v4.35.0** (`75315d46`). **STANDBY** **BLUE** `10.92.3.24` synced. Switch #107.
+**Production:** **LIVE** **BLUE** `10.92.3.24` **v4.36.0** (`a4bbf879`). **STANDBY** **GREEN** `10.92.3.22` synced. Switch #108.
 
 ---
 
 ## Current Task
 
-Nothing in progress. FB-036 still blocked.
+Volunteer phone app. Sign-in, assignments, and chat work in Expo Go against production. FB-036 still blocked.
 
 ### What I'm doing right now
 
-Nothing in progress. v4.35.0 is live and synced.
+Next screens in the Expo app: availability, documents, pinned announcement, early check-in.
 
 ### Recent completions
 
+- ✅ **v4.36.0** — Volunteer phone app sign-in, assignments, and chat (`a4bbf879`, released 2026-10-30)
 - ✅ **v4.35.0** — Support role for users and event permissions (`75315d46`, released 2026-10-30)
 - ✅ **v4.34.0** — Pinned announcement stays on the volunteer dashboard until acknowledged (`bb4dfdbd`, released 2026-10-30)
 - ✅ **v4.33.14** — Count groups save when a counter is left blank (`09746a01`, released 2026-10-29)
@@ -37,11 +38,12 @@ Nothing in progress. v4.35.0 is live and synced.
 
 ### Next steps
 
-1. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
+1. Add availability, documents, pinned announcement, and early check-in to the Expo app.
+2. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
 
 ## Exact next command
 
-None until FB-036 choices are made.
+Build the next Expo screens. Phone test uses Expo Go at `exp://10.92.0.233:8081` with server `https://theoshift.com`.
 
 ---
 
@@ -56,5 +58,5 @@ None until FB-036 choices are made.
 - Blue-green via HAProxy; do not assume container color without `get_deployment_status`.
 - If MCP `haproxy.backend` is `error`, read `use_backend … if is_theoshift` before `/release` (D-TS-047).
 - Color hostnames must stay on their node: `blue.theoshift.com` → BLUE, `green.theoshift.com` → GREEN (D-TS-048). After a switch, set qa-01 `STANDBY_URL=` to the new STANDBY color host.
-- qa-01 `detect-standby.sh` cannot read HAProxy (Proxmox CT 136 is missing on that host) and falls back to `STANDBY_URL` in `/opt/tests/theoshift/.env.test`. After the 2026-10-30 v4.35.0 switch, STANDBY is BLUE. `STANDBY_URL` is `https://blue.theoshift.com`. Fetch tags before the gate if the baseline is a new tag.
+- qa-01 `detect-standby.sh` cannot read HAProxy (Proxmox CT 136 is missing on that host) and falls back to `STANDBY_URL` in `/opt/tests/theoshift/.env.test`. After the 2026-10-30 v4.36.0 switch, STANDBY is GREEN. `STANDBY_URL` is `https://green.theoshift.com`. Pass `vX.Y.Z^{commit}` to the gate; a shallow clone may not have the tag object. Fetch tags before the gate if the baseline is a new tag.
 - qa-01 clone can be left dirty on `package-lock.json` after `npm install`. `git checkout -- package-lock.json` before the gate if the script reports a dirty tree.

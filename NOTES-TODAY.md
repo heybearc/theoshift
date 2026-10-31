@@ -59,3 +59,10 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - qa-01 `STANDBY_URL` is now `https://blue.theoshift.com`.
 - Release gate passed on GREEN before the switch: 5 suite tests plus the Support grant test. qa-01 lockfile was dirty; cleared with checkout before the rerun.
 - Urgent new feedback: 0.
+- Shipped v4.36.0 (`a4bbf879`). LIVE BLUE `10.92.3.24` CT 134. STANDBY GREEN `10.92.3.22` CT 132 synced. Switch #108.
+- Volunteer app is Expo in `mobile/`. Same email link, then assignments and chat. Confirmed on an iPhone with Expo Go against https://theoshift.com.
+- Kept TheoShift APIs. Did not move chat to Mattermost or Matrix (D-TS-050).
+- Next app screens: availability, documents, pinned announcement, early check-in. Then push. Stores last.
+- qa-01 `STANDBY_URL` set to `https://green.theoshift.com`. Gate baseline must be the commit, not the annotated tag object.
+- Release gate passed on BLUE before the switch: 5 suite tests plus 4 phone sign-in tests. qa-01 lockfile was dirty; cleared with checkout before the rerun.
+- Urgent new feedback: 0.
