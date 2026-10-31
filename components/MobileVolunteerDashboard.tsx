@@ -107,6 +107,7 @@ interface MobileVolunteerDashboardProps {
   /** When the next assigned count replaces the one on screen. */
   nextCountAvailableAt?: string | null
   documents?: Document[]
+  stationDiagram?: { documentId: string; title: string; fileType: string; fileName: string } | null
   availabilityRequests: AvailabilityRequest[]
   onAvailabilityResponse: (requestId: string, status: string, notes?: string) => Promise<void>
   onRefresh?: () => Promise<void>
@@ -132,6 +133,7 @@ export default function MobileVolunteerDashboard({
   activeCountGroups = [],
   nextCountAvailableAt = null,
   documents = [],
+  stationDiagram = null,
   availabilityRequests,
   onAvailabilityResponse,
   onRefresh,
@@ -503,10 +505,10 @@ export default function MobileVolunteerDashboard({
                           </span>
                         </div>
                       </div>
-                      <svg
-                        className={`w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ml-2 ${
-                          expandedAssignment === assignment.id ? 'transform rotate-180' : ''
-                        }`}
+                    <svg
+                      className={`w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ml-2 ${
+                        expandedAssignment === assignment.id ? 'transform rotate-180' : ''
+                      }`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -515,6 +517,31 @@ export default function MobileVolunteerDashboard({
                       </svg>
                     </div>
                   </button>
+                  {stationDiagram ? (
+                    <div className="px-4 pb-4">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setViewingDoc({
+                            id: stationDiagram.documentId,
+                            title: `Look for ${assignment.positionName}`,
+                            fileName: stationDiagram.fileName,
+                            fileSize: 0,
+                            fileType:
+                              stationDiagram.fileType ||
+                              (stationDiagram.fileName.toLowerCase().endsWith('.pdf')
+                                ? 'application/pdf'
+                                : 'image/jpeg'),
+                            fileUrl: '',
+                            publishedAt: '',
+                          })
+                        }
+                        className="text-sm font-medium text-blue-700 min-h-[44px]"
+                      >
+                        Show on diagram
+                      </button>
+                    </div>
+                  ) : null}
 
                   {/* Expanded Details */}
                   {expandedAssignment === assignment.id && (

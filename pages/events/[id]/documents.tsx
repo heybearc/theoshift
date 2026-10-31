@@ -52,9 +52,17 @@ interface EventDocumentsPageProps {
   attendants: Volunteer[]
   moduleConfig?: any
   terminology?: any
+  stationDiagramDocumentId: string | null
+  canSetStationDiagram: boolean
 }
 
-export default function EventDocumentsPage({ eventId, event, documents, canEdit, canDelete, canManagePermissions, attendants, moduleConfig, terminology }: EventDocumentsPageProps) {
+function isDiagramFile(fileType: string, fileName: string): boolean {
+  const type = fileType.toLowerCase()
+  const name = fileName.toLowerCase()
+  return type.includes('pdf') || type.includes('image') || /\.(pdf|png|jpe?g|gif|webp)$/.test(name)
+}
+
+export default function EventDocumentsPage({ eventId, event, documents, canEdit, canDelete, canManagePermissions, attendants, moduleConfig, terminology, stationDiagramDocumentId, canSetStationDiagram }: EventDocumentsPageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -72,6 +80,34 @@ export default function EventDocumentsPage({ eventId, event, documents, canEdit,
     description: '',
     file: null as File | null
   })
+  const [diagramChoice, setDiagramChoice] = useState(stationDiagramDocumentId || '')
+  const [savedDiagramId, setSavedDiagramId] = useState(stationDiagramDocumentId || '')
+  const [diagramSaving, setDiagramSaving] = useState(false)
+
+  const saveDiagram = async (documentId: string) => {
+    setDiagramSaving(true)
+    setError('')
+    setSuccess('')
+    try {
+      const response = await fetch(`/api/events/${eventId}/station-diagram`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId }),
+      })
+      const result = await response.json()
+      if (!response.ok || !result.success) {
+        setError(result.error || 'Could not save the station diagram')
+        return
+      }
+      setDiagramChoice(result.diagram?.documentId || '')
+      setSavedDiagramId(result.diagram?.documentId || '')
+      setSuccess(result.diagram ? 'Station diagram is on for this event.' : 'Station diagram is off.')
+    } catch {
+      setError('Could not save the station diagram')
+    } finally {
+      setDiagramSaving(false)
+    }
+  }
 
   const handleFileUpload = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -280,6 +316,39 @@ export default function EventDocumentsPage({ eventId, event, documents, canEdit,
           {success && (
             <div className="mb-6 bg-green-50 border border-green-200 rounded-md p-4">
               <p className="text-green-700">{success}</p>
+            </div>
+          )}
+
+          {canSetStationDiagram && (
+            <div className="bg-white shadow rounded-lg p-6 mb-6">
+              <h3 className="text-lg font-medium text-gray-900">Station diagram</h3>
+              <p className="mt-1 text-sm text-gray-600">
+                Optional. Choose one PDF or image of your stations. Assignments then include Show on diagram,
+                with the station name, so a volunteer can find their place. Leave this blank and nothing changes.
+              </p>
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <select
+                  value={diagramChoice}
+                  onChange={(e) => setDiagramChoice(e.target.value)}
+                  aria-label="Station diagram file"
+                  className="w-full sm:max-w-md px-3 py-2 min-h-[44px] border border-gray-300 rounded-md text-sm"
+                >
+                  <option value="">No diagram</option>
+                  {documents.filter((document) => isDiagramFile(document.fileType, document.fileName)).map((document) => (
+                    <option key={document.id} value={document.id}>
+                      {document.title}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  disabled={diagramSaving || diagramChoice === savedDiagramId}
+                  onClick={() => void saveDiagram(diagramChoice)}
+                  className="px-4 py-2 min-h-[44px] bg-blue-700 hover:bg-blue-800 text-white rounded-md text-sm disabled:opacity-50"
+                >
+                  {diagramSaving ? 'Saving…' : 'Save'}
+                </button>
+              </div>
             </div>
           )}
 
@@ -724,7 +793,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         canManagePermissions: canManagePerms,
         attendants,
         moduleConfig: eventModuleConfig,
-        terminology: (event.settings as any)?.terminology || null
+        terminology: (event.settings as any)?.terminology || null,
+        stationDiagramDocumentId: (() => {
+          const id = (event.settings as { stationDiagram?: { documentId?: unknown } } | null)?.stationDiagram?.documentId
+          return typeof id === 'string' ? id : null
+        })(),
+        canSetStationDiagram: ['ADMIN', 'OVERSEER'].includes(session.user?.role || ''),
       },
     }
   } catch (error) {

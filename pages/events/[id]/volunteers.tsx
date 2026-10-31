@@ -114,6 +114,7 @@ interface EventVolunteersPageProps {
   terminology?: any
   viewerVolunteerId: string | null
   viewerRole: string
+  stationDiagramDocumentId: string | null
 }
 
 function AssignmentGlance({
@@ -121,11 +122,13 @@ function AssignmentGlance({
   assignments,
   counts,
   showCounts,
+  diagramDocumentId,
 }: {
   eventId: string
   assignments: NonNullable<Volunteer['assignments']>
   counts: NonNullable<Volunteer['counts']>
   showCounts: boolean
+  diagramDocumentId?: string | null
 }) {
   if (assignments.length === 0 && (!showCounts || counts.length === 0)) {
     return <span className="text-xs text-gray-400">No assignments</span>
@@ -146,6 +149,16 @@ function AssignmentGlance({
           {assignment.role !== 'VOLUNTEER' ? (
             <span className="ml-1 text-gray-500">({assignment.role})</span>
           ) : null}
+          {diagramDocumentId ? (
+            <a
+              href={`/api/events/${eventId}/documents/${diagramDocumentId}/file`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-2 text-blue-700 hover:underline"
+            >
+              Show on diagram
+            </a>
+          ) : null}
         </div>
       ))}
       {showCounts
@@ -165,7 +178,7 @@ function AssignmentGlance({
   )
 }
 
-export default function EventAttendantsPage({ eventId, event, attendants, canManageContent, canEdit, canDelete, canManagePermissions, moduleConfig, terminology, viewerVolunteerId, viewerRole }: EventVolunteersPageProps) {
+export default function EventAttendantsPage({ eventId, event, attendants, canManageContent, canEdit, canDelete, canManagePermissions, moduleConfig, terminology, viewerVolunteerId, viewerRole, stationDiagramDocumentId }: EventVolunteersPageProps) {
   const router = useRouter()
   const rowRange = useShiftRangeSelection()
   const [roster, setRoster] = useState<Attendant[]>(attendants)
@@ -1914,6 +1927,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
             search={filters.search}
             showLanyards={moduleConfig?.lanyards === true}
             showCountTimes={moduleConfig?.countTimes === true}
+            diagramDocumentId={stationDiagramDocumentId}
           />
         ) : null}
 
@@ -2050,6 +2064,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                               assignments={attendant.assignments || []}
                               counts={attendant.counts || []}
                               showCounts={moduleConfig?.countTimes !== false}
+                              diagramDocumentId={stationDiagramDocumentId}
                             />
                           </div>
                         </div>
@@ -2281,6 +2296,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             assignments={attendant.assignments || []}
                             counts={attendant.counts || []}
                             showCounts={moduleConfig?.countTimes !== false}
+                            diagramDocumentId={stationDiagramDocumentId}
                           />
                         </td>
                         <td className="px-3 py-3 whitespace-nowrap text-sm font-medium">
@@ -3684,6 +3700,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         terminology: (eventSettings?.settings as any)?.terminology || null,
         viewerVolunteerId: viewerVolunteer?.id || null,
         viewerRole: session.user?.role || '',
+        stationDiagramDocumentId: (() => {
+          const id = (eventSettings?.settings as { stationDiagram?: { documentId?: unknown } } | null)?.stationDiagram?.documentId
+          return typeof id === 'string' ? id : null
+        })(),
       }
     };
   } catch (error) {

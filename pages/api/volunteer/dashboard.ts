@@ -7,6 +7,7 @@ import { viewerCanSeeArrivals } from '@/lib/arrivals'
 import { grantAllPublishedDocuments } from '@/lib/grantPublishedDocuments'
 import { getViewAsVolunteerId } from '@/lib/countAssignmentsShared'
 import { volunteerVisibleCountSessions } from '@/lib/volunteerCountVisibility'
+import { getStationDiagram } from '@/lib/stationDiagram'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -497,6 +498,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           endDate: event.endDate ? toDateOnlyStringUTC(event.endDate) : null,
           status: event.status
         },
+        stationDiagram: await getStationDiagram(eid),
         isIVSTeamMember: !!ivsTeamMember,
         canViewArrivals: await viewerCanSeeArrivals(eid, vid),
         canSubmitIvsRequests,

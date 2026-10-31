@@ -135,9 +135,17 @@ interface AvailabilityRequest {
   }
 }
 
+interface StationDiagram {
+  documentId: string
+  title: string
+  fileType: string
+  fileName: string
+}
+
 interface DashboardData {
   volunteer: Volunteer
   event: Event
+  stationDiagram?: StationDiagram | null
   assignments: Assignment[]
   documents: Document[]
   oversightContacts: OversightContact[]
@@ -1069,6 +1077,7 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
           volunteer={dashboardData.volunteer}
           event={dashboardData.event}
           assignments={dashboardData.assignments}
+          stationDiagram={dashboardData.stationDiagram || null}
           oversightContacts={dashboardData.oversightContacts}
           activeCountSessions={dashboardData.activeCountSessions}
           activeCountGroups={dashboardData.activeCountGroups}
@@ -1291,6 +1300,29 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
                               <h3 className="font-medium text-gray-900">{assignment.positionName}</h3>
                               {assignment.location && (
                                 <p className="text-sm text-gray-600 mt-1">📍 {assignment.location}</p>
+                              )}
+                              {dashboardData.stationDiagram && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setViewingDocument({
+                                      id: dashboardData.stationDiagram!.documentId,
+                                      title: `Look for ${assignment.positionName}`,
+                                      fileName: dashboardData.stationDiagram!.fileName,
+                                      fileUrl: '',
+                                      fileType:
+                                        dashboardData.stationDiagram!.fileType ||
+                                        (dashboardData.stationDiagram!.fileName.toLowerCase().endsWith('.pdf')
+                                          ? 'application/pdf'
+                                          : 'image/jpeg'),
+                                      fileSize: 0,
+                                      publishedAt: '',
+                                    })
+                                  }
+                                  className="mt-2 text-sm font-medium text-blue-700 hover:underline"
+                                >
+                                  Show on diagram
+                                </button>
                               )}
                               <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
                                 <span>🕐 {assignment.startTime === 'All Day' ? 'All Day' : `${formatTime(assignment.startTime)}${assignment.endTime ? ` - ${formatTime(assignment.endTime)}` : ''}`}</span>

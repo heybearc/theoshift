@@ -32,6 +32,7 @@ export default function VolunteerPeoplePanel({
   search,
   showLanyards,
   showCountTimes,
+  diagramDocumentId,
 }: {
   eventId: string
   focusId: string
@@ -39,6 +40,7 @@ export default function VolunteerPeoplePanel({
   search: string
   showLanyards: boolean
   showCountTimes: boolean
+  diagramDocumentId?: string | null
 }) {
   const [people, setPeople] = useState<Person[]>([])
   const [myPositionIds, setMyPositionIds] = useState<string[]>([])
@@ -163,6 +165,16 @@ export default function VolunteerPeoplePanel({
                         {assignment.when ? ` · ${assignment.when}` : ''}
                       </Link>
                       {assignment.area ? <span className="text-gray-600"> · {assignment.area}</span> : null}
+                      {diagramDocumentId ? (
+                        <a
+                          href={`/api/events/${eventId}/documents/${diagramDocumentId}/file`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-2 text-blue-700 hover:underline"
+                        >
+                          Show on diagram
+                        </a>
+                      ) : null}
                     </li>
                   ))}
                 </ul>

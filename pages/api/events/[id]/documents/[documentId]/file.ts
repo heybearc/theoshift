@@ -5,6 +5,8 @@ import fs from 'fs'
 import path from 'path'
 import { getDocumentAbsolutePath } from '@/lib/documentFileStorage'
 import { tryPipeUploadFromPeers } from '@/lib/uploadPeerFallback'
+import { getViewAsVolunteerId } from '@/lib/countAssignmentsShared'
+import { getStationDiagram, volunteerMayViewStationDiagram } from '@/lib/stationDiagram'
 
 const STAFF_ROLES = ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'] as const
 
@@ -61,6 +63,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
       })
       allowed = !!pub
+    }
+
+    if (!allowed) {
+      const diagram = await getStationDiagram(eventId)
+      if (
+        diagram?.documentId === documentId &&
+        (await volunteerMayViewStationDiagram(eventId, session.user.id, getViewAsVolunteerId(req)))
+      ) {
+        allowed = true
+      }
     }
 
     if (!allowed) {
