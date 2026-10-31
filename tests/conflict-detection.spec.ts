@@ -37,7 +37,7 @@ test.describe('FB-017: Conflict Detection - Assign Volunteer Modal', () => {
       await firstEvent.click()
       await page.waitForLoadState('networkidle')
       // Try to get to positions tab
-      const positionsTab = page.locator('a:has-text("Positions"), button:has-text("Positions")')
+      const positionsTab = page.locator('a[href*="/positions"]')
       if (await positionsTab.count() > 0) {
         await positionsTab.first().click()
         await page.waitForLoadState('networkidle')
@@ -63,7 +63,7 @@ test.describe('FB-017: Conflict Detection - Assign Volunteer Modal', () => {
     await firstEvent.click()
     await page.waitForLoadState('networkidle')
 
-    const positionsTab = page.locator('a:has-text("Positions"), button:has-text("Positions")')
+    const positionsTab = page.locator('a[href*="/positions"]')
     if (await positionsTab.count() > 0) {
       await positionsTab.first().click()
       await page.waitForLoadState('networkidle')
@@ -94,7 +94,7 @@ test.describe('FB-017: Conflict Detection - Assign Volunteer Modal', () => {
     await firstEvent.click()
     await page.waitForLoadState('networkidle')
 
-    const positionsTab = page.locator('a:has-text("Positions"), button:has-text("Positions")')
+    const positionsTab = page.locator('a[href*="/positions"]')
     if (await positionsTab.count() > 0) {
       await positionsTab.first().click()
       await page.waitForLoadState('networkidle')
