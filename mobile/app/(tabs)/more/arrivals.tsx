@@ -12,12 +12,16 @@ type Arrival = {
   congregation: string
   checkedIn: boolean
   lanyardBadge: string | null
+  positionIds: string[]
+  assignments: Array<{ positionId: string; positionName: string; when: string }>
+  countTimes: Array<{ label: string; when: string }>
 }
 
-type FilterId = 'all' | 'missing-checkin' | 'missing-lanyard'
+type FilterId = 'all' | 'mine' | 'missing-checkin' | 'missing-lanyard'
 
 const FILTERS: Array<{ id: FilterId; label: string }> = [
   { id: 'all', label: 'All' },
+  { id: 'mine', label: 'My positions' },
   { id: 'missing-checkin', label: 'Not checked in' },
   { id: 'missing-lanyard', label: 'No lanyard' },
 ]
@@ -26,6 +30,7 @@ export default function ArrivalsScreen() {
   const { token, apiBase } = useAuth()
   const { eventId } = useVolunteerEvents()
   const [people, setPeople] = useState<Arrival[]>([])
+  const [myPositionIds, setMyPositionIds] = useState<string[]>([])
   const [scope, setScope] = useState<'event' | 'mine'>('mine')
   const [filter, setFilter] = useState<FilterId>('all')
   const [query, setQuery] = useState('')
@@ -34,12 +39,13 @@ export default function ArrivalsScreen() {
 
   const load = useCallback(async () => {
     if (!token || !eventId) return
-    const result = await apiRequest<{ people: Arrival[]; scope: 'event' | 'mine' }>(
-      apiBase,
-      `/api/volunteer/arrivals?eventId=${encodeURIComponent(eventId)}`,
-      { token }
-    )
+    const result = await apiRequest<{
+      people: Arrival[]
+      scope: 'event' | 'mine'
+      myPositions: Array<{ id: string }>
+    }>(apiBase, `/api/volunteer/arrivals?eventId=${encodeURIComponent(eventId)}`, { token })
     setPeople(result.people || [])
+    setMyPositionIds((result.myPositions || []).map((position) => position.id))
     setScope(result.scope === 'event' ? 'event' : 'mine')
   }, [token, eventId, apiBase])
 
@@ -61,16 +67,21 @@ export default function ArrivalsScreen() {
   )
 
   const needle = query.trim().toLowerCase()
+  const mine = new Set(myPositionIds)
   const visible = people.filter((person) => {
+    if (filter === 'mine' && !person.positionIds.some((id) => mine.has(id))) return false
     if (filter === 'missing-checkin' && person.checkedIn) return false
     if (filter === 'missing-lanyard' && person.lanyardBadge) return false
     if (!needle) return true
-    const haystack = `${person.firstName} ${person.lastName} ${person.congregation}`.toLowerCase()
+    const haystack = `${person.firstName} ${person.lastName} ${person.congregation} ${person.assignments
+      .map((assignment) => assignment.positionName)
+      .join(' ')}`.toLowerCase()
     return haystack.includes(needle)
   })
 
-  const checkedInCount = people.filter((person) => person.checkedIn).length
-  const lanyardCount = people.filter((person) => person.lanyardBadge).length
+  const checkedInCount = visible.filter((person) => person.checkedIn).length
+  const lanyardCount = visible.filter((person) => person.lanyardBadge).length
+  const filters = FILTERS.filter((item) => item.id !== 'mine' || myPositionIds.length > 0)
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -79,7 +90,7 @@ export default function ArrivalsScreen() {
         {lanyardCount} with a lanyard
       </Text>
       <View style={styles.filters}>
-        {FILTERS.map((item) => {
+        {filters.map((item) => {
           const selected = item.id === filter
           return (
             <Pressable
@@ -117,6 +128,19 @@ export default function ArrivalsScreen() {
           <Text style={styles.status}>
             {person.lanyardBadge ? `Lanyard ${person.lanyardBadge}` : 'No lanyard'}
           </Text>
+          {person.assignments.length === 0 ? <Text style={styles.meta}>No assignment yet</Text> : null}
+          {person.assignments.map((assignment) => (
+            <Text key={`${person.id}-${assignment.positionId}-${assignment.when}`} style={styles.detail}>
+              {assignment.positionName}
+              {assignment.when ? ` · ${assignment.when}` : ''}
+            </Text>
+          ))}
+          {person.countTimes.map((count) => (
+            <Text key={`${person.id}-count-${count.label}-${count.when}`} style={styles.detail}>
+              Count: {count.label}
+              {count.when ? ` · ${count.when}` : ''}
+            </Text>
+          ))}
         </View>
       ))}
     </ScrollView>
@@ -158,6 +182,7 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 17, fontWeight: '700', color: '#0f172a' },
   meta: { marginTop: 4, color: '#475569' },
+  detail: { marginTop: 4, color: '#334155' },
   status: { marginTop: 6, fontWeight: '600', color: '#1e3a8a' },
   empty: { marginTop: 16, color: '#475569', lineHeight: 22 },
   error: { marginTop: 12, color: '#b91c1c' },
