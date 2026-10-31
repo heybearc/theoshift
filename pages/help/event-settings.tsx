@@ -117,7 +117,8 @@ export default function EventSettingsPage({ userRole }: EventSettingsProps) {
                 <div className="border-l-4 border-pink-500 pl-4">
                   <h4 className="font-semibold text-gray-900">🎫 Lanyards Module</h4>
                   <p className="text-gray-600 text-sm">
-                    Controls the Lanyards page for managing volunteer credentials. 
+                    Controls the Lanyards page for managing volunteer credentials.
+                    Checking a badge back in keeps who had it, so you can look the number up later.
                     Disable this if you don't use lanyards for this event.
                   </p>
                 </div>

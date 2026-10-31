@@ -487,8 +487,22 @@ model lanyards {
   createdAt        DateTime         @default(now())
   updatedAt        DateTime
   lanyard_settings lanyard_settings @relation(fields: [lanyardSettingId], references: [id], onDelete: Cascade)
+  checkouts        lanyard_checkouts[]
 
   @@unique([lanyardSettingId, badgeNumber])
+}
+
+model lanyard_checkouts {
+  id           String    @id
+  lanyardId    String
+  checkedOutTo String
+  phone        String?
+  checkedOutAt DateTime
+  checkedInAt  DateTime?
+  createdAt    DateTime  @default(now())
+  lanyards     lanyards  @relation(fields: [lanyardId], references: [id], onDelete: Cascade)
+
+  @@index([lanyardId, checkedOutAt])
 }
 
 model oversight_assignments {

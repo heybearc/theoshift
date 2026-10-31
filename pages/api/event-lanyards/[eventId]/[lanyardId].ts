@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
+import { randomUUID } from 'crypto'
 import { authOptions } from '../../auth/[...nextauth]'
 import { prisma } from '../../../../src/lib/prisma'
 import { z } from 'zod'
@@ -45,13 +46,67 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       case 'PUT':
         const validatedData = lanyardUpdateSchema.parse(req.body)
-        
-        const updatedLanyard = await prisma.lanyards.update({
-          where: { id: lanyardId },
-          data: {
-            ...validatedData,
-            updatedAt: new Date()
+        const existing = await prisma.lanyards.findUnique({ where: { id: lanyardId } })
+        if (!existing) {
+          return res.status(404).json({ error: 'Lanyard not found' })
+        }
+
+        const returnedAt = validatedData.checkedInAt
+          ? new Date(validatedData.checkedInAt)
+          : new Date()
+        const takenAt = validatedData.checkedOutAt
+          ? new Date(validatedData.checkedOutAt)
+          : new Date()
+        const checkingIn = validatedData.isCheckedOut === false && existing.isCheckedOut
+        const checkingOut =
+          validatedData.isCheckedOut === true &&
+          (!existing.isCheckedOut ||
+            (validatedData.checkedOutTo && validatedData.checkedOutTo !== existing.checkedOutTo))
+
+        const updatedLanyard = await prisma.$transaction(async (tx) => {
+          if (checkingIn || (checkingOut && existing.isCheckedOut)) {
+            const open = await tx.lanyard_checkouts.findFirst({
+              where: { lanyardId, checkedInAt: null },
+              orderBy: { checkedOutAt: 'desc' },
+            })
+            if (open) {
+              await tx.lanyard_checkouts.update({
+                where: { id: open.id },
+                data: { checkedInAt: returnedAt },
+              })
+            } else if (existing.checkedOutTo) {
+              await tx.lanyard_checkouts.create({
+                data: {
+                  id: randomUUID(),
+                  lanyardId,
+                  checkedOutTo: existing.checkedOutTo,
+                  phone: existing.notes,
+                  checkedOutAt: existing.checkedOutAt || returnedAt,
+                  checkedInAt: returnedAt,
+                },
+              })
+            }
           }
+
+          if (checkingOut && validatedData.checkedOutTo) {
+            await tx.lanyard_checkouts.create({
+              data: {
+                id: randomUUID(),
+                lanyardId,
+                checkedOutTo: validatedData.checkedOutTo,
+                phone: validatedData.notes || null,
+                checkedOutAt: takenAt,
+              },
+            })
+          }
+
+          return tx.lanyards.update({
+            where: { id: lanyardId },
+            data: {
+              ...validatedData,
+              updatedAt: new Date(),
+            },
+          })
         })
 
         return res.status(200).json({

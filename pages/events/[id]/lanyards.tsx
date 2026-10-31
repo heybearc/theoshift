@@ -21,6 +21,13 @@ interface Lanyard {
   checkedInAt?: string
   createdAt: string
   updatedAt: string
+  checkouts: Array<{
+    id: string
+    checkedOutTo: string
+    phone: string | null
+    checkedOutAt: string
+    checkedInAt: string | null
+  }>
 }
 
 interface Event {
@@ -72,6 +79,57 @@ interface EventLanyardsPageProps {
   terminology?: any
 }
 
+function sameBadge(badge: string, query: string) {
+  const left = badge.trim().toLowerCase()
+  const right = query.trim().toLowerCase()
+  if (left === right) return true
+  const digits = (value: string) => value.replace(/\D/g, '')
+  const a = digits(left)
+  const b = digits(right)
+  if (!a || !b) return false
+  return parseInt(a, 10) === parseInt(b, 10)
+}
+
+function whenLabel(value: string | null) {
+  if (!value) return ''
+  return new Date(value).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+}
+
+function BadgeHistory({ lanyards, query }: { lanyards: Lanyard[]; query: string }) {
+  const match = lanyards.find((lanyard) => sameBadge(lanyard.badgeNumber, query))
+  if (!match) {
+    return <p className="mt-3 text-sm text-gray-600">No badge matches {query.trim()}.</p>
+  }
+  return (
+    <div className="mt-4">
+      <p className="text-sm font-medium text-gray-900">
+        Badge {match.badgeNumber}
+        {match.isCheckedOut ? ` is out to ${match.checkedOutTo || 'someone'}` : ' is available'}
+      </p>
+      {match.checkouts.length === 0 ? (
+        <p className="mt-2 text-sm text-gray-600">No checkout has been recorded for this badge yet.</p>
+      ) : (
+        <ul className="mt-2 space-y-2">
+          {match.checkouts.map((checkout) => (
+            <li key={checkout.id} className="text-sm text-gray-800">
+              <span className="font-medium">{checkout.checkedOutTo}</span>
+              {checkout.phone ? ` · ${checkout.phone}` : ''}
+              {' · '}
+              {whenLabel(checkout.checkedOutAt)}
+              {checkout.checkedInAt ? ` to ${whenLabel(checkout.checkedInAt)}` : ' · still out'}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
 export default function EventLanyardsPage({ eventId, event, lanyards, attendants, lanyardSettings, stats, canEdit, canDelete, canManagePermissions, moduleConfig, terminology }: EventLanyardsPageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -84,6 +142,7 @@ export default function EventLanyardsPage({ eventId, event, lanyards, attendants
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [showBulkForm, setShowBulkForm] = useState(false)
   const [editingLanyard, setEditingLanyard] = useState<Lanyard | null>(null)
+  const [badgeLookup, setBadgeLookup] = useState('')
   
   // PDF Export Header Fields
   const [exportInfo, setExportInfo] = useState({
@@ -805,6 +864,28 @@ export default function EventLanyardsPage({ eventId, event, lanyards, attendants
           </div>
         )}
 
+        {/* Badge history */}
+        <div id="badge-history" className="bg-white shadow rounded-lg mb-4">
+          <div className="px-6 py-4">
+            <h3 className="text-lg font-medium text-gray-900">Who had this badge?</h3>
+            <p className="mt-1 text-sm text-gray-600">
+              Check-in keeps the name. Enter a badge number to see everyone who has had it on this event.
+            </p>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={badgeLookup}
+              onChange={(e) => setBadgeLookup(e.target.value)}
+              placeholder="Badge number, such as 49"
+              aria-label="Look up a badge number"
+              className="mt-3 w-full max-w-xs px-3 py-2 min-h-[44px] border border-gray-300 rounded-md text-sm"
+            />
+            {badgeLookup.trim() ? (
+              <BadgeHistory lanyards={lanyards} query={badgeLookup} />
+            ) : null}
+          </div>
+        </div>
+
         {/* Lanyards List */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
@@ -880,7 +961,14 @@ export default function EventLanyardsPage({ eventId, event, lanyards, attendants
                             )}
                           </div>
                         ) : (
-                          <span className="text-gray-400">Available</span>
+                          <div>
+                            <span className="text-gray-400">Available</span>
+                            {lanyard.checkouts?.[0] ? (
+                              <div className="text-xs text-gray-600 mt-1">
+                                Last: {lanyard.checkouts[0].checkedOutTo}
+                              </div>
+                            ) : null}
+                          </div>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -888,6 +976,16 @@ export default function EventLanyardsPage({ eventId, event, lanyards, attendants
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setBadgeLookup(lanyard.badgeNumber)
+                              document.getElementById('badge-history')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                            }}
+                            className="text-gray-700 hover:text-gray-900"
+                          >
+                            History
+                          </button>
                           <button 
                             onClick={() => handleEditLanyard(lanyard)}
                             className="text-blue-600 hover:text-blue-900"
@@ -990,7 +1088,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             lanyards: {
               orderBy: [
                 { badgeNumber: 'asc' }
-              ]
+              ],
+              include: {
+                checkouts: {
+                  orderBy: { checkedOutAt: 'desc' }
+                }
+              }
             }
           }
         },
@@ -1049,7 +1152,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         checkedOutAt: lanyard.checkedOutAt?.toISOString() || null,
         checkedInAt: lanyard.checkedInAt?.toISOString() || null,
         createdAt: lanyard.createdAt?.toISOString() || null,
-        updatedAt: lanyard.updatedAt?.toISOString() || null
+        updatedAt: lanyard.updatedAt?.toISOString() || null,
+        checkouts: (lanyard.checkouts || []).map((checkout) => ({
+          id: checkout.id,
+          checkedOutTo: checkout.checkedOutTo,
+          phone: checkout.phone,
+          checkedOutAt: checkout.checkedOutAt?.toISOString() || null,
+          checkedInAt: checkout.checkedInAt?.toISOString() || null,
+        }))
       })) || []
 
     // Sort lanyards numerically by badge number
