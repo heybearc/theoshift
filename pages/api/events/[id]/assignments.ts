@@ -7,6 +7,7 @@ import crypto from 'crypto'
 import { handleApiError } from '@/lib/apiError'
 import { canManageAssignments } from '../../../../src/lib/eventAccess'
 import { shiftsConflict } from '../../../../lib/shiftConflict'
+import { grantAllPublishedDocuments } from '@/lib/grantPublishedDocuments'
 
 // Validation schema for assignment creation
 const assignmentSchema = z.object({
@@ -200,6 +201,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             assignedBy: session.user?.id || null
           }
         })
+
+        try {
+          await grantAllPublishedDocuments(eventId, validatedData.volunteerId)
+        } catch (grantError) {
+          console.error('Assignment saved, but published documents were not granted', grantError)
+        }
 
         return res.status(201).json({
           success: true,

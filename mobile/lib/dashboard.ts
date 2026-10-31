@@ -45,6 +45,7 @@ export type DashboardData = {
   documents: DashboardDocument[]
   announcements: DashboardAnnouncement[]
   isIVSTeamMember: boolean
+  canViewArrivals?: boolean
 }
 
 export function useDashboard() {

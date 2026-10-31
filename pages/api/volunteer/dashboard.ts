@@ -3,6 +3,7 @@ import { getApiSession } from '@/lib/apiSession'
 import { prisma } from '../../../src/lib/prisma'
 import { toDateOnlyStringUTC } from '../../../src/lib/calendarDate'
 import { verifyVolunteerIvsEarlyCheckinAccessForIds } from '@/lib/ivsVolunteerEarlyCheckinAccess'
+import { viewerCanSeeArrivals } from '@/lib/arrivals'
 import { getViewAsVolunteerId } from '@/lib/countAssignmentsShared'
 import { volunteerVisibleCountSessions } from '@/lib/volunteerCountVisibility'
 
@@ -459,6 +460,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           status: event.status
         },
         isIVSTeamMember: !!ivsTeamMember,
+        canViewArrivals: await viewerCanSeeArrivals(eid, vid),
         canSubmitIvsRequests,
         assignments,
         activeCountGroups: visibleCountGroups.map((g) => ({

@@ -35,6 +35,13 @@ export default function MoreScreen() {
         </View>
       ))}
 
+      {data?.canViewArrivals ? (
+        <MenuRow
+          title="Check-in and lanyards"
+          detail="See who is checked in and who has a lanyard"
+          onPress={() => router.push('/more/arrivals')}
+        />
+      ) : null}
       <MenuRow
         title="Availability"
         detail="Tell your overseer which days you can serve"
