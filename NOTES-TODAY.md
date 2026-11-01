@@ -96,3 +96,12 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - qa-01 `STANDBY_URL` is `https://blue.theoshift.com`.
 - Urgent new feedback: 0.
 - Next: FB-036 still blocked. Recommend a new session (v4.41.0 shipped).
+
+### Mid-day (counts)
+- Not shipped. STANDBY BLUE `10.92.3.24` is `d3ee3165`. LIVE stays GREEN v4.41.0 (`08fc3d3a`).
+- A submitted count is grey for the volunteer. Overseer, keyman, or event staff can change it.
+- The next count opens one hour after the previous count time. Count times and view details refresh every 15 seconds.
+- Roster Total, Active, and Inactive show the number once.
+- Session progress counts a submitted zero and keeps group totals when station rows exist. Each assigned station has its own count.
+- Urgent new feedback: 0.
+- Next: check counts on https://blue.theoshift.com, then release. FB-036 still blocked.

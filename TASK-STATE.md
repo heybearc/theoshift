@@ -2,20 +2,21 @@
 
 **Last updated:** 2026-10-31  
 **Branch:** `main`  
-**Production:** **LIVE** **GREEN** `10.92.3.22` **v4.41.0** (`08fc3d3a`). **STANDBY** **BLUE** `10.92.3.24` synced. Switch #113.
+**Production:** **LIVE** **GREEN** `10.92.3.22` **v4.41.0** (`08fc3d3a`). **STANDBY** **BLUE** `10.92.3.24` has unreleased count fixes (`d3ee3165`). Switch #113.
 
 ---
 
 ## Current Task
 
-v4.41.0 is live. Lanyards keeps who had a badge. FB-036 still blocked.
+v4.41.0 is live. Count fixes are on STANDBY BLUE only. FB-036 still blocked.
 
 ### What I'm doing right now
 
-Nothing in progress. v4.41.0 is shipped and both nodes are synced.
+Waiting on a standby check of volunteer counts, then a release.
 
 ### Recent completions
 
+- ✅ **STANDBY** — Submitted counts lock for volunteers. Next count opens one hour after the previous one. Count pages refresh. Roster totals show once (`d3ee3165`, not released)
 - ✅ **v4.41.0** — Lanyard check-in keeps who had the badge (`08fc3d3a`, released 2026-10-31)
 - ✅ **v4.40.0** — Assignment links open the station; optional station diagram (`b2eb01cd`, released 2026-10-31)
 - ✅ **v4.39.0** — Staff people list on Volunteers; volunteer count page shows only that assignment; group counts name the submitter (`9cbf69f8`, released 2026-10-31)
@@ -43,7 +44,8 @@ Nothing in progress. v4.41.0 is shipped and both nodes are synced.
 
 ### Next steps
 
-1. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
+1. Check volunteer counts on STANDBY BLUE (`https://blue.theoshift.com`), then release.
+2. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
 
 ## Exact next command
 

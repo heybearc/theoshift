@@ -667,6 +667,11 @@ This document tracks significant technical decisions made during development.
 **Decision:** Checking a badge in still clears the current name. A history row keeps the name, phone, and times. Look it up on Lanyards. Names cleared before this version are not recoverable.  
 **Consequences:** Shipped **v4.41.0**.
 
+### D-TS-054: Next volunteer count opens one hour after the previous count
+**Date:** 2026-10-31  
+**Decision:** A volunteer sees one count. The next one opens one hour after the previous count time, not at the later count's own clock time. After they submit, that box stays grey. Only an overseer, keyman, or event staff member can change it.  
+**Consequences:** On STANDBY BLUE (`d3ee3165`). Not released. Supersedes the v4.33.13 wait-until-the-later-clock-time rule.
+
 ---
 
 ## Shared Decisions
