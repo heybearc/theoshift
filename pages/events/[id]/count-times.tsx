@@ -39,6 +39,8 @@ interface CountSession {
   createdAt: string
   /** Includes station-group totals (count_group_entries), not only position_counts */
   reportedTotalAttendees: number
+  /** A saved number exists, including a submitted zero. */
+  hasSubmission?: boolean
   position_counts: Array<{
     id: string
     positionId: string
@@ -150,6 +152,7 @@ export default function CountTimesPage({ eventId, event, countSessions, canManag
             return payload.data as {
               id: string
               reportedAttendeeTotal?: number
+              hasSubmission?: boolean
               status?: string
               position_counts?: CountSession['position_counts']
             }
@@ -166,6 +169,7 @@ export default function CountTimesPage({ eventId, event, countSessions, canManag
           return {
             ...session,
             reportedTotalAttendees: fresh.reportedAttendeeTotal ?? session.reportedTotalAttendees,
+            hasSubmission: fresh.hasSubmission ?? session.hasSubmission,
             status: fresh.status ?? session.status,
             position_counts: fresh.position_counts ?? session.position_counts,
           }
@@ -465,7 +469,9 @@ export default function CountTimesPage({ eventId, event, countSessions, canManag
                       </Link>
                     </div>
                   </div>
-                  {(session.reportedTotalAttendees > 0 || session.position_counts.length > 0) && (
+                  {(session.hasSubmission ||
+                    session.reportedTotalAttendees > 0 ||
+                    session.position_counts.some((count) => count.attendeeCount != null)) && (
                     <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-3">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-gray-700">Session Total:</span>
@@ -882,6 +888,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           isActive: session.isActive,
           createdAt: session.createdAt?.toISOString() || null,
           reportedTotalAttendees: breakdown.attendeeTotal,
+          hasSubmission: breakdown.hasSubmission,
           position_counts: session.position_counts.map((count) => ({
             id: count.id,
             positionId: count.positionId,

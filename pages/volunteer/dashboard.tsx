@@ -97,12 +97,22 @@ interface OversightContact {
   email?: string
 }
 
+interface CountStationTask {
+  positionId: string
+  name: string
+  positionNumber?: number | null
+  existingCount?: number | null
+  existingNotes?: string | null
+  hasSubmitted?: boolean
+}
+
 interface CountSession {
   id: string
   sessionName: string
-  countTime: string
+  countTime: string | null
   status: string
   positionIds?: string[]
+  stations?: CountStationTask[]
   existingCount?: number | null
   existingNotes?: string | null
   hasSubmitted?: boolean
@@ -545,7 +555,19 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
             rememberSubmitted(next, `g:${g.groupId}`, g.existingCount, g.existingNotes, g.hasSubmitted)
           }
           for (const s of countSessions) {
-            rememberSubmitted(next, s.id, s.existingCount, s.existingNotes, s.hasSubmitted)
+            const stations = s.stations ?? []
+            if (stations.length === 0) {
+              rememberSubmitted(next, s.id, s.existingCount, s.existingNotes, s.hasSubmitted)
+            }
+            for (const station of stations) {
+              rememberSubmitted(
+                next,
+                `${s.id}:${station.positionId}`,
+                station.existingCount,
+                station.existingNotes,
+                station.hasSubmitted
+              )
+            }
           }
           return next
         })
@@ -557,8 +579,11 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
             }
           }
           for (const s of countSessions) {
-            if (s.existingCount != null && !next.has(s.id)) {
-              next.set(s.id, String(s.existingCount))
+            for (const station of s.stations ?? []) {
+              const key = `${s.id}:${station.positionId}`
+              if (station.existingCount != null && !next.has(key)) {
+                next.set(key, String(station.existingCount))
+              }
             }
           }
           return next
@@ -571,8 +596,11 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
             }
           }
           for (const s of countSessions) {
-            if (s.existingNotes && !next.has(s.id)) {
-              next.set(s.id, s.existingNotes)
+            for (const station of s.stations ?? []) {
+              const key = `${s.id}:${station.positionId}`
+              if (station.existingNotes && !next.has(key)) {
+                next.set(key, station.existingNotes)
+              }
             }
           }
           return next
@@ -847,11 +875,10 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
     </div>
   ) : null
 
-  const handleSubmitCount = async (sessionId: string) => {
-    const countValue = countValues.get(sessionId) || ''
-    const sessionMeta = dashboardData?.activeCountSessions?.find((s) => s.id === sessionId)
-    const targetPositionId = sessionMeta?.positionIds?.[0]
-    if (!countValue || !targetPositionId) {
+  const handleSubmitCount = async (sessionId: string, positionId: string) => {
+    const key = `${sessionId}:${positionId}`
+    const countValue = countValues.get(key) || ''
+    if (!countValue || !positionId) {
       return
     }
 
@@ -859,13 +886,13 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
     setCountSuccess('')
 
     try {
-      const notes = countNotes.get(sessionId) || ''
+      const notes = countNotes.get(key) || ''
       
       const response = await fetch(`/api/events/${selectedEventId}/count-sessions/${sessionId}/counts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getViewAsHeaders() },
         body: JSON.stringify({
-          positionId: targetPositionId,
+          positionId,
           attendeeCount: parseInt(countValue),
           notes: notes || undefined
         })
@@ -875,7 +902,8 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
 
       if (result.success) {
         setCountSuccess('Count submitted successfully!')
-        setSubmittedCounts(prev => new Map(prev).set(sessionId, {
+        setEditingSession(null)
+        setSubmittedCounts(prev => new Map(prev).set(key, {
           count: parseInt(countValue),
           notes: notes || undefined
         }))
@@ -920,6 +948,7 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
 
       if (result.success) {
         setCountSuccess('Count submitted successfully!')
+        setEditingSession(null)
         setSubmittedCounts((prev) =>
           new Map(prev).set(key, {
             count: parseInt(countValue, 10),
@@ -1776,106 +1805,131 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
 
                     {(dashboardData.activeCountSessions ?? []).map((session) => {
                       const canRevise = Boolean(dashboardData.canReviseSubmittedCounts)
-                      const hasSubmitted = Boolean(session.hasSubmitted) || session.existingCount != null || submittedCounts.has(session.id)
-                      const isEditing = canRevise && editingSession === session.id
-                      const submittedData = submittedCounts.get(session.id)
-                      const locked = hasSubmitted && !isEditing && !canRevise
-                      
+                      const stations = (session.stations?.length
+                        ? session.stations
+                        : [{
+                            positionId: session.positionIds?.[0] || '',
+                            name: '',
+                            existingCount: session.existingCount,
+                            existingNotes: session.existingNotes,
+                            hasSubmitted: session.hasSubmitted,
+                          }]
+                      ).filter((station) => station.positionId)
+                      const allLocked = stations.length > 0 && stations.every((station) => {
+                        const key = `${session.id}:${station.positionId}`
+                        const submitted = Boolean(station.hasSubmitted) || station.existingCount != null || submittedCounts.has(key)
+                        const editing = canRevise && editingSession === key
+                        return submitted && !editing && !canRevise
+                      })
+
                       return (
-                        <div key={session.id} className={`rounded-lg p-4 shadow-sm mb-4 ${locked ? 'bg-gray-100 border border-gray-300' : 'bg-white'}`}>
+                        <div key={session.id} className={`rounded-lg p-4 shadow-sm mb-4 ${allLocked ? 'bg-gray-100 border border-gray-300' : 'bg-white'}`}>
                           <div className="mb-3">
                             <div className="flex flex-wrap items-center gap-2 mb-2">
                               <h3 className="text-xl font-extrabold text-emerald-900 tracking-tight">
                                 {session.sessionName}
                               </h3>
-                              <span className="inline-flex items-center px-2 py-1 rounded-full bg-emerald-50 text-emerald-900 text-xs font-semibold border border-emerald-200">
-                                {new Date(session.countTime).toLocaleString()}
-                              </span>
+                              {session.countTime ? (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full bg-emerald-50 text-emerald-900 text-xs font-semibold border border-emerald-200">
+                                  {new Date(session.countTime).toLocaleString()}
+                                </span>
+                              ) : null}
                             </div>
                           </div>
-                          
-                          {hasSubmitted && !isEditing ? (
-                            <div className="space-y-3">
-                              <div className={`rounded-lg p-4 border ${locked ? 'bg-gray-200 border-gray-300' : 'bg-green-50 border-green-200'}`}>
-                                <div className="flex items-center justify-between mb-2">
-                                  <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${locked ? 'bg-gray-300 text-gray-700' : 'bg-green-100 text-green-800'}`}>
-                                    Submitted
-                                  </span>
-                                  {canRevise && (
-                                    <button
-                                      onClick={() => setEditingSession(session.id)}
-                                      className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                                    >
-                                      Edit
-                                    </button>
+                          <div className="space-y-4">
+                            {stations.map((station) => {
+                              const key = `${session.id}:${station.positionId}`
+                              const hasSubmitted = Boolean(station.hasSubmitted) || station.existingCount != null || submittedCounts.has(key)
+                              const isEditing = canRevise && editingSession === key
+                              const submittedData = submittedCounts.get(key)
+                              const locked = hasSubmitted && !isEditing && !canRevise
+                              const stationLabel = station.name
+                                ? `${station.positionNumber != null ? `#${station.positionNumber} ` : ''}${station.name}`
+                                : ''
+                              return (
+                                <div key={key}>
+                                  {stationLabel ? (
+                                    <p className="text-sm font-semibold text-gray-800 mb-2">{stationLabel}</p>
+                                  ) : null}
+                                  {hasSubmitted && !isEditing ? (
+                                    <div className={`rounded-lg p-4 border ${locked ? 'bg-gray-200 border-gray-300' : 'bg-green-50 border-green-200'}`}>
+                                      <div className="flex items-center justify-between mb-2">
+                                        <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${locked ? 'bg-gray-300 text-gray-700' : 'bg-green-100 text-green-800'}`}>
+                                          Submitted
+                                        </span>
+                                        {canRevise && (
+                                          <button
+                                            onClick={() => setEditingSession(key)}
+                                            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                                          >
+                                            Edit
+                                          </button>
+                                        )}
+                                      </div>
+                                      <p className={`text-lg font-bold ${locked ? 'text-gray-600' : 'text-gray-900'}`}>Count: {submittedData?.count ?? station.existingCount}</p>
+                                      {(submittedData?.notes || station.existingNotes) && (
+                                        <p className="text-sm text-gray-600 mt-1">Notes: {submittedData?.notes || station.existingNotes}</p>
+                                      )}
+                                      {locked && (
+                                        <p className="text-sm text-gray-500 mt-2">An overseer or event staff can change this count.</p>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="space-y-3">
+                                      <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                          Attendance Count *
+                                        </label>
+                                        <input
+                                          type="number"
+                                          min="0"
+                                          value={countValues.get(key) || ''}
+                                          onChange={(e) => setCountValues(prev => new Map(prev).set(key, e.target.value))}
+                                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                          placeholder="Enter count"
+                                          disabled={submittingCount}
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                          Notes (optional)
+                                        </label>
+                                        <textarea
+                                          value={countNotes.get(key) || ''}
+                                          onChange={(e) => setCountNotes(prev => new Map(prev).set(key, e.target.value))}
+                                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                          placeholder="Optional context for this station"
+                                          rows={2}
+                                          disabled={submittingCount}
+                                        />
+                                      </div>
+                                      <div className="flex gap-2">
+                                        <button
+                                          onClick={() => handleSubmitCount(session.id, station.positionId)}
+                                          disabled={submittingCount || !countValues.get(key)}
+                                          className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                          {submittingCount ? 'Submitting...' : hasSubmitted ? 'Update Count' : 'Submit Count'}
+                                        </button>
+                                        {isEditing && (
+                                          <button
+                                            onClick={() => {
+                                              setEditingSession(null)
+                                              setCountValues(prev => new Map(prev).set(key, submittedData?.count.toString() || station.existingCount?.toString() || ''))
+                                              setCountNotes(prev => new Map(prev).set(key, submittedData?.notes || station.existingNotes || ''))
+                                            }}
+                                            className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+                                          >
+                                            Cancel
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
                                   )}
                                 </div>
-                                <div className="mt-2">
-                                  <p className={`text-lg font-bold ${locked ? 'text-gray-600' : 'text-gray-900'}`}>Count: {submittedData?.count ?? session.existingCount}</p>
-                                  {(submittedData?.notes || session.existingNotes) && (
-                                    <p className="text-sm text-gray-600 mt-1">Notes: {submittedData?.notes || session.existingNotes}</p>
-                                  )}
-                                  {locked && (
-                                    <p className="text-sm text-gray-500 mt-2">An overseer or event staff can change this count.</p>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            // Show input form
-                            <div className="space-y-3">
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Attendance Count *
-                                </label>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  value={countValues.get(session.id) || ''}
-                                  onChange={(e) => setCountValues(prev => new Map(prev).set(session.id, e.target.value))}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                  placeholder="Enter count"
-                                  disabled={submittingCount}
-                                />
-                              </div>
-                              
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Notes (optional)
-                                </label>
-                                <textarea
-                                  value={countNotes.get(session.id) || ''}
-                                  onChange={(e) => setCountNotes(prev => new Map(prev).set(session.id, e.target.value))}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                  placeholder="e.g., Combined count for Stations 2 and 3"
-                                  rows={2}
-                                  disabled={submittingCount}
-                                />
-                              </div>
-                              
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => handleSubmitCount(session.id)}
-                                  disabled={submittingCount || !countValues.get(session.id)}
-                                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                >
-                                  {submittingCount ? 'Submitting...' : hasSubmitted ? 'Update Count' : 'Submit Count'}
-                                </button>
-                                {isEditing && (
-                                  <button
-                                    onClick={() => {
-                                      setEditingSession(null)
-                                      setCountValues(prev => new Map(prev).set(session.id, submittedData?.count.toString() || ''))
-                                      setCountNotes(prev => new Map(prev).set(session.id, submittedData?.notes || ''))
-                                    }}
-                                    className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
-                                  >
-                                    Cancel
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          )}
+                              )
+                            })}
+                          </div>
                         </div>
                       )
                     })}

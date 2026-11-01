@@ -478,28 +478,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       countVisibility.visibleIds.has(session.id)
     )
 
-    const stationCountBySession = new Map<string, { attendeeCount: number | null; notes: string | null }>()
+    const stationCountByKey = new Map<string, { attendeeCount: number | null; notes: string | null }>()
+    const positionNameById = new Map<string, { name: string; positionNumber: number | null }>()
     if (visibleCountSessions.length > 0) {
-      const stationRows = await prisma.position_counts.findMany({
-        where: {
-          OR: visibleCountSessions.map((session) => ({
-            countSessionId: session.id,
-            positionId: { in: session.positionIds },
-          })),
-        },
-        select: { countSessionId: true, positionId: true, attendeeCount: true, notes: true },
-      })
-      for (const session of visibleCountSessions) {
-        const targetId = session.positionIds[0]
-        const row = stationRows.find(
-          (entry) => entry.countSessionId === session.id && entry.positionId === targetId
-        )
-        if (row) {
-          stationCountBySession.set(session.id, {
-            attendeeCount: row.attendeeCount,
-            notes: row.notes,
-          })
-        }
+      const positionIds = [...new Set(visibleCountSessions.flatMap((session) => session.positionIds))]
+      const [stationRows, positionRows] = await Promise.all([
+        prisma.position_counts.findMany({
+          where: {
+            OR: visibleCountSessions.map((session) => ({
+              countSessionId: session.id,
+              positionId: { in: session.positionIds },
+            })),
+          },
+          select: { countSessionId: true, positionId: true, attendeeCount: true, notes: true },
+        }),
+        positionIds.length
+          ? prisma.positions.findMany({
+              where: { id: { in: positionIds } },
+              select: { id: true, name: true, positionNumber: true },
+            })
+          : Promise.resolve([]),
+      ])
+      for (const row of stationRows) {
+        stationCountByKey.set(`${row.countSessionId}:${row.positionId}`, {
+          attendeeCount: row.attendeeCount,
+          notes: row.notes,
+        })
+      }
+      for (const position of positionRows) {
+        positionNameById.set(position.id, {
+          name: position.name,
+          positionNumber: position.positionNumber,
+        })
       }
     }
 
@@ -556,19 +566,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           existingNotes: g.entry?.notes ?? null,
           hasSubmitted: Boolean(g.entry)
         })),
-        activeCountSessions: visibleCountSessions.map(session => {
-          const existing = stationCountBySession.get(session.id)
-          return {
-            id: session.id,
-            sessionName: session.sessionName,
-            countTime: session.countTime ? session.countTime.toISOString() : null,
-            status: session.status,
-            positionIds: session.positionIds,
-            existingCount: existing?.attendeeCount ?? null,
-            existingNotes: existing?.notes ?? null,
-            hasSubmitted: Boolean(existing)
-          }
-        }),
+        activeCountSessions: visibleCountSessions.map(session => ({
+          id: session.id,
+          sessionName: session.sessionName,
+          countTime: session.countTime ? session.countTime.toISOString() : null,
+          status: session.status,
+          positionIds: session.positionIds,
+          stations: session.positionIds.map((positionId) => {
+            const existing = stationCountByKey.get(`${session.id}:${positionId}`)
+            const position = positionNameById.get(positionId)
+            return {
+              positionId,
+              name: position?.name ?? 'Station',
+              positionNumber: position?.positionNumber ?? null,
+              existingCount: existing?.attendeeCount ?? null,
+              existingNotes: existing?.notes ?? null,
+              hasSubmitted: Boolean(existing),
+            }
+          }),
+        })),
         canReviseSubmittedCounts,
         announcements: announcements.map(ann => ({
           id: ann.id,

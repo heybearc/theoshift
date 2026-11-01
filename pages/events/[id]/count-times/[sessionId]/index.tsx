@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import CountSubmissionSummaries from '../../../../../components/CountSubmissionSummaries'
+import { countSessionProgress } from '@/lib/countSessionReporting'
 import type {
   GroupSubmissionSummary,
   UngroupedPositionSubmission
@@ -127,24 +128,11 @@ export default function CountSessionDetailPage() {
 
   const calculateStats = () => {
     if (!countSession) return { total: 0, counted: 0, pending: 0 }
-
-    // Station-group counts may have no position_counts rows; use API-derived slots.
-    if (
-      countSession.position_counts.length === 0 &&
-      typeof countSession.reportingSlots === 'number'
-    ) {
-      const slots = countSession.reportingSlots
-      const hasTotal = (countSession.reportedAttendeeTotal ?? 0) > 0
-      const counted = hasTotal ? slots : 0
-      const total = Math.max(slots, 1)
-      return { total, counted, pending: total - counted }
-    }
-
-    const counted = countSession.position_counts.filter((pc) => pc.attendeeCount !== null).length
-    const total = countSession.position_counts.length
-    const pending = total - counted
-
-    return { total, counted, pending }
+    return countSessionProgress({
+      groups: countSession.groupSubmissionSummaries ?? [],
+      ungrouped: countSession.ungroupedPositionSubmissions ?? [],
+      positionCounts: countSession.position_counts,
+    })
   }
 
   const calculateTotalAttendees = () => {
@@ -527,7 +515,7 @@ export default function CountSessionDetailPage() {
         esc(pc.attendeeCount ?? 'Not counted'),
         esc(pc.notes || ''),
         esc(
-          ungrouped.find((u) => u.positionId === pc.positionId)?.submittedBy ??
+          ungrouped.find((u) => u.positionId === pc.position.id)?.submittedBy ??
             ''
         ),
         esc(

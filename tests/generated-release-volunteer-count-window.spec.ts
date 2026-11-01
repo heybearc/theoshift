@@ -1,6 +1,7 @@
 /**
  * Generated release test: a volunteer assigned to two active counts
- * sees only the earlier one until the later count time.
+ * sees the earlier one until one hour after that count time, even when the
+ * later count's own clock time is still ahead.
  * Also checks the volunteers page loads and the day board names assigned people.
  */
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test'
@@ -109,7 +110,10 @@ test.describe('Generated release — one count at a time', () => {
       const [earlierId, laterId] = created
       expect(visible.has(laterId)).toBe(false)
       if (visible.has(earlierId)) {
-        expect(payload.data.nextCountAvailableAt).toBeTruthy()
+        const reveal = new Date(payload.data.nextCountAvailableAt).getTime()
+        const hourAfterEarlier = new Date(earlierAt).getTime() + 60 * 60 * 1000
+        expect(Math.abs(reveal - hourAfterEarlier)).toBeLessThan(2000)
+        expect(reveal).toBeLessThan(new Date(laterAt).getTime())
       }
     } finally {
       for (const sessionId of created) {

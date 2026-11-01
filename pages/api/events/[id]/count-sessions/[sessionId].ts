@@ -157,6 +157,7 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse, eventId: str
       ...sessionRest,
       reportedAttendeeTotal: breakdown.attendeeTotal,
       reportingSlots: breakdown.reportingSlots,
+      hasSubmission: breakdown.hasSubmission,
       groupSubmissionSummaries: summaries.groupSubmissionSummaries,
       ungroupedPositionSubmissions: summaries.ungroupedPositionSubmissions
     }

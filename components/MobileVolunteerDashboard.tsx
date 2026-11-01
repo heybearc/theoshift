@@ -62,6 +62,13 @@ interface CountSession {
   status: string
   existingCount?: number | null
   hasSubmitted?: boolean
+  stations?: Array<{
+    positionId: string
+    name: string
+    positionNumber?: number | null
+    existingCount?: number | null
+    hasSubmitted?: boolean
+  }>
 }
 
 /** Grouped count section (one total for multiple stations) */
@@ -451,14 +458,27 @@ export default function MobileVolunteerDashboard({
                   <div className="space-y-3">
                     {activeCountSessions.map((session) => {
                       const when = formatCountDateTime(session.countTime)
-                      const submitted = Boolean(session.hasSubmitted) || session.existingCount != null
+                      const stations = session.stations ?? []
+                      const submitted = stations.length > 0
+                        ? stations.every((station) => Boolean(station.hasSubmitted) || station.existingCount != null)
+                        : Boolean(session.hasSubmitted) || session.existingCount != null
                       const locked = submitted && !canReviseSubmittedCounts
                       if (locked) {
                         return (
                           <div key={session.id} className="block bg-gray-100 border-2 border-gray-300 rounded-lg p-4">
                             <h4 className="font-semibold text-gray-600">{session.sessionName}</h4>
                             {when ? <p className="text-sm text-gray-500 mt-1">{when}</p> : null}
-                            <p className="text-sm font-semibold text-gray-700 mt-2">Submitted{session.existingCount != null ? ` · ${session.existingCount}` : ''}</p>
+                            {stations.length > 0 ? (
+                              <div className="mt-2 space-y-1">
+                                {stations.map((station) => (
+                                  <p key={station.positionId} className="text-sm font-semibold text-gray-700">
+                                    Submitted · {station.name}{station.existingCount != null ? ` · ${station.existingCount}` : ''}
+                                  </p>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-sm font-semibold text-gray-700 mt-2">Submitted{session.existingCount != null ? ` · ${session.existingCount}` : ''}</p>
+                            )}
                             <p className="text-xs text-gray-500 mt-1">An overseer or event staff can change this count.</p>
                           </div>
                         )

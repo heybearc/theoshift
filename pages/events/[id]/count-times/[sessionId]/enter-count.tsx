@@ -488,6 +488,38 @@ export default function EnterCountPage({ canReviseCounts = false }: { canReviseC
                     ) : null}
                     <p className="text-sm text-gray-500 mt-2">An overseer or event staff can change this count.</p>
                   </div>
+                ) : groupSubmitted && !positionCounts[group.id] ? (
+                  <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 p-3">
+                    <div>
+                      <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                        Submitted
+                      </span>
+                      <p className="text-sm font-semibold text-gray-900 mt-2">
+                        Count: {group.entry?.attendeeCount ?? '—'}
+                      </p>
+                      {group.entry?.notes ? (
+                        <p className="text-sm text-gray-600 mt-1">Notes: {group.entry.notes}</p>
+                      ) : null}
+                    </div>
+                    {canEditSubmitted ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPositionCounts((prev) => ({
+                            ...prev,
+                            [group.id]: group.entry?.attendeeCount?.toString() ?? '',
+                          }))
+                          setPositionNotes((prev) => ({
+                            ...prev,
+                            [group.id]: group.entry?.notes || '',
+                          }))
+                        }}
+                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                      >
+                        Edit
+                      </button>
+                    ) : null}
+                  </div>
                 ) : (
                 <>
                 <div className="flex gap-2">
