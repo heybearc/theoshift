@@ -87,3 +87,12 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - Next gate needs qa-01 `STANDBY_URL=https://blue.theoshift.com`.
 - Urgent new feedback: 0.
 - Next: FB-036 still blocked. Recommend a new session (v4.39.0 shipped).
+
+### Mid-day (evening)
+- Shipped v4.40.0 (`b2eb01cd`) then v4.41.0 (`08fc3d3a`). LIVE GREEN `10.92.3.22` CT 132. STANDBY BLUE `10.92.3.24` CT 134 synced. Switch #113.
+- Assignment names open that station on Positions. Counter duty opens the count. Optional station diagram is one file, opened from the assignment.
+- Lanyards keeps who had a badge after check-in. Badge 49’s earlier name was already cleared and is not in history.
+- Release gates passed on GREEN before each switch. qa-01 lockfile was dirty; cleared with checkout. Schema change ran smoke plus the release-gate suite.
+- qa-01 `STANDBY_URL` is `https://blue.theoshift.com`.
+- Urgent new feedback: 0.
+- Next: FB-036 still blocked. Recommend a new session (v4.41.0 shipped).

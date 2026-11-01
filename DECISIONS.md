@@ -657,6 +657,16 @@ This document tracks significant technical decisions made during development.
 **Decision:** Publishing to everyone is not frozen. Assigning a brother to a position grants those documents. Individually published documents stay limited to the people selected. My volunteers (assignments, count times, check-in, lanyard, My positions) ships in the phone app first.  
 **Consequences:** Shipped **v4.38.0**. The website volunteer dashboard does not have My volunteers yet.
 
+### D-TS-052: Station diagram is one optional file
+**Date:** 2026-10-31  
+**Decision:** Assignment names open the existing Positions day board. A station diagram is off until an overseer picks one PDF or image. “Show on diagram” opens that file with the station name. No pins.  
+**Consequences:** Shipped **v4.40.0**.
+
+### D-TS-053: Lanyard check-in keeps who had the badge
+**Date:** 2026-10-31  
+**Decision:** Checking a badge in still clears the current name. A history row keeps the name, phone, and times. Look it up on Lanyards. Names cleared before this version are not recoverable.  
+**Consequences:** Shipped **v4.41.0**.
+
 ---
 
 ## Shared Decisions

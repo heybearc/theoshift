@@ -2,20 +2,22 @@
 
 **Last updated:** 2026-10-31  
 **Branch:** `main`  
-**Production:** **LIVE** **GREEN** `10.92.3.22` **v4.39.0** (`9cbf69f8`). **STANDBY** **BLUE** `10.92.3.24` synced. Switch #111.
+**Production:** **LIVE** **GREEN** `10.92.3.22` **v4.41.0** (`08fc3d3a`). **STANDBY** **BLUE** `10.92.3.24` synced. Switch #113.
 
 ---
 
 ## Current Task
 
-v4.39.0 is live. Staff open one keyman or overseer's people from Volunteers. FB-036 still blocked.
+v4.41.0 is live. Lanyards keeps who had a badge. FB-036 still blocked.
 
 ### What I'm doing right now
 
-Nothing in progress. v4.39.0 is shipped and both nodes are synced.
+Nothing in progress. v4.41.0 is shipped and both nodes are synced.
 
 ### Recent completions
 
+- ✅ **v4.41.0** — Lanyard check-in keeps who had the badge (`08fc3d3a`, released 2026-10-31)
+- ✅ **v4.40.0** — Assignment links open the station; optional station diagram (`b2eb01cd`, released 2026-10-31)
 - ✅ **v4.39.0** — Staff people list on Volunteers; volunteer count page shows only that assignment; group counts name the submitter (`9cbf69f8`, released 2026-10-31)
 - ✅ **v4.38.0** — My volunteers, position filter, assignments, count times, check-in, lanyards; documents follow a later assignment (`84574e9e`, released 2026-10-31)
 - ✅ **v4.37.0** — Phone availability, documents, profile, and early check-in (`5d03f922`, released 2026-10-30)
@@ -60,5 +62,5 @@ None until the next request. Phone app stays Expo Go against `https://theoshift.
 - Blue-green via HAProxy; do not assume container color without `get_deployment_status`.
 - If MCP `haproxy.backend` is `error`, read `use_backend … if is_theoshift` before `/release` (D-TS-047).
 - Color hostnames must stay on their node: `blue.theoshift.com` → BLUE, `green.theoshift.com` → GREEN (D-TS-048). After a switch, set qa-01 `STANDBY_URL=` to the new STANDBY color host.
-- qa-01 `detect-standby.sh` cannot read HAProxy (Proxmox CT 136 is missing on that host) and falls back to `STANDBY_URL` in `/opt/tests/theoshift/.env.test`. After the 2026-10-31 v4.39.0 switch, STANDBY is BLUE. Set `STANDBY_URL` to `https://blue.theoshift.com` before the next gate. Pass the release commit, not only the tag name. Fetch tags before the gate if the baseline is a new tag.
+- qa-01 `detect-standby.sh` cannot read HAProxy (Proxmox CT 136 is missing on that host) and falls back to `STANDBY_URL` in `/opt/tests/theoshift/.env.test`. After the 2026-10-31 v4.41.0 switch, STANDBY is BLUE. `STANDBY_URL` is `https://blue.theoshift.com`. Pass the release commit, not only the tag name. Fetch tags before the gate if the baseline is a new tag.
 - qa-01 clone can be left dirty on `package-lock.json` after `npm install`. `git checkout -- package-lock.json` before the gate if the script reports a dirty tree.
