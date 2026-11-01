@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-31  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.41.0 LIVE** (GREEN `10.92.3.22`). STANDBY BLUE `10.92.3.24` is ahead (`d3ee3165`, not released).
+**Status:** **v4.42.0 LIVE** (BLUE `10.92.3.24`). STANDBY GREEN `10.92.3.22` is synced.
 
 ---
 
@@ -23,11 +23,12 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Volunteer phone app** — through v4.41.0 on production. Not in the App Store or Google Play. Staff Volunteers page opens one keyman or overseer's people. Lanyards keeps badge history.
-- **FB-036 (age and photo) still blocked.** LIVE is v4.41.0 on GREEN. STANDBY BLUE has unreleased count fixes (`d3ee3165`).
+- **Volunteer phone app** — through v4.42.0 on production. Counts, contacts, the station diagram, and pinned announcements are in the app. Not in the App Store or Google Play.
+- **FB-036 (age and photo) still blocked.** LIVE is v4.42.0 on BLUE. Count locking and the phone count screen shipped with that release.
 - **Mobile readiness across TheoShift** — Users, Locations, and Feedback phone layouts shipped in v4.33.10. Positions and Volunteers shipped in v4.33.9. Early Check-In volunteer path done through **v4.29.7**.
 
 ### Recently Completed (2026-10-31)
+- ✅ **v4.42.0** — Phone app enters counts, contacts, the station diagram, and pinned announcements. A submitted count stays locked. Shipped + synced (`0dffca3c`)
 - ✅ **v4.41.0** — Lanyard check-in keeps who had the badge. Shipped + synced (`08fc3d3a`)
 - ✅ **v4.40.0** — Assignment links open the station. Optional station diagram. Shipped + synced (`b2eb01cd`)
 - ✅ **v4.39.0** — Staff people list, volunteer count assignment only, group-count submitter name. Shipped + synced (`9cbf69f8`)
