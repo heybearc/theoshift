@@ -11,6 +11,7 @@ import {
   resolveVolunteerIdForSessionUser
 } from '@/lib/countAssignments'
 import { volunteerCanEnterStationCount } from '@/lib/countStationVolunteerAccess'
+import { getApiSession } from '@/lib/apiSession'
 
 // Validation schema for position count
 const positionCountSchema = z.object({
@@ -29,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Event ID and Session ID are required' })
   }
 
-  const sessionUser = await getSessionUser(req, res)
+  const sessionUser = await countSessionUser(req, res)
   if (!sessionUser) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
@@ -48,6 +49,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch (error) {
     // Error logged by handleApiError
     return res.status(500).json({ error: 'Internal server error' })
+  }
+}
+
+/** Cookie sessions stay first. The phone app sends the volunteer bearer token. */
+async function countSessionUser(req: NextApiRequest, res: NextApiResponse) {
+  const cookieUser = await getSessionUser(req, res)
+  if (cookieUser) return cookieUser
+  const api = await getApiSession(req, res)
+  if (!api?.user?.id) return null
+  return {
+    id: api.user.id,
+    role: api.user.role || '',
+    email: api.user.email || '',
   }
 }
 

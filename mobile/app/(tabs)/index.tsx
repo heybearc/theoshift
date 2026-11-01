@@ -1,13 +1,45 @@
+import { useEffect, useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { router } from 'expo-router'
+import PinnedAnnouncement from '@/components/PinnedAnnouncement'
 import { useAuth } from '@/lib/auth'
-import { profileNeedsAttention, useDashboard } from '@/lib/dashboard'
+import { countIsLocked, formatCountWhen, profileNeedsAttention, useDashboard } from '@/lib/dashboard'
 import { useVolunteerEvents } from '@/lib/events'
+import { openProtectedDocument } from '@/lib/openDocument'
 
 export default function AssignmentsScreen() {
-  const { volunteer, signOut } = useAuth()
+  const { volunteer, signOut, token, apiBase } = useAuth()
   const { events, eventId, setEventId, loading: eventsLoading, error: eventsError, reload } = useVolunteerEvents()
-  const { data: dashboard, loading, error } = useDashboard()
+  const { data: dashboard, loading, error, reload: reloadDashboard } = useDashboard()
+  const [diagramError, setDiagramError] = useState('')
+  const canRevise = Boolean(dashboard?.canReviseSubmittedCounts)
+  const countGroups = dashboard?.activeCountGroups || []
+  const countSessions = dashboard?.activeCountSessions || []
+
+  useEffect(() => {
+    if (!dashboard) return
+    const timer = setInterval(() => {
+      void reloadDashboard()
+    }, 15000)
+    return () => clearInterval(timer)
+  }, [dashboard, reloadDashboard])
+
+  async function openDiagram() {
+    const diagram = dashboard?.stationDiagram
+    if (!token || !eventId || !diagram) return
+    setDiagramError('')
+    try {
+      await openProtectedDocument({
+        apiBase,
+        eventId,
+        documentId: diagram.documentId,
+        fileName: diagram.fileName,
+        token,
+      })
+    } catch (err) {
+      setDiagramError(err instanceof Error ? err.message : 'Could not open the station diagram')
+    }
+  }
 
   const name = volunteer ? `${volunteer.firstName} ${volunteer.lastName}`.trim() : ''
 
@@ -50,11 +82,82 @@ export default function AssignmentsScreen() {
       ) : null}
 
       {dashboard?.event ? <Text style={styles.eventTitle}>{dashboard.event.name}</Text> : null}
+      {eventId ? <PinnedAnnouncement eventId={eventId} /> : null}
+
+      {dashboard?.nextCountAvailableAt ? (
+        <Text style={styles.note}>
+          Your next count opens at {formatCountWhen(dashboard.nextCountAvailableAt)}. This page updates on its own.
+        </Text>
+      ) : null}
+
+      {countGroups.map((group) => {
+        const submitted = Boolean(group.hasSubmitted) || group.existingCount != null
+        const locked = countIsLocked(submitted, canRevise)
+        return (
+          <Pressable
+            key={group.groupId}
+            style={[styles.card, styles.countCard, locked && styles.lockedCard]}
+            disabled={locked}
+            onPress={() =>
+              router.push({ pathname: '/count', params: { sessionId: group.sessionId, groupId: group.groupId } })
+            }
+          >
+            <Text style={styles.countLabel}>Section / group</Text>
+            <Text style={styles.position}>{group.groupName}</Text>
+            <Text style={styles.meta}>
+              {group.sessionName}
+              {group.countTime ? ` · ${formatCountWhen(group.countTime)}` : ''}
+            </Text>
+            <Text style={styles.meta}>
+              {locked
+                ? `Submitted${group.existingCount != null ? ` · ${group.existingCount}` : ''}. An overseer or event staff can change this count.`
+                : 'One total for all stations in this group'}
+            </Text>
+          </Pressable>
+        )
+      })}
+
+      {countSessions.map((session) => {
+        const stations = session.stations || []
+        const submitted = stations.length > 0 && stations.every((station) => station.hasSubmitted || station.existingCount != null)
+        const locked = countIsLocked(submitted, canRevise)
+        return (
+          <Pressable
+            key={session.id}
+            style={[styles.card, styles.countCard, locked && styles.lockedCard]}
+            disabled={locked}
+            onPress={() => router.push({ pathname: '/count', params: { sessionId: session.id } })}
+          >
+            <Text style={styles.countLabel}>Attendance count</Text>
+            <Text style={styles.position}>{session.sessionName}</Text>
+            {session.countTime ? <Text style={styles.meta}>{formatCountWhen(session.countTime)}</Text> : null}
+            {locked ? (
+              stations.map((station) => (
+                <Text key={station.positionId} style={styles.meta}>
+                  Submitted · {station.name}
+                  {station.existingCount != null ? ` · ${station.existingCount}` : ''}
+                </Text>
+              ))
+            ) : (
+              <Text style={styles.meta}>Enter the count for your station</Text>
+            )}
+            {locked ? <Text style={styles.meta}>An overseer or event staff can change this count.</Text> : null}
+          </Pressable>
+        )
+      })}
+
+      {dashboard?.stationDiagram ? (
+        <Pressable style={styles.card} onPress={() => void openDiagram()}>
+          <Text style={styles.position}>{dashboard.stationDiagram.title || 'Station diagram'}</Text>
+          <Text style={styles.meta}>Open the station diagram</Text>
+        </Pressable>
+      ) : null}
+      {diagramError ? <Text style={styles.error}>{diagramError}</Text> : null}
       {loading ? <ActivityIndicator style={styles.spinner} /> : null}
       {error ? (
         <View>
           <Text style={styles.error}>{error}</Text>
-          <Pressable onPress={reload}>
+          <Pressable onPress={() => void reloadDashboard()}>
             <Text style={styles.signOut}>Try again</Text>
           </Pressable>
         </View>
@@ -98,6 +201,10 @@ const styles = StyleSheet.create({
   card: { marginTop: 12, backgroundColor: '#fff', borderRadius: 14, padding: 14, borderWidth: 1, borderColor: '#e2e8f0' },
   position: { fontSize: 17, fontWeight: '700', color: '#0f172a' },
   meta: { marginTop: 4, color: '#475569' },
+  note: { marginTop: 12, color: '#475569', lineHeight: 20 },
+  countCard: { borderColor: '#99f6e4', backgroundColor: '#f0fdfa' },
+  lockedCard: { backgroundColor: '#f1f5f9', borderColor: '#cbd5e1' },
+  countLabel: { fontSize: 12, fontWeight: '700', color: '#0f766e', textTransform: 'uppercase' },
   empty: { marginTop: 20, color: '#475569', lineHeight: 22 },
   error: { marginTop: 16, color: '#b91c1c' },
   spinner: { marginTop: 24 },

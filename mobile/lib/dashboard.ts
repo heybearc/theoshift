@@ -38,6 +38,48 @@ export type DashboardAssignment = {
   keyman?: string
 }
 
+export type StationDiagram = {
+  documentId: string
+  title: string
+  fileType: string
+  fileName: string
+}
+
+export type OversightContact = {
+  name: string
+  role: string
+  phone?: string | null
+  email?: string | null
+}
+
+export type CountStation = {
+  positionId: string
+  name: string
+  positionNumber?: number | null
+  existingCount: number | null
+  existingNotes?: string | null
+  hasSubmitted: boolean
+}
+
+export type CountSessionCard = {
+  id: string
+  sessionName: string
+  countTime: string | null
+  status?: string
+  stations: CountStation[]
+}
+
+export type CountGroupCard = {
+  sessionId: string
+  sessionName: string
+  countTime: string | null
+  groupId: string
+  groupName: string
+  existingCount: number | null
+  existingNotes?: string | null
+  hasSubmitted: boolean
+}
+
 export type DashboardData = {
   volunteer: DashboardVolunteer
   event: { id: string; name: string }
@@ -46,6 +88,23 @@ export type DashboardData = {
   announcements: DashboardAnnouncement[]
   isIVSTeamMember: boolean
   canViewArrivals?: boolean
+  stationDiagram?: StationDiagram | null
+  oversightContacts?: OversightContact[]
+  activeCountSessions?: CountSessionCard[]
+  activeCountGroups?: CountGroupCard[]
+  nextCountAvailableAt?: string | null
+  canReviseSubmittedCounts?: boolean
+}
+
+export function countIsLocked(submitted: boolean, canRevise: boolean): boolean {
+  return submitted && !canRevise
+}
+
+export function formatCountWhen(value: string | null | undefined): string {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleString()
 }
 
 export function useDashboard() {

@@ -35,6 +35,13 @@ export default function MoreScreen() {
         </View>
       ))}
 
+      {(data?.oversightContacts?.length || 0) > 0 ? (
+        <MenuRow
+          title="Contacts"
+          detail="Your overseer and keyman"
+          onPress={() => router.push('/more/contacts')}
+        />
+      ) : null}
       {data?.canViewArrivals ? (
         <MenuRow
           title="My volunteers"
