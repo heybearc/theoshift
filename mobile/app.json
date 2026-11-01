@@ -10,15 +10,35 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.theoshift.volunteer",
+      "buildNumber": "1",
+      "associatedDomains": [
+        "applinks:theoshift.com"
+      ],
       "infoPlist": {
-        "NSAppTransportSecurity": {
-          "NSAllowsLocalNetworking": true
-        }
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "app.theoshift.volunteer",
-      "usesCleartextTraffic": true,
+      "versionCode": 1,
+      "usesCleartextTraffic": false,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "theoshift.com",
+              "pathPrefix": "/auth/open-app"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#1e40af",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -39,13 +59,25 @@
         {
           "image": "./assets/images/splash-icon.png",
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#1e40af"
         }
       ],
       "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": false
-    }
+    },
+    "extra": {
+      "privacyPolicyUrl": "https://theoshift.com/privacy",
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "52e77c16-7895-4604-8cbc-cbfa51da0eb1"
+      }
+    },
+    "owner": "corya92"
   }
 }

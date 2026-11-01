@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { apiRequest } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { profileNeedsAttention, useDashboard } from '@/lib/dashboard'
@@ -74,6 +74,12 @@ export default function ProfileScreen() {
       <Pressable style={styles.button} disabled={saving} onPress={() => void save()}>
         <Text style={styles.buttonText}>{saving ? 'Saving…' : 'Save'}</Text>
       </Pressable>
+      <Text style={styles.privacy}>
+        Signing out removes the sign-in on this phone. Ask an overseer to change or remove your volunteer record.
+      </Text>
+      <Pressable onPress={() => void Linking.openURL('https://theoshift.com/privacy')}>
+        <Text style={styles.link}>Privacy</Text>
+      </Pressable>
     </View>
   )
 }
@@ -95,4 +101,6 @@ const styles = StyleSheet.create({
   error: { marginTop: 12, color: '#b91c1c' },
   success: { marginTop: 12, color: '#166534', fontWeight: '600' },
   spinner: { marginBottom: 12 },
+  privacy: { marginTop: 24, color: '#475569', lineHeight: 20 },
+  link: { marginTop: 8, color: '#1e40af', fontWeight: '600' },
 })

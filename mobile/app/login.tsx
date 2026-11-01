@@ -19,6 +19,8 @@ export default function LoginScreen() {
   const [busy, setBusy] = useState<'link' | 'paste' | null>(null)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [showServer, setShowServer] = useState(__DEV__)
+  const [titleTaps, setTitleTaps] = useState(0)
 
   async function sendLink() {
     setBusy('link')
@@ -52,23 +54,35 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.kicker}>TheoShift</Text>
+        <Text
+          style={styles.kicker}
+          onPress={() => {
+            const next = titleTaps + 1
+            setTitleTaps(next)
+            if (next >= 7) setShowServer(true)
+          }}
+        >
+          TheoShift
+        </Text>
         <Text style={styles.title}>Sign in</Text>
         <Text style={styles.help}>
-          Use the email on your volunteer record. The server address is the TheoShift site this phone should talk to.
-          A simulator on this computer can use localhost. A phone needs that computer's address, such as
-          http://192.168.1.20:3001.
+          Use the email on your volunteer record. We will email a sign-in link to this phone. Open that link, or paste
+          it below.
         </Text>
 
-        <Text style={styles.label}>Server</Text>
-        <TextInput
-          value={apiBase}
-          onChangeText={setApiBase}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="url"
-          style={styles.input}
-        />
+        {showServer ? (
+          <>
+            <Text style={styles.label}>Server</Text>
+            <TextInput
+              value={apiBase}
+              onChangeText={setApiBase}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="url"
+              style={styles.input}
+            />
+          </>
+        ) : null}
 
         <Text style={styles.label}>Email</Text>
         <TextInput

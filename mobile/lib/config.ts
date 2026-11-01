@@ -1,6 +1,10 @@
+export const PRODUCTION_API_BASE = 'https://theoshift.com'
+
 export function defaultApiBase() {
   const fromEnv = process.env.EXPO_PUBLIC_API_URL?.trim()
-  return (fromEnv || 'http://localhost:3001').replace(/\/$/, '')
+  if (fromEnv) return fromEnv.replace(/\/$/, '')
+  if (__DEV__) return 'http://localhost:3001'
+  return PRODUCTION_API_BASE
 }
 
 export function normalizeApiBase(value: string) {
