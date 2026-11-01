@@ -5,8 +5,8 @@ import crypto from 'crypto'
 import { handleApiError } from '@/lib/apiError'
 import {
   blockSimulatedMutation,
+  canReviseSubmittedCount,
   getSessionUser,
-  isPrivilegedCounterRole,
   resolveUserIdForCountEnteredBy,
   resolveVolunteerIdForSessionUser
 } from '@/lib/countAssignments'
@@ -117,7 +117,8 @@ async function handlePost(
       return res.status(400).json({ error: 'Count session is not active' })
     }
 
-    if (!isPrivilegedCounterRole(role)) {
+    const reviser = await canReviseSubmittedCount(userId, role, eventId)
+    if (!reviser) {
       const volunteerId = await resolveVolunteerIdForSessionUser(userId, role)
       if (!volunteerId) {
         return res.status(403).json({ error: 'No volunteer identity found for this user' })
@@ -126,6 +127,16 @@ async function handlePost(
       if (!canEnter) {
         return res.status(403).json({ error: 'Only assigned primary/secondary counters can submit this group count' })
       }
+    }
+
+    const existingEntry = await prisma.count_group_entries.findUnique({
+      where: { groupId: data.groupId },
+      select: { id: true }
+    })
+    if (existingEntry && !reviser) {
+      return res.status(403).json({
+        error: 'A submitted count can only be changed by an overseer or event staff'
+      })
     }
 
     const enteredByUserId = await resolveUserIdForCountEnteredBy(userId, role)
@@ -176,9 +187,14 @@ async function handlePost(
     return res.status(400).json({ error: 'Count session is not active' })
   }
 
+  if (!data.positionId) {
+    return res.status(400).json({ error: 'Position ID is required' })
+  }
+  const positionId = data.positionId
+
   // Verify position exists and belongs to event
   const position = await prisma.positions.findUnique({
-    where: { id: data.positionId },
+    where: { id: positionId },
     select: { eventId: true }
   })
 
@@ -190,7 +206,8 @@ async function handlePost(
     return res.status(400).json({ error: 'Position does not belong to this event' })
   }
 
-  if (!isPrivilegedCounterRole(role)) {
+  const reviser = await canReviseSubmittedCount(userId, role, eventId)
+  if (!reviser) {
     const volunteerId = await resolveVolunteerIdForSessionUser(userId, role)
     if (!volunteerId) {
       return res.status(403).json({ error: 'No volunteer identity found for this user' })
@@ -199,7 +216,7 @@ async function handlePost(
     const canEnter = await volunteerCanEnterStationCount({
       eventId,
       countSessionId: sessionId,
-      positionId: data.positionId,
+      positionId,
       volunteerId,
     })
 
@@ -213,12 +230,18 @@ async function handlePost(
     where: {
       countSessionId_positionId: {
         countSessionId: sessionId,
-        positionId: data.positionId
+        positionId
       }
     }
   })
 
   let positionCount
+
+  if (existingCount && !reviser) {
+    return res.status(403).json({
+      error: 'A submitted count can only be changed by an overseer or event staff'
+    })
+  }
 
   if (existingCount) {
     // Update existing count
@@ -248,7 +271,7 @@ async function handlePost(
       data: {
         id: crypto.randomUUID(),
         countSessionId: sessionId,
-        positionId: data.positionId,
+        positionId,
         attendeeCount: data.attendeeCount ?? null,
         notes: data.notes,
         countedBy: userId,

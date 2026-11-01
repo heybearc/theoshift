@@ -114,6 +114,7 @@ interface CountTimesPageProps {
 
 export default function CountTimesPage({ eventId, event, countSessions, canManageContent, canEdit, canDelete, canManagePermissions, stats, moduleConfig, terminology }: CountTimesPageProps) {
   const router = useRouter()
+  const [liveSessions, setLiveSessions] = useState(countSessions)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -127,6 +128,58 @@ export default function CountTimesPage({ eventId, event, countSessions, canManag
   const [savingAssignments, setSavingAssignments] = useState(false)
   const [groupDrafts, setGroupDrafts] = useState<CountGroupDraft[]>([])
   const [groupSaveMessage, setGroupSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  useEffect(() => {
+    setLiveSessions(countSessions)
+  }, [countSessions])
+
+  useEffect(() => {
+    if (!eventId || countSessions.length === 0) return
+    let cancelled = false
+    const refreshTotals = async () => {
+      if (document.visibilityState !== 'visible') return
+      const updates = await Promise.all(
+        countSessions.map(async (session) => {
+          try {
+            const response = await fetch(`/api/events/${eventId}/count-sessions/${session.id}`, {
+              headers: { ...getViewAsHeaders() },
+            })
+            if (!response.ok) return null
+            const payload = await response.json()
+            if (!payload?.success || !payload.data) return null
+            return payload.data as {
+              id: string
+              reportedAttendeeTotal?: number
+              status?: string
+              position_counts?: CountSession['position_counts']
+            }
+          } catch {
+            return null
+          }
+        })
+      )
+      if (cancelled) return
+      setLiveSessions((current) =>
+        current.map((session) => {
+          const fresh = updates.find((row) => row?.id === session.id)
+          if (!fresh) return session
+          return {
+            ...session,
+            reportedTotalAttendees: fresh.reportedAttendeeTotal ?? session.reportedTotalAttendees,
+            status: fresh.status ?? session.status,
+            position_counts: fresh.position_counts ?? session.position_counts,
+          }
+        })
+      )
+    }
+    const intervalId = window.setInterval(() => {
+      void refreshTotals()
+    }, 15000)
+    return () => {
+      cancelled = true
+      window.clearInterval(intervalId)
+    }
+  }, [eventId, countSessions])
 
   // APEX GUARDIAN: Client-side fetching removed - data now provided via SSR
 
@@ -346,7 +399,7 @@ export default function CountTimesPage({ eventId, event, countSessions, canManag
                 {error}
               </div>
             )}
-            {countSessions.map((session) => (
+            {liveSessions.map((session) => (
               <div key={session.id} className="bg-white shadow rounded-lg overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-200">
                   <div className="flex items-center justify-between mb-3">

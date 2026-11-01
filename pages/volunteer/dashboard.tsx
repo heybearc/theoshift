@@ -103,6 +103,9 @@ interface CountSession {
   countTime: string
   status: string
   positionIds?: string[]
+  existingCount?: number | null
+  existingNotes?: string | null
+  hasSubmitted?: boolean
 }
 
 interface ActiveCountGroup {
@@ -118,6 +121,7 @@ interface ActiveCountGroup {
   stations: Array<{ id: string; name: string; positionNumber?: number | null }>
   existingCount?: number | null
   existingNotes?: string | null
+  hasSubmitted?: boolean
 }
 
 interface AvailabilityRequest {
@@ -153,6 +157,7 @@ interface DashboardData {
   activeCountGroups?: ActiveCountGroup[]
   /** When the next assigned count replaces the one on screen. */
   nextCountAvailableAt?: string | null
+  canReviseSubmittedCounts?: boolean
   isIVSTeamMember?: boolean
   canSubmitIvsRequests?: boolean
 }
@@ -470,7 +475,7 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
     }
   }
 
-  const loadDashboard = async () => {
+  const loadDashboard = async (options?: { silent?: boolean }) => {
     try {
       if (!session?.user?.id) {
         console.error('❌ loadDashboard called without session.user.id')
@@ -520,67 +525,119 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
         setVolunteer(result.data.volunteer)
 
         const groups = result.data.activeCountGroups ?? []
-        if (groups.length > 0) {
-          setSubmittedCounts((prev) => {
-            const next = new Map(prev)
-            for (const g of groups) {
-              if (g.existingCount != null) {
-                next.set(`g:${g.groupId}`, {
-                  count: g.existingCount,
-                  notes: g.existingNotes || undefined
-                })
-              }
-            }
-            return next
-          })
-          setCountValues((prev) => {
-            const next = new Map(prev)
-            for (const g of groups) {
-              if (g.existingCount != null) {
-                next.set(`g:${g.groupId}`, String(g.existingCount))
-              }
-            }
-            return next
-          })
-          setCountNotes((prev) => {
-            const next = new Map(prev)
-            for (const g of groups) {
-              if (g.existingNotes) {
-                next.set(`g:${g.groupId}`, g.existingNotes)
-              }
-            }
-            return next
+        const countSessions = result.data.activeCountSessions ?? []
+        const rememberSubmitted = (
+          next: Map<string, { count: number; notes?: string }>,
+          key: string,
+          count: number | null | undefined,
+          notes: string | null | undefined,
+          submitted: boolean | undefined
+        ) => {
+          if (!submitted && count == null) return
+          next.set(key, {
+            count: count ?? 0,
+            notes: notes || undefined
           })
         }
+        setSubmittedCounts((prev) => {
+          const next = new Map(prev)
+          for (const g of groups) {
+            rememberSubmitted(next, `g:${g.groupId}`, g.existingCount, g.existingNotes, g.hasSubmitted)
+          }
+          for (const s of countSessions) {
+            rememberSubmitted(next, s.id, s.existingCount, s.existingNotes, s.hasSubmitted)
+          }
+          return next
+        })
+        setCountValues((prev) => {
+          const next = new Map(prev)
+          for (const g of groups) {
+            if (g.existingCount != null && !next.has(`g:${g.groupId}`)) {
+              next.set(`g:${g.groupId}`, String(g.existingCount))
+            }
+          }
+          for (const s of countSessions) {
+            if (s.existingCount != null && !next.has(s.id)) {
+              next.set(s.id, String(s.existingCount))
+            }
+          }
+          return next
+        })
+        setCountNotes((prev) => {
+          const next = new Map(prev)
+          for (const g of groups) {
+            if (g.existingNotes && !next.has(`g:${g.groupId}`)) {
+              next.set(`g:${g.groupId}`, g.existingNotes)
+            }
+          }
+          for (const s of countSessions) {
+            if (s.existingNotes && !next.has(s.id)) {
+              next.set(s.id, s.existingNotes)
+            }
+          }
+          return next
+        })
         
-        // Fetch availability requests for this event
-        await fetchAvailabilityRequests(eventId)
-        await fetchChatChannels(eventId)
-        
-        // Check if profile verification is needed
-        // Show verification if: 1) email/phone missing OR 2) profileVerificationRequired flag is set
-        const needsVerification = !result.data.volunteer.email || 
-                                  !result.data.volunteer.phone || 
-                                  result.data.volunteer.profileVerificationRequired
-        
-        if (needsVerification) {
-          // Pre-fill with existing data
-          setProfileData({
-            email: result.data.volunteer.email || '',
-            phone: result.data.volunteer.phone || ''
-          })
-          setShowProfileVerification(true)
+        if (!options?.silent) {
+          await fetchAvailabilityRequests(eventId)
+          await fetchChatChannels(eventId)
+
+          const needsVerification = !result.data.volunteer.email ||
+                                    !result.data.volunteer.phone ||
+                                    result.data.volunteer.profileVerificationRequired
+
+          if (needsVerification) {
+            setProfileData({
+              email: result.data.volunteer.email || '',
+              phone: result.data.volunteer.phone || ''
+            })
+            setShowProfileVerification(true)
+          }
         }
-      } else {
+      } else if (!options?.silent) {
         setError(result.error || 'Failed to load dashboard')
       }
     } catch (error) {
       console.error('Dashboard loading error:', error)
-      setError('An error occurred while loading your dashboard')
+      if (!options?.silent) {
+        setError('An error occurred while loading your dashboard')
+      }
     } finally {
-      setLoading(false)
+      if (!options?.silent) setLoading(false)
     }
   }
+
+  const loadDashboardRef = useRef(loadDashboard)
+  loadDashboardRef.current = loadDashboard
+
+  useEffect(() => {
+    const revealAt = dashboardData?.nextCountAvailableAt
+    const hasCountWork = Boolean(
+      revealAt ||
+      dashboardData?.activeCountGroups?.length ||
+      dashboardData?.activeCountSessions?.length
+    )
+    if (!hasCountWork) return
+
+    const refresh = () => {
+      if (document.visibilityState !== 'visible') return
+      void loadDashboardRef.current({ silent: true })
+    }
+    const intervalId = window.setInterval(refresh, 20000)
+    let handoffId: number | undefined
+    if (revealAt) {
+      const delay = new Date(revealAt).getTime() - Date.now()
+      handoffId = window.setTimeout(refresh, Math.max(delay, 0) + 1000)
+    }
+    return () => {
+      window.clearInterval(intervalId)
+      if (handoffId) window.clearTimeout(handoffId)
+    }
+  }, [
+    dashboardData?.nextCountAvailableAt,
+    dashboardData?.activeCountGroups?.length,
+    dashboardData?.activeCountSessions?.length,
+  ])
   
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPhoneNumber(e.target.value)
@@ -1082,6 +1139,7 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
           activeCountSessions={dashboardData.activeCountSessions}
           activeCountGroups={dashboardData.activeCountGroups}
           nextCountAvailableAt={dashboardData.nextCountAvailableAt}
+          canReviseSubmittedCounts={Boolean(dashboardData.canReviseSubmittedCounts)}
           documents={dashboardData.documents}
           availabilityRequests={availabilityRequests}
           onAvailabilityResponse={handleAvailabilityResponse}
@@ -1548,8 +1606,8 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
                     </p>
                     {dashboardData.nextCountAvailableAt && (
                       <p className="text-sm text-gray-600 mt-2">
-                        Your next count replaces this one at{' '}
-                        {new Date(dashboardData.nextCountAvailableAt).toLocaleString()}. Refresh this page then.
+                        Your next count opens at{' '}
+                        {new Date(dashboardData.nextCountAvailableAt).toLocaleString()}. This page updates on its own.
                       </p>
                     )}
                   </div>
@@ -1589,11 +1647,13 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
 
                     {(dashboardData.activeCountGroups ?? []).map((task) => {
                       const gKey = `g:${task.groupId}`
-                      const hasSubmitted = submittedCounts.has(gKey)
-                      const isEditing = editingSession === gKey
+                      const canRevise = Boolean(dashboardData.canReviseSubmittedCounts)
+                      const hasSubmitted = Boolean(task.hasSubmitted) || task.existingCount != null || submittedCounts.has(gKey)
+                      const isEditing = canRevise && editingSession === gKey
                       const submittedData = submittedCounts.get(gKey)
+                      const locked = hasSubmitted && !isEditing && !canRevise
                       return (
-                        <div key={task.groupId} className="bg-white rounded-lg p-4 shadow-sm mb-4 border-2 border-teal-100">
+                        <div key={task.groupId} className={`rounded-lg p-4 shadow-sm mb-4 border-2 ${locked ? 'bg-gray-100 border-gray-300' : 'bg-white border-teal-100'}`}>
                           <div className="mb-3">
                             <div className="flex flex-wrap items-center gap-2 mb-2">
                               <h3 className="text-xl font-extrabold text-teal-900 tracking-tight">
@@ -1619,23 +1679,28 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
 
                           {hasSubmitted && !isEditing ? (
                             <div className="space-y-3">
-                              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                              <div className={`rounded-lg p-4 border ${locked ? 'bg-gray-200 border-gray-300' : 'bg-green-50 border-green-200'}`}>
                                 <div className="flex items-center justify-between mb-2">
-                                  <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                                    ✓ Submitted
+                                  <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${locked ? 'bg-gray-300 text-gray-700' : 'bg-green-100 text-green-800'}`}>
+                                    Submitted
                                   </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => setEditingSession(gKey)}
-                                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                                  >
-                                    Edit
-                                  </button>
+                                  {canRevise && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingSession(gKey)}
+                                      className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                                    >
+                                      Edit
+                                    </button>
+                                  )}
                                 </div>
                                 <div className="mt-2">
-                                  <p className="text-lg font-bold text-gray-900">Count: {submittedData?.count}</p>
-                                  {submittedData?.notes && (
-                                    <p className="text-sm text-gray-600 mt-1">Notes: {submittedData.notes}</p>
+                                  <p className={`text-lg font-bold ${locked ? 'text-gray-600' : 'text-gray-900'}`}>Count: {submittedData?.count ?? task.existingCount}</p>
+                                  {(submittedData?.notes || task.existingNotes) && (
+                                    <p className="text-sm text-gray-600 mt-1">Notes: {submittedData?.notes || task.existingNotes}</p>
+                                  )}
+                                  {locked && (
+                                    <p className="text-sm text-gray-500 mt-2">An overseer or event staff can change this count.</p>
                                   )}
                                 </div>
                               </div>
@@ -1710,12 +1775,14 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
                     })}
 
                     {(dashboardData.activeCountSessions ?? []).map((session) => {
-                      const hasSubmitted = submittedCounts.has(session.id)
-                      const isEditing = editingSession === session.id
+                      const canRevise = Boolean(dashboardData.canReviseSubmittedCounts)
+                      const hasSubmitted = Boolean(session.hasSubmitted) || session.existingCount != null || submittedCounts.has(session.id)
+                      const isEditing = canRevise && editingSession === session.id
                       const submittedData = submittedCounts.get(session.id)
+                      const locked = hasSubmitted && !isEditing && !canRevise
                       
                       return (
-                        <div key={session.id} className="bg-white rounded-lg p-4 shadow-sm mb-4">
+                        <div key={session.id} className={`rounded-lg p-4 shadow-sm mb-4 ${locked ? 'bg-gray-100 border border-gray-300' : 'bg-white'}`}>
                           <div className="mb-3">
                             <div className="flex flex-wrap items-center gap-2 mb-2">
                               <h3 className="text-xl font-extrabold text-emerald-900 tracking-tight">
@@ -1728,24 +1795,28 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
                           </div>
                           
                           {hasSubmitted && !isEditing ? (
-                            // Show submitted count with edit button
                             <div className="space-y-3">
-                              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                              <div className={`rounded-lg p-4 border ${locked ? 'bg-gray-200 border-gray-300' : 'bg-green-50 border-green-200'}`}>
                                 <div className="flex items-center justify-between mb-2">
-                                  <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                                    ✓ Submitted
+                                  <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${locked ? 'bg-gray-300 text-gray-700' : 'bg-green-100 text-green-800'}`}>
+                                    Submitted
                                   </span>
-                                  <button
-                                    onClick={() => setEditingSession(session.id)}
-                                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                                  >
-                                    Edit
-                                  </button>
+                                  {canRevise && (
+                                    <button
+                                      onClick={() => setEditingSession(session.id)}
+                                      className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                                    >
+                                      Edit
+                                    </button>
+                                  )}
                                 </div>
                                 <div className="mt-2">
-                                  <p className="text-lg font-bold text-gray-900">Count: {submittedData?.count}</p>
-                                  {submittedData?.notes && (
-                                    <p className="text-sm text-gray-600 mt-1">Notes: {submittedData.notes}</p>
+                                  <p className={`text-lg font-bold ${locked ? 'text-gray-600' : 'text-gray-900'}`}>Count: {submittedData?.count ?? session.existingCount}</p>
+                                  {(submittedData?.notes || session.existingNotes) && (
+                                    <p className="text-sm text-gray-600 mt-1">Notes: {submittedData?.notes || session.existingNotes}</p>
+                                  )}
+                                  {locked && (
+                                    <p className="text-sm text-gray-500 mt-2">An overseer or event staff can change this count.</p>
                                   )}
                                 </div>
                               </div>

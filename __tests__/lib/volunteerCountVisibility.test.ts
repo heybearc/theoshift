@@ -16,26 +16,26 @@ describe('volunteerVisibleCountSessions', () => {
     expect(result.nextRevealAt).toBeNull()
   })
 
-  it('hides a later count until its own count time', () => {
+  it('opens the next count one hour after the previous count', () => {
     const beforeMorning = volunteerVisibleCountSessions(
       [morning, afternoon],
       at('2026-10-29T13:30:00.000Z')
     )
     expect([...beforeMorning.visibleIds]).toEqual(['morning'])
-    expect(beforeMorning.nextRevealAt?.toISOString()).toBe(afternoon.countTime)
+    expect(beforeMorning.nextRevealAt?.getTime()).toBe(at(morning.countTime).getTime() + hour)
 
-    const duringGap = volunteerVisibleCountSessions(
+    const stillMorning = volunteerVisibleCountSessions(
       [morning, afternoon],
-      at('2026-10-29T16:00:00.000Z')
+      at('2026-10-29T14:30:00.000Z')
     )
-    expect([...duringGap.visibleIds]).toEqual(['morning'])
+    expect([...stillMorning.visibleIds]).toEqual(['morning'])
 
-    const atAfternoon = volunteerVisibleCountSessions(
+    const afternoonReady = volunteerVisibleCountSessions(
       [morning, afternoon],
-      at('2026-10-29T18:00:00.000Z')
+      at('2026-10-29T15:00:00.000Z')
     )
-    expect([...atAfternoon.visibleIds]).toEqual(['afternoon'])
-    expect(atAfternoon.nextRevealAt).toBeNull()
+    expect([...afternoonReady.visibleIds]).toEqual(['afternoon'])
+    expect(afternoonReady.nextRevealAt).toBeNull()
   })
 
   it('holds a count that is less than an hour after the previous one', () => {

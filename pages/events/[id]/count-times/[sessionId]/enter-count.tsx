@@ -36,6 +36,7 @@ interface CountGroup {
   secondaryVolunteerId?: string | null
   primaryName?: string | null
   secondaryName?: string | null
+  entry?: { attendeeCount: number | null; notes?: string | null } | null
 }
 
 interface CountSession {
@@ -52,7 +53,7 @@ interface Event {
   name: string
 }
 
-export default function EnterCountPage() {
+export default function EnterCountPage({ canReviseCounts = false }: { canReviseCounts?: boolean }) {
   const router = useRouter()
   const { data: session, status: sessionStatus } = useSession()
   const { id: eventId, sessionId } = router.query
@@ -75,6 +76,7 @@ export default function EnterCountPage() {
   const viewAsVid =
     viewAsVolunteerIdFromQuery || (typeof window !== 'undefined' ? getViewAsVolunteerId() : null)
   const privilegedCounterView = isPrivilegedCounter && !viewAsVid
+  const canEditSubmitted = canReviseCounts && !viewAsVid
   const effectiveVolunteerIdForCounts = viewAsVid || session?.user?.id || ''
 
   useEffect(() => {
@@ -459,9 +461,12 @@ export default function EnterCountPage() {
           </div>
         ) : groups.length > 0 ? (
           <div className="space-y-4">
-            {groups.map((group) => (
-              <div key={group.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                <h4 className="font-medium text-gray-900">{group.name}</h4>
+            {groups.map((group) => {
+              const groupSubmitted = group.entry != null
+              const groupLocked = groupSubmitted && !canEditSubmitted
+              return (
+              <div key={group.id} className={`rounded-lg p-4 shadow-sm border ${groupLocked ? 'bg-gray-100 border-gray-300' : 'bg-white border-gray-200'}`}>
+                <h4 className={`font-medium ${groupLocked ? 'text-gray-600' : 'text-gray-900'}`}>{group.name}</h4>
                 <p className="text-sm text-gray-700 mt-1">
                   <span className="text-gray-500">Primary counter:</span>{' '}
                   <span className="font-medium">{group.primaryName || '—'}</span>
@@ -470,6 +475,21 @@ export default function EnterCountPage() {
                   <span className="font-medium">{group.secondaryName || '—'}</span>
                 </p>
                 <p className="text-xs text-gray-500 mb-2 mt-2">Stations in group: {group.positionIds.length}</p>
+                {groupLocked ? (
+                  <div className="rounded-lg border border-gray-300 bg-gray-200 p-3">
+                    <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-300 text-gray-700 rounded-full">
+                      Submitted
+                    </span>
+                    <p className="text-sm font-semibold text-gray-600 mt-2">
+                      Count: {group.entry?.attendeeCount ?? '—'}
+                    </p>
+                    {group.entry?.notes ? (
+                      <p className="text-sm text-gray-600 mt-1">Notes: {group.entry.notes}</p>
+                    ) : null}
+                    <p className="text-sm text-gray-500 mt-2">An overseer or event staff can change this count.</p>
+                  </div>
+                ) : (
+                <>
                 <div className="flex gap-2">
                   <input
                     type="number"
@@ -495,8 +515,11 @@ export default function EnterCountPage() {
                   className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md text-sm"
                   placeholder="Notes (optional)"
                 />
+                </>
+                )}
               </div>
-            ))}
+              )
+            })}
           </div>
         ) : (
           <div className="space-y-4">
@@ -507,10 +530,12 @@ export default function EnterCountPage() {
             {positions.map((position) => (
               <div
                 key={position.id}
-                className={`bg-white border rounded-lg p-4 shadow-sm ${
-                  position.hasSubmitted
+                className={`border rounded-lg p-4 shadow-sm ${
+                  position.hasSubmitted && !canEditSubmitted
+                    ? 'border-gray-300 bg-gray-100'
+                    : position.hasSubmitted
                     ? 'border-green-500 bg-green-50'
-                    : 'border-gray-200'
+                    : 'border-gray-200 bg-white'
                 }`}
               >
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
@@ -525,10 +550,10 @@ export default function EnterCountPage() {
                   <div className="flex-grow md:max-w-md">
                     {position.hasSubmitted && !submittingPositions.has(position.id) && !positionCounts[position.id] ? (
                       <div className="space-y-2">
-                        <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-green-200">
+                        <div className={`flex items-center justify-between rounded-lg p-3 border ${canEditSubmitted ? 'bg-white border-green-200' : 'bg-gray-200 border-gray-300'}`}>
                           <div>
-                            <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                              ✓ Submitted
+                            <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${canEditSubmitted ? 'bg-green-100 text-green-800' : 'bg-gray-300 text-gray-700'}`}>
+                              Submitted
                             </span>
                             {position.currentCount !== undefined && (
                               <p className="text-sm text-gray-700 mt-1 font-semibold">
@@ -536,6 +561,7 @@ export default function EnterCountPage() {
                               </p>
                             )}
                           </div>
+                          {canEditSubmitted ? (
                           <div className="flex gap-2">
                             <button
                               onClick={() => {
@@ -553,9 +579,12 @@ export default function EnterCountPage() {
                               disabled={submittingPositions.has(position.id)}
                               className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
-                              🗑️ Delete
+                              Delete
                             </button>
                           </div>
+                          ) : (
+                            <p className="text-sm text-gray-500 max-w-[12rem] text-right">An overseer or event staff can change this count.</p>
+                          )}
                         </div>
                       </div>
                     ) : (
@@ -662,7 +691,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     }
   }
 
+  const { canReviseSubmittedCount } = await import('../../../../../src/lib/countAssignments')
+  const canReviseCounts = await canReviseSubmittedCount(
+    userId,
+    session.user?.role || '',
+    id as string
+  )
+
   return {
-    props: {},
+    props: { canReviseCounts },
   }
 }

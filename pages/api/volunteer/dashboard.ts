@@ -5,7 +5,8 @@ import { toDateOnlyStringUTC } from '../../../src/lib/calendarDate'
 import { verifyVolunteerIvsEarlyCheckinAccessForIds } from '@/lib/ivsVolunteerEarlyCheckinAccess'
 import { viewerCanSeeArrivals } from '@/lib/arrivals'
 import { grantAllPublishedDocuments } from '@/lib/grantPublishedDocuments'
-import { getViewAsVolunteerId } from '@/lib/countAssignmentsShared'
+import { canReviseSubmittedCount } from '@/lib/countAssignments'
+import { getViewAsVolunteerId, isSimulatedMode } from '@/lib/countAssignmentsShared'
 import { volunteerVisibleCountSessions } from '@/lib/volunteerCountVisibility'
 import { getStationDiagram } from '@/lib/stationDiagram'
 
@@ -477,6 +478,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       countVisibility.visibleIds.has(session.id)
     )
 
+    const stationCountBySession = new Map<string, { attendeeCount: number | null; notes: string | null }>()
+    if (visibleCountSessions.length > 0) {
+      const stationRows = await prisma.position_counts.findMany({
+        where: {
+          OR: visibleCountSessions.map((session) => ({
+            countSessionId: session.id,
+            positionId: { in: session.positionIds },
+          })),
+        },
+        select: { countSessionId: true, positionId: true, attendeeCount: true, notes: true },
+      })
+      for (const session of visibleCountSessions) {
+        const targetId = session.positionIds[0]
+        const row = stationRows.find(
+          (entry) => entry.countSessionId === session.id && entry.positionId === targetId
+        )
+        if (row) {
+          stationCountBySession.set(session.id, {
+            attendeeCount: row.attendeeCount,
+            notes: row.notes,
+          })
+        }
+      }
+    }
+
+    const canReviseSubmittedCounts = isSimulatedMode(req)
+      ? false
+      : await canReviseSubmittedCount(session.user.id, session.user.role || '', eid)
+
     return res.status(200).json({
       success: true,
       data: {
@@ -523,15 +553,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             positionNumber: row.position.positionNumber
           })),
           existingCount: g.entry?.attendeeCount ?? null,
-          existingNotes: g.entry?.notes ?? null
+          existingNotes: g.entry?.notes ?? null,
+          hasSubmitted: Boolean(g.entry)
         })),
-        activeCountSessions: visibleCountSessions.map(session => ({
-          id: session.id,
-          sessionName: session.sessionName,
-          countTime: session.countTime ? session.countTime.toISOString() : null,
-          status: session.status,
-          positionIds: session.positionIds
-        })),
+        activeCountSessions: visibleCountSessions.map(session => {
+          const existing = stationCountBySession.get(session.id)
+          return {
+            id: session.id,
+            sessionName: session.sessionName,
+            countTime: session.countTime ? session.countTime.toISOString() : null,
+            status: session.status,
+            positionIds: session.positionIds,
+            existingCount: existing?.attendeeCount ?? null,
+            existingNotes: existing?.notes ?? null,
+            hasSubmitted: Boolean(existing)
+          }
+        }),
+        canReviseSubmittedCounts,
         announcements: announcements.map(ann => ({
           id: ann.id,
           title: ann.title,

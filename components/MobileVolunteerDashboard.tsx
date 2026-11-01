@@ -60,6 +60,8 @@ interface CountSession {
   sessionName: string
   countTime: string | null
   status: string
+  existingCount?: number | null
+  hasSubmitted?: boolean
 }
 
 /** Grouped count section (one total for multiple stations) */
@@ -69,6 +71,8 @@ interface ActiveCountGroupSummary {
   countTime: string | null
   groupId: string
   groupName: string
+  existingCount?: number | null
+  hasSubmitted?: boolean
 }
 
 interface Document {
@@ -106,6 +110,7 @@ interface MobileVolunteerDashboardProps {
   activeCountGroups?: ActiveCountGroupSummary[]
   /** When the next assigned count replaces the one on screen. */
   nextCountAvailableAt?: string | null
+  canReviseSubmittedCounts?: boolean
   documents?: Document[]
   stationDiagram?: { documentId: string; title: string; fileType: string; fileName: string } | null
   availabilityRequests: AvailabilityRequest[]
@@ -132,6 +137,7 @@ export default function MobileVolunteerDashboard({
   activeCountSessions = [],
   activeCountGroups = [],
   nextCountAvailableAt = null,
+  canReviseSubmittedCounts = false,
   documents = [],
   stationDiagram = null,
   availabilityRequests,
@@ -392,12 +398,29 @@ export default function MobileVolunteerDashboard({
                 </h3>
                 {nextCountAvailableAt && (
                   <p className="text-sm text-gray-600 mb-3">
-                    Your next count replaces this one at {new Date(nextCountAvailableAt).toLocaleString()}. Refresh this page then.
+                    Your next count opens at {new Date(nextCountAvailableAt).toLocaleString()}. This page updates on its own.
                   </p>
                 )}
                 {activeCountGroups.length > 0 && (
                   <div className="space-y-3 mb-4">
-                    {activeCountGroups.map((group) => (
+                    {activeCountGroups.map((group) => {
+                      const submitted = Boolean(group.hasSubmitted) || group.existingCount != null
+                      const locked = submitted && !canReviseSubmittedCounts
+                      if (locked) {
+                        return (
+                          <div
+                            key={group.groupId}
+                            className="block bg-gray-100 border-2 border-gray-300 rounded-lg p-4"
+                          >
+                            <p className="text-xs font-medium text-gray-500 uppercase">Section / group</p>
+                            <h4 className="font-semibold text-gray-600">{group.groupName}</h4>
+                            <p className="text-sm text-gray-500 mt-1">{group.sessionName}</p>
+                            <p className="text-sm font-semibold text-gray-700 mt-2">Submitted{group.existingCount != null ? ` · ${group.existingCount}` : ''}</p>
+                            <p className="text-xs text-gray-500 mt-1">An overseer or event staff can change this count.</p>
+                          </div>
+                        )
+                      }
+                      return (
                       <Link
                         key={group.groupId}
                         href={`/events/${event.id}/count-times/${group.sessionId}/enter-count${enterCountViewAsQuery}`}
@@ -420,13 +443,26 @@ export default function MobileVolunteerDashboard({
                           </svg>
                         </div>
                       </Link>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
                 {activeCountSessions.length > 0 && (
                   <div className="space-y-3">
                     {activeCountSessions.map((session) => {
                       const when = formatCountDateTime(session.countTime)
+                      const submitted = Boolean(session.hasSubmitted) || session.existingCount != null
+                      const locked = submitted && !canReviseSubmittedCounts
+                      if (locked) {
+                        return (
+                          <div key={session.id} className="block bg-gray-100 border-2 border-gray-300 rounded-lg p-4">
+                            <h4 className="font-semibold text-gray-600">{session.sessionName}</h4>
+                            {when ? <p className="text-sm text-gray-500 mt-1">{when}</p> : null}
+                            <p className="text-sm font-semibold text-gray-700 mt-2">Submitted{session.existingCount != null ? ` · ${session.existingCount}` : ''}</p>
+                            <p className="text-xs text-gray-500 mt-1">An overseer or event staff can change this count.</p>
+                          </div>
+                        )
+                      }
                       return (
                         <Link
                           key={session.id}

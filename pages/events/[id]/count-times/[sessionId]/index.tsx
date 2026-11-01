@@ -85,9 +85,9 @@ export default function CountSessionDetailPage() {
     }
   }, [router.query.submissions])
 
-  const fetchData = async () => {
+  const fetchData = async (options?: { silent?: boolean }) => {
     try {
-      setLoading(true)
+      if (!options?.silent) setLoading(true)
       
       const [eventRes, sessionRes] = await Promise.all([
         fetch(`/api/events/${eventId}`),
@@ -102,16 +102,28 @@ export default function CountSessionDetailPage() {
       if (eventData.success) setEvent(eventData.data)
       if (sessionData.success) setCountSession(sessionData.data)
       
-      if (!eventData.success || !sessionData.success) {
+      if (!options?.silent && (!eventData.success || !sessionData.success)) {
         setError('Failed to load data')
       }
     } catch (err) {
-      setError('Error loading data')
+      if (!options?.silent) setError('Error loading data')
       console.error('Error:', err)
     } finally {
-      setLoading(false)
+      if (!options?.silent) setLoading(false)
     }
   }
+
+  const fetchDataRef = useRef(fetchData)
+  fetchDataRef.current = fetchData
+
+  useEffect(() => {
+    if (!eventId || !sessionId) return
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') return
+      void fetchDataRef.current({ silent: true })
+    }, 15000)
+    return () => window.clearInterval(intervalId)
+  }, [eventId, sessionId])
 
   const calculateStats = () => {
     if (!countSession) return { total: 0, counted: 0, pending: 0 }

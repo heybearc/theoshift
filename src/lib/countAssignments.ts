@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../pages/api/auth/[...nextauth]'
 import { prisma } from './prisma'
+import { canManageAttendants } from './eventAccess'
 import { getViewAsVolunteerId, isPrivilegedCounterRole, isSimulatedMode } from './countAssignmentsShared'
 export { getViewAsVolunteerId, isPrivilegedCounterRole, isSimulatedMode } from './countAssignmentsShared'
 
@@ -66,6 +67,35 @@ export async function isVolunteerAssignedToSessionPosition(
     select: { id: true }
   })
   return !!assignment
+}
+
+const COUNT_REVISION_ROLES = ['ADMIN', 'OVERSEER', 'ASSISTANT_OVERSEER', 'KEYMAN', 'SUPPORT'] as const
+
+/** Overseers and event staff may change a count after it has been submitted. */
+export async function canReviseSubmittedCount(
+  userId: string,
+  role: string,
+  eventId: string
+): Promise<boolean> {
+  if ((COUNT_REVISION_ROLES as readonly string[]).includes(role)) return true
+  if (await canManageAttendants(userId, eventId)) return true
+
+  const volunteerId = await resolveVolunteerIdForSessionUser(userId, role)
+  if (!volunteerId) return false
+
+  const membership = await prisma.event_volunteers.findFirst({
+    where: {
+      eventId,
+      volunteerId,
+      OR: [
+        { isOverseer: true },
+        { isKeyman: true },
+        { role: { in: [...COUNT_REVISION_ROLES] } },
+      ],
+    },
+    select: { id: true },
+  })
+  return Boolean(membership)
 }
 
 export async function hasSessionPositionAssignees(countSessionId: string, positionId: string): Promise<boolean> {

@@ -15,9 +15,9 @@ function toMillis(value: Date | string | null | undefined): number | null {
 /**
  * When a later assigned count becomes the one the volunteer should see.
  * The first session is available as soon as it is active.
- * A later session waits until its own count time, so a 2:00 count does not
- * appear an hour after a 10:00 count. If the next count is sooner than
- * `handoffMs` after the previous one, it waits out that gap instead.
+ * Each later session opens one hour after the previous count time, so the
+ * afternoon count is on the dashboard before its own clock time. Counts
+ * scheduled closer than that hour still wait out the full gap.
  */
 export function countSessionBecomesCurrentAt(
   sessions: AssignedCountSessionTime[],
@@ -29,8 +29,7 @@ export function countSessionBecomesCurrentAt(
   const ownMs = toMillis(sessions[index]?.countTime)
   if (previousMs == null || ownMs == null) return Number.NEGATIVE_INFINITY
   if (ownMs <= previousMs) return Number.NEGATIVE_INFINITY
-  const afterHandoff = previousMs + handoffMs
-  return ownMs <= afterHandoff ? afterHandoff : ownMs
+  return previousMs + handoffMs
 }
 
 /**
