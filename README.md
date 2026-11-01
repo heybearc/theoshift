@@ -278,6 +278,7 @@ For issues or questions:
 4. Contact the project maintainer for deployment access
 
 ## 📝 Version History
+- **v4.42.0** (2026-10-31) - The phone app can enter a count, open contacts and the station diagram, and acknowledge a pinned announcement. A submitted count stays locked.
 - **v4.41.0** (2026-10-31) - Lanyard check-in keeps who had the badge so you can look it up later
 - **v4.40.0** (2026-10-31) - Assignments open the station, and an optional station diagram shows a volunteer where to stand
 - **v4.39.0** (2026-10-31) - Staff can open one keyman or overseer's people, and group counts show who submitted them

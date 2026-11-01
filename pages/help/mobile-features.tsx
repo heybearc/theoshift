@@ -15,7 +15,8 @@ export default function MobileFeaturesHelp() {
         <h2>📲 TheoShift phone app</h2>
         <p>
           If you have the TheoShift app on an iPhone or Android phone, sign in with the same email link as the website.
-          Assignments and chat are on their own tabs. <strong>More</strong> has availability, documents, and your email and phone.
+          Assignments and chat are on their own tabs. On Assignments you can enter the attendance count that is open for you, open the station diagram, and mark a pinned announcement as read. A submitted count stays grey until an overseer or event staff changes it.
+          <strong>More</strong> has availability, documents, contacts, and your email and phone.
           Keymen and overseers also see the volunteers assigned to them, including assignments, count times, and lanyards. They can filter that list to their own positions. Check-in appears on that list only when the event uses the IVS module.
           Early check-in is there when you are on the event roster and the event uses early entry.
         </p>
