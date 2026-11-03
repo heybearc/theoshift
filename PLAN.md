@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-11-03  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.42.0 LIVE** (BLUE `10.92.3.24`). STANDBY GREEN `10.92.3.22` is synced.
+**Status:** **v4.42.1 LIVE** (GREEN `10.92.3.22`). STANDBY BLUE `10.92.3.24` is synced.
 
 ---
 
@@ -23,9 +23,12 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Volunteer phone app** — v4.42.0 is on the website. Store release is in progress: Android `.aab` is built under `@corya92/theoshift`. iOS credentials and both store listings are not done. Privacy page is on STANDBY only.
-- **FB-036 (age and photo) still blocked.** LIVE is v4.42.0 on BLUE. Count locking and the phone count screen shipped with that release.
+- **Volunteer phone app** — v4.42.1 is on the website, including https://theoshift.com/privacy. Android `.aab` is built under `@corya92/theoshift`. Next: Play Console app and closed-test submit. iOS credentials and both store listings are not done.
+- **FB-036 (age and photo) still blocked.** LIVE is v4.42.1 on GREEN. Count locking and the phone count screen shipped in v4.42.0.
 - **Mobile readiness across TheoShift** — Users, Locations, and Feedback phone layouts shipped in v4.33.10. Positions and Volunteers shipped in v4.33.9. Early Check-In volunteer path done through **v4.29.7**.
+
+### Recently Completed (2026-11-03)
+- ✅ **v4.42.1** — Public privacy page for the website and phone app. Shipped + synced (`55eb8b89`)
 
 ### Recently Completed (2026-10-31)
 - ✅ **v4.42.0** — Phone app enters counts, contacts, the station diagram, and pinned announcements. A submitted count stays locked. Shipped + synced (`0dffca3c`)

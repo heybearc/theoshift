@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-11-03  
 **Branch:** `main`  
-**Production:** **LIVE** **BLUE** `10.92.3.24` **v4.42.0** (`0dffca3c`). **STANDBY** **GREEN** `10.92.3.22` synced. Switch #114.
+**Production:** **LIVE** **GREEN** `10.92.3.22` **v4.42.1** (`55eb8b89`). **STANDBY** **BLUE** `10.92.3.24` synced. Switch #115.
 
 ---
 
@@ -12,11 +12,11 @@ First store release. Android app bundle is built. iOS and both store listings ar
 
 ### What I'm doing right now
 
-Waiting on an Apple Developer sign-in for the iOS build, and a Play Console app for the finished Android bundle.
+Privacy page is on LIVE at https://theoshift.com/privacy. Next store step is a Play Console app and a closed-test submit of the finished Android bundle. iOS still waits on Apple Developer approval.
 
 ### Recent completions
 
-- ✅ **STANDBY** — Store prep: production API, icon, privacy page (`7dce865f`, not on LIVE). Android production `.aab` finished.
+- ✅ **v4.42.1** — Public privacy page for the website and phone app (`55eb8b89`, released 2026-11-03). Android production `.aab` is built.
 - ✅ **v4.42.0** — Phone counts, contacts, station diagram, pinned announcements. Submitted counts stay locked (`0dffca3c`, released 2026-10-31)
 - ✅ **v4.41.0** — Lanyard check-in keeps who had the badge (`08fc3d3a`, released 2026-10-31)
 - ✅ **v4.40.0** — Assignment links open the station; optional station diagram (`b2eb01cd`, released 2026-10-31)
