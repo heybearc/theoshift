@@ -1,6 +1,6 @@
 # TheoShift Task State
 
-**Last updated:** 2026-10-31  
+**Last updated:** 2026-11-03  
 **Branch:** `main`  
 **Production:** **LIVE** **BLUE** `10.92.3.24` **v4.42.0** (`0dffca3c`). **STANDBY** **GREEN** `10.92.3.22` synced. Switch #114.
 
@@ -8,15 +8,16 @@
 
 ## Current Task
 
-v4.42.0 is live. The phone app can enter counts. FB-036 still blocked.
+First store release. Android app bundle is built. iOS and both store listings are not. FB-036 still blocked.
 
 ### What I'm doing right now
 
-Shipped and synced v4.42.0. Phone app is still Expo Go, not in the App Store.
+Waiting on an Apple Developer sign-in for the iOS build, and a Play Console app for the finished Android bundle.
 
 ### Recent completions
 
-- ✅ **STANDBY** — Submitted counts lock for volunteers. Next count opens one hour after the previous one. Count pages refresh. Roster totals show once (`d3ee3165`, not released)
+- ✅ **STANDBY** — Store prep: production API, icon, privacy page (`7dce865f`, not on LIVE). Android production `.aab` finished.
+- ✅ **v4.42.0** — Phone counts, contacts, station diagram, pinned announcements. Submitted counts stay locked (`0dffca3c`, released 2026-10-31)
 - ✅ **v4.41.0** — Lanyard check-in keeps who had the badge (`08fc3d3a`, released 2026-10-31)
 - ✅ **v4.40.0** — Assignment links open the station; optional station diagram (`b2eb01cd`, released 2026-10-31)
 - ✅ **v4.39.0** — Staff people list on Volunteers; volunteer count page shows only that assignment; group counts name the submitter (`9cbf69f8`, released 2026-10-31)
@@ -44,12 +45,14 @@ Shipped and synced v4.42.0. Phone app is still Expo Go, not in the App Store.
 
 ### Next steps
 
-1. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
-2. App Store and Google Play are still not set up.
+1. Ship the website so https://theoshift.com/privacy is on LIVE.
+2. In `mobile/`, run `npx eas-cli build --platform ios --profile production` and sign in to Apple.
+3. Create the Play Console app, then `npx eas-cli submit --platform android --profile production`.
+4. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
 
 ## Exact next command
 
-None until the next request. Phone app stays Expo Go against `https://theoshift.com`.
+`npx eas-cli build --platform ios --profile production` from `mobile/`, after the Apple Developer login.
 
 ---
 

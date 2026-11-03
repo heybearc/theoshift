@@ -1,6 +1,6 @@
 # TheoShift Plan
 
-**Last updated:** 2026-10-31  
+**Last updated:** 2026-11-03  
 **Current phase:** Feature Development + Platform Infrastructure  
 **Status:** **v4.42.0 LIVE** (BLUE `10.92.3.24`). STANDBY GREEN `10.92.3.22` is synced.
 
@@ -23,7 +23,7 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Volunteer phone app** — through v4.42.0 on production. Counts, contacts, the station diagram, and pinned announcements are in the app. Not in the App Store or Google Play.
+- **Volunteer phone app** — v4.42.0 is on the website. Store release is in progress: Android `.aab` is built under `@corya92/theoshift`. iOS credentials and both store listings are not done. Privacy page is on STANDBY only.
 - **FB-036 (age and photo) still blocked.** LIVE is v4.42.0 on BLUE. Count locking and the phone count screen shipped with that release.
 - **Mobile readiness across TheoShift** — Users, Locations, and Feedback phone layouts shipped in v4.33.10. Positions and Volunteers shipped in v4.33.9. Early Check-In volunteer path done through **v4.29.7**.
 
