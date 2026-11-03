@@ -12,7 +12,7 @@ First store release. Android app bundle is built. iOS and both store listings ar
 
 ### What I'm doing right now
 
-Privacy page is on LIVE at https://theoshift.com/privacy. Next store step is a Play Console app and a closed-test submit of the finished Android bundle. iOS still waits on Apple Developer approval.
+Privacy page is on LIVE. Android submit is set to the internal track. Upload is blocked until Play Console has the app and a Google service account key is stored in Expo. iOS still waits on Apple Developer approval.
 
 ### Recent completions
 
@@ -45,14 +45,14 @@ Privacy page is on LIVE at https://theoshift.com/privacy. Next store step is a P
 
 ### Next steps
 
-1. Ship the website so https://theoshift.com/privacy is on LIVE.
-2. In `mobile/`, run `npx eas-cli build --platform ios --profile production` and sign in to Apple.
-3. Create the Play Console app, then `npx eas-cli submit --platform android --profile production`.
+1. In Play Console, create the TheoShift app (`app.theoshift.volunteer`) and add a Google service account key for Expo Submit.
+2. From `mobile/`, run `npx eas-cli submit --platform android --profile production --latest`. That profile now uploads to the internal testing track.
+3. In `mobile/`, run `npx eas-cli build --platform ios --profile production` after Apple approves the developer account.
 4. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
 
 ## Exact next command
 
-`npx eas-cli build --platform ios --profile production` from `mobile/`, after the Apple Developer login.
+Create the Play Console app, then from `mobile/` run `npx eas-cli submit --platform android --profile production --latest`.
 
 ---
 

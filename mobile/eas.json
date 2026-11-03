@@ -30,7 +30,8 @@
   "submit": {
     "production": {
       "android": {
-        "track": "production"
+        "track": "internal",
+        "releaseStatus": "completed"
       }
     }
   }

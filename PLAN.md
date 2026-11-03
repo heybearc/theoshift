@@ -23,7 +23,7 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Volunteer phone app** — v4.42.1 is on the website, including https://theoshift.com/privacy. Android `.aab` is built under `@corya92/theoshift`. Next: Play Console app and closed-test submit. iOS credentials and both store listings are not done.
+- **Volunteer phone app** — v4.42.1 is on the website, including https://theoshift.com/privacy. Android `.aab` is built under `@corya92/theoshift`. Next: Play Console app, then internal-track submit. iOS credentials and both store listings are not done.
 - **FB-036 (age and photo) still blocked.** LIVE is v4.42.1 on GREEN. Count locking and the phone count screen shipped in v4.42.0.
 - **Mobile readiness across TheoShift** — Users, Locations, and Feedback phone layouts shipped in v4.33.10. Positions and Volunteers shipped in v4.33.9. Early Check-In volunteer path done through **v4.29.7**.
 
