@@ -68,6 +68,14 @@ export default function ChatListScreen() {
         <View>
           {eventName ? <Text style={styles.event}>{eventName}</Text> : null}
           {error ? <Text style={styles.error}>{error}</Text> : null}
+          <Pressable
+            style={styles.messageSomeone}
+            disabled={!eventId}
+            onPress={() => router.push('/chat/people')}
+          >
+            <Text style={styles.messageSomeoneText}>Message someone</Text>
+            <Text style={styles.messageSomeoneDetail}>Private chat with a person on this event</Text>
+          </Pressable>
         </View>
       }
       ListEmptyComponent={<Text style={styles.empty}>{eventId ? 'No chat channels for this event.' : 'Choose an event from Assignments first.'}</Text>}
@@ -100,6 +108,17 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#f8fafc' },
   center: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   event: { paddingHorizontal: 16, paddingTop: 12, color: '#1e3a8a', fontWeight: '700' },
+  messageSomeone: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    backgroundColor: '#1e40af',
+    borderRadius: 14,
+    padding: 14,
+    minHeight: 64,
+    justifyContent: 'center',
+  },
+  messageSomeoneText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  messageSomeoneDetail: { marginTop: 2, color: '#dbeafe' },
   row: {
     marginHorizontal: 16,
     marginTop: 10,

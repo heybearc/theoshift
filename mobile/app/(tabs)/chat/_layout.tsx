@@ -13,6 +13,7 @@ export default function ChatLayout() {
       }}
     >
       <Stack.Screen name="index" options={{ title: 'Chat' }} />
+      <Stack.Screen name="people" options={{ title: 'Message someone' }} />
       <Stack.Screen name="[channelId]" options={{ title: 'Messages' }} />
     </Stack>
   )
