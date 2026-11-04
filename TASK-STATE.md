@@ -2,17 +2,17 @@
 
 **Last updated:** 2026-11-04  
 **Branch:** `main`  
-**Production:** **LIVE** **BLUE** `10.92.3.24` **v4.43.0** (`b9234509`). **STANDBY** **GREEN** `10.92.3.22` has the phone branding (`8db1c4cd`). Switch #116.
+**Production:** **LIVE** **GREEN** `10.92.3.22` **v4.43.0** (`becb1ee4`). **STANDBY** **BLUE** `10.92.3.24` synced to the same commit. Switch #117.
 
 ---
 
 ## Current Task
 
-First store release. Android app bundle is built. iOS and both store listings are not. FB-036 still blocked.
+First store release. iOS TestFlight build 8 is submitted. Android build 6 is built and not submitted. FB-036 still blocked.
 
 ### What I'm doing right now
 
-Play internal testing is up. Android version code 4 (website logo and colors) is downloaded for a manual Play upload. `eas submit` still needs a Google service account. iOS still waits on Apple Developer approval.
+Phone app is in TestFlight. Message someone works on https://theoshift.com. Android 1.0.0 (6) finished and still needs a Play upload. `eas submit` for Android still needs a Google service account.
 
 ### Recent completions
 
@@ -47,14 +47,13 @@ Play internal testing is up. Android version code 4 (website logo and colors) is
 
 ### Next steps
 
-1. Ship the clone-date work from STANDBY to LIVE when asked. Until then, https://theoshift.com still has the old clone dialog.
-2. Testers install from the Play internal opt-in link, opened in a new tab, on the invited Google account.
-3. In `mobile/`, run `npx eas-cli build --platform ios --profile production` after Apple approves the developer account.
-4. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
+1. Install iOS 1.0.0 (8) from TestFlight after Apple finishes processing.
+2. Upload Android 1.0.0 (6) to Play internal testing. `eas submit` still needs a Google service account.
+3. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
 
 ## Exact next command
 
-Ship STANDBY (`112d9eb3`) when the clone date dialog should be on https://theoshift.com.
+Upload Android build 6 to Play internal testing.
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-11-04  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.43.0 LIVE** (BLUE `10.92.3.24`, `b9234509`). New STANDBY is GREEN `10.92.3.22`. Switch #116.
+**Status:** **v4.43.0 LIVE** (GREEN `10.92.3.22`, `becb1ee4`). STANDBY BLUE `10.92.3.24` is synced. Switch #117.
 
 ---
 

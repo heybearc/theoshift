@@ -44,3 +44,12 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - `eas submit` failed. No Google service account key for non-interactive submit.
 - Unbranded version code 3 build was canceled.
 - Urgent feedback: 0. FB-036 and iOS still blocked.
+
+### Afternoon (2026-11-04)
+- App Store record is TheoShift, bundle `app.theoshift.volunteer`, SKU `theoshift`, team `S42AL6JZDB`.
+- iOS 1.0.0 (5) was the first TestFlight build. Build 6 added Message someone. Build 8 is the chat-fix build and is submitted.
+- Message someone 404 was LIVE missing `/api/events/.../chat/people`. Switch #117 moved LIVE to GREEN (`becb1ee4`).
+- Both nodes synced to `becb1ee4`. STANDBY is BLUE `10.92.3.24`.
+- Android 1.0.0 (6) finished: https://expo.dev/accounts/corya92/projects/theoshift/builds/acb57bbe-024a-4245-ab5f-1e0de3c883ee
+- Phone push uses an Expo token on the existing chat subscription table. iOS push key is created. Android alerts still need that build installed.
+- Urgent feedback: 0. FB-036 still blocked.
