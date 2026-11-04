@@ -1,10 +1,19 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { addDaysToDateKey, daysBetweenDateKeys } from '../lib/eventDates'
 
 interface CloneEventModalProps {
   isOpen: boolean
   onClose: () => void
   onConfirm: (options: CloneOptions) => void
   eventName: string
+  startDate?: string | null
+  endDate?: string | null
+}
+
+function dateInputValue(value?: string | null): string {
+  if (!value) return ''
+  const match = value.match(/^(\d{4}-\d{2}-\d{2})/)
+  return match ? match[1] : ''
 }
 
 export interface CloneOptions {
@@ -21,7 +30,14 @@ export interface CloneOptions {
   endDate?: string
 }
 
-export default function CloneEventModal({ isOpen, onClose, onConfirm, eventName }: CloneEventModalProps) {
+export default function CloneEventModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  eventName,
+  startDate,
+  endDate,
+}: CloneEventModalProps) {
   const [options, setOptions] = useState<CloneOptions>({
     name: `${eventName} (Copy)`,
     clonePositions: true,
@@ -31,13 +47,49 @@ export default function CloneEventModal({ isOpen, onClose, onConfirm, eventName 
     clonePermissions: true,
     cloneSettings: true,
     cloneOversight: true,
-    cloneDocuments: true
+    cloneDocuments: true,
+    startDate: dateInputValue(startDate),
+    endDate: dateInputValue(endDate || startDate),
   })
+  const [dateError, setDateError] = useState('')
+
+  useEffect(() => {
+    if (!isOpen) return
+    setDateError('')
+    setOptions((prev) => ({
+      ...prev,
+      name: `${eventName} (Copy)`,
+      startDate: dateInputValue(startDate),
+      endDate: dateInputValue(endDate || startDate),
+    }))
+  }, [isOpen, eventName, startDate, endDate])
 
   if (!isOpen) return null
 
+  const updateStartDate = (value: string) => {
+    setDateError('')
+    setOptions((prev) => {
+      const previousStart = prev.startDate || dateInputValue(startDate)
+      const previousEnd = prev.endDate || dateInputValue(endDate || startDate)
+      let nextEnd = previousEnd
+      if (previousStart && value && previousEnd) {
+        const delta = daysBetweenDateKeys(previousStart, value)
+        nextEnd = addDaysToDateKey(previousEnd, delta)
+      }
+      return { ...prev, startDate: value, endDate: nextEnd }
+    })
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    if (!options.startDate || !options.endDate) {
+      setDateError('Choose a start and end date for the new event.')
+      return
+    }
+    if (options.endDate < options.startDate) {
+      setDateError('The end date has to be on or after the start date.')
+      return
+    }
     onConfirm(options)
   }
 
@@ -70,6 +122,47 @@ export default function CloneEventModal({ isOpen, onClose, onConfirm, eventName 
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">New event dates</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="cloneStartDate" className="block text-sm font-medium text-gray-700 mb-1">
+                    Start date
+                  </label>
+                  <input
+                    id="cloneStartDate"
+                    type="date"
+                    value={options.startDate || ''}
+                    onChange={(e) => updateStartDate(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="cloneEndDate" className="block text-sm font-medium text-gray-700 mb-1">
+                    End date
+                  </label>
+                  <input
+                    id="cloneEndDate"
+                    type="date"
+                    value={options.endDate || ''}
+                    onChange={(e) => {
+                      setDateError('')
+                      setOptions((prev) => ({ ...prev, endDate: e.target.value }))
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-gray-600 mt-2">
+                {options.clonePositions
+                  ? 'Shifts move with the start date. Change the end date if the new event is shorter or longer. You can move them again later by editing the event dates and saving.'
+                  : 'The new event uses these dates. Turn on Positions & Shifts if the schedule should move with the start date.'}
+              </p>
+              {dateError ? <p className="mt-2 text-sm text-red-600">{dateError}</p> : null}
             </div>
 
             {/* Clone Options */}

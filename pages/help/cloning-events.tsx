@@ -291,9 +291,10 @@ export default function CloningEventsPage({ userRole }: CloningEventsProps) {
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <h4 className="font-semibold text-gray-900 mb-2">Does cloning copy count times or documents?</h4>
                 <p className="text-gray-600 text-sm">
+                  The clone dialog asks for the new start and end dates. Shifts move with the start date.
                   Documents are copied when that box is checked, including the station diagram.
                   Count times are not copied. The new event starts with none.
-                  If you give the copy a new start date, the shifts move with that date.
+                  To move a copy later, edit its start date and save. The shifts move by the same number of days.
                 </p>
               </div>
             </div>

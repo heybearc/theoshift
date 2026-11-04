@@ -500,11 +500,7 @@ export default function EditEventPage({ event }: EditEventPageProps) {
       const response = await fetch(`/api/events/${eventId}/clone`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...options,
-          startDate: formData.startDate,
-          endDate: formData.endDate,
-        })
+        body: JSON.stringify(options)
       })
 
       const data = await response.json()
@@ -842,6 +838,10 @@ export default function EditEventPage({ event }: EditEventPageProps) {
                 />
                 {errors.endDate && <p className="mt-1 text-sm text-red-600">{errors.endDate}</p>}
               </div>
+
+              <p className="md:col-span-2 text-sm text-gray-600">
+                Saving a new start date moves every dated shift by the same number of days.
+              </p>
 
               <div>
                 <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">
@@ -1333,6 +1333,8 @@ export default function EditEventPage({ event }: EditEventPageProps) {
         onClose={() => setShowCloneConfirm(false)}
         onConfirm={handleCloneEvent}
         eventName={event.name}
+        startDate={formData.startDate}
+        endDate={formData.endDate}
       />
     </EventLayout>
   )
