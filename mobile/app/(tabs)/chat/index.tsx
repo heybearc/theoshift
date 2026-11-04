@@ -106,6 +106,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 14,
     padding: 14,
+    minHeight: 64,
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#e2e8f0',
     flexDirection: 'row',

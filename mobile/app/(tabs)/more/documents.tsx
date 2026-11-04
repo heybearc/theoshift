@@ -50,7 +50,7 @@ export default function DocumentsScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#f8fafc' },
   content: { padding: 16, paddingBottom: 32 },
-  card: { marginTop: 12, backgroundColor: '#fff', borderRadius: 14, padding: 14, borderWidth: 1, borderColor: '#e2e8f0' },
+  card: { marginTop: 12, backgroundColor: '#fff', borderRadius: 14, padding: 16, minHeight: 64, justifyContent: 'center', borderWidth: 1, borderColor: '#e2e8f0' },
   title: { fontSize: 17, fontWeight: '700', color: '#0f172a' },
   meta: { marginTop: 4, color: '#475569' },
   empty: { color: '#475569', lineHeight: 22 },

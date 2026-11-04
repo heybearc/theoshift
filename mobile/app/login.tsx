@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -10,6 +11,7 @@ import {
   TextInput,
   View,
 } from 'react-native'
+import { theme } from '@/constants/theme'
 import { useAuth } from '@/lib/auth'
 
 export default function LoginScreen() {
@@ -54,6 +56,7 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <Image source={require('../assets/images/icon.png')} style={styles.logo} accessibilityLabel="TheoShift" />
         <Text
           style={styles.kicker}
           onPress={() => {
@@ -118,7 +121,7 @@ export default function LoginScreen() {
           disabled={!pastedLink.trim() || !!busy}
           onPress={() => void usePastedLink()}
         >
-          {busy === 'paste' ? <ActivityIndicator color="#1e40af" /> : <Text style={styles.secondaryText}>Sign in with link</Text>}
+          {busy === 'paste' ? <ActivityIndicator color={theme.button} /> : <Text style={styles.secondaryText}>Sign in with link</Text>}
         </Pressable>
 
         {message ? <Text style={styles.message}>{message}</Text> : null}
@@ -130,8 +133,9 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#f8fafc' },
-  content: { padding: 24, paddingTop: 72 },
-  kicker: { color: '#1e40af', fontWeight: '700', letterSpacing: 0.4 },
+  content: { padding: 24, paddingTop: 48 },
+  logo: { width: 96, height: 96, borderRadius: 48, marginBottom: 16 },
+  kicker: { color: theme.navy, fontWeight: '700', letterSpacing: 0.4 },
   title: { fontSize: 32, fontWeight: '700', color: '#0f172a', marginTop: 8 },
   help: { color: '#475569', marginTop: 12, lineHeight: 22 },
   label: { marginTop: 20, marginBottom: 6, color: '#334155', fontWeight: '600' },
@@ -147,7 +151,7 @@ const styles = StyleSheet.create({
   linkInput: { minHeight: 88, textAlignVertical: 'top' },
   button: {
     marginTop: 16,
-    backgroundColor: '#1e40af',
+    backgroundColor: theme.button,
     borderRadius: 12,
     minHeight: 48,
     alignItems: 'center',
@@ -162,10 +166,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#1e40af',
+    borderColor: theme.button,
     backgroundColor: '#fff',
   },
-  secondaryText: { color: '#1e40af', fontWeight: '700', fontSize: 16 },
+  secondaryText: { color: theme.button, fontWeight: '700', fontSize: 16 },
   message: { marginTop: 16, color: '#166534', lineHeight: 22 },
   error: { marginTop: 16, color: '#b91c1c', lineHeight: 22 },
 })

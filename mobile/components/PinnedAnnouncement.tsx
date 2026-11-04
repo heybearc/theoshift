@@ -73,6 +73,6 @@ const styles = StyleSheet.create({
   body: { marginTop: 8, color: '#451a03', lineHeight: 20 },
   meta: { marginTop: 8, color: '#92400e', fontSize: 12 },
   error: { marginTop: 8, color: '#b91c1c' },
-  button: { marginTop: 12, alignSelf: 'flex-start', backgroundColor: '#b45309', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10 },
+  button: { marginTop: 12, alignSelf: 'flex-start', backgroundColor: '#b45309', borderRadius: 12, paddingHorizontal: 16, minHeight: 48, justifyContent: 'center' },
   buttonText: { color: '#fff', fontWeight: '700' },
 })

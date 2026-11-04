@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   card: { marginTop: 12, backgroundColor: '#fff', borderRadius: 14, padding: 14, borderWidth: 1, borderColor: '#e2e8f0' },
   role: { color: '#1e40af', fontWeight: '700', fontSize: 12, textTransform: 'uppercase' },
   name: { marginTop: 4, fontSize: 17, fontWeight: '700', color: '#0f172a' },
-  link: { marginTop: 8, color: '#1e40af', fontWeight: '600' },
+  link: { marginTop: 8, color: '#2563eb', fontWeight: '700', fontSize: 16, minHeight: 44 },
   meta: { color: '#475569' },
   error: { color: '#b91c1c' },
 })

@@ -47,7 +47,11 @@ export default function AssignmentsScreen() {
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.headerRow}>
         <Text style={styles.greeting}>{name}</Text>
-        <Pressable onPress={() => void signOut()}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => void signOut()}
+          style={({ pressed }) => [styles.signOutButton, pressed && styles.signOutPressed]}
+        >
           <Text style={styles.signOut}>Sign out</Text>
         </Pressable>
       </View>
@@ -189,9 +193,20 @@ const styles = StyleSheet.create({
   content: { padding: 16, paddingBottom: 32 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   greeting: { fontSize: 20, fontWeight: '700', color: '#0f172a', flex: 1, marginRight: 12 },
-  signOut: { color: '#1e40af', fontWeight: '600' },
+  signOutButton: {
+    minHeight: 44,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  signOutPressed: { backgroundColor: '#eff6ff' },
+  signOut: { color: '#1e40af', fontWeight: '700' },
   eventList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 },
-  eventChip: { borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: '#fff' },
+  eventChip: { borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 999, paddingHorizontal: 14, paddingVertical: 10, minHeight: 44, justifyContent: 'center', backgroundColor: '#fff' },
   eventChipSelected: { backgroundColor: '#1e40af', borderColor: '#1e40af' },
   eventChipText: { color: '#334155', fontWeight: '600' },
   eventChipTextSelected: { color: '#fff' },

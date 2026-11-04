@@ -167,11 +167,11 @@ const styles = StyleSheet.create({
   label: { fontSize: 16, fontWeight: '700', color: '#0f172a' },
   lockedText: { marginTop: 8, fontWeight: '700', color: '#334155' },
   input: { marginTop: 10, borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 16, backgroundColor: '#fff' },
-  button: { marginTop: 12, alignSelf: 'flex-start', backgroundColor: '#1e40af', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10 },
+  button: { marginTop: 12, alignSelf: 'flex-start', backgroundColor: '#2563eb', borderRadius: 12, paddingHorizontal: 16, minHeight: 48, justifyContent: 'center' },
   buttonText: { color: '#fff', fontWeight: '700' },
   error: { marginTop: 12, color: '#b91c1c' },
   success: { marginTop: 12, color: '#047857', fontWeight: '600' },
   spinner: { marginTop: 16 },
-  back: { marginTop: 24 },
+  back: { marginTop: 24, minHeight: 44, justifyContent: 'center' },
   backText: { color: '#1e40af', fontWeight: '600' },
 })

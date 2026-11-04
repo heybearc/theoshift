@@ -1,6 +1,7 @@
 import { SymbolView } from 'expo-symbols'
 import { Tabs } from 'expo-router'
 
+import { theme } from '@/constants/theme'
 import { EventProvider } from '@/lib/events'
 
 export default function TabLayout() {
@@ -8,9 +9,19 @@ export default function TabLayout() {
     <EventProvider>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: '#1e40af',
+          tabBarActiveTintColor: theme.navy,
+          tabBarInactiveTintColor: '#64748b',
+          tabBarStyle: {
+            backgroundColor: '#fff',
+            borderTopColor: theme.line,
+            borderTopWidth: 1,
+          },
+          tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
+          tabBarItemStyle: { paddingTop: 4 },
           headerStyle: { backgroundColor: '#fff' },
-          headerTitleStyle: { fontWeight: '700' },
+          headerTintColor: theme.navy,
+          headerTitleStyle: { fontWeight: '700', color: theme.ink },
+          headerShadowVisible: false,
         }}
       >
         <Tabs.Screen

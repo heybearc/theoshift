@@ -96,11 +96,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   notice: { color: '#1e40af', lineHeight: 20 },
-  button: { marginTop: 20, backgroundColor: '#1e40af', borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
+  button: { marginTop: 20, backgroundColor: '#2563eb', borderRadius: 12, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
   buttonText: { color: '#fff', fontWeight: '700' },
   error: { marginTop: 12, color: '#b91c1c' },
   success: { marginTop: 12, color: '#166534', fontWeight: '600' },
   spinner: { marginBottom: 12 },
   privacy: { marginTop: 24, color: '#475569', lineHeight: 20 },
-  link: { marginTop: 8, color: '#1e40af', fontWeight: '600' },
+  link: { marginTop: 8, color: '#1e40af', fontWeight: '700', minHeight: 44 },
 })

@@ -4,6 +4,7 @@ import * as SplashScreen from 'expo-splash-screen'
 import { useEffect } from 'react'
 import 'react-native-reanimated'
 
+import { theme } from '@/constants/theme'
 import { AuthProvider, useAuth } from '@/lib/auth'
 
 export { ErrorBoundary } from 'expo-router'
@@ -45,7 +46,15 @@ function RootNavigator() {
   }, [ready, token, segments, router])
 
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerStyle: { backgroundColor: '#fff' },
+        headerTintColor: theme.navy,
+        headerTitleStyle: { fontWeight: '700', color: theme.ink },
+        headerShadowVisible: false,
+        contentStyle: { backgroundColor: theme.canvas },
+      }}
+    >
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="count" options={{ title: 'Attendance count', headerBackTitle: 'Back' }} />

@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   choices: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 },
-  choice: { borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 8 },
+  choice: { borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 999, paddingHorizontal: 14, minHeight: 44, justifyContent: 'center', backgroundColor: '#fff' },
   choiceSelected: { backgroundColor: '#1e40af', borderColor: '#1e40af' },
   choiceText: { color: '#334155', fontWeight: '600' },
   choiceTextSelected: { color: '#fff' },

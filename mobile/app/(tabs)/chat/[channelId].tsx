@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#fff',
   },
-  send: { backgroundColor: '#1e40af', borderRadius: 12, paddingHorizontal: 16, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  send: { backgroundColor: '#2563eb', borderRadius: 12, paddingHorizontal: 16, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
   sendDisabled: { opacity: 0.5 },
   sendText: { color: '#fff', fontWeight: '700' },
 })

@@ -1,5 +1,7 @@
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { router } from 'expo-router'
+import MenuRow from '@/components/MenuRow'
+import { theme } from '@/constants/theme'
 import { profileNeedsAttention, useDashboard } from '@/lib/dashboard'
 import { useAuth } from '@/lib/auth'
 
@@ -76,19 +78,14 @@ export default function MoreScreen() {
         <Text style={styles.empty}>No announcements for this event.</Text>
       ) : null}
 
-      <Pressable onPress={() => void signOut()} style={styles.signOutButton}>
-        <Text style={styles.link}>Sign out</Text>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => void signOut()}
+        style={({ pressed }) => [styles.signOutButton, pressed && styles.signOutPressed]}
+      >
+        <Text style={styles.signOutText}>Sign out</Text>
       </Pressable>
     </ScrollView>
-  )
-}
-
-function MenuRow({ title, detail, onPress }: { title: string; detail: string; onPress: () => void }) {
-  return (
-    <Pressable style={styles.card} onPress={onPress}>
-      <Text style={styles.cardTitle}>{title}</Text>
-      <Text style={styles.meta}>{detail}</Text>
-    </Pressable>
   )
 }
 
@@ -104,7 +101,18 @@ const styles = StyleSheet.create({
   bannerBody: { marginTop: 4, color: '#1e40af', lineHeight: 20 },
   empty: { marginTop: 20, color: '#475569' },
   error: { marginTop: 16, color: '#b91c1c' },
-  link: { color: '#1e40af', fontWeight: '600', marginTop: 8 },
-  signOutButton: { marginTop: 24, alignSelf: 'flex-start' },
+  link: { color: theme.navy, fontWeight: '600', marginTop: 8, minHeight: 44 },
+  signOutButton: {
+    marginTop: 28,
+    minHeight: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#fecaca',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  signOutPressed: { backgroundColor: '#fef2f2' },
+  signOutText: { color: '#b91c1c', fontWeight: '700', fontSize: 16 },
   spinner: { marginTop: 12 },
 })

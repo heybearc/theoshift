@@ -1,8 +1,17 @@
 import { Stack } from 'expo-router'
+import { theme } from '@/constants/theme'
 
 export default function MoreLayout() {
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerStyle: { backgroundColor: '#fff' },
+        headerTintColor: theme.navy,
+        headerTitleStyle: { fontWeight: '700', color: theme.ink },
+        headerShadowVisible: false,
+        contentStyle: { backgroundColor: theme.canvas },
+      }}
+    >
       <Stack.Screen name="index" options={{ title: 'More' }} />
       <Stack.Screen name="availability" options={{ title: 'Availability' }} />
       <Stack.Screen name="documents" options={{ title: 'Documents' }} />
