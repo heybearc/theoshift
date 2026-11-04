@@ -8,6 +8,7 @@ interface CloneEventModalProps {
   eventName: string
   startDate?: string | null
   endDate?: string | null
+  submitError?: string
 }
 
 function dateInputValue(value?: string | null): string {
@@ -37,6 +38,7 @@ export default function CloneEventModal({
   eventName,
   startDate,
   endDate,
+  submitError,
 }: CloneEventModalProps) {
   const [options, setOptions] = useState<CloneOptions>({
     name: `${eventName} (Copy)`,
@@ -163,6 +165,7 @@ export default function CloneEventModal({
                   : 'The new event uses these dates. Turn on Positions & Shifts if the schedule should move with the start date.'}
               </p>
               {dateError ? <p className="mt-2 text-sm text-red-600">{dateError}</p> : null}
+              {submitError ? <p className="mt-2 text-sm text-red-600">{submitError}</p> : null}
             </div>
 
             {/* Clone Options */}

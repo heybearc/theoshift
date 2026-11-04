@@ -17,7 +17,12 @@ export default function ContactsScreen() {
           <Text style={styles.role}>{contact.role}</Text>
           <Text style={styles.name}>{contact.name}</Text>
           {contact.phone ? (
-            <Pressable onPress={() => void Linking.openURL(`tel:${contact.phone}`)}>
+            <Pressable
+              onPress={() => {
+                const digits = String(contact.phone).replace(/\D/g, '')
+                if (digits) void Linking.openURL(`tel:${digits}`)
+              }}
+            >
               <Text style={styles.link}>{contact.phone}</Text>
             </Pressable>
           ) : null}

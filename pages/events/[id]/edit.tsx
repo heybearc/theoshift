@@ -97,6 +97,7 @@ export default function EditEventPage({ event }: EditEventPageProps) {
   const [submitting, setSubmitting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showCloneConfirm, setShowCloneConfirm] = useState(false)
+  const [cloneError, setCloneError] = useState('')
   const [activeTab, setActiveTab] = useState<'basic' | 'modules' | 'oversight'>('basic')
   const [showTabMoreMenu, setShowTabMoreMenu] = useState(false)
   const [isSmallScreen, setIsSmallScreen] = useState(false)
@@ -496,6 +497,7 @@ export default function EditEventPage({ event }: EditEventPageProps) {
   }
 
   const handleCloneEvent = async (options: CloneOptions) => {
+    setCloneError('')
     try {
       const response = await fetch(`/api/events/${eventId}/clone`, {
         method: 'POST',
@@ -503,18 +505,17 @@ export default function EditEventPage({ event }: EditEventPageProps) {
         body: JSON.stringify(options)
       })
 
-      const data = await response.json()
+      const data = await response.json().catch(() => null)
 
-      if (data.success) {
+      if (response.ok && data?.success && data?.data?.id) {
         setShowCloneConfirm(false)
         router.push(`/events/${data.data.id}`)
-      } else {
-        setError(data.error || 'Failed to clone event')
-        setShowCloneConfirm(false)
+        return
       }
+
+      setCloneError(data?.error || 'Failed to clone event')
     } catch (err) {
-      setError('Failed to clone event')
-      setShowCloneConfirm(false)
+      setCloneError('Failed to clone event')
     }
   }
 
@@ -1330,11 +1331,15 @@ export default function EditEventPage({ event }: EditEventPageProps) {
       {/* Clone Event Modal */}
       <CloneEventModal
         isOpen={showCloneConfirm}
-        onClose={() => setShowCloneConfirm(false)}
+        onClose={() => {
+          setCloneError('')
+          setShowCloneConfirm(false)
+        }}
         onConfirm={handleCloneEvent}
         eventName={event.name}
         startDate={formData.startDate}
         endDate={formData.endDate}
+        submitError={cloneError}
       />
     </EventLayout>
   )

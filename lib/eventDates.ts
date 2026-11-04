@@ -1,5 +1,7 @@
 import { parseDateKey, toDateKey } from './shiftConflict'
 
+export { parseDateKey, toDateKey }
+
 /** All calendar days from event start through end (inclusive), as YYYY-MM-DD. */
 export function enumerateEventDateKeys(
   startDate: string | Date | null | undefined,

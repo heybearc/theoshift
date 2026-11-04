@@ -97,6 +97,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const sourceStartKey = toDateKey(originalEvent.startDate)
     const newStartKey = requestedStartKey || sourceStartKey
     const newEndKey = requestedEndKey || toDateKey(originalEvent.endDate) || newStartKey
+    if (newStartKey && newEndKey && newEndKey < newStartKey) {
+      return res.status(400).json({
+        success: false,
+        error: "End date must be on or after the start date.",
+      })
+    }
     const shiftDayDelta =
       sourceStartKey && newStartKey ? daysBetweenDateKeys(sourceStartKey, newStartKey) : 0
 
