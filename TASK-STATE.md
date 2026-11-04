@@ -1,8 +1,8 @@
 # TheoShift Task State
 
-**Last updated:** 2026-11-03  
+**Last updated:** 2026-11-04  
 **Branch:** `main`  
-**Production:** **LIVE** **BLUE** `10.92.3.24` **v4.43.0** (`b9234509`). **STANDBY** **GREEN** `10.92.3.22` awaits sync. Switch #116.
+**Production:** **LIVE** **BLUE** `10.92.3.24` **v4.43.0** (`b9234509`). **STANDBY** **GREEN** `10.92.3.22` has the phone branding (`8db1c4cd`). Switch #116.
 
 ---
 
@@ -12,10 +12,11 @@ First store release. Android app bundle is built. iOS and both store listings ar
 
 ### What I'm doing right now
 
-Play internal testing is up. v4.43.0 asks for dates when cloning an event and sends a new Android build so contact numbers dial. iOS still waits on Apple Developer approval.
+Play internal testing is up. Android version code 4 (website logo and colors) is downloaded for a manual Play upload. `eas submit` still needs a Google service account. iOS still waits on Apple Developer approval.
 
 ### Recent completions
 
+- ✅ **Phone branding** — Website logo, navy and blue, larger menus and buttons. Version code 4 `.aab` is in Downloads (`8db1c4cd`, 2026-11-03).
 - ✅ **v4.43.0** — Clone dates move shifts. Failed clone keeps the dialog. Android contacts dial digits only (2026-11-03).
 - ✅ **v4.42.1** — Public privacy page for the website and phone app (`55eb8b89`, released 2026-11-03). Android production `.aab` is built.
 - ✅ **v4.42.0** — Phone counts, contacts, station diagram, pinned announcements. Submitted counts stay locked (`0dffca3c`, released 2026-10-31)

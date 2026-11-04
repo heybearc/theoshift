@@ -1,6 +1,6 @@
 # TheoShift Plan
 
-**Last updated:** 2026-11-03  
+**Last updated:** 2026-11-04  
 **Current phase:** Feature Development + Platform Infrastructure  
 **Status:** **v4.43.0 LIVE** (BLUE `10.92.3.24`, `b9234509`). New STANDBY is GREEN `10.92.3.22`. Switch #116.
 
@@ -23,7 +23,7 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Volunteer phone app** — Android internal testing is open. The contact dialer fix is in the next Play upload. iOS waits on Apple.
+- **Volunteer phone app** — Android version code 4 is downloaded for a manual Play upload (logo, colors, larger controls). `eas submit` has no Google service account. iOS waits on Apple.
 - **Event clone** — The clone window asks for the new dates and moves shifts with the start date. A failed clone stays open.
 - **FB-036 (age and photo) still blocked.** Count locking and the phone count screen shipped in v4.42.0.
 - **Mobile readiness across TheoShift** — Users, Locations, and Feedback phone layouts shipped in v4.33.10. Positions and Volunteers shipped in v4.33.9. Early Check-In volunteer path done through **v4.29.7**.

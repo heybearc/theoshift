@@ -1,5 +1,5 @@
 ---
-date: 2026-11-03
+date: 2026-11-04
 purpose: Scratchpad for today's discoveries (promote on /end-day)
 ---
 
@@ -36,3 +36,11 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - Cloned “Attendants - Circuit Assembly with Branch Rep” kept October 31 shifts and copied no documents. Database repair moved 84 shifts to 2027-05-16 and copied 3 documents.
 - Clone date dialog and “save start date moves shifts” are on STANDBY BLUE (`112d9eb3`), not LIVE.
 - iOS still blocked on Apple Developer review. FB-036 still blocked.
+
+### Mid-day (2026-11-04)
+- v4.43.0 is LIVE on BLUE (`b9234509`). STANDBY GREEN has the phone branding (`8db1c4cd`). No traffic switch after that commit.
+- Android version code 4 finished: https://expo.dev/accounts/corya92/projects/theoshift/builds/0fd17525-0fb5-417f-ad31-718b353d0549
+- Bundle for manual upload: `/Users/cory/Downloads/theoshift-android-1.0.0-vc4.aab`
+- `eas submit` failed. No Google service account key for non-interactive submit.
+- Unbranded version code 3 build was canceled.
+- Urgent feedback: 0. FB-036 and iOS still blocked.
