@@ -42,27 +42,58 @@ export default function ChannelScreen() {
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
+  const [muted, setMuted] = useState(false)
+  const [loadingEarlier, setLoadingEarlier] = useState(false)
+  const [hasEarlier, setHasEarlier] = useState(false)
   const listRef = useRef<FlatList<ChatMessage>>(null)
+  const nearBottom = useRef(true)
 
-  const load = useCallback(async () => {
+  const loadLatest = useCallback(async () => {
     if (!token || !eventId || !channelId) return
-    const result = await apiRequest<{ data: { channel: Channel; messages: ChatMessage[] } }>(
-      apiBase,
-      `/api/events/${eventId}/chat/channels/${channelId}/messages`,
-      { token }
-    )
+    const result = await apiRequest<{
+      data: { channel: Channel; messages: ChatMessage[]; muted?: boolean; nextBefore?: string | null }
+    }>(apiBase, `/api/events/${eventId}/chat/channels/${channelId}/messages?limit=40`, { token })
+    const incoming = result.data.messages || []
     setChannel(result.data.channel)
-    setMessages(result.data.messages || [])
-    void apiRequest(apiBase, `/api/events/${eventId}/chat/channels/${channelId}/read`, {
-      method: 'POST',
-      token,
-    }).catch(() => undefined)
+    setMuted(!!result.data.muted)
+    setHasEarlier(incoming.length >= 40 && !!result.data.nextBefore)
+    setMessages((prev) => {
+      const ids = new Set(incoming.map((message) => message.id))
+      const oldestIncoming = incoming[0]?.createdAt
+      const older = prev.filter((message) => !ids.has(message.id) && oldestIncoming && message.createdAt < oldestIncoming)
+      return [...older, ...incoming]
+    })
   }, [token, apiBase, eventId, channelId])
+
+  async function loadEarlier() {
+    const oldest = messages[0]?.createdAt
+    if (!oldest || !token || !eventId || !channelId || loadingEarlier) return
+    nearBottom.current = false
+    setLoadingEarlier(true)
+    setError('')
+    try {
+      const result = await apiRequest<{ data: { messages: ChatMessage[]; nextBefore?: string | null } }>(
+        apiBase,
+        `/api/events/${eventId}/chat/channels/${channelId}/messages?limit=40&before=${encodeURIComponent(oldest)}`,
+        { token }
+      )
+      const incoming = result.data.messages || []
+      setHasEarlier(incoming.length >= 40 && !!result.data.nextBefore)
+      setMessages((prev) => {
+        const ids = new Set(prev.map((message) => message.id))
+        return [...incoming.filter((message) => !ids.has(message.id)), ...prev]
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not load earlier messages')
+    } finally {
+      setLoadingEarlier(false)
+    }
+  }
 
   useEffect(() => {
     let cancelled = false
     setLoading(true)
-    load()
+    loadLatest()
       .catch((err: Error) => {
         if (!cancelled) setError(err.message)
       })
@@ -70,13 +101,13 @@ export default function ChannelScreen() {
         if (!cancelled) setLoading(false)
       })
     const timer = setInterval(() => {
-      load().catch(() => undefined)
+      loadLatest().catch(() => undefined)
     }, 4000)
     return () => {
       cancelled = true
       clearInterval(timer)
     }
-  }, [load])
+  }, [loadLatest])
 
   async function send() {
     const body = draft.trim()
@@ -90,7 +121,8 @@ export default function ChannelScreen() {
         body: { body },
       })
       setDraft('')
-      await load()
+      nearBottom.current = true
+      await loadLatest()
       listRef.current?.scrollToEnd({ animated: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not send')
@@ -99,7 +131,7 @@ export default function ChannelScreen() {
     }
   }
 
-  const readOnly = channel?.type === 'EVENT_ANNOUNCEMENTS'
+  const readOnly = channel?.type === 'EVENT_ANNOUNCEMENTS' || muted
 
   return (
     <KeyboardAvoidingView
@@ -116,7 +148,21 @@ export default function ChannelScreen() {
           data={messages}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
-          onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
+          onScroll={(event) => {
+            const { contentSize, layoutMeasurement, contentOffset } = event.nativeEvent
+            nearBottom.current = contentSize.height - layoutMeasurement.height - contentOffset.y < 80
+          }}
+          scrollEventThrottle={100}
+          onContentSizeChange={() => {
+            if (nearBottom.current) listRef.current?.scrollToEnd({ animated: false })
+          }}
+          ListHeaderComponent={
+            hasEarlier ? (
+              <Pressable style={styles.earlier} disabled={loadingEarlier} onPress={() => void loadEarlier()}>
+                <Text style={styles.earlierText}>{loadingEarlier ? 'Loading…' : 'Earlier messages'}</Text>
+              </Pressable>
+            ) : undefined
+          }
           ListEmptyComponent={<Text style={styles.empty}>No messages yet.</Text>}
           renderItem={({ item }) => (
             <View style={styles.bubble}>
@@ -129,7 +175,9 @@ export default function ChannelScreen() {
         />
       )}
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      {readOnly ? (
+      {muted ? (
+        <Text style={styles.notice}>You are muted in this channel.</Text>
+      ) : readOnly ? (
         <Text style={styles.notice}>Only organizers can post in Announcements.</Text>
       ) : (
         <View style={styles.composer}>
@@ -157,6 +205,8 @@ const styles = StyleSheet.create({
   sender: { color: '#64748b', fontSize: 12 },
   body: { color: '#0f172a', marginTop: 4, fontSize: 16, lineHeight: 22 },
   empty: { color: '#64748b', textAlign: 'center', marginTop: 24 },
+  earlier: { alignSelf: 'center', paddingVertical: 8, paddingHorizontal: 12 },
+  earlierText: { color: '#1e40af', fontWeight: '700' },
   error: { color: '#b91c1c', paddingHorizontal: 12, paddingBottom: 8 },
   notice: { padding: 16, color: '#475569' },
   composer: {

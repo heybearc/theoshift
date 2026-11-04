@@ -6,6 +6,7 @@ import 'react-native-reanimated'
 
 import { theme } from '@/constants/theme'
 import { AuthProvider, useAuth } from '@/lib/auth'
+import { registerChatPush } from '@/lib/push'
 
 export { ErrorBoundary } from 'expo-router'
 
@@ -34,9 +35,14 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { ready, token } = useAuth()
+  const { ready, token, apiBase } = useAuth()
   const segments = useSegments()
   const router = useRouter()
+
+  useEffect(() => {
+    if (!ready || !token) return
+    void registerChatPush(apiBase, token).catch(() => undefined)
+  }, [ready, token, apiBase])
 
   useEffect(() => {
     if (!ready) return

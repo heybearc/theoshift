@@ -12,10 +12,12 @@ import {
   View,
 } from 'react-native'
 import { theme } from '@/constants/theme'
+import { friendlyAuthError } from '@/lib/config'
 import { useAuth } from '@/lib/auth'
 
 export default function LoginScreen() {
-  const { apiBase, setApiBase, requestLink, completeLink } = useAuth()
+  const { apiBase, setApiBase, requestLink, completeLink, linkError, clearLinkError } = useAuth()
+  const [serverDraft, setServerDraft] = useState(apiBase)
   const [email, setEmail] = useState('')
   const [pastedLink, setPastedLink] = useState('')
   const [busy, setBusy] = useState<'link' | 'paste' | null>(null)
@@ -29,7 +31,8 @@ export default function LoginScreen() {
     setError('')
     setMessage('')
     try {
-      await setApiBase(apiBase)
+      await setApiBase(serverDraft)
+      clearLinkError()
       await requestLink(email)
       setMessage('Check your email on this phone, then open the link. You can also paste it below.')
     } catch (err) {
@@ -44,10 +47,11 @@ export default function LoginScreen() {
     setError('')
     setMessage('')
     try {
-      await setApiBase(apiBase)
+      await setApiBase(serverDraft)
+      clearLinkError()
       await completeLink(pastedLink.trim())
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not sign in with that link')
+      setError(friendlyAuthError(err instanceof Error ? err.message : 'Could not sign in with that link'))
     } finally {
       setBusy(null)
     }
@@ -77,8 +81,9 @@ export default function LoginScreen() {
           <>
             <Text style={styles.label}>Server</Text>
             <TextInput
-              value={apiBase}
-              onChangeText={setApiBase}
+              value={serverDraft}
+              onChangeText={setServerDraft}
+              onEndEditing={() => void setApiBase(serverDraft)}
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="url"
@@ -125,7 +130,7 @@ export default function LoginScreen() {
         </Pressable>
 
         {message ? <Text style={styles.message}>{message}</Text> : null}
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error || linkError ? <Text style={styles.error}>{error || linkError}</Text> : null}
       </ScrollView>
     </KeyboardAvoidingView>
   )

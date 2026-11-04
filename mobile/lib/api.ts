@@ -1,3 +1,11 @@
+type UnauthorizedHandler = () => void
+
+let unauthorizedHandler: UnauthorizedHandler | null = null
+
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | null) {
+  unauthorizedHandler = handler
+}
+
 export class ApiError extends Error {
   status: number
 
@@ -29,6 +37,7 @@ export async function apiRequest<T>(
 
   const json = await response.json().catch(() => ({}))
   if (!response.ok || json?.success === false) {
+    if (options.token && response.status === 401) unauthorizedHandler?.()
     throw new ApiError(json?.error || json?.message || `Request failed (${response.status})`, response.status)
   }
   return json as T

@@ -1,0 +1,17 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["S42AL6JZDB.app.theoshift.volunteer"],
+        "components": [
+          {
+            "/": "/auth/open-app",
+            "?": { "token": "?*", "email": "?*" },
+            "comment": "Open volunteer sign-in links in the TheoShift app"
+          }
+        ]
+      }
+    ]
+  }
+}

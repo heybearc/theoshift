@@ -7,6 +7,7 @@ import { getActiveLinkedVolunteerId } from '@/lib/eventVolunteerIdentity'
 import { broadcastToChannel, broadcastToEvent } from '@/lib/chatRealtime'
 import { isReleaseGateChatProbe } from '@/lib/chatReleaseGate'
 import { sendWebPush } from '@/lib/webPush'
+import { isExpoPushToken, sendExpoPushes } from '@/lib/expoPush'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id: eventId, channelId } = req.query
@@ -53,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     })
 
-    if (messages.length > 0) {
+    if (!before && messages.length > 0) {
       const newestMessage = messages[0]
       await prisma.event_chat_reads.upsert({
         where:
@@ -81,6 +82,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
     }
 
+    const member = await prisma.event_chat_members.findFirst({
+      where: {
+        channelId,
+        ...(access.actor.kind === 'user' ? { userId: access.actor.id } : { volunteerId: access.actor.id }),
+      },
+      select: { mutedUntil: true },
+    })
+    const muted = !!(member?.mutedUntil && member.mutedUntil > new Date())
+
     const pinnedMessageId = access.channel.pinnedMessageId || null
     const pinnedMessage =
       pinnedMessageId
@@ -104,6 +114,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         channel: access.channel,
         actor: { kind: access.actor.kind, id: access.actor.id, role: access.actor.role },
         messages: [...messages].reverse(),
+        muted,
         nextBefore: messages.length > 0 ? messages[messages.length - 1].createdAt.toISOString() : null,
         pinnedMessageId,
         pinnedMessage
@@ -336,8 +347,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           bodyPreview: message.body.slice(0, 140)
         }
 
+        const title = eventRow?.name ? `${eventRow.name}` : 'TheoShift'
+        const bodyText = message.body.slice(0, 140)
+        const webSubs = subs.filter((s) => !isExpoPushToken(s.endpoint))
+        const phoneSubs = subs.filter((s) => isExpoPushToken(s.endpoint))
+
         await Promise.all(
-          subs.map(async (s) => {
+          webSubs.map(async (s) => {
             const skipSelf =
               (s.userId != null && senderUserIds.has(s.userId)) ||
               (s.volunteerId != null && senderVolunteerIds.has(s.volunteerId))
@@ -361,6 +377,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
           })
         )
+
+        const phoneMessages = phoneSubs
+          .filter((s) => {
+            const skipSelf =
+              (s.userId != null && senderUserIds.has(s.userId)) ||
+              (s.volunteerId != null && senderVolunteerIds.has(s.volunteerId))
+            return !skipSelf
+          })
+          .map((s) => ({
+            to: s.endpoint,
+            title,
+            body: bodyText,
+            data: { eventId, channelId },
+          }))
+        const expired = await sendExpoPushes(phoneMessages)
+        if (expired && expired.length > 0) {
+          await prisma.event_chat_push_subscriptions.deleteMany({ where: { endpoint: { in: expired } } })
+        }
       } catch {
         // ignore
       }

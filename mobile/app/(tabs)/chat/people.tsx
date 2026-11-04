@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { router, useFocusEffect } from 'expo-router'
-import { apiRequest } from '@/lib/api'
+import { ApiError, apiRequest } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { useVolunteerEvents } from '@/lib/events'
 import { theme } from '@/constants/theme'
@@ -35,8 +35,13 @@ export default function MessageSomeoneScreen() {
       let cancelled = false
       setLoading(true)
       load()
-        .catch((err: Error) => {
-          if (!cancelled) setError(err.message)
+        .catch((err: unknown) => {
+          if (cancelled) return
+          if (err instanceof ApiError && err.status === 404) {
+            setError('Private chats are not available on this server yet.')
+          } else {
+            setError(err instanceof Error ? err.message : 'Could not load people')
+          }
         })
         .finally(() => {
           if (!cancelled) setLoading(false)

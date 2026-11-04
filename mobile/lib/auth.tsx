@@ -2,7 +2,8 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import * as Linking from 'expo-linking'
 import * as SecureStore from 'expo-secure-store'
 import { apiRequest } from './api'
-import { defaultApiBase, normalizeApiBase, parseSignInLink } from './config'
+import { defaultApiBase, friendlyAuthError, normalizeApiBase, parseSignInLink, storeApiBase } from './config'
+import { setUnauthorizedHandler } from './api'
 
 const TOKEN_KEY = 'theoshift.token'
 const VOLUNTEER_KEY = 'theoshift.volunteer'
@@ -21,6 +22,8 @@ type AuthContextValue = {
   volunteer: VolunteerProfile | null
   apiBase: string
   setApiBase: (value: string) => void
+  linkError: string
+  clearLinkError: () => void
   requestLink: (email: string) => Promise<void>
   completeLink: (url: string) => Promise<void>
   updateVolunteer: (patch: Partial<VolunteerProfile>) => Promise<void>
@@ -34,6 +37,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
   const [volunteer, setVolunteer] = useState<VolunteerProfile | null>(null)
   const [apiBase, setApiBaseState] = useState(defaultApiBase())
+  const apiBaseRef = useRef(apiBase)
+  apiBaseRef.current = apiBase
+  const [linkError, setLinkError] = useState('')
   const handledLinks = useRef(new Set<string>())
 
   useEffect(() => {
@@ -45,7 +51,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         SecureStore.getItemAsync(API_BASE_KEY),
       ])
       if (cancelled) return
-      if (storedBase) setApiBaseState(normalizeApiBase(storedBase))
+      if (__DEV__) {
+        if (storedBase) setApiBaseState(normalizeApiBase(storedBase))
+      } else if (storedBase && normalizeApiBase(storedBase) !== storeApiBase()) {
+        await SecureStore.deleteItemAsync(API_BASE_KEY)
+      }
       if (storedToken) setToken(storedToken)
       if (storedVolunteer) {
         try {
@@ -67,8 +77,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const handleUrl = (url: string | null) => {
       if (!url || !parseSignInLink(url) || handledLinks.current.has(url)) return
       handledLinks.current.add(url)
-      void completeLink(url).catch(() => {
+      void completeLink(url).catch((err: unknown) => {
         handledLinks.current.delete(url)
+        const message = err instanceof Error ? err.message : 'Could not sign in with that link'
+        setLinkError(friendlyAuthError(message))
       })
     }
 
@@ -79,12 +91,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function setApiBase(value: string) {
     const next = normalizeApiBase(value)
+    apiBaseRef.current = next
     setApiBaseState(next)
-    await SecureStore.setItemAsync(API_BASE_KEY, next)
+    if (__DEV__) await SecureStore.setItemAsync(API_BASE_KEY, next)
   }
 
   async function requestLink(email: string) {
-    await apiRequest(apiBase, '/api/auth/magic-link/send', {
+    await apiRequest(apiBaseRef.current, '/api/auth/magic-link/send', {
       method: 'POST',
       body: { email: email.trim(), client: 'mobile' },
     })
@@ -93,9 +106,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function completeLink(url: string) {
     const parsed = parseSignInLink(url)
     if (!parsed) throw new Error('That link is not a TheoShift sign-in link.')
+    setLinkError('')
     const result = await apiRequest<{
       data: { accessToken: string; volunteer: VolunteerProfile }
-    }>(apiBase, '/api/auth/mobile/exchange', {
+    }>(apiBaseRef.current, '/api/auth/mobile/exchange', {
       method: 'POST',
       body: parsed,
     })
@@ -104,6 +118,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(result.data.accessToken)
     setVolunteer(result.data.volunteer)
   }
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      void signOut()
+    })
+    return () => setUnauthorizedHandler(null)
+  }, [])
 
   async function updateVolunteer(patch: Partial<VolunteerProfile>) {
     if (!volunteer) return
@@ -119,7 +140,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setVolunteer(null)
   }
 
-  const value = { ready, token, volunteer, apiBase, setApiBase, requestLink, completeLink, updateVolunteer, signOut }
+  const value = {
+    ready,
+    token,
+    volunteer,
+    apiBase,
+    setApiBase,
+    linkError,
+    clearLinkError: () => setLinkError(''),
+    requestLink,
+    completeLink,
+    updateVolunteer,
+    signOut,
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
