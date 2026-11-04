@@ -5,8 +5,8 @@ import { prisma } from "../../../src/lib/prisma"
 import { canDeleteEvent } from "../../../src/lib/eventAccess"
 import { handleApiError, apiSuccess } from "../../../src/lib/apiError"
 import { normalizePhoneOrNull, normalizePhoneForStorage } from "@/lib/formatPhone"
-import { addDaysToDateKey, daysBetweenDateKeys, toDateKey } from "@/lib/eventDates"
-import { parseDateKey } from "@/lib/shiftConflict"
+import { addDaysToDateKey, daysBetweenDateKeys, toDateKey } from "../../../lib/eventDates"
+import { parseDateKey } from "../../../lib/shiftConflict"
 
 function normalizeContactList(value: unknown): unknown {
   if (!Array.isArray(value)) return value
