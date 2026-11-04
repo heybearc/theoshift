@@ -1,5 +1,5 @@
 import { shiftsConflict, sameShiftDay, toDateKey } from '../../lib/shiftConflict'
-import { enumerateEventDateKeys, isMultiDayEvent } from '../../lib/eventDates'
+import { addDaysToDateKey, daysBetweenDateKeys, enumerateEventDateKeys, isMultiDayEvent } from '../../lib/eventDates'
 
 describe('shiftConflict', () => {
   it('does not conflict across different days with same clock times', () => {
@@ -59,5 +59,11 @@ describe('eventDates', () => {
     ])
     expect(isMultiDayEvent('2026-07-31', '2026-08-02')).toBe(true)
     expect(isMultiDayEvent('2026-07-31', '2026-07-31')).toBe(false)
+  })
+
+  it('moves a shift day by the same amount as the event start date', () => {
+    const delta = daysBetweenDateKeys('2026-10-31', '2027-05-16')
+    expect(addDaysToDateKey('2026-10-31', delta)).toBe('2027-05-16')
+    expect(addDaysToDateKey('2026-11-01', delta)).toBe('2027-05-17')
   })
 })

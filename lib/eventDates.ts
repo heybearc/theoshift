@@ -31,6 +31,19 @@ export function formatEventDayLabel(dateKey: string): string {
   }).format(d)
 }
 
+/** Whole days from one calendar day to another. Positive when `toKey` is later. */
+export function daysBetweenDateKeys(fromKey: string, toKey: string): number {
+  const from = parseDateKey(fromKey).getTime()
+  const to = parseDateKey(toKey).getTime()
+  return Math.round((to - from) / (24 * 60 * 60 * 1000))
+}
+
+/** Move a YYYY-MM-DD key by whole days. */
+export function addDaysToDateKey(key: string, days: number): string {
+  const next = new Date(parseDateKey(key).getTime() + days * 24 * 60 * 60 * 1000)
+  return next.toISOString().slice(0, 10)
+}
+
 export function isMultiDayEvent(
   startDate: string | Date | null | undefined,
   endDate: string | Date | null | undefined

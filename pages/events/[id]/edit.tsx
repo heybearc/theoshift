@@ -500,7 +500,11 @@ export default function EditEventPage({ event }: EditEventPageProps) {
       const response = await fetch(`/api/events/${eventId}/clone`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(options)
+        body: JSON.stringify({
+          ...options,
+          startDate: formData.startDate,
+          endDate: formData.endDate,
+        })
       })
 
       const data = await response.json()

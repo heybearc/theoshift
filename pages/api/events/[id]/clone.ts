@@ -3,6 +3,16 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "../../auth/[...nextauth]"
 import { prisma } from "../../../../src/lib/prisma"
 import { v4 as uuidv4 } from 'uuid'
+import { addDaysToDateKey, daysBetweenDateKeys, toDateKey } from "../../../../lib/eventDates"
+import { parseDateKey } from "../../../../lib/shiftConflict"
+import { readStationDiagramId } from "../../../../src/lib/stationDiagram"
+
+function settingsForClone(settings: unknown, cloneDocuments: boolean): unknown {
+  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) return undefined
+  const copy = { ...(settings as Record<string, unknown>) }
+  if (!cloneDocuments) delete copy.stationDiagram
+  return copy
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -24,7 +34,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     cloneLanyards = true,
     clonePermissions = true,
     cloneSettings = true,
-    cloneOversight = true
+    cloneOversight = true,
+    cloneDocuments = true,
+    startDate: requestedStart,
+    endDate: requestedEnd
   } = req.body
 
   if (!id || typeof id !== "string") {
@@ -79,6 +92,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       name = `${originalEvent.name} (Copy)`
     }
 
+    const requestedStartKey = typeof requestedStart === 'string' ? toDateKey(requestedStart) : null
+    const requestedEndKey = typeof requestedEnd === 'string' ? toDateKey(requestedEnd) : null
+    const sourceStartKey = toDateKey(originalEvent.startDate)
+    const newStartKey = requestedStartKey || sourceStartKey
+    const newEndKey = requestedEndKey || toDateKey(originalEvent.endDate) || newStartKey
+    const shiftDayDelta =
+      sourceStartKey && newStartKey ? daysBetweenDateKeys(sourceStartKey, newStartKey) : 0
+
+    const movedShiftDate = (value: Date | null) => {
+      const key = toDateKey(value)
+      if (!key || shiftDayDelta === 0) return value
+      return parseDateKey(addDaysToDateKey(key, shiftDayDelta))
+    }
+
     // Create the cloned event
     const newEventId = uuidv4()
     const clonedEvent = await prisma.events.create({
@@ -87,8 +114,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         name: name,
         description: originalEvent.description,
         eventType: originalEvent.eventType,
-        startDate: originalEvent.startDate,
-        endDate: originalEvent.endDate,
+        startDate: newStartKey ? parseDateKey(newStartKey) : originalEvent.startDate,
+        endDate: newEndKey ? parseDateKey(newEndKey) : originalEvent.endDate,
         startTime: originalEvent.startTime,
         endTime: originalEvent.endTime,
         location: originalEvent.location,
@@ -99,9 +126,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         status: 'UPCOMING',
         createdBy: user.id,
         updatedAt: new Date(),
-        // Module / terminology settings (JSON)
+        // Module / terminology settings (JSON). The diagram id is remapped after documents copy.
         ...(cloneSettings && {
-          settings: originalEvent.settings ?? undefined,
+          settings: settingsForClone(originalEvent.settings, cloneDocuments),
           notificationSettings: originalEvent.notificationSettings ?? undefined
         }),
         // Event-level oversight contacts (columns — not settings JSON)
@@ -184,7 +211,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             isAllDay: shift.isAllDay,
             startTime: shift.startTime,
             endTime: shift.endTime,
-            shiftDate: shift.shiftDate,
+            shiftDate: movedShiftDate(shift.shiftDate),
             volunteersNeeded: shift.volunteersNeeded
           }
         })
@@ -265,8 +292,69 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Note: We intentionally do NOT clone count_sessions as those are event-specific
-    // and should start fresh for each event
+    // Documents share the uploaded file. The new event gets its own rows.
+    if (cloneDocuments) {
+      const originalDocuments = await prisma.event_documents.findMany({
+        where: { eventId: id, isActive: true },
+        include: { document_publications: true }
+      })
+      const documentMapping = new Map<string, string>()
+      for (const document of originalDocuments) {
+        const newDocumentId = uuidv4()
+        documentMapping.set(document.id, newDocumentId)
+        await prisma.event_documents.create({
+          data: {
+            id: newDocumentId,
+            eventId: newEventId,
+            title: document.title,
+            description: document.description,
+            fileName: document.fileName,
+            fileUrl: document.fileUrl,
+            fileType: document.fileType,
+            fileSize: document.fileSize,
+            uploadedBy: document.uploadedBy,
+            uploadedAt: new Date(),
+            publishedTo: document.publishedTo,
+            publishedCount: document.publishedCount,
+            publishedAt: document.publishedAt,
+            isActive: document.isActive,
+            updatedAt: new Date()
+          }
+        })
+        for (const publication of document.document_publications) {
+          await prisma.document_publications.create({
+            data: {
+              id: uuidv4(),
+              documentId: newDocumentId,
+              volunteerId: publication.volunteerId,
+              publishedAt: publication.publishedAt,
+              viewedAt: null,
+              downloadedAt: null
+            }
+          })
+        }
+      }
+
+      const previousDiagramId = readStationDiagramId(originalEvent.settings)
+      const nextDiagramId = previousDiagramId ? documentMapping.get(previousDiagramId) : undefined
+      if (cloneSettings && nextDiagramId) {
+        const current = await prisma.events.findUnique({
+          where: { id: newEventId },
+          select: { settings: true }
+        })
+        const settings =
+          current?.settings && typeof current.settings === 'object' && !Array.isArray(current.settings)
+            ? { ...(current.settings as Record<string, unknown>) }
+            : {}
+        settings.stationDiagram = { documentId: nextDiagramId }
+        await prisma.events.update({
+          where: { id: newEventId },
+          data: { settings: settings as any, updatedAt: new Date() }
+        })
+      }
+    }
+
+    // Count times stay on the original event. A new event starts with none.
 
     // Clone event permissions (if enabled)
     const originalPermissions = clonePermissions ? await prisma.event_permissions.findMany({

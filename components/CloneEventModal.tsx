@@ -16,6 +16,9 @@ export interface CloneOptions {
   clonePermissions: boolean
   cloneSettings: boolean
   cloneOversight: boolean
+  cloneDocuments: boolean
+  startDate?: string
+  endDate?: string
 }
 
 export default function CloneEventModal({ isOpen, onClose, onConfirm, eventName }: CloneEventModalProps) {
@@ -27,7 +30,8 @@ export default function CloneEventModal({ isOpen, onClose, onConfirm, eventName 
     cloneLanyards: true,
     clonePermissions: true,
     cloneSettings: true,
-    cloneOversight: true
+    cloneOversight: true,
+    cloneDocuments: true
   })
 
   if (!isOpen) return null
@@ -178,6 +182,21 @@ export default function CloneEventModal({ isOpen, onClose, onConfirm, eventName 
                     <div className="text-sm font-medium text-gray-900">Oversight Details</div>
                     <div className="text-xs text-gray-600 mt-1">
                       Department overseer contacts, keymen, and position oversight assignments
+                    </div>
+                  </div>
+                </label>
+
+                <label className="flex items-start p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={options.cloneDocuments}
+                    onChange={() => toggleOption('cloneDocuments')}
+                    className="mt-1 h-4 w-4 text-slate-700 focus:ring-slate-500 border-gray-300 rounded"
+                  />
+                  <div className="ml-3 flex-1">
+                    <div className="text-sm font-medium text-gray-900">Documents</div>
+                    <div className="text-xs text-gray-600 mt-1">
+                      Event files and the station diagram, using the same uploaded files
                     </div>
                   </div>
                 </label>

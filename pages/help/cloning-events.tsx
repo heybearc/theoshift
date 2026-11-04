@@ -291,8 +291,9 @@ export default function CloningEventsPage({ userRole }: CloningEventsProps) {
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <h4 className="font-semibold text-gray-900 mb-2">Does cloning copy count times or documents?</h4>
                 <p className="text-gray-600 text-sm">
-                  No. Count times and documents are event-specific and are not copied. You'll start fresh 
-                  with these features in the cloned event.
+                  Documents are copied when that box is checked, including the station diagram.
+                  Count times are not copied. The new event starts with none.
+                  If you give the copy a new start date, the shifts move with that date.
                 </p>
               </div>
             </div>

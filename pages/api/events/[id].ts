@@ -5,6 +5,8 @@ import { prisma } from "../../../src/lib/prisma"
 import { canDeleteEvent } from "../../../src/lib/eventAccess"
 import { handleApiError, apiSuccess } from "../../../src/lib/apiError"
 import { normalizePhoneOrNull, normalizePhoneForStorage } from "@/lib/formatPhone"
+import { addDaysToDateKey, daysBetweenDateKeys, toDateKey } from "@/lib/eventDates"
+import { parseDateKey } from "@/lib/shiftConflict"
 
 function normalizeContactList(value: unknown): unknown {
   if (!Array.isArray(value)) return value
@@ -119,10 +121,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           updateData.keyman = normalizeContactList(keyman) || []
         }
 
-        // Update the event using Prisma relations
-        const event = await prisma.events.update({
+        const previous = await prisma.events.findUnique({
           where: { id },
-          data: updateData
+          select: { startDate: true }
+        })
+
+        // Update the event using Prisma relations, and keep dated shifts on the new days.
+        const event = await prisma.$transaction(async (tx) => {
+          const updated = await tx.events.update({
+            where: { id },
+            data: updateData
+          })
+
+          const oldKey = toDateKey(previous?.startDate)
+          const newKey = toDateKey(updated.startDate)
+          if (oldKey && newKey && oldKey !== newKey) {
+            const delta = daysBetweenDateKeys(oldKey, newKey)
+            const shifts = await tx.position_shifts.findMany({
+              where: { shiftDate: { not: null }, positions: { eventId: id } },
+              select: { id: true, shiftDate: true }
+            })
+            for (const shift of shifts) {
+              const key = toDateKey(shift.shiftDate)
+              if (!key) continue
+              await tx.position_shifts.update({
+                where: { id: shift.id },
+                data: { shiftDate: parseDateKey(addDaysToDateKey(key, delta)) }
+              })
+            }
+          }
+
+          return updated
         })
 
         return res.status(200).json({ success: true, data: event })
