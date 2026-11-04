@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-11-03  
 **Branch:** `main`  
-**Production:** Shipping **v4.43.0**. LIVE was GREEN `10.92.3.22` **v4.42.1**. STANDBY BLUE `10.92.3.24` has the clone-date release. Switch #115 before this release.
+**Production:** **LIVE** **BLUE** `10.92.3.24` **v4.43.0** (`b9234509`). **STANDBY** **GREEN** `10.92.3.22` awaits sync. Switch #116.
 
 ---
 
