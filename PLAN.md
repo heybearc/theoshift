@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-11-03  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.42.1 LIVE** (GREEN `10.92.3.22`). STANDBY BLUE `10.92.3.24` is ahead with the clone-date dialog (`112d9eb3`), not shipped.
+**Status:** **v4.43.0** — clone dates and dialable phone contacts. Shipping from STANDBY BLUE.
 
 ---
 
@@ -23,12 +23,13 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Volunteer phone app** — v4.42.1 is on the website, including https://theoshift.com/privacy. Android internal testing is open. iOS waits on Apple. Next: testers use the Play opt-in link.
-- **Event clone** — Dated shifts and documents did not follow a new date. The May 16 copy was repaired in the database. The dialog that asks for new dates is on STANDBY only.
-- **FB-036 (age and photo) still blocked.** LIVE is v4.42.1 on GREEN. Count locking and the phone count screen shipped in v4.42.0.
+- **Volunteer phone app** — Android internal testing is open. The contact dialer fix is in the next Play upload. iOS waits on Apple.
+- **Event clone** — The clone window asks for the new dates and moves shifts with the start date. A failed clone stays open.
+- **FB-036 (age and photo) still blocked.** Count locking and the phone count screen shipped in v4.42.0.
 - **Mobile readiness across TheoShift** — Users, Locations, and Feedback phone layouts shipped in v4.33.10. Positions and Volunteers shipped in v4.33.9. Early Check-In volunteer path done through **v4.29.7**.
 
 ### Recently Completed (2026-11-03)
+- ✅ **v4.43.0** — Clone asks for dates and moves shifts. Failed clone keeps the window. Phone contacts dial digits only.
 - ✅ **v4.42.1** — Public privacy page for the website and phone app. Shipped + synced (`55eb8b89`)
 
 ### Recently Completed (2026-10-31)

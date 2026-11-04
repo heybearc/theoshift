@@ -68,16 +68,16 @@ export default function CloningEventsPage({ userRole }: CloningEventsProps) {
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Select What to Clone</h4>
-                      <p className="text-gray-600">Choose which items to copy (see options below)</p>
+                      <h4 className="font-semibold text-gray-900">Choose the new dates</h4>
+                      <p className="text-gray-600">Set the start and end dates. The end date has to be on or after the start date. Shifts move with the start date when positions are included.</p>
                     </div>
                   </div>
 
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">5</div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Enter New Event Name</h4>
-                      <p className="text-gray-600">Give your cloned event a unique name</p>
+                      <h4 className="font-semibold text-gray-900">Select What to Clone</h4>
+                      <p className="text-gray-600">Choose which items to copy, and give the new event a name</p>
                     </div>
                   </div>
 
@@ -291,7 +291,8 @@ export default function CloningEventsPage({ userRole }: CloningEventsProps) {
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <h4 className="font-semibold text-gray-900 mb-2">Does cloning copy count times or documents?</h4>
                 <p className="text-gray-600 text-sm">
-                  The clone dialog asks for the new start and end dates. Shifts move with the start date.
+                  The clone dialog asks for the new start and end dates. The end date has to be on or after the start date. Shifts move with the start date.
+                  If the copy cannot be created, the window stays open so you can correct the dates and try again.
                   Documents are copied when that box is checked, including the station diagram.
                   Count times are not copied. The new event starts with none.
                   To move a copy later, edit its start date and save. The shifts move by the same number of days.

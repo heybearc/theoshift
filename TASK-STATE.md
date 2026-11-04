@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-11-03  
 **Branch:** `main`  
-**Production:** **LIVE** **GREEN** `10.92.3.22` **v4.42.1** (`55eb8b89`). **STANDBY** **BLUE** `10.92.3.24` has unreleased clone-date work (`112d9eb3`). Switch #115.
+**Production:** Shipping **v4.43.0**. LIVE was GREEN `10.92.3.22` **v4.42.1**. STANDBY BLUE `10.92.3.24` has the clone-date release. Switch #115 before this release.
 
 ---
 
@@ -12,10 +12,11 @@ First store release. Android app bundle is built. iOS and both store listings ar
 
 ### What I'm doing right now
 
-Play internal testing is up. The opt-in link works when opened in a new tab. Clone-date and document copy are on STANDBY only. iOS still waits on Apple Developer approval.
+Play internal testing is up. v4.43.0 asks for dates when cloning an event and sends a new Android build so contact numbers dial. iOS still waits on Apple Developer approval.
 
 ### Recent completions
 
+- ✅ **v4.43.0** — Clone dates move shifts. Failed clone keeps the dialog. Android contacts dial digits only (2026-11-03).
 - ✅ **v4.42.1** — Public privacy page for the website and phone app (`55eb8b89`, released 2026-11-03). Android production `.aab` is built.
 - ✅ **v4.42.0** — Phone counts, contacts, station diagram, pinned announcements. Submitted counts stay locked (`0dffca3c`, released 2026-10-31)
 - ✅ **v4.41.0** — Lanyard check-in keeps who had the badge (`08fc3d3a`, released 2026-10-31)
