@@ -29,3 +29,10 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - iOS build did not start. No Apple distribution certificate. Needs an interactive `eas build` signed into the Apple Developer account.
 - Google Play still needs a Console app before `eas submit`.
 - FB-036 still blocked.
+
+### Evening (2026-11-03)
+- Play internal testing is created. Opt-in link works in a new tab. “Item not found” was the Play Store account/tab, not a missing bundle.
+- Service account is only for `eas submit`. Manual Play upload does not need it.
+- Cloned “Attendants - Circuit Assembly with Branch Rep” kept October 31 shifts and copied no documents. Database repair moved 84 shifts to 2027-05-16 and copied 3 documents.
+- Clone date dialog and “save start date moves shifts” are on STANDBY BLUE (`112d9eb3`), not LIVE.
+- iOS still blocked on Apple Developer review. FB-036 still blocked.

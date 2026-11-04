@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-11-03  
 **Branch:** `main`  
-**Production:** **LIVE** **GREEN** `10.92.3.22` **v4.42.1** (`55eb8b89`). **STANDBY** **BLUE** `10.92.3.24` synced. Switch #115.
+**Production:** **LIVE** **GREEN** `10.92.3.22` **v4.42.1** (`55eb8b89`). **STANDBY** **BLUE** `10.92.3.24` has unreleased clone-date work (`112d9eb3`). Switch #115.
 
 ---
 
@@ -12,7 +12,7 @@ First store release. Android app bundle is built. iOS and both store listings ar
 
 ### What I'm doing right now
 
-Privacy page is on LIVE. Android submit is set to the internal track. Upload is blocked until Play Console has the app and a Google service account key is stored in Expo. iOS still waits on Apple Developer approval.
+Play internal testing is up. The opt-in link works when opened in a new tab. Clone-date and document copy are on STANDBY only. iOS still waits on Apple Developer approval.
 
 ### Recent completions
 
@@ -45,14 +45,14 @@ Privacy page is on LIVE. Android submit is set to the internal track. Upload is 
 
 ### Next steps
 
-1. In Play Console, create the TheoShift app (`app.theoshift.volunteer`) and add a Google service account key for Expo Submit.
-2. From `mobile/`, run `npx eas-cli submit --platform android --profile production --latest`. That profile now uploads to the internal testing track.
+1. Ship the clone-date work from STANDBY to LIVE when asked. Until then, https://theoshift.com still has the old clone dialog.
+2. Testers install from the Play internal opt-in link, opened in a new tab, on the invited Google account.
 3. In `mobile/`, run `npx eas-cli build --platform ios --profile production` after Apple approves the developer account.
 4. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
 
 ## Exact next command
 
-Create the Play Console app, then from `mobile/` run `npx eas-cli submit --platform android --profile production --latest`.
+Ship STANDBY (`112d9eb3`) when the clone date dialog should be on https://theoshift.com.
 
 ---
 
