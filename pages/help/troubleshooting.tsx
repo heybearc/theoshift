@@ -65,6 +65,7 @@ export default function TroubleshootingPage() {
                     <p className="font-semibold text-gray-900 mb-2">Solutions:</p>
                     <ul className="space-y-1 text-sm text-gray-600">
                       <li>• <strong>Sign in again:</strong> Sessions expire after 30 days of inactivity</li>
+                      <li>• <strong>Lost phone:</strong> Open Phones signed in and sign that phone out. It stops the next time it reaches TheoShift.</li>
                       <li>• <strong>Stay active:</strong> Regular use prevents automatic logout</li>
                       <li>• <strong>Save work frequently:</strong> Don't lose data due to timeouts</li>
                       <li>• <strong>Use "Remember Me":</strong> If available, to extend session length</li>

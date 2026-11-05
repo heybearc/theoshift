@@ -278,6 +278,7 @@ For issues or questions:
 4. Contact the project maintainer for deployment access
 
 ## 📝 Version History
+- **v4.44.0** (2026-11-05) - A lost phone can be signed out, and store review can use a sign-in code
 - **v4.43.0** (2026-11-03) - Cloning asks for the new dates, and those dates move the shifts
 - **v4.42.1** (2026-11-03) - A public privacy page covers the website and the phone app
 - **v4.42.0** (2026-10-31) - The phone app can enter a count, open contacts and the station diagram, and acknowledge a pinned announcement. A submitted count stays locked.

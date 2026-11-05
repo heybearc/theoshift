@@ -43,7 +43,13 @@ export default function VolunteerPortalHelp({ userRole }: VolunteerPortalHelpPro
                 </ol>
                 <div className="mt-3 space-y-2">
                   <p className="text-sm text-gray-600">
+                    Leave the sign-in code blank unless someone gave you one. Most volunteers use the email link.
+                  </p>
+                  <p className="text-sm text-gray-600">
                     🔒 <strong>Security:</strong> The link expires in 24 hours and can only be used once.
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    If you lose a phone, open <strong>Phones</strong> on the website, or <strong>More → Phones signed in</strong> in the app, and sign that phone out.
                   </p>
                   <p className="text-sm text-gray-600">
                     📱 <strong>Mobile Friendly:</strong> Works great on phones and tablets!
