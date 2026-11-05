@@ -246,6 +246,12 @@ export default function MobileVolunteerDashboard({
             </div>
             <div className="flex items-center space-x-2">
               <Link
+                href="/volunteer/devices"
+                className="px-3 py-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-all text-sm font-semibold"
+              >
+                Phones
+              </Link>
+              <Link
                 href="/profile"
                 className="p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-all"
                 aria-label="My Profile"

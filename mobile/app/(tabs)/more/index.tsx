@@ -66,6 +66,11 @@ export default function MoreScreen() {
         detail={needsProfile ? 'Needs confirmation' : 'Email and phone'}
         onPress={() => router.push('/more/profile')}
       />
+      <MenuRow
+        title="Phones signed in"
+        detail="Sign out a lost phone"
+        onPress={() => router.push('/more/phones')}
+      />
       {data?.isIVSTeamMember ? (
         <MenuRow
           title="Early check-in"

@@ -48,6 +48,7 @@ export default function AdminLayout({ children, title, breadcrumbs = [], userLas
     { label: 'Audit Logs', href: '/admin/audit-logs', icon: '📝' },
     { label: 'System Ops', href: '/admin/system-ops', icon: '⚡' },
     { label: 'Email Config', href: '/admin/email-config', icon: '📧' },
+    { label: 'Review sign-in', href: '/admin/review-signin', icon: '⭐' },
   ]
 
   const eventTabs = [

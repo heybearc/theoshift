@@ -2,6 +2,7 @@ import NextAuth, { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { prisma } from '../../../src/lib/prisma'
 import { findUserByEmailCaseInsensitive } from '@/lib/userEmailLookup'
+import { volunteerAccessAllows } from '@/lib/volunteerSignins'
 import bcrypt from 'bcryptjs'
 
 export const authOptions: NextAuthOptions = {
@@ -79,15 +80,33 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
+      if (token.role === 'VOLUNTEER' && typeof token.sub === 'string') {
+        const allowed = await volunteerAccessAllows(
+          token.sub,
+          typeof token.sid === 'string' ? token.sid : null,
+          typeof token.iat === 'number' ? token.iat : undefined
+        )
+        if (!allowed) {
+          token.signinRevoked = true
+          delete token.sub
+        }
+      }
+
       return token
     },
     async session({ session, token }) {
+      if (token?.signinRevoked) {
+        session.user.id = ''
+        session.user.role = ''
+        return session
+      }
       if (token && session.user) {
         session.user.id = token.sub!
         session.user.role = token.role as string
         ;(session.user as any).congregation = token.congregation as string
         if (token.email) session.user.email = token.email as string
         if (token.name) session.user.name = token.name as string
+        if (typeof token.sid === 'string') session.sid = token.sid
       }
       return session
     },

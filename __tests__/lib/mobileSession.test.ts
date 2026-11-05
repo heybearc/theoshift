@@ -12,17 +12,22 @@ describe('mobileSession', () => {
   })
 
   it('round-trips a volunteer token', () => {
-    const token = signMobileToken({
-      id: 'vol_1',
-      email: 'ada@example.com',
-      firstName: 'Ada',
-      lastName: 'Lovelace',
-    })
+    const token = signMobileToken(
+      {
+        id: 'vol_1',
+        email: 'ada@example.com',
+        firstName: 'Ada',
+        lastName: 'Lovelace',
+      },
+      'signin_1'
+    )
     expect(verifyMobileToken(token)).toEqual({
       sub: 'vol_1',
       email: 'ada@example.com',
       role: 'VOLUNTEER',
       name: 'Ada Lovelace',
+      sid: 'signin_1',
+      iat: expect.any(Number),
     })
   })
 

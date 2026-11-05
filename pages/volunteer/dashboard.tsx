@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { useSession, signOut } from 'next-auth/react'
+import { revokeVolunteerBrowserSignIn } from '@/lib/revokeVolunteerBrowser'
 import Head from 'next/head'
 import Link from 'next/link'
 import { format, parseISO } from 'date-fns'
@@ -745,7 +746,7 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
     localStorage.removeItem('selectedEventId')
     localStorage.removeItem('profileVerified')
     
-    // CRITICAL: Sign out from NextAuth to clear the session cookie
+    await revokeVolunteerBrowserSignIn()
     await signOut({ redirect: false })
     
     // Redirect to volunteer login
@@ -1125,7 +1126,7 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
           <h2 className="text-xl font-bold text-gray-900 mb-2">Unable to Load Dashboard</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={() => signOut({ callbackUrl: '/auth/signin?role=volunteer' })}
+            onClick={() => void handleLogout()}
             className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors inline-flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1173,7 +1174,7 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
           availabilityRequests={availabilityRequests}
           onAvailabilityResponse={handleAvailabilityResponse}
           onRefresh={loadDashboard}
-          onSignOut={() => signOut({ callbackUrl: '/volunteer/login' })}
+          onSignOut={() => void handleLogout()}
           chatEnabled={chatChannels.length > 0}
           chatChannelCount={chatChannels.length}
           chatUnreadCount={totalUnreadChat}
@@ -1218,6 +1219,9 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
                 <span className="text-sm text-gray-700">
                   {volunteer?.firstName} {volunteer?.lastName}
                 </span>
+                <Link href="/volunteer/devices" className="text-sm text-blue-600 hover:text-blue-800">
+                  Phones
+                </Link>
                 <button
                   onClick={handleSwitchEvent}
                   className="text-sm text-blue-600 hover:text-blue-800"

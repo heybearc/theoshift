@@ -43,6 +43,7 @@ export default function SignIn() {
   
   // Volunteer email form
   const [volunteerEmail, setVolunteerEmail] = useState('')
+  const [volunteerCode, setVolunteerCode] = useState('')
 
   // Load saved role preference and handle URL params
   useEffect(() => {
@@ -95,11 +96,14 @@ export default function SignIn() {
 
   const handleVolunteerEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    await sendVolunteerLink()
+  }
+
+  const sendVolunteerLink = async () => {
     setLoading(true)
     setError('')
 
     try {
-      // Call our custom magic link API
       const response = await fetch('/api/auth/magic-link/send', {
         method: 'POST',
         headers: {
@@ -117,6 +121,28 @@ export default function SignIn() {
         setEmailSent(true)
         setLoading(false)
       }
+    } catch (error) {
+      setError('An error occurred. Please try again.')
+      setLoading(false)
+    }
+  }
+
+  const signInVolunteerWithCode = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const response = await fetch('/api/auth/sign-in-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: volunteerEmail, code: volunteerCode, client: 'web' })
+      })
+      const data = await response.json()
+      if (!response.ok) {
+        setError(data.error || 'Could not sign in with that code')
+        setLoading(false)
+        return
+      }
+      router.push(data.data?.redirect || '/volunteer/select-event')
     } catch (error) {
       setError('An error occurred. Please try again.')
       setLoading(false)
@@ -357,6 +383,21 @@ export default function SignIn() {
                   />
                 </div>
 
+                <div>
+                  <label htmlFor="volunteer-code" className="block text-sm font-semibold text-gray-700 mb-2">
+                    Sign-in code
+                  </label>
+                  <input
+                    id="volunteer-code"
+                    type="password"
+                    autoComplete="current-password"
+                    value={volunteerCode}
+                    onChange={(e) => setVolunteerCode(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 bg-gray-50 focus:bg-white text-base"
+                    placeholder="Only if you were given a code"
+                  />
+                </div>
+
                 <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
                   <div className="flex">
                     <div className="flex-shrink-0">
@@ -366,7 +407,7 @@ export default function SignIn() {
                     </div>
                     <div className="ml-3">
                       <p className="text-sm text-blue-700">
-                        We&apos;ll send you a secure sign-in link. Click it to access your dashboard.
+                        Invited volunteers only. Leave the code blank and we will email a sign-in link. If you were given a code, enter it and sign in with that.
                       </p>
                     </div>
                   </div>
@@ -384,11 +425,19 @@ export default function SignIn() {
                 )}
 
                 <button
-                  type="submit"
-                  disabled={loading}
+                  type="button"
+                  disabled={loading || !volunteerCode.trim()}
+                  onClick={() => void signInVolunteerWithCode()}
                   className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-semibold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
-                  {loading ? 'Sending...' : 'Send Sign-In Link'}
+                  {loading ? 'Please wait...' : 'Sign in with code'}
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex justify-center items-center py-3 px-4 border border-green-600 rounded-lg shadow-sm text-base font-semibold text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                >
+                  {loading ? 'Please wait...' : 'Send Sign-In Link'}
                 </button>
               </form>
 

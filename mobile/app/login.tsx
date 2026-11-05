@@ -16,11 +16,12 @@ import { friendlyAuthError } from '@/lib/config'
 import { useAuth } from '@/lib/auth'
 
 export default function LoginScreen() {
-  const { apiBase, setApiBase, requestLink, completeLink, linkError, clearLinkError } = useAuth()
+  const { apiBase, setApiBase, requestLink, completeLink, signInWithCode, linkError, clearLinkError } = useAuth()
   const [serverDraft, setServerDraft] = useState(apiBase)
   const [email, setEmail] = useState('')
+  const [code, setCode] = useState('')
   const [pastedLink, setPastedLink] = useState('')
-  const [busy, setBusy] = useState<'link' | 'paste' | null>(null)
+  const [busy, setBusy] = useState<'link' | 'paste' | 'code' | null>(null)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [showServer, setShowServer] = useState(__DEV__)
@@ -37,6 +38,21 @@ export default function LoginScreen() {
       setMessage('Check your email on this phone, then open the link. You can also paste it below.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not send the sign-in link')
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  async function useCode() {
+    setBusy('code')
+    setError('')
+    setMessage('')
+    try {
+      await setApiBase(serverDraft)
+      clearLinkError()
+      await signInWithCode(email, code)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not sign in with that code')
     } finally {
       setBusy(null)
     }
@@ -73,8 +89,8 @@ export default function LoginScreen() {
         </Text>
         <Text style={styles.title}>Sign in</Text>
         <Text style={styles.help}>
-          Use the email on your volunteer record. We will email a sign-in link to this phone. Open that link, or paste
-          it below.
+          This app is for invited volunteers. Use the email on your volunteer record. We will email a sign-in link to
+          this phone. If you were given a sign-in code, enter it instead.
         </Text>
 
         {showServer ? (
@@ -103,12 +119,29 @@ export default function LoginScreen() {
           style={styles.input}
         />
 
+        <Text style={styles.label}>Sign-in code</Text>
+        <TextInput
+          value={code}
+          onChangeText={setCode}
+          autoCapitalize="none"
+          autoCorrect={false}
+          secureTextEntry
+          placeholder="Only if you were given a code"
+          style={styles.input}
+        />
         <Pressable
-          style={[styles.button, (!email.trim() || busy) && styles.buttonDisabled]}
+          style={[styles.button, (!email.trim() || !code.trim() || busy) && styles.buttonDisabled]}
+          disabled={!email.trim() || !code.trim() || !!busy}
+          onPress={() => void useCode()}
+        >
+          {busy === 'code' ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in with code</Text>}
+        </Pressable>
+        <Pressable
+          style={[styles.secondary, (!email.trim() || busy) && styles.buttonDisabled]}
           disabled={!email.trim() || !!busy}
           onPress={() => void sendLink()}
         >
-          {busy === 'link' ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Email me a sign-in link</Text>}
+          {busy === 'link' ? <ActivityIndicator color={theme.button} /> : <Text style={styles.secondaryText}>Email me a sign-in link</Text>}
         </Pressable>
 
         <Text style={styles.label}>Paste the link</Text>

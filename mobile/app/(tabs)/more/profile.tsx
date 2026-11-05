@@ -75,7 +75,8 @@ export default function ProfileScreen() {
         <Text style={styles.buttonText}>{saving ? 'Saving…' : 'Save'}</Text>
       </Pressable>
       <Text style={styles.privacy}>
-        Signing out removes the sign-in on this phone. Ask an overseer to change or remove your volunteer record.
+        Signing out removes the sign-in on this phone. Phones signed in can also sign out a lost phone. Ask an
+        overseer to change or remove your volunteer record.
       </Text>
       <Pressable onPress={() => void Linking.openURL('https://theoshift.com/privacy')}>
         <Text style={styles.link}>Privacy</Text>

@@ -72,6 +72,14 @@ export default function AdminDashboard({ user, stats, userLastSeenVersion, relea
       iconColor: 'text-indigo-600'
     },
     {
+      title: 'Store review sign-in',
+      description: 'Email and code for App Store and Play review',
+      href: '/admin/review-signin',
+      icon: '⭐',
+      color: 'bg-amber-50 hover:bg-amber-100 border-amber-200',
+      iconColor: 'text-amber-600'
+    },
+    {
       title: 'Session Management',
       description: 'Monitor and manage active user sessions',
       href: '/admin/sessions',

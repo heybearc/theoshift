@@ -224,12 +224,19 @@ export default function ProfilePage() {
                 {profile?.role ? ` · ${profile.role}` : ''}
               </p>
             </div>
-            <Link
-              href="/events/select"
-              className="text-sm text-blue-600 hover:text-blue-800 whitespace-nowrap"
-            >
-              ← Events
-            </Link>
+            <div className="flex flex-col items-end gap-2">
+              {session?.user?.role === 'VOLUNTEER' ? (
+                <Link href="/volunteer/devices" className="text-sm text-blue-600 hover:text-blue-800 whitespace-nowrap">
+                  Phones signed in
+                </Link>
+              ) : null}
+              <Link
+                href="/events/select"
+                className="text-sm text-blue-600 hover:text-blue-800 whitespace-nowrap"
+              >
+                ← Events
+              </Link>
+            </div>
           </div>
 
           <form onSubmit={handleSave} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4">

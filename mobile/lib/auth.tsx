@@ -3,6 +3,7 @@ import * as Linking from 'expo-linking'
 import * as SecureStore from 'expo-secure-store'
 import { apiRequest } from './api'
 import { defaultApiBase, friendlyAuthError, normalizeApiBase, parseSignInLink, storeApiBase } from './config'
+import { phonePlatform } from './platform'
 import { setUnauthorizedHandler } from './api'
 
 const TOKEN_KEY = 'theoshift.token'
@@ -26,6 +27,8 @@ type AuthContextValue = {
   clearLinkError: () => void
   requestLink: (email: string) => Promise<void>
   completeLink: (url: string) => Promise<void>
+  signInWithCode: (email: string, code: string) => Promise<void>
+  replaceToken: (accessToken: string) => Promise<void>
   updateVolunteer: (patch: Partial<VolunteerProfile>) => Promise<void>
   signOut: () => Promise<void>
 }
@@ -41,6 +44,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   apiBaseRef.current = apiBase
   const [linkError, setLinkError] = useState('')
   const handledLinks = useRef(new Set<string>())
+  const tokenRef = useRef<string | null>(null)
+  const signingOut = useRef(false)
+  tokenRef.current = token
 
   useEffect(() => {
     let cancelled = false
@@ -111,12 +117,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { accessToken: string; volunteer: VolunteerProfile }
     }>(apiBaseRef.current, '/api/auth/mobile/exchange', {
       method: 'POST',
-      body: parsed,
+      body: { ...parsed, platform: phonePlatform() },
     })
-    await SecureStore.setItemAsync(TOKEN_KEY, result.data.accessToken)
-    await SecureStore.setItemAsync(VOLUNTEER_KEY, JSON.stringify(result.data.volunteer))
-    setToken(result.data.accessToken)
-    setVolunteer(result.data.volunteer)
+    await saveSession(result.data.accessToken, result.data.volunteer)
+  }
+
+  async function saveSession(accessToken: string, profile: VolunteerProfile) {
+    await SecureStore.setItemAsync(TOKEN_KEY, accessToken)
+    await SecureStore.setItemAsync(VOLUNTEER_KEY, JSON.stringify(profile))
+    tokenRef.current = accessToken
+    setToken(accessToken)
+    setVolunteer(profile)
+  }
+
+  async function signInWithCode(email: string, code: string) {
+    setLinkError('')
+    const result = await apiRequest<{
+      data: { accessToken: string; volunteer: VolunteerProfile }
+    }>(apiBaseRef.current, '/api/auth/sign-in-code', {
+      method: 'POST',
+      body: { email: email.trim(), code, client: 'mobile', platform: phonePlatform() },
+    })
+    await saveSession(result.data.accessToken, result.data.volunteer)
+  }
+
+  async function replaceToken(accessToken: string) {
+    await SecureStore.setItemAsync(TOKEN_KEY, accessToken)
+    tokenRef.current = accessToken
+    setToken(accessToken)
   }
 
   useEffect(() => {
@@ -134,10 +162,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function signOut() {
-    await SecureStore.deleteItemAsync(TOKEN_KEY)
-    await SecureStore.deleteItemAsync(VOLUNTEER_KEY)
-    setToken(null)
-    setVolunteer(null)
+    if (signingOut.current) return
+    signingOut.current = true
+    const current = tokenRef.current
+    try {
+      if (current) {
+        await apiRequest(apiBaseRef.current, '/api/volunteer/sessions', {
+          method: 'POST',
+          token: current,
+          body: { action: 'revoke-current' },
+        })
+      }
+    } catch {
+      // Still clear this phone if the server is unreachable.
+    } finally {
+      await SecureStore.deleteItemAsync(TOKEN_KEY)
+      await SecureStore.deleteItemAsync(VOLUNTEER_KEY)
+      tokenRef.current = null
+      setToken(null)
+      setVolunteer(null)
+      signingOut.current = false
+    }
   }
 
   const value = {
@@ -150,6 +195,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearLinkError: () => setLinkError(''),
     requestLink,
     completeLink,
+    signInWithCode,
+    replaceToken,
     updateVolunteer,
     signOut,
   }

@@ -170,6 +170,21 @@ model volunteers {
   chat_push_subscriptions      event_chat_push_subscriptions[]
   chat_pin_acknowledgments     event_chat_pin_acknowledgments[]
   entered_count_group_entries  count_group_entries[]                 @relation("count_group_entries_entered_by_volunteer")
+  sessionValidAfter            DateTime?
+  volunteer_signins            volunteer_signins[]
+}
+
+model volunteer_signins {
+  id          String     @id @default(uuid())
+  volunteerId String
+  platform    String
+  createdAt   DateTime   @default(now())
+  lastSeenAt  DateTime   @default(now())
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  volunteers  volunteers @relation(fields: [volunteerId], references: [id], onDelete: Cascade)
+
+  @@index([volunteerId])
 }
 
 model count_sessions {

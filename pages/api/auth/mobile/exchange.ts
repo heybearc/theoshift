@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { consumeMagicLink } from '@/lib/magicLink'
-import { signMobileToken } from '@/lib/mobileSession'
+import { createVolunteerSignin, mobileAccessToken } from '@/lib/volunteerSignins'
+import { normalizeSigninPlatform } from '@/lib/signinAccess'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -20,7 +21,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(status).json({ success: false, error: result.error })
     }
 
-    const accessToken = signMobileToken(result.volunteer)
+    const signin = await createVolunteerSignin(result.volunteer.id, normalizeSigninPlatform(req.body?.platform))
+    const accessToken = mobileAccessToken(
+      { ...result.volunteer, congregation: '' },
+      signin.id
+    )
     return res.status(200).json({
       success: true,
       data: {

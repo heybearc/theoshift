@@ -8,6 +8,7 @@ declare module 'next-auth' {
       name: string
       role: string
     }
+    sid?: string
   }
 
   interface User {
@@ -22,5 +23,7 @@ declare module 'next-auth/jwt' {
   interface JWT {
     userId: string
     role: string
+    sid?: string
+    signinRevoked?: boolean
   }
 }
