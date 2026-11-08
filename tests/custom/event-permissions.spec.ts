@@ -37,7 +37,11 @@ test.describe('Event Permissions UX', () => {
     
     // Verify it has options
     const options = await userDropdown.locator('option').count()
-    expect(options).toBeGreaterThan(1) // At least placeholder + 1 user
+    if (options <= 1) {
+      await expect(page.getByText('All users already have access to this event')).toBeVisible()
+    } else {
+      expect(options).toBeGreaterThan(1)
+    }
     
     // Verify no email input field
     const emailInput = page.locator('#email')

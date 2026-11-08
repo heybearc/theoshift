@@ -22,15 +22,7 @@ test.describe('Date Display Verification', () => {
     // Click first event
     await page.click('button:has-text("Select Event")')
     await page.waitForURL('**/events/**', { timeout: 10000 })
-    await page.waitForLoadState('load')
-    await page.waitForTimeout(500)
-    
-    // Look for any date on the page - event details should have dates
-    const pageContent = await page.content()
-    const hasDate = /[A-Z][a-z]{2,8}\s+\d{1,2},\s+\d{4}/.test(pageContent)
-    
-    // Verify at least one date is displayed
-    expect(hasDate).toBeTruthy()
+    await expect(page.getByText(/[A-Z][a-z]+ \d{1,2}, \d{4}/).first()).toBeVisible({ timeout: 15000 })
   })
 
 })
