@@ -92,6 +92,7 @@ export default function LoginScreen() {
         <Text style={styles.title}>Sign in</Text>
         <View style={styles.toggle}>
           <Pressable
+            testID="sign-in-oversight"
             style={[styles.toggleItem, mode === 'oversight' && styles.toggleOn]}
             onPress={() => {
               setMode('oversight')
@@ -103,6 +104,7 @@ export default function LoginScreen() {
             <Text style={[styles.toggleText, mode === 'oversight' && styles.toggleTextOn]}>Oversight</Text>
           </Pressable>
           <Pressable
+            testID="sign-in-volunteer"
             style={[styles.toggleItem, mode === 'volunteer' && styles.toggleOn]}
             onPress={() => {
               setMode('volunteer')
@@ -139,6 +141,7 @@ export default function LoginScreen() {
           <>
             <Text style={styles.label}>Email</Text>
             <TextInput
+              testID="sign-in-email"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"

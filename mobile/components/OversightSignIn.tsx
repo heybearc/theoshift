@@ -46,6 +46,7 @@ export default function OversightSignIn({
       )}
       <Text style={styles.label}>Email</Text>
       <TextInput
+        testID="sign-in-staff-email"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
@@ -56,6 +57,7 @@ export default function OversightSignIn({
       />
       <Text style={styles.label}>Password</Text>
       <TextInput
+        testID="sign-in-staff-password"
         value={password}
         onChangeText={setPassword}
         autoCapitalize="none"
@@ -65,6 +67,7 @@ export default function OversightSignIn({
         style={styles.input}
       />
       <Pressable
+        testID="sign-in-staff-submit"
         style={[styles.button, (!email.trim() || !password || busy) && styles.buttonDisabled]}
         disabled={!email.trim() || !password || busy}
         onPress={() => void submit()}

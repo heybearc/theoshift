@@ -1,0 +1,27 @@
+appId: app.theoshift.volunteer
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Sign in"
+    timeout: 120000
+- assertVisible:
+    id: "sign-in-volunteer"
+- assertVisible: "Email me a sign-in link"
+- tapOn:
+    id: "sign-in-oversight"
+- extendedWaitUntil:
+    visible: "Sign in as oversight"
+    timeout: 10000
+- assertVisible: "Event tools use the same email and password as the website."
+- assertVisible:
+    id: "sign-in-staff-email"
+- assertVisible:
+    id: "sign-in-staff-password"
+- tapOn:
+    id: "sign-in-volunteer"
+- extendedWaitUntil:
+    visible: "Email me a sign-in link"
+    timeout: 10000
+- assertVisible:
+    id: "sign-in-email"

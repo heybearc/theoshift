@@ -36,7 +36,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "release:ios": "sh scripts/fastlane.sh ios release",
-    "release:android": "sh scripts/fastlane.sh android release"
+    "release:android": "sh scripts/fastlane.sh android release",
+    "test:phone": "sh scripts/phone-test.sh"
   },
   "private": true
 }
