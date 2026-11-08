@@ -20,7 +20,7 @@
     },
     "android": {
       "package": "app.theoshift.volunteer",
-      "versionCode": 4,
+      "versionCode": 5,
       "usesCleartextTraffic": false,
       "intentFilters": [
         {

@@ -36,7 +36,7 @@ end
 
 def replace_once!(path, pattern, label:)
   contents = File.read(path)
-  updated = contents.sub(pattern) { yield }
+  updated = contents.sub(pattern) { yield Regexp.last_match }
   UI.user_error!("Could not update #{label} in #{path}") if updated == contents
   File.write(path, updated)
 end
@@ -44,9 +44,9 @@ end
 def bump_ios_build_number!
   path = File.join(PROJECT, "app.json")
   number = nil
-  replace_once!(path, /("buildNumber"\s*:\s*")(\d+)(")/, label: "ios.buildNumber") do
-    number = (Regexp.last_match(2).to_i + 1).to_s
-    "#{Regexp.last_match(1)}#{number}#{Regexp.last_match(3)}"
+  replace_once!(path, /("buildNumber"\s*:\s*")(\d+)(")/, label: "ios.buildNumber") do |match|
+    number = (match[2].to_i + 1).to_s
+    "#{match[1]}#{number}#{match[3]}"
   end
   UI.message("iOS build number is now #{number}")
   number
@@ -55,21 +55,30 @@ end
 def bump_android_version_code!
   app_path = File.join(PROJECT, "app.json")
   gradle_path = File.join(PROJECT, "android/app/build.gradle")
-  app_contents = File.read(app_path)
-  app_code = app_contents[/("versionCode"\s*:\s*)(\d+)/, 2].to_i
+  app_code = File.read(app_path)[/("versionCode"\s*:\s*)(\d+)/, 2].to_i
   gradle_code = File.exist?(gradle_path) ? File.read(gradle_path)[/versionCode\s+(\d+)/, 1].to_i : 0
   number = [app_code, gradle_code].max + 1
-  replace_once!(app_path, /("versionCode"\s*:\s*)(\d+)/, label: "android.versionCode") do
-    "#{Regexp.last_match(1)}#{number}"
+  replace_once!(app_path, /("versionCode"\s*:\s*)(\d+)/, label: "android.versionCode") do |match|
+    "#{match[1]}#{number}"
   end
   UI.message("Android version code is now #{number}. Play Console rejects a code it has already received.")
   number
 end
 
 def prebuild!(platform)
+  ENV["CI"] = "1"
   Dir.chdir(PROJECT) do
-    sh("npx", "expo", "prebuild", "--platform", platform, "--non-interactive")
+    sh("npx", "expo", "prebuild", "--platform", platform)
   end
+  restore_dev_scripts!
+end
+
+def restore_dev_scripts!
+  path = File.join(PROJECT, "package.json")
+  contents = File.read(path)
+  contents = contents.sub('"android": "expo run:android"', '"android": "expo start --android"')
+  contents = contents.sub('"ios": "expo run:ios"', '"ios": "expo start --ios"')
+  File.write(path, contents)
 end
 
 def ios_workspace
@@ -108,7 +117,7 @@ def ensure_android_release_signing!
   path = File.join(PROJECT, "android/app/build.gradle")
   UI.user_error!("Missing #{path}. Run expo prebuild before signing.") unless File.exist?(path)
   contents = File.read(path)
-  return if contents.include?("signingConfigs.release")
+  return if contents.include?("ANDROID_KEYSTORE_FILE")
 
   release_config = <<~GRADLE
         release {
@@ -119,7 +128,7 @@ def ensure_android_release_signing!
         }
   GRADLE
   updated = contents.sub(/signingConfigs \{\n        debug \{.*?\n        \}\n    \}/m) do |block|
-    block.sub("    }", "#{release_config}    }")
+    block.sub(/\n    \}\z/, "\n#{release_config}    }")
   end
   updated = updated.sub(
     /release \{\n            \/\/ Caution!.*?\n            signingConfig signingConfigs\.debug\n/m,
