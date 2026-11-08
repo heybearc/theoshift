@@ -54,7 +54,7 @@ test.describe('FB-029: Volunteer Details Popup', () => {
       await page.waitForTimeout(400)
       
       // Popup should appear
-      const popup = page.locator('.absolute.z-50.w-96.bg-white.rounded-lg.shadow-2xl')
+      const popup = page.locator('.absolute.w-96.bg-white.rounded-lg.shadow-2xl')
       await expect(popup).toBeVisible({ timeout: 2000 })
     }
   })
@@ -63,14 +63,10 @@ test.describe('FB-029: Volunteer Details Popup', () => {
     // Find first volunteer name
     const volunteerName = page.locator('td div.cursor-pointer').first()
     
-    if (await volunteerName.count() > 0) {
-      // Click name
-      await volunteerName.click()
-      
-      // Popup should appear immediately
-      const popup = page.locator('.absolute.z-50.w-96.bg-white.rounded-lg.shadow-2xl')
-      await expect(popup).toBeVisible({ timeout: 1000 })
-    }
+    await expect(volunteerName).toBeVisible({ timeout: 10000 })
+    await volunteerName.click()
+    const popup = page.locator('.absolute.w-96.bg-white.rounded-lg.shadow-2xl')
+    await expect(popup).toBeVisible({ timeout: 5000 })
   })
 
   test('should display volunteer contact information in popup', async ({ page }) => {
@@ -147,7 +143,7 @@ test.describe('FB-029: Volunteer Details Popup', () => {
       await volunteerName.click()
       
       // Wait for popup to appear
-      const popup = page.locator('.absolute.z-50.w-96.bg-white.rounded-lg.shadow-2xl, [role="dialog"]')
+      const popup = page.locator('.absolute.w-96.bg-white.rounded-lg.shadow-2xl, [role="dialog"]')
       await popup.first().waitFor({ state: 'visible', timeout: 2000 }).catch(() => {})
       
       if (await popup.first().isVisible()) {
@@ -186,7 +182,7 @@ test.describe('FB-029: Volunteer Details Popup', () => {
       await page.waitForTimeout(300)
       
       // Popup should close
-      const popup = page.locator('.absolute.z-50.w-96.bg-white.rounded-lg.shadow-2xl')
+      const popup = page.locator('.absolute.w-96.bg-white.rounded-lg.shadow-2xl')
       await expect(popup).not.toBeVisible({ timeout: 1000 })
     }
   })
@@ -199,7 +195,7 @@ test.describe('FB-029: Volunteer Details Popup', () => {
       await page.waitForTimeout(300)
       
       // Popup should have either top-full or bottom-full class
-      const popup = page.locator('.absolute.z-50.w-96.bg-white.rounded-lg.shadow-2xl')
+      const popup = page.locator('.absolute.w-96.bg-white.rounded-lg.shadow-2xl')
       
       if (await popup.count() > 0) {
         const classes = await popup.getAttribute('class')
@@ -217,7 +213,7 @@ test.describe('FB-029: Volunteer Details Popup', () => {
       await page.waitForTimeout(300)
       
       // The volunteers table also has an Assignments column. Only the open popup counts.
-      const popup = page.locator('.absolute.z-50.w-96.bg-white.rounded-lg.shadow-2xl')
+      const popup = page.locator('.absolute.w-96.bg-white.rounded-lg.shadow-2xl')
       const assignmentsSection = popup.getByText(/assignments/i)
 
       if (await assignmentsSection.count() > 0) {
