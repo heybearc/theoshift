@@ -216,6 +216,12 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
   const [availabilityComments, setAvailabilityComments] = useState<Record<string, string>>({})
   const [isMobile, setIsMobile] = useState(false)
   const [activeTab, setActiveTab] = useState<'dashboard' | 'checkin' | 'request'>('dashboard')
+
+  useEffect(() => {
+    if (!router.isReady) return
+    const tab = router.query.tab
+    if (tab === 'request' || tab === 'checkin' || tab === 'dashboard') setActiveTab(tab)
+  }, [router.isReady, router.query.tab])
   const [viewingDocument, setViewingDocument] = useState<Document | null>(null)
   const [chatChannels, setChatChannels] = useState<ChatChannel[]>([])
   const [chatLoading, setChatLoading] = useState(false)

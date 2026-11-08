@@ -6,7 +6,7 @@ import { profileNeedsAttention, useDashboard } from '@/lib/dashboard'
 import { useAuth } from '@/lib/auth'
 
 export default function MoreScreen() {
-  const { signOut } = useAuth()
+  const { token, signOut } = useAuth()
   const { data, loading, error, reload } = useDashboard()
   const needsProfile = profileNeedsAttention(data?.volunteer)
   const pendingAnnouncements = data?.announcements?.length || 0
@@ -37,6 +37,13 @@ export default function MoreScreen() {
         </View>
       ))}
 
+      <MenuRow
+        title="Website tools"
+        detail="IVS requests, event management, admin, help, and feedback"
+        onPress={() => router.push('/tools')}
+      />
+      {token ? (
+        <>
       {(data?.oversightContacts?.length || 0) > 0 ? (
         <MenuRow
           title="Contacts"
@@ -71,7 +78,9 @@ export default function MoreScreen() {
         detail="Sign out a lost phone"
         onPress={() => router.push('/more/phones')}
       />
-      {data?.isIVSTeamMember ? (
+        </>
+      ) : null}
+      {token && data?.isIVSTeamMember ? (
         <MenuRow
           title="Early check-in"
           detail="Check in volunteers arriving early"

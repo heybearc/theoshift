@@ -31,7 +31,12 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
-    if (!token || !volunteer) return
+    if (!token || !volunteer) {
+      setEvents([])
+      setEventId(null)
+      setLoading(false)
+      return
+    }
     let cancelled = false
     setLoading(true)
     setError('')

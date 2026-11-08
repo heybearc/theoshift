@@ -11,6 +11,7 @@ import {
   TextInput,
   View,
 } from 'react-native'
+import OversightSignIn from '@/components/OversightSignIn'
 import { theme } from '@/constants/theme'
 import { friendlyAuthError } from '@/lib/config'
 import { useAuth } from '@/lib/auth'
@@ -164,6 +165,8 @@ export default function LoginScreen() {
 
         {message ? <Text style={styles.message}>{message}</Text> : null}
         {error || linkError ? <Text style={styles.error}>{error || linkError}</Text> : null}
+
+        <OversightSignIn beforeSubmit={() => setApiBase(serverDraft)} />
       </ScrollView>
     </KeyboardAvoidingView>
   )

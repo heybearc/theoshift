@@ -43,6 +43,20 @@ export default function AssignmentsScreen() {
 
   const name = volunteer ? `${volunteer.firstName} ${volunteer.lastName}`.trim() : ''
 
+  if (!token) {
+    return (
+      <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+        <Text style={styles.greeting}>Oversight</Text>
+        <Text style={styles.empty}>
+          Assignments and chat use a volunteer sign-in. Event tools, positions, volunteers, and admin are on the Tools tab.
+        </Text>
+        <Pressable onPress={() => router.push('/tools')} style={styles.signOutButton}>
+          <Text style={styles.signOut}>Open Tools</Text>
+        </Pressable>
+      </ScrollView>
+    )
+  }
+
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.headerRow}>

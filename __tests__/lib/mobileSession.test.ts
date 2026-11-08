@@ -1,4 +1,4 @@
-import { signMobileToken, verifyMobileToken } from '../../src/lib/mobileSession'
+import { signMobileToken, signStaffToken, verifyMobileToken, verifyStaffToken } from '../../src/lib/mobileSession'
 
 describe('mobileSession', () => {
   const previous = process.env.NEXTAUTH_SECRET
@@ -29,6 +29,29 @@ describe('mobileSession', () => {
       sid: 'signin_1',
       iat: expect.any(Number),
     })
+  })
+
+  it('round-trips an oversight token and keeps it off the volunteer checker', () => {
+    const token = signStaffToken({
+      id: 'user_1',
+      email: 'ada@example.com',
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      role: 'ADMIN',
+    })
+    expect(verifyStaffToken(token)?.role).toBe('ADMIN')
+    expect(verifyMobileToken(token)).toBeNull()
+  })
+
+  it('rejects a volunteer role on the oversight checker', () => {
+    const token = signStaffToken({
+      id: 'user_1',
+      email: 'ada@example.com',
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      role: 'VOLUNTEER',
+    })
+    expect(verifyStaffToken(token)).toBeNull()
   })
 
   it('rejects a token signed for another purpose', () => {

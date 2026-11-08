@@ -35,9 +35,10 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { ready, token, apiBase } = useAuth()
+  const { ready, token, staffToken, apiBase } = useAuth()
   const segments = useSegments()
   const router = useRouter()
+  const signedIn = Boolean(token || staffToken)
 
   useEffect(() => {
     if (!ready || !token) return
@@ -47,9 +48,9 @@ function RootNavigator() {
   useEffect(() => {
     if (!ready) return
     const onLogin = segments[0] === 'login'
-    if (!token && !onLogin) router.replace('/login')
-    if (token && onLogin) router.replace('/')
-  }, [ready, token, segments, router])
+    if (!signedIn && !onLogin) router.replace('/login')
+    if (signedIn && onLogin) router.replace('/')
+  }, [ready, signedIn, segments, router])
 
   return (
     <Stack
@@ -64,6 +65,8 @@ function RootNavigator() {
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="count" options={{ title: 'Attendance count', headerBackTitle: 'Back' }} />
+      <Stack.Screen name="staff-sign-in" options={{ title: 'Oversight sign-in', headerBackTitle: 'Back' }} />
+      <Stack.Screen name="site" options={{ title: 'TheoShift', headerBackTitle: 'Back' }} />
     </Stack>
   )
 }

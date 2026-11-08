@@ -16,6 +16,7 @@ export default function TabLayout() {
 }
 
 function AppTabs() {
+  const { token } = useAuth()
   const unread = useChatUnread()
   return (
       <Tabs
@@ -45,6 +46,19 @@ function AppTabs() {
           }}
         />
         <Tabs.Screen
+          name="tools"
+          options={{
+            title: 'Tools',
+            tabBarIcon: ({ color }) => (
+              <SymbolView
+                name={{ ios: 'square.grid.2x2', android: 'grid_view', web: 'grid_view' }}
+                tintColor={color}
+                size={24}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="more"
           options={{
             title: 'More',
@@ -59,6 +73,7 @@ function AppTabs() {
           options={{
             title: 'Chat',
             headerShown: false,
+            href: token ? undefined : null,
             tabBarBadge: unread > 0 ? unread : undefined,
             tabBarIcon: ({ color }) => (
               <SymbolView

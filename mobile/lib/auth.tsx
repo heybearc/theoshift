@@ -9,6 +9,8 @@ import { setUnauthorizedHandler } from './api'
 const TOKEN_KEY = 'theoshift.token'
 const VOLUNTEER_KEY = 'theoshift.volunteer'
 const API_BASE_KEY = 'theoshift.apiBase'
+const STAFF_TOKEN_KEY = 'theoshift.staffToken'
+const STAFF_KEY = 'theoshift.staff'
 
 export type VolunteerProfile = {
   id: string
@@ -17,10 +19,20 @@ export type VolunteerProfile = {
   lastName: string
 }
 
+export type StaffProfile = {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  role: string
+}
+
 type AuthContextValue = {
   ready: boolean
   token: string | null
   volunteer: VolunteerProfile | null
+  staffToken: string | null
+  staff: StaffProfile | null
   apiBase: string
   setApiBase: (value: string) => void
   linkError: string
@@ -28,6 +40,7 @@ type AuthContextValue = {
   requestLink: (email: string) => Promise<void>
   completeLink: (url: string) => Promise<void>
   signInWithCode: (email: string, code: string) => Promise<void>
+  signInStaff: (email: string, password: string) => Promise<void>
   replaceToken: (accessToken: string) => Promise<void>
   updateVolunteer: (patch: Partial<VolunteerProfile>) => Promise<void>
   signOut: () => Promise<void>
@@ -39,6 +52,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false)
   const [token, setToken] = useState<string | null>(null)
   const [volunteer, setVolunteer] = useState<VolunteerProfile | null>(null)
+  const [staffToken, setStaffToken] = useState<string | null>(null)
+  const [staff, setStaff] = useState<StaffProfile | null>(null)
   const [apiBase, setApiBaseState] = useState(defaultApiBase())
   const apiBaseRef = useRef(apiBase)
   apiBaseRef.current = apiBase
@@ -51,10 +66,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false
     ;(async () => {
-      const [storedToken, storedVolunteer, storedBase] = await Promise.all([
+      const [storedToken, storedVolunteer, storedBase, storedStaffToken, storedStaff] = await Promise.all([
         SecureStore.getItemAsync(TOKEN_KEY),
         SecureStore.getItemAsync(VOLUNTEER_KEY),
         SecureStore.getItemAsync(API_BASE_KEY),
+        SecureStore.getItemAsync(STAFF_TOKEN_KEY),
+        SecureStore.getItemAsync(STAFF_KEY),
       ])
       if (cancelled) return
       if (__DEV__) {
@@ -68,6 +85,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setVolunteer(JSON.parse(storedVolunteer) as VolunteerProfile)
         } catch {
           setVolunteer(null)
+        }
+      }
+      if (storedStaffToken) setStaffToken(storedStaffToken)
+      if (storedStaff) {
+        try {
+          setStaff(JSON.parse(storedStaff) as StaffProfile)
+        } catch {
+          setStaff(null)
         }
       }
       setReady(true)
@@ -130,6 +155,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setVolunteer(profile)
   }
 
+  async function saveStaff(accessToken: string, profile: StaffProfile) {
+    await SecureStore.setItemAsync(STAFF_TOKEN_KEY, accessToken)
+    await SecureStore.setItemAsync(STAFF_KEY, JSON.stringify(profile))
+    setStaffToken(accessToken)
+    setStaff(profile)
+  }
+
+  async function signInStaff(email: string, password: string) {
+    setLinkError('')
+    const result = await apiRequest<{
+      data: {
+        accessToken: string
+        user: StaffProfile
+        volunteerAccess: { accessToken: string; volunteer: VolunteerProfile } | null
+      }
+    }>(apiBaseRef.current, '/api/auth/mobile/staff', {
+      method: 'POST',
+      body: { email: email.trim(), password, platform: phonePlatform() },
+    })
+    await saveStaff(result.data.accessToken, result.data.user)
+    if (result.data.volunteerAccess) {
+      await saveSession(result.data.volunteerAccess.accessToken, result.data.volunteerAccess.volunteer)
+    }
+  }
+
   async function signInWithCode(email: string, code: string) {
     setLinkError('')
     const result = await apiRequest<{
@@ -178,9 +228,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       await SecureStore.deleteItemAsync(TOKEN_KEY)
       await SecureStore.deleteItemAsync(VOLUNTEER_KEY)
+      await SecureStore.deleteItemAsync(STAFF_TOKEN_KEY)
+      await SecureStore.deleteItemAsync(STAFF_KEY)
       tokenRef.current = null
       setToken(null)
       setVolunteer(null)
+      setStaffToken(null)
+      setStaff(null)
       signingOut.current = false
     }
   }
@@ -189,6 +243,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     ready,
     token,
     volunteer,
+    staffToken,
+    staff,
     apiBase,
     setApiBase,
     linkError,
@@ -196,6 +252,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     requestLink,
     completeLink,
     signInWithCode,
+    signInStaff,
     replaceToken,
     updateVolunteer,
     signOut,

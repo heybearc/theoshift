@@ -19,6 +19,9 @@ export default function MobileFeaturesHelp() {
           <strong>More</strong> has availability, documents, contacts, and your email and phone.
           Keymen and overseers also see the volunteers assigned to them, including assignments, count times, and lanyards. They can filter that list to their own positions. Check-in appears on that list only when the event uses the IVS module.
           Early check-in is there when you are on the event roster and the event uses early entry.
+          The Tools tab opens the rest of the website on this phone: IVS volunteer requests, help, and feedback.
+          An oversight sign-in (the same email and password as the website) adds event tools — positions, volunteers,
+          counts, lanyards, documents, IVS, permissions — and, for system admins, users, locations, announcements, and the other admin pages.
         </p>
         <p>
           The app is not in the App Store or Google Play yet. Use the website until someone gives you the app.
