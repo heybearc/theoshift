@@ -32,7 +32,7 @@ test.describe('Event Permissions UX', () => {
     await page.click('button:has-text("+ Add User")')
     
     // Verify dropdown exists
-    const userDropdown = page.locator('select').first()
+    const userDropdown = page.locator('label').filter({ hasText: 'Select User' }).locator('..').locator('select')
     await expect(userDropdown).toBeVisible()
     
     // Verify it has options
