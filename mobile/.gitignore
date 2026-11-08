@@ -39,3 +39,16 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+vendor/bundle/
+build/
+*.ipa
+*.aab
+*.keystore
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output/
+fastlane/README.md
+fastlane/.env
+credentials.json
+credentials/

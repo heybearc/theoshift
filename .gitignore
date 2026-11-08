@@ -66,6 +66,7 @@ ecosystem.config.js
 
 # Runtime / local environment files
 .env.*
+!mobile/fastlane/.env.example
 deployment-state.json
 frontend/data/
 frontend/test-env.js

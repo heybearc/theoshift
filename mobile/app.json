@@ -10,7 +10,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.theoshift.volunteer",
-      "buildNumber": "1",
+      "buildNumber": "12",
       "associatedDomains": [
         "applinks:theoshift.com"
       ],
@@ -20,7 +20,7 @@
     },
     "android": {
       "package": "app.theoshift.volunteer",
-      "versionCode": 1,
+      "versionCode": 4,
       "usesCleartextTraffic": false,
       "intentFilters": [
         {
