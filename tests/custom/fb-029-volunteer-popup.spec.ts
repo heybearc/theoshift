@@ -216,12 +216,12 @@ test.describe('FB-029: Volunteer Details Popup', () => {
       await volunteerName.click()
       await page.waitForTimeout(300)
       
-      // Look for assignments section
-      const assignmentsSection = page.locator('text=/Assignments/i')
-      
-      // If volunteer has assignments, section should be visible
+      // The volunteers table also has an Assignments column. Only the open popup counts.
+      const popup = page.locator('.absolute.z-50.w-96.bg-white.rounded-lg.shadow-2xl')
+      const assignmentsSection = popup.getByText(/assignments/i)
+
       if (await assignmentsSection.count() > 0) {
-        await expect(assignmentsSection).toBeVisible()
+        await expect(assignmentsSection.first()).toBeVisible()
       }
     }
   })
