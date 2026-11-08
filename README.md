@@ -278,6 +278,7 @@ For issues or questions:
 4. Contact the project maintainer for deployment access
 
 ## 📝 Version History
+- **v4.45.0** (2026-11-08) - The phone app opens the rest of the website, and chat can alert the lock screen
 - **v4.44.0** (2026-11-05) - A lost phone can be signed out, and store review can use a sign-in code
 - **v4.43.0** (2026-11-03) - Cloning asks for the new dates, and those dates move the shifts
 - **v4.42.1** (2026-11-03) - A public privacy page covers the website and the phone app
