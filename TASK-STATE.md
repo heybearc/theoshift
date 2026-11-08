@@ -2,20 +2,22 @@
 
 **Last updated:** 2026-11-08  
 **Branch:** `main`  
-**Production:** **LIVE** **BLUE** `10.92.3.24` **v4.44.0** (`6d4f26d3`). **STANDBY** **GREEN** `10.92.3.22` is ahead at `245407d8`. Switch #118.
+**Production:** **LIVE** **GREEN** `10.92.3.22` **v4.45.0** (`a2840643`). **STANDBY** **BLUE** `10.92.3.24` synced. Switch #119.
 
 ---
 
 ## Current Task
 
-Phone chat alerts (badge and lock screen) and local store uploads. FB-036 still blocked.
+v4.45.0 is live. Phone store builds are TestFlight 13 and Play internal version code 5. FB-036 still blocked.
 
 ### What I'm doing right now
 
-Android 1.0.0 version code 5 is on the Play internal track. iOS local upload waits until Xcode is installed.
+Nothing in progress. Next store upload is iOS build 14 and Android version code 6, and only from Terminal.
 
 ### Recent completions
 
+- ✅ **v4.45.0** — Phone Tools opens the website. Chat can alert the lock screen. Shipped and synced (`a2840643`, 2026-11-08).
+- ✅ **TestFlight 13** — Local Fastlane upload from Terminal (`5bdda529`). Cursor’s shell deadlocks `actool`.
 - ✅ **Play internal** — Android 1.0.0 version code 5 uploaded (`245407d8`, 2026-11-08).
 - ✅ **Phone chat alerts** — Icon badge and lock-screen notification. On STANDBY (`a1bbec37`). iOS 1.0.0 (12) is in App Store Connect. Not released, so live still sends the old payload.
 - ✅ **Local Fastlane** — `mobile/` can build and upload both stores (`80d68a80`). iOS lane needs Xcode.
@@ -52,14 +54,12 @@ Android 1.0.0 version code 5 is on the Play internal track. iOS local upload wai
 
 ### Next steps
 
-1. Install Xcode, then from `mobile/` run `npm run release:ios` (uploads build 13).
-2. Install iOS 1.0.0 (12) from TestFlight: https://appstoreconnect.apple.com/apps/6830737568/testflight/ios
-3. `/release` when phone tools, sign-in, and chat alerts should leave STANDBY. Until then the store app still talks to LIVE.
-4. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
+1. Install TestFlight build 13: https://appstoreconnect.apple.com/apps/6830737568/testflight/ios
+2. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
 
 ## Exact next command
 
-Install Xcode, then run `npm run release:ios` from `mobile/`.
+Install TestFlight build 13.
 
 ---
 
@@ -74,5 +74,5 @@ Install Xcode, then run `npm run release:ios` from `mobile/`.
 - Blue-green via HAProxy; do not assume container color without `get_deployment_status`.
 - If MCP `haproxy.backend` is `error`, read `use_backend … if is_theoshift` before `/release` (D-TS-047).
 - Color hostnames must stay on their node: `blue.theoshift.com` → BLUE, `green.theoshift.com` → GREEN (D-TS-048). After a switch, set qa-01 `STANDBY_URL=` to the new STANDBY color host.
-- qa-01 `detect-standby.sh` cannot read HAProxy (Proxmox CT 136 is missing on that host) and falls back to `STANDBY_URL` in `/opt/tests/theoshift/.env.test`. After the 2026-10-31 v4.42.0 switch, STANDBY is GREEN. `STANDBY_URL` is `https://green.theoshift.com`. Pass the release commit, not only the tag name. Fetch tags before the gate if the baseline is a new tag.
+- After switch #119, STANDBY is BLUE. qa-01 `STANDBY_URL` should be `https://blue.theoshift.com` if HAProxy detection falls back. D-069: the next `/ship` also uploads phone builds when `mobile/` changed, and that upload must start from Terminal.
 - qa-01 clone can be left dirty on `package-lock.json` after `npm install`. `git checkout -- package-lock.json` before the gate if the script reports a dirty tree.

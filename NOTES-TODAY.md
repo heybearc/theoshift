@@ -1,5 +1,5 @@
 ---
-date: 2026-11-04
+date: 2026-11-08
 purpose: Scratchpad for today's discoveries (promote on /end-day)
 ---
 
@@ -76,3 +76,11 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - iOS local upload did not run. This Mac has command-line tools only, no Xcode.
 - STANDBY GREEN `10.92.3.22` is `245407d8`. LIVE is still v4.44.0 (`6d4f26d3`). Switch #118.
 - Urgent feedback: 0 open. FB-036 still blocked.
+
+### Mid-day (2026-11-08, afternoon)
+- v4.45.0 is LIVE on GREEN (`a2840643`). STANDBY BLUE `10.92.3.24` is synced. Switch #119.
+- Release gate on GREEN: 175 passed, 32 skipped.
+- iOS 1.0.0 (13) uploaded to TestFlight from Terminal. `actool` deadlocks when Xcode is started from Cursor.
+- Android version code 5 remains on the Play internal track. Not on the public store.
+- Governance synced to `e85b8fa` (`ca86c165`). D-069: the next `/ship` uploads phone builds when `mobile/` changed.
+- Urgent feedback: 0. FB-036 still blocked.

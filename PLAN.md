@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-11-08  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.44.0 LIVE** (BLUE `10.92.3.24`, `6d4f26d3`). STANDBY GREEN `10.92.3.22` is ahead at `245407d8`. Switch #118.
+**Status:** **v4.45.0 LIVE** (GREEN `10.92.3.22`, `a2840643`). STANDBY BLUE `10.92.3.24` synced. Switch #119.
 
 ---
 
@@ -23,10 +23,13 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Volunteer phone app** — Tools, sign-in, and chat badge/lock-screen alerts are on STANDBY (`245407d8`), not LIVE. iOS 1.0.0 (12) is in App Store Connect. Android 1.0.0 version code 5 is on the Play internal track. The next iOS upload needs Xcode on this Mac.
+- **Volunteer phone app** — Tools and chat alerts shipped in v4.45.0. TestFlight build 13 is uploaded. Android 1.0.0 version code 5 is on the Play internal track. Neither is on the public store.
 - **Event clone** — The clone window asks for the new dates and moves shifts with the start date. A failed clone stays open.
 - **FB-036 (age and photo) still blocked.** Count locking and the phone count screen shipped in v4.42.0.
 - **Mobile readiness across TheoShift** — Users, Locations, and Feedback phone layouts shipped in v4.33.10. Positions and Volunteers shipped in v4.33.9. Early Check-In volunteer path done through **v4.29.7**.
+
+### Recently Completed (2026-11-08)
+- ✅ **v4.45.0** — Phone Tools opens the website. Chat can alert the lock screen. Shipped + synced (`a2840643`)
 
 ### Recently Completed (2026-11-05)
 - ✅ **v4.44.0** — Sign out a lost phone. Store review can use a sign-in code. Shipped + synced (`6d4f26d3`)
