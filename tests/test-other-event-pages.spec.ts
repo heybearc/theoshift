@@ -13,8 +13,8 @@ test.describe('Test Other Event Pages', () => {
   test.beforeEach(async ({ page }) => {
     // Login
     await page.goto(`${BASE_URL}/auth/signin`)
-    await page.type('#email', 'admin@theoshift.local')
-    await page.type('#password', 'AdminPass123!')
+    await page.locator('#oversight-email').fill(credentials.email)
+    await page.locator('#oversight-password').fill(credentials.password)
     await page.click('button[type="submit"]')
     await page.waitForURL(/\/events|\/admin/, { timeout: 10000 })
   })

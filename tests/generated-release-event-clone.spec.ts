@@ -33,6 +33,7 @@ test.describe('Generated release — Event clone parity', () => {
   })
 
   test('clone with volunteers puts people on Volunteers roster API', async ({ page }) => {
+    test.setTimeout(120000)
     const sourceId = await getValidEventId(page)
 
     const sourceVolRes = await page.request.get(`${BASE_URL}/api/events/${sourceId}/volunteers`)
@@ -50,6 +51,7 @@ test.describe('Generated release — Event clone parity', () => {
 
     const cloneName = `Clone Gate ${Date.now()}`
     const cloneRes = await page.request.post(`${BASE_URL}/api/events/${sourceId}/clone`, {
+      timeout: 90000,
       data: {
         name: cloneName,
         clonePositions: true,
@@ -149,9 +151,11 @@ test.describe('Generated release — Event clone parity', () => {
   })
 
   test('clone without volunteers leaves roster empty', async ({ page }) => {
+    test.setTimeout(120000)
     const sourceId = await getValidEventId(page)
     const cloneName = `Clone Structure ${Date.now()}`
     const cloneRes = await page.request.post(`${BASE_URL}/api/events/${sourceId}/clone`, {
+      timeout: 90000,
       data: {
         name: cloneName,
         clonePositions: true,

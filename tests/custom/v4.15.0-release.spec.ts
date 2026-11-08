@@ -7,9 +7,9 @@ const TEST_USER = {
 
 async function loginAdmin(page: any) {
   await page.goto('/auth/signin')
-  await page.waitForSelector('input[id="email"]', { state: 'visible', timeout: 15000 })
-  await page.fill('input[id="email"]', TEST_USER.email)
-  await page.fill('input[id="password"]', TEST_USER.password)
+  await page.waitForSelector('input[id="oversight-email"]', { state: 'visible', timeout: 15000 })
+  await page.fill('input[id="oversight-email"]', TEST_USER.email)
+  await page.fill('input[id="oversight-password"]', TEST_USER.password)
   await Promise.all([
     page.waitForNavigation({ timeout: 15000 }),
     page.click('button[type="submit"]')
@@ -68,9 +68,9 @@ test.describe('v4.15.0: Service Worker', () => {
     const response = await page.request.get('/sw.js')
     expect(response.status()).toBe(200)
     const body = await response.text()
-    expect(body).toContain('Version 2.0.4')
-    expect(body).toContain('theoshift-static-v2.0.4')
-    expect(body).toContain('theoshift-data-v2.0.4')
+    expect(body).toContain('Version 2.0.5')
+    expect(body).toContain('theoshift-static-v2.0.5')
+    expect(body).toContain('theoshift-data-v2.0.5')
   })
 
   test('sw.js contains stale-while-revalidate for volunteer API routes', async ({ page }) => {

@@ -2,6 +2,12 @@ import { useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 
 const ACTIVITY_UPDATE_INTERVAL = 5 * 60 * 1000 // Update every 5 minutes
+
+function reportActivityError(label: string, err: unknown) {
+  const message = err instanceof Error ? err.message : String(err)
+  if (message.includes('Failed to fetch') || message.includes('aborted')) return
+  console.error(label, err)
+}
 const SESSION_STORAGE_KEY = 'user_session_id' // Using localStorage to share across tabs
 
 export function useActivityTracking() {
@@ -28,7 +34,7 @@ export function useActivityTracking() {
               sessionIdRef.current = data.sessionId
             }
           })
-          .catch(err => console.error('[ACTIVITY] Login tracking failed:', err))
+          .catch(err => reportActivityError('[ACTIVITY] Login tracking failed:', err))
       } else {
         sessionIdRef.current = sessionId
       }
@@ -44,7 +50,7 @@ export function useActivityTracking() {
               action: 'activity',
               sessionId: currentSessionId
             })
-          }).catch(err => console.error('[ACTIVITY] Update failed:', err))
+          }).catch(err => reportActivityError('[ACTIVITY] Update failed:', err))
         }
       }
 

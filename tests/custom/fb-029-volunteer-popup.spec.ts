@@ -100,7 +100,7 @@ test.describe('FB-029: Volunteer Details Popup', () => {
       await page.waitForTimeout(300)
       
       // Look for status badges (Active/Inactive, Verified)
-      const statusBadges = page.locator('span.rounded-full:has-text(/Active|Inactive|Verified/)')
+      const statusBadges = page.locator('span.rounded-full').filter({ hasText: /Active|Inactive|Verified/ })
       
       if (await statusBadges.count() > 0) {
         await expect(statusBadges.first()).toBeVisible()

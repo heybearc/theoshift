@@ -140,7 +140,7 @@ test.describe('Volunteer Login - Email Link Method', () => {
     await expect(page.locator('label:has-text("Email Address")')).toBeVisible()
     
     // Verify info message
-    await expect(page.locator('text=We\'ll send you a secure sign-in link')).toBeVisible()
+    await expect(page.getByText('Invited volunteers only')).toBeVisible()
     
     // Verify send button
     await expect(page.locator('button:has-text("Send Sign-In Link")')).toBeVisible()

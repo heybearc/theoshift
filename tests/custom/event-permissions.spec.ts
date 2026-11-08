@@ -51,7 +51,7 @@ test.describe('Event Permissions UX', () => {
     await page.click('button:has-text("+ Add User")')
     
     // Verify role dropdown exists
-    const roleDropdown = page.locator('select').nth(1)
+    const roleDropdown = page.locator('select').filter({ has: page.locator('option[value="VIEWER"]') })
     await expect(roleDropdown).toBeVisible()
     
     // Verify it has the three roles

@@ -2,11 +2,9 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Phase 7 Mobile Optimization Validation', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(process.env.BASE_URL || 'http://localhost:3001')
-    
-    // Login
-    await page.type('#email', process.env.TEST_USER_EMAIL || '')
-    await page.type('#password', process.env.TEST_USER_PASSWORD || '')
+    await page.goto(`${process.env.BASE_URL || 'http://localhost:3001'}/auth/signin`)
+    await page.locator('#oversight-email').fill(process.env.TEST_USER_EMAIL || '')
+    await page.locator('#oversight-password').fill(process.env.TEST_USER_PASSWORD || '')
     await page.click('button[type="submit"]')
     await page.waitForURL('**/events/select')
   })
@@ -86,7 +84,7 @@ test.describe('Phase 7 Mobile Optimization Validation', () => {
     await page.goto(`${process.env.BASE_URL}/volunteer/login`)
     
     // Check for autocomplete attributes
-    const emailInput = page.locator('#email').first()
+    const emailInput = page.locator('#oversight-email, #volunteer-email').first()
     if (await emailInput.count() > 0) {
       const autocomplete = await emailInput.getAttribute('autocomplete')
       expect(autocomplete).toBeTruthy()

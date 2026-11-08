@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Head from 'next/head'
 import { signIn, getSession, useSession, signOut, getCsrfToken } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { GetServerSideProps } from 'next'
@@ -153,6 +154,9 @@ export default function SignIn() {
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700">
+        <Head>
+          <title>Sign in · TheoShift</title>
+        </Head>
         <div className="text-white text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
           <p className="text-lg">Loading...</p>
@@ -166,6 +170,9 @@ export default function SignIn() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 px-4">
         <div className="max-w-md w-full">
+          <Head>
+            <title>Sign in · TheoShift</title>
+          </Head>
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
             <div className="text-center">
               <div className="mx-auto h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
@@ -213,6 +220,9 @@ export default function SignIn() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 px-4">
       <div className="max-w-md w-full space-y-6">
+        <Head>
+          <title>Sign in · TheoShift</title>
+        </Head>
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
           {/* Volunteer Sign-Out Notice */}
           {session?.user?.role === 'VOLUNTEER' && role === 'oversight' && (
