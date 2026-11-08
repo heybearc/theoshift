@@ -29,13 +29,19 @@ Run lint and typecheck before declaring any task done.
 - Import `Link`, `router`, and `useLocalSearchParams` from `expo-router`.
 - Docs: https://docs.expo.dev/router/introduction.md
 
-## Building with EAS
+## Store builds
 
-Use EAS to build, sign, and submit the app in the cloud (`eas build`, `eas submit`) and to ship over-the-air updates (`eas update`) — no local Xcode or Android Studio required. Run EAS CLI as `bunx eas-cli <command>` in Bun projects, or `npx eas-cli@latest <command>` otherwise; substitute that for bare `eas` in docs examples.
-Docs: https://docs.expo.dev/eas/index.md
+Build and upload on this Mac with Fastlane. Do not use `eas build` or `eas submit`; those run on Expo's paid cloud plan.
+
+```bash
+npm run release:ios      # App Store ipa, uploaded to App Store Connect
+npm run release:android  # Play App Bundle, uploaded to the internal track
+```
+
+`expo prebuild` runs inside those commands and is free. Version and build numbers live in `app.json`. Fastlane bumps the iOS build number and Android version code before each upload.
 
 ## Rules
 
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
-- Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
+- Expo Go only includes its bundled native modules. After adding a library with native code, make a local development build with `npx expo run:ios` or `npx expo run:android`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md

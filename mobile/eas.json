@@ -1,41 +1,23 @@
 {
   "cli": {
     "version": ">= 16.0.0",
-    "appVersionSource": "remote"
+    "appVersionSource": "local"
   },
   "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal",
-      "env": {
-        "EXPO_PUBLIC_API_URL": "https://theoshift.com"
-      }
-    },
     "preview": {
       "distribution": "internal",
-      "env": {
-        "EXPO_PUBLIC_API_URL": "https://theoshift.com"
-      },
       "android": {
         "buildType": "apk"
       }
     },
     "production": {
-      "autoIncrement": true,
-      "env": {
-        "EXPO_PUBLIC_API_URL": "https://theoshift.com"
-      }
+      "autoIncrement": false
     }
   },
   "submit": {
     "production": {
       "ios": {
-        "ascAppId": "6830737568",
-        "appleTeamId": "S42AL6JZDB"
-      },
-      "android": {
-        "track": "internal",
-        "releaseStatus": "completed"
+        "ascAppId": "6830737568"
       }
     }
   }
