@@ -159,7 +159,7 @@ platform :ios do
       workspace: workspace,
       scheme: scheme,
       configuration: "Release",
-      export_method: "app-store-connect",
+      export_method: "app-store",
       output_directory: File.dirname(ipa),
       output_name: IPA_NAME,
       clean: true,
