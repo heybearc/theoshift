@@ -65,24 +65,10 @@ def bump_android_version_code!
   number
 end
 
-def without_bundler
-  keys = %w[BUNDLE_GEMFILE BUNDLE_BIN_PATH BUNDLE_PATH RUBYOPT BUNDLE_APP_CONFIG]
-  saved_env = keys.to_h { |key| [key, ENV[key]] }
-  saved_path = ENV["PATH"]
-  keys.each { |key| ENV.delete(key) }
-  ENV["PATH"] = saved_path.to_s.split(":").reject { |entry| entry.include?("vendor/bundle") }.join(":")
-  yield
-ensure
-  saved_env&.each { |key, value| value.nil? ? ENV.delete(key) : ENV[key] = value }
-  ENV["PATH"] = saved_path if saved_path
-end
-
 def prebuild!(platform)
   ENV["CI"] = "1"
-  without_bundler do
-    Dir.chdir(PROJECT) do
-      sh("npx", "expo", "prebuild", "--platform", platform)
-    end
+  Dir.chdir(PROJECT) do
+    sh("npx", "expo", "prebuild", "--platform", platform)
   end
   restore_dev_scripts!
 end
