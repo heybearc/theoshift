@@ -2,21 +2,24 @@
 
 **Last updated:** 2026-11-08  
 **Branch:** `main`  
-**Production:** **LIVE** **BLUE** `10.92.3.24` **v4.44.0** (`6d4f26d3`). **STANDBY** **GREEN** `10.92.3.22` is ahead at `411e040b`. Switch #118.
+**Production:** **LIVE** **BLUE** `10.92.3.24` **v4.44.0** (`6d4f26d3`). **STANDBY** **GREEN** `10.92.3.22` is ahead at `245407d8`. Switch #118.
 
 ---
 
 ## Current Task
 
-Phone app Tools tab (website event and admin pages) and the sign-in session fix. FB-036 still blocked.
+Phone chat alerts (badge and lock screen) and local store uploads. FB-036 still blocked.
 
 ### What I'm doing right now
 
-Wait for Apple to finish processing iOS 1.0.0 (11). Android store submit is blocked until the Expo free Android build quota resets on 2026-12-01.
+Android 1.0.0 version code 5 is on the Play internal track. iOS local upload waits until Xcode is installed.
 
 ### Recent completions
 
-- ✅ **Phone tools + sign-in fix** — Tools opens the website. Sign-in no longer keeps the previous person. On STANDBY GREEN (`411e040b`, 2026-11-08). Not released. iOS 1.0.0 (11) uploaded to TestFlight.
+- ✅ **Play internal** — Android 1.0.0 version code 5 uploaded (`245407d8`, 2026-11-08).
+- ✅ **Phone chat alerts** — Icon badge and lock-screen notification. On STANDBY (`a1bbec37`). iOS 1.0.0 (12) is in App Store Connect. Not released, so live still sends the old payload.
+- ✅ **Local Fastlane** — `mobile/` can build and upload both stores (`80d68a80`). iOS lane needs Xcode.
+- ✅ **Phone tools + sign-in fix** — Tools opens the website. Sign-in no longer keeps the previous person. On STANDBY (`411e040b`, 2026-11-08). Not released. iOS 1.0.0 (11) uploaded to TestFlight.
 - ✅ **v4.44.0** — Lost-phone sign-out and a store review sign-in code. Shipped and synced (`6d4f26d3`, 2026-11-05). iOS build 9 was superseded by builds 10 and 11.
 - ✅ **Phone branding** — Website logo, navy and blue, larger menus and buttons. Version code 4 `.aab` is in Downloads (`8db1c4cd`, 2026-11-03).
 - ✅ **v4.43.0** — Clone dates move shifts. Failed clone keeps the dialog. Android contacts dial digits only (2026-11-03).
@@ -49,14 +52,14 @@ Wait for Apple to finish processing iOS 1.0.0 (11). Android store submit is bloc
 
 ### Next steps
 
-1. Install iOS 1.0.0 (11) from TestFlight after Apple finishes processing: https://appstoreconnect.apple.com/apps/6830737568/testflight/ios
-2. `/release` when the phone tools and sign-in fix should leave STANDBY. Until then, Tools on the store build still talks to LIVE and will not use the new handoff.
-3. Android Play internal testing waits on an Expo Android build slot (resets 2026-12-01) or a plan upgrade.
+1. Install Xcode, then from `mobile/` run `npm run release:ios` (uploads build 13).
+2. Install iOS 1.0.0 (12) from TestFlight: https://appstoreconnect.apple.com/apps/6830737568/testflight/ios
+3. `/release` when phone tools, sign-in, and chat alerts should leave STANDBY. Until then the store app still talks to LIVE.
 4. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
 
 ## Exact next command
 
-Install iOS build 11 from TestFlight and try volunteer and oversight sign-in.
+Install Xcode, then run `npm run release:ios` from `mobile/`.
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-11-08  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.44.0 LIVE** (BLUE `10.92.3.24`, `6d4f26d3`). STANDBY GREEN `10.92.3.22` is ahead at `411e040b`. Switch #118.
+**Status:** **v4.44.0 LIVE** (BLUE `10.92.3.24`, `6d4f26d3`). STANDBY GREEN `10.92.3.22` is ahead at `245407d8`. Switch #118.
 
 ---
 
@@ -23,7 +23,7 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Volunteer phone app** — Tools tab and the sign-in fix are on STANDBY (`411e040b`), not LIVE. iOS 1.0.0 (11) is uploaded to TestFlight. Android submit is blocked until 2026-12-01 (Expo free Android builds used up).
+- **Volunteer phone app** — Tools, sign-in, and chat badge/lock-screen alerts are on STANDBY (`245407d8`), not LIVE. iOS 1.0.0 (12) is in App Store Connect. Android 1.0.0 version code 5 is on the Play internal track. The next iOS upload needs Xcode on this Mac.
 - **Event clone** — The clone window asks for the new dates and moves shifts with the start date. A failed clone stays open.
 - **FB-036 (age and photo) still blocked.** Count locking and the phone count screen shipped in v4.42.0.
 - **Mobile readiness across TheoShift** — Users, Locations, and Feedback phone layouts shipped in v4.33.10. Positions and Volunteers shipped in v4.33.9. Early Check-In volunteer path done through **v4.29.7**.

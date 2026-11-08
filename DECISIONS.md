@@ -677,6 +677,16 @@ This document tracks significant technical decisions made during development.
 **Decision:** The Tools tab signs oversight in and opens the existing website pages. Volunteer assignments and chat stay native. Supersedes the D-TS-050 line that staff tools stay only on the website.  
 **Consequences:** On STANDBY GREEN (`411e040b`). Not released. iOS 1.0.0 (11) is in TestFlight processing.
 
+### D-TS-056: Phone chat alerts use an icon badge and a lock-screen notification
+**Date:** 2026-11-08  
+**Decision:** A chat message sets the app icon badge to the unread count and shows on the lock screen. Android uses a high-importance channel with a notification dot.  
+**Consequences:** On STANDBY GREEN (`a1bbec37`). iOS 1.0.0 (12) is in App Store Connect. Live still sends the old payload until `/release`.
+
+### D-TS-057: Phone store releases are built on this Mac
+**Date:** 2026-11-08  
+**Decision:** `npm run release:ios` and `npm run release:android` in `mobile/` build and upload with Fastlane. The Apple team key is shared. The Android keystore is TheoShift’s.  
+**Consequences:** Android 1.0.0 version code 5 is on the Play internal track (`245407d8`). iOS local upload waits on Xcode.
+
 ---
 
 ## Shared Decisions

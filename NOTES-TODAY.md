@@ -68,3 +68,11 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - iOS 1.0.0 (11) uploaded to TestFlight. Build 10 was the first tools build and does not have the sign-in fix.
 - Android store submit did not start. Expo free Android builds are used up until 2026-12-01.
 - Urgent feedback: 0 open. FB-036 still blocked.
+
+### Later (2026-11-08)
+- Chat alerts set the icon badge and show on the lock screen. Android uses a high-importance channel. On STANDBY (`a1bbec37`). D-TS-056.
+- iOS 1.0.0 (12) is in App Store Connect. Live still sends the old alert payload until `/release`.
+- Local Fastlane releases are in `mobile/`. D-TS-057. Android version code 5 is on the Play internal track (`245407d8`).
+- iOS local upload did not run. This Mac has command-line tools only, no Xcode.
+- STANDBY GREEN `10.92.3.22` is `245407d8`. LIVE is still v4.44.0 (`6d4f26d3`). Switch #118.
+- Urgent feedback: 0 open. FB-036 still blocked.
