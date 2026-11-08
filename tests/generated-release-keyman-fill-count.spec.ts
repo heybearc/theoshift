@@ -77,7 +77,9 @@ test.describe('Generated release — keyman on the card and shift fill', () => {
     const fixture = await findEvent(page.request)
     const positionNumber = fixture.positionNumber
     const positionName = `Gate keyman fill ${positionNumber}`
+    const stamp = Date.now()
     let positionId: string | null = null
+    let overseerId: string | null = null
     let createdAssignmentId: string | null = null
 
     try {
@@ -114,22 +116,32 @@ test.describe('Generated release — keyman on the card and shift fill', () => {
       )
       expect(oversight.ok()).toBeTruthy()
 
-      for (const overseer of fixture.overseers) {
-        const assignment = await page.request.post(
-          `${BASE_URL}/api/events/${fixture.eventId}/assignments`,
-          {
-            data: {
-              positionId,
-              volunteerId: overseer.id,
-              shiftId,
-              role: 'OVERSEER',
-            },
-          }
-        )
-        if (!assignment.ok()) continue
-        createdAssignmentId = (await assignment.json())?.data?.id || null
-        break
-      }
+      const overseer = await page.request.post(`${BASE_URL}/api/events/${fixture.eventId}/volunteers`, {
+        data: {
+          firstName: 'Gate',
+          lastName: `Overseer${stamp}`,
+          email: `gate.overseer.${stamp}@example.com`,
+          phone: '555-0194',
+          congregation: 'Test Congregation',
+          formsOfService: ['Elder'],
+          isOverseer: true,
+        },
+      })
+      expect(overseer.ok()).toBeTruthy()
+      overseerId = (await overseer.json())?.data?.id || null
+      expect(overseerId).toBeTruthy()
+
+      const assignment = await page.request.post(`${BASE_URL}/api/events/${fixture.eventId}/assignments`, {
+        data: {
+          positionId,
+          volunteerId: overseerId,
+          shiftId,
+          role: 'OVERSEER',
+        },
+      })
+      const assignmentBody = await assignment.json()
+      expect(assignment.ok(), JSON.stringify(assignmentBody)).toBeTruthy()
+      createdAssignmentId = assignmentBody?.data?.id || null
       expect(createdAssignmentId).toBeTruthy()
 
       await page.setViewportSize({ width: 1280, height: 900 })
@@ -154,6 +166,11 @@ test.describe('Generated release — keyman on the card and shift fill', () => {
         await page.request.delete(
           `${BASE_URL}/api/events/${fixture.eventId}/positions/${positionId}`
         )
+      }
+      if (overseerId) {
+        await page.request.put(`${BASE_URL}/api/events/${fixture.eventId}/volunteers/${overseerId}`, {
+          data: { isActive: false },
+        })
       }
     }
   })
