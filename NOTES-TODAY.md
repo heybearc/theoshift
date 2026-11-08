@@ -53,3 +53,11 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - Android 1.0.0 (6) finished: https://expo.dev/accounts/corya92/projects/theoshift/builds/acb57bbe-024a-4245-ab5f-1e0de3c883ee
 - Phone push uses an Expo token on the existing chat subscription table. iOS push key is created. Android alerts still need that build installed.
 - Urgent feedback: 0. FB-036 still blocked.
+
+### Mid-day (2026-11-07)
+- v4.44.0 is LIVE on BLUE (`6d4f26d3`). STANDBY GREEN `10.92.3.22` is synced. Switch #118.
+- Lost-phone sign-out and the store review sign-in code are on the website. The review email and code are not saved yet.
+- iOS 1.0.0 (9) finished and is not submitted: https://expo.dev/accounts/corya92/projects/theoshift/builds/0a11b84b-e30a-4746-bd61-7318604d184e
+- Android 1.0.0 (6) is still not in Play internal testing.
+- Urgent feedback: 0. FB-036 still blocked.
+- qa-01 fallback `STANDBY_URL` should be `https://green.theoshift.com` after switch #118.

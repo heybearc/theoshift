@@ -1,21 +1,22 @@
 # TheoShift Task State
 
-**Last updated:** 2026-11-04  
+**Last updated:** 2026-11-07  
 **Branch:** `main`  
-**Production:** **LIVE** **GREEN** `10.92.3.22` **v4.43.0** (`becb1ee4`). **STANDBY** **BLUE** `10.92.3.24` synced to the same commit. Switch #117.
+**Production:** **LIVE** **BLUE** `10.92.3.24` **v4.44.0** (`6d4f26d3`). **STANDBY** **GREEN** `10.92.3.22` synced to the same commit. Switch #118.
 
 ---
 
 ## Current Task
 
-First store release. iOS TestFlight build 8 is submitted. Android build 6 is built and not submitted. FB-036 still blocked.
+Store review. v4.44.0 is live. iOS 1.0.0 (9) is built and not submitted. FB-036 still blocked.
 
 ### What I'm doing right now
 
-Phone app is in TestFlight. Message someone works on https://theoshift.com. Android 1.0.0 (6) finished and still needs a Play upload. `eas submit` for Android still needs a Google service account.
+Set the store review sign-in on the live site, then submit iOS build 9. Android 1.0.0 (6) is still not in Play internal testing.
 
 ### Recent completions
 
+- ✅ **v4.44.0** — Lost-phone sign-out and a store review sign-in code. Shipped and synced (`6d4f26d3`, 2026-11-05). iOS build 9 finished and is not submitted.
 - ✅ **Phone branding** — Website logo, navy and blue, larger menus and buttons. Version code 4 `.aab` is in Downloads (`8db1c4cd`, 2026-11-03).
 - ✅ **v4.43.0** — Clone dates move shifts. Failed clone keeps the dialog. Android contacts dial digits only (2026-11-03).
 - ✅ **v4.42.1** — Public privacy page for the website and phone app (`55eb8b89`, released 2026-11-03). Android production `.aab` is built.
@@ -47,13 +48,14 @@ Phone app is in TestFlight. Message someone works on https://theoshift.com. Andr
 
 ### Next steps
 
-1. Install iOS 1.0.0 (8) from TestFlight after Apple finishes processing.
-2. Upload Android 1.0.0 (6) to Play internal testing. `eas submit` still needs a Google service account.
-3. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
+1. On https://theoshift.com/admin/review-signin, save a volunteer email and a sign-in code, then paste the notes into App Store Connect.
+2. Submit iOS 1.0.0 (9): https://expo.dev/accounts/corya92/projects/theoshift/builds/0a11b84b-e30a-4746-bd61-7318604d184e
+3. Upload Android 1.0.0 (6) to Play internal testing.
+4. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
 
 ## Exact next command
 
-Upload Android build 6 to Play internal testing.
+Save the store review sign-in, then submit iOS build 9.
 
 ---
 

@@ -1,8 +1,8 @@
 # TheoShift Plan
 
-**Last updated:** 2026-11-04  
+**Last updated:** 2026-11-07  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.43.0 LIVE** (GREEN `10.92.3.22`, `becb1ee4`). STANDBY BLUE `10.92.3.24` is synced. Switch #117.
+**Status:** **v4.44.0 LIVE** (BLUE `10.92.3.24`, `6d4f26d3`). STANDBY GREEN `10.92.3.22` is synced. Switch #118.
 
 ---
 
@@ -23,10 +23,13 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Volunteer phone app** — Android version code 4 is downloaded for a manual Play upload (logo, colors, larger controls). `eas submit` has no Google service account. iOS waits on Apple.
+- **Volunteer phone app** — v4.44.0 is live. iOS 1.0.0 (9) is built and not submitted. Set the store review sign-in first. Android 1.0.0 (6) is still not in Play internal testing.
 - **Event clone** — The clone window asks for the new dates and moves shifts with the start date. A failed clone stays open.
 - **FB-036 (age and photo) still blocked.** Count locking and the phone count screen shipped in v4.42.0.
 - **Mobile readiness across TheoShift** — Users, Locations, and Feedback phone layouts shipped in v4.33.10. Positions and Volunteers shipped in v4.33.9. Early Check-In volunteer path done through **v4.29.7**.
+
+### Recently Completed (2026-11-05)
+- ✅ **v4.44.0** — Sign out a lost phone. Store review can use a sign-in code. Shipped + synced (`6d4f26d3`)
 
 ### Recently Completed (2026-11-03)
 - ✅ **v4.43.0** — Clone asks for dates and moves shifts. Failed clone keeps the window. Phone contacts dial digits only.
