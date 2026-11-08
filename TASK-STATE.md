@@ -1,22 +1,23 @@
 # TheoShift Task State
 
-**Last updated:** 2026-11-07  
+**Last updated:** 2026-11-08  
 **Branch:** `main`  
-**Production:** **LIVE** **BLUE** `10.92.3.24` **v4.44.0** (`6d4f26d3`). **STANDBY** **GREEN** `10.92.3.22` synced to the same commit. Switch #118.
+**Production:** **LIVE** **BLUE** `10.92.3.24` **v4.44.0** (`6d4f26d3`). **STANDBY** **GREEN** `10.92.3.22` is ahead at `411e040b`. Switch #118.
 
 ---
 
 ## Current Task
 
-Store review. v4.44.0 is live. iOS 1.0.0 (9) is built and not submitted. FB-036 still blocked.
+Phone app Tools tab (website event and admin pages) and the sign-in session fix. FB-036 still blocked.
 
 ### What I'm doing right now
 
-Set the store review sign-in on the live site, then submit iOS build 9. Android 1.0.0 (6) is still not in Play internal testing.
+Wait for Apple to finish processing iOS 1.0.0 (11). Android store submit is blocked until the Expo free Android build quota resets on 2026-12-01.
 
 ### Recent completions
 
-- ✅ **v4.44.0** — Lost-phone sign-out and a store review sign-in code. Shipped and synced (`6d4f26d3`, 2026-11-05). iOS build 9 finished and is not submitted.
+- ✅ **Phone tools + sign-in fix** — Tools opens the website. Sign-in no longer keeps the previous person. On STANDBY GREEN (`411e040b`, 2026-11-08). Not released. iOS 1.0.0 (11) uploaded to TestFlight.
+- ✅ **v4.44.0** — Lost-phone sign-out and a store review sign-in code. Shipped and synced (`6d4f26d3`, 2026-11-05). iOS build 9 was superseded by builds 10 and 11.
 - ✅ **Phone branding** — Website logo, navy and blue, larger menus and buttons. Version code 4 `.aab` is in Downloads (`8db1c4cd`, 2026-11-03).
 - ✅ **v4.43.0** — Clone dates move shifts. Failed clone keeps the dialog. Android contacts dial digits only (2026-11-03).
 - ✅ **v4.42.1** — Public privacy page for the website and phone app (`55eb8b89`, released 2026-11-03). Android production `.aab` is built.
@@ -48,14 +49,14 @@ Set the store review sign-in on the live site, then submit iOS build 9. Android 
 
 ### Next steps
 
-1. On https://theoshift.com/admin/review-signin, save a volunteer email and a sign-in code, then paste the notes into App Store Connect.
-2. Submit iOS 1.0.0 (9): https://expo.dev/accounts/corya92/projects/theoshift/builds/0a11b84b-e30a-4746-bd61-7318604d184e
-3. Upload Android 1.0.0 (6) to Play internal testing.
+1. Install iOS 1.0.0 (11) from TestFlight after Apple finishes processing: https://appstoreconnect.apple.com/apps/6830737568/testflight/ios
+2. `/release` when the phone tools and sign-in fix should leave STANDBY. Until then, Tools on the store build still talks to LIVE and will not use the new handoff.
+3. Android Play internal testing waits on an Expo Android build slot (resets 2026-12-01) or a plan upgrade.
 4. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
 
 ## Exact next command
 
-Save the store review sign-in, then submit iOS build 9.
+Install iOS build 11 from TestFlight and try volunteer and oversight sign-in.
 
 ---
 

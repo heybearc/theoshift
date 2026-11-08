@@ -672,6 +672,11 @@ This document tracks significant technical decisions made during development.
 **Decision:** A volunteer sees one count. The next one opens one hour after the previous count time, not at the later count's own clock time. After they submit, that box stays grey. Only an overseer, keyman, or event staff member can change it.  
 **Consequences:** On STANDBY BLUE (`d3ee3165`). Not released. Supersedes the v4.33.13 wait-until-the-later-clock-time rule.
 
+### D-TS-055: Phone app opens the website for event and admin tools
+**Date:** 2026-11-08  
+**Decision:** The Tools tab signs oversight in and opens the existing website pages. Volunteer assignments and chat stay native. Supersedes the D-TS-050 line that staff tools stay only on the website.  
+**Consequences:** On STANDBY GREEN (`411e040b`). Not released. iOS 1.0.0 (11) is in TestFlight processing.
+
 ---
 
 ## Shared Decisions

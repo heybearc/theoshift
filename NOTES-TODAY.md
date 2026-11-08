@@ -61,3 +61,10 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - Android 1.0.0 (6) is still not in Play internal testing.
 - Urgent feedback: 0. FB-036 still blocked.
 - qa-01 fallback `STANDBY_URL` should be `https://green.theoshift.com` after switch #118.
+
+### Mid-day (2026-11-08)
+- Tools tab opens website event and admin pages from the phone. Assignments and chat stay native. D-TS-055.
+- Sign-in fix `411e040b` is on STANDBY GREEN `10.92.3.22`. LIVE is still v4.44.0 (`6d4f26d3`). Switch #118.
+- iOS 1.0.0 (11) uploaded to TestFlight. Build 10 was the first tools build and does not have the sign-in fix.
+- Android store submit did not start. Expo free Android builds are used up until 2026-12-01.
+- Urgent feedback: 0 open. FB-036 still blocked.
