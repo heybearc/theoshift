@@ -18,6 +18,24 @@ test('the open-app page asks for a new link when the token is missing', async ({
   await expect(page.getByText('This sign-in link is missing its token.')).toBeVisible()
 })
 
+test('oversight sign-in accepts a form body and utf-16 json', async ({ request }) => {
+  const form = await request.post('/api/auth/mobile/staff', {
+    form: { email: 'nobody@example.com', password: 'not-a-real-password', platform: 'ios' },
+  })
+  expect(form.status()).toBe(401)
+  expect((await form.json()).error).toBe('Email or password is incorrect')
+
+  const utf16 = Buffer.from(
+    JSON.stringify({ email: 'nobody@example.com', password: 'not-a-real-password', platform: 'ios' }),
+    'utf16le'
+  )
+  const wide = await request.post('/api/auth/mobile/staff', {
+    headers: { 'Content-Type': 'application/json' },
+    data: utf16,
+  })
+  expect(wide.status()).toBe(401)
+})
+
 test('mobile sign-in rejects a missing or unknown link', async ({ request }) => {
   const missing = await request.post('/api/auth/mobile/exchange', { data: {} })
   expect(missing.status()).toBe(400)

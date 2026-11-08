@@ -15,13 +15,39 @@ export class ApiError extends Error {
   }
 }
 
+function formBody(body: unknown): string {
+  const params = new URLSearchParams()
+  if (body && typeof body === 'object') {
+    for (const [key, value] of Object.entries(body as Record<string, unknown>)) {
+      if (value === undefined || value === null) continue
+      params.append(key, String(value))
+    }
+  }
+  return params.toString()
+}
+
 export async function apiRequest<T>(
   apiBase: string,
   path: string,
-  options: { method?: string; token?: string | null; body?: unknown; skipUnauthorized?: boolean } = {}
+  options: {
+    method?: string
+    token?: string | null
+    body?: unknown
+    form?: boolean
+    skipUnauthorized?: boolean
+  } = {}
 ): Promise<T> {
-  const headers: Record<string, string> = {}
-  if (options.body !== undefined) headers['Content-Type'] = 'application/json'
+  const headers: Record<string, string> = { Accept: 'application/json' }
+  let body: string | undefined
+  if (options.body !== undefined) {
+    if (options.form) {
+      headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=utf-8'
+      body = formBody(options.body)
+    } else {
+      headers['Content-Type'] = 'application/json; charset=utf-8'
+      body = JSON.stringify(options.body)
+    }
+  }
   if (options.token) headers.Authorization = `Bearer ${options.token}`
 
   let response: Response
@@ -29,16 +55,29 @@ export async function apiRequest<T>(
     response = await fetch(`${apiBase}${path}`, {
       method: options.method || 'GET',
       headers,
-      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+      body,
+      credentials: 'omit',
     })
   } catch {
     throw new ApiError(`Could not reach ${apiBase}. Check the server address and that TheoShift is running.`, 0)
   }
 
-  const json = await response.json().catch(() => ({}))
+  const raw = await response.text()
+  let json: { success?: boolean; error?: unknown; message?: unknown } = {}
+  if (raw) {
+    try {
+      json = JSON.parse(raw) as typeof json
+    } catch {
+      json = { error: raw.replace(/\s+/g, ' ').trim().slice(0, 300) }
+    }
+  }
   if (!response.ok || json?.success === false) {
     if (options.token && response.status === 401 && !options.skipUnauthorized) unauthorizedHandler?.(options.token)
-    throw new ApiError(json?.error || json?.message || `Request failed (${response.status})`, response.status)
+    const message =
+      (typeof json?.error === 'string' && json.error) ||
+      (typeof json?.message === 'string' && json.message) ||
+      `Request failed (${response.status})`
+    throw new ApiError(message, response.status)
   }
   return json as T
 }

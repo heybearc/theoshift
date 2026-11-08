@@ -6,9 +6,11 @@ import { useAuth } from '@/lib/auth'
 export default function OversightSignIn({
   beforeSubmit,
   onSuccess,
+  showIntro = true,
 }: {
   beforeSubmit?: () => void | Promise<void>
   onSuccess?: () => void
+  showIntro?: boolean
 }) {
   const { signInStaff } = useAuth()
   const [email, setEmail] = useState('')
@@ -32,10 +34,16 @@ export default function OversightSignIn({
 
   return (
     <>
-      <Text style={styles.heading}>Oversight</Text>
-      <Text style={styles.help}>
-        Event tools, IVS, positions, volunteers, and system admin use the same email and password as the website.
-      </Text>
+      {showIntro ? (
+        <>
+          <Text style={styles.heading}>Oversight</Text>
+          <Text style={styles.help}>
+            Event tools, IVS, positions, volunteers, and system admin use the same email and password as the website.
+          </Text>
+        </>
+      ) : (
+        <Text style={styles.help}>Use the same email and password as the website.</Text>
+      )}
       <Text style={styles.label}>Email</Text>
       <TextInput
         value={email}

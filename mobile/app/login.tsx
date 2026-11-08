@@ -27,6 +27,7 @@ export default function LoginScreen() {
   const [error, setError] = useState('')
   const [showServer, setShowServer] = useState(__DEV__)
   const [titleTaps, setTitleTaps] = useState(0)
+  const [mode, setMode] = useState<'volunteer' | 'oversight'>('volunteer')
 
   async function sendLink() {
     setBusy('link')
@@ -89,9 +90,34 @@ export default function LoginScreen() {
           TheoShift
         </Text>
         <Text style={styles.title}>Sign in</Text>
+        <View style={styles.toggle}>
+          <Pressable
+            style={[styles.toggleItem, mode === 'oversight' && styles.toggleOn]}
+            onPress={() => {
+              setMode('oversight')
+              setError('')
+              setMessage('')
+              clearLinkError()
+            }}
+          >
+            <Text style={[styles.toggleText, mode === 'oversight' && styles.toggleTextOn]}>Oversight</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.toggleItem, mode === 'volunteer' && styles.toggleOn]}
+            onPress={() => {
+              setMode('volunteer')
+              setError('')
+              setMessage('')
+              clearLinkError()
+            }}
+          >
+            <Text style={[styles.toggleText, mode === 'volunteer' && styles.toggleTextOn]}>Volunteer</Text>
+          </Pressable>
+        </View>
         <Text style={styles.help}>
-          This app is for invited volunteers. Use the email on your volunteer record. We will email a sign-in link to
-          this phone. If you were given a sign-in code, enter it instead.
+          {mode === 'oversight'
+            ? 'Event tools use the same email and password as the website.'
+            : 'Invited volunteers: use the email on your volunteer record. We will email a sign-in link, or you can enter a sign-in code.'}
         </Text>
 
         {showServer ? (
@@ -109,64 +135,68 @@ export default function LoginScreen() {
           </>
         ) : null}
 
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="email-address"
-          placeholder="you@example.com"
-          style={styles.input}
-        />
+        {mode === 'volunteer' ? (
+          <>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="email-address"
+              placeholder="you@example.com"
+              style={styles.input}
+            />
 
-        <Text style={styles.label}>Sign-in code</Text>
-        <TextInput
-          value={code}
-          onChangeText={setCode}
-          autoCapitalize="none"
-          autoCorrect={false}
-          secureTextEntry
-          placeholder="Only if you were given a code"
-          style={styles.input}
-        />
-        <Pressable
-          style={[styles.button, (!email.trim() || !code.trim() || busy) && styles.buttonDisabled]}
-          disabled={!email.trim() || !code.trim() || !!busy}
-          onPress={() => void useCode()}
-        >
-          {busy === 'code' ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in with code</Text>}
-        </Pressable>
-        <Pressable
-          style={[styles.secondary, (!email.trim() || busy) && styles.buttonDisabled]}
-          disabled={!email.trim() || !!busy}
-          onPress={() => void sendLink()}
-        >
-          {busy === 'link' ? <ActivityIndicator color={theme.button} /> : <Text style={styles.secondaryText}>Email me a sign-in link</Text>}
-        </Pressable>
+            <Text style={styles.label}>Sign-in code</Text>
+            <TextInput
+              value={code}
+              onChangeText={setCode}
+              autoCapitalize="none"
+              autoCorrect={false}
+              secureTextEntry
+              placeholder="Only if you were given a code"
+              style={styles.input}
+            />
+            <Pressable
+              style={[styles.button, (!email.trim() || !code.trim() || busy) && styles.buttonDisabled]}
+              disabled={!email.trim() || !code.trim() || !!busy}
+              onPress={() => void useCode()}
+            >
+              {busy === 'code' ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in with code</Text>}
+            </Pressable>
+            <Pressable
+              style={[styles.secondary, (!email.trim() || busy) && styles.buttonDisabled]}
+              disabled={!email.trim() || !!busy}
+              onPress={() => void sendLink()}
+            >
+              {busy === 'link' ? <ActivityIndicator color={theme.button} /> : <Text style={styles.secondaryText}>Email me a sign-in link</Text>}
+            </Pressable>
 
-        <Text style={styles.label}>Paste the link</Text>
-        <TextInput
-          value={pastedLink}
-          onChangeText={setPastedLink}
-          autoCapitalize="none"
-          autoCorrect={false}
-          placeholder="https://…/auth/open-app?token=…"
-          style={[styles.input, styles.linkInput]}
-          multiline
-        />
-        <Pressable
-          style={[styles.secondary, (!pastedLink.trim() || busy) && styles.buttonDisabled]}
-          disabled={!pastedLink.trim() || !!busy}
-          onPress={() => void usePastedLink()}
-        >
-          {busy === 'paste' ? <ActivityIndicator color={theme.button} /> : <Text style={styles.secondaryText}>Sign in with link</Text>}
-        </Pressable>
+            <Text style={styles.label}>Paste the link</Text>
+            <TextInput
+              value={pastedLink}
+              onChangeText={setPastedLink}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder="https://…/auth/open-app?token=…"
+              style={[styles.input, styles.linkInput]}
+              multiline
+            />
+            <Pressable
+              style={[styles.secondary, (!pastedLink.trim() || busy) && styles.buttonDisabled]}
+              disabled={!pastedLink.trim() || !!busy}
+              onPress={() => void usePastedLink()}
+            >
+              {busy === 'paste' ? <ActivityIndicator color={theme.button} /> : <Text style={styles.secondaryText}>Sign in with link</Text>}
+            </Pressable>
+          </>
+        ) : (
+          <OversightSignIn showIntro={false} beforeSubmit={() => setApiBase(serverDraft)} />
+        )}
 
         {message ? <Text style={styles.message}>{message}</Text> : null}
         {error || linkError ? <Text style={styles.error}>{error || linkError}</Text> : null}
-
-        <OversightSignIn beforeSubmit={() => setApiBase(serverDraft)} />
       </ScrollView>
     </KeyboardAvoidingView>
   )
@@ -179,6 +209,23 @@ const styles = StyleSheet.create({
   kicker: { color: theme.navy, fontWeight: '700', letterSpacing: 0.4 },
   title: { fontSize: 32, fontWeight: '700', color: '#0f172a', marginTop: 8 },
   help: { color: '#475569', marginTop: 12, lineHeight: 22 },
+  toggle: {
+    flexDirection: 'row',
+    backgroundColor: '#e2e8f0',
+    borderRadius: 12,
+    padding: 4,
+    marginTop: 20,
+  },
+  toggleItem: {
+    flex: 1,
+    minHeight: 44,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  toggleOn: { backgroundColor: '#fff' },
+  toggleText: { color: '#475569', fontWeight: '700', fontSize: 16 },
+  toggleTextOn: { color: '#0f172a' },
   label: { marginTop: 20, marginBottom: 6, color: '#334155', fontWeight: '600' },
   input: {
     backgroundColor: '#fff',

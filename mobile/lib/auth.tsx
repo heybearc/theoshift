@@ -211,6 +211,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }>(apiBaseRef.current, '/api/auth/mobile/staff', {
       method: 'POST',
+      form: true,
       body: { email: email.trim(), password, platform: phonePlatform() },
     })
     await saveStaff(result.data.accessToken, result.data.user)
