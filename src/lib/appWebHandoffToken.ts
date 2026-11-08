@@ -15,6 +15,8 @@ const ALLOWED_PREFIXES = [
   '/account',
 ]
 
+const VOLUNTEER_PREFIXES = ['/volunteer', '/help', '/profile', '/privacy', '/account']
+
 export type WebHandoff = {
   sub: string
   kind: 'volunteer' | 'staff'
@@ -49,6 +51,12 @@ export function safeAppPath(input: unknown): string | null {
   const allowed = ALLOWED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
   if (!allowed) return null
   return `${pathname}${url.search}`
+}
+
+/** Volunteer sign-ins can open volunteer pages. Event and admin pages need oversight. */
+export function volunteerMayOpen(path: string): boolean {
+  const pathname = path.split('?')[0]
+  return VOLUNTEER_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
 }
 
 export function signWebHandoff(handoff: WebHandoff): string {

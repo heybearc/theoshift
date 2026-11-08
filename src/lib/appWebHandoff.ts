@@ -4,7 +4,7 @@ import { encode } from 'next-auth/jwt'
 import { VOLUNTEER_SESSION_SECONDS } from './mobileSession'
 import { sessionTokenCookieName, useSecureCookies } from './nextAuthCookieHelpers'
 
-export { safeAppPath, signWebHandoff, verifyWebHandoff } from './appWebHandoffToken'
+export { safeAppPath, signWebHandoff, verifyWebHandoff, volunteerMayOpen } from './appWebHandoffToken'
 export type { WebHandoff } from './appWebHandoffToken'
 
 export async function writeStaffSessionCookie(
@@ -36,6 +36,10 @@ export async function writeStaffSessionCookie(
       maxAge: VOLUNTEER_SESSION_SECONDS,
     })
   )
+}
+
+export function sessionDeniedHtml(): string {
+  return '<!doctype html><html><head><meta charset="utf-8"></head><body><p>Sign in again in the TheoShift app.</p></body></html>'
 }
 
 export function handoffHtml(path: string): string {

@@ -1,4 +1,4 @@
-import { safeAppPath, signWebHandoff, verifyWebHandoff } from '../../src/lib/appWebHandoffToken'
+import { safeAppPath, signWebHandoff, verifyWebHandoff, volunteerMayOpen } from '../../src/lib/appWebHandoffToken'
 
 describe('appWebHandoff', () => {
   const previous = process.env.NEXTAUTH_SECRET
@@ -18,6 +18,13 @@ describe('appWebHandoff', () => {
     expect(safeAppPath('//evil.example/admin')).toBeNull()
     expect(safeAppPath('/api/auth/mobile/staff')).toBeNull()
     expect(safeAppPath('/events/../admin')).toBeNull()
+  })
+
+  it('lets volunteers open volunteer pages only', () => {
+    expect(volunteerMayOpen('/volunteer/dashboard?tab=request')).toBe(true)
+    expect(volunteerMayOpen('/help/feedback')).toBe(true)
+    expect(volunteerMayOpen('/events/select')).toBe(false)
+    expect(volunteerMayOpen('/admin/users')).toBe(false)
   })
 
   it('round-trips a signed handoff', () => {

@@ -1,4 +1,4 @@
-type UnauthorizedHandler = () => void
+type UnauthorizedHandler = (failedToken: string) => void
 
 let unauthorizedHandler: UnauthorizedHandler | null = null
 
@@ -18,7 +18,7 @@ export class ApiError extends Error {
 export async function apiRequest<T>(
   apiBase: string,
   path: string,
-  options: { method?: string; token?: string | null; body?: unknown } = {}
+  options: { method?: string; token?: string | null; body?: unknown; skipUnauthorized?: boolean } = {}
 ): Promise<T> {
   const headers: Record<string, string> = {}
   if (options.body !== undefined) headers['Content-Type'] = 'application/json'
@@ -37,7 +37,7 @@ export async function apiRequest<T>(
 
   const json = await response.json().catch(() => ({}))
   if (!response.ok || json?.success === false) {
-    if (options.token && response.status === 401) unauthorizedHandler?.()
+    if (options.token && response.status === 401 && !options.skipUnauthorized) unauthorizedHandler?.(options.token)
     throw new ApiError(json?.error || json?.message || `Request failed (${response.status})`, response.status)
   }
   return json as T

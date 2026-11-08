@@ -60,8 +60,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [linkError, setLinkError] = useState('')
   const handledLinks = useRef(new Set<string>())
   const tokenRef = useRef<string | null>(null)
+  const staffTokenRef = useRef<string | null>(null)
   const signingOut = useRef(false)
   tokenRef.current = token
+  staffTokenRef.current = staffToken
 
   useEffect(() => {
     let cancelled = false
@@ -144,6 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       method: 'POST',
       body: { ...parsed, platform: phonePlatform() },
     })
+    await clearStaff()
     await saveSession(result.data.accessToken, result.data.volunteer)
   }
 
@@ -153,6 +156,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     tokenRef.current = accessToken
     setToken(accessToken)
     setVolunteer(profile)
+  }
+
+  async function clearVolunteer() {
+    const current = tokenRef.current
+    tokenRef.current = null
+    setToken(null)
+    setVolunteer(null)
+    await forget(TOKEN_KEY)
+    await forget(VOLUNTEER_KEY)
+    if (!current) return
+    try {
+      await apiRequest(apiBaseRef.current, '/api/volunteer/sessions', {
+        method: 'POST',
+        token: current,
+        skipUnauthorized: true,
+        body: { action: 'revoke-current' },
+      })
+    } catch {
+      // The phone copy is already gone.
+    }
+  }
+
+  async function clearStaff() {
+    staffTokenRef.current = null
+    setStaffToken(null)
+    setStaff(null)
+    await forget(STAFF_TOKEN_KEY)
+    await forget(STAFF_KEY)
+  }
+
+  async function forget(key: string) {
+    try {
+      await SecureStore.deleteItemAsync(key)
+    } catch {
+      // Nothing stored under that key.
+    }
   }
 
   async function saveStaff(accessToken: string, profile: StaffProfile) {
@@ -177,6 +216,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await saveStaff(result.data.accessToken, result.data.user)
     if (result.data.volunteerAccess) {
       await saveSession(result.data.volunteerAccess.accessToken, result.data.volunteerAccess.volunteer)
+    } else {
+      await clearVolunteer()
     }
   }
 
@@ -188,6 +229,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       method: 'POST',
       body: { email: email.trim(), code, client: 'mobile', platform: phonePlatform() },
     })
+    await clearStaff()
     await saveSession(result.data.accessToken, result.data.volunteer)
   }
 
@@ -198,8 +240,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    setUnauthorizedHandler(() => {
-      void signOut()
+    setUnauthorizedHandler((failedToken) => {
+      if (failedToken && failedToken === staffTokenRef.current) {
+        void clearStaff()
+        return
+      }
+      void clearVolunteer()
     })
     return () => setUnauthorizedHandler(null)
   }, [])
@@ -220,16 +266,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await apiRequest(apiBaseRef.current, '/api/volunteer/sessions', {
           method: 'POST',
           token: current,
+          skipUnauthorized: true,
           body: { action: 'revoke-current' },
         })
       }
     } catch {
       // Still clear this phone if the server is unreachable.
     } finally {
-      await SecureStore.deleteItemAsync(TOKEN_KEY)
-      await SecureStore.deleteItemAsync(VOLUNTEER_KEY)
-      await SecureStore.deleteItemAsync(STAFF_TOKEN_KEY)
-      await SecureStore.deleteItemAsync(STAFF_KEY)
+      await forget(TOKEN_KEY)
+      await forget(VOLUNTEER_KEY)
+      await forget(STAFF_TOKEN_KEY)
+      await forget(STAFF_KEY)
       tokenRef.current = null
       setToken(null)
       setVolunteer(null)

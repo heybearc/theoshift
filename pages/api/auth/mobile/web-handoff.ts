@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { safeAppPath, signWebHandoff } from '@/lib/appWebHandoff'
+import { safeAppPath, signWebHandoff, volunteerMayOpen } from '@/lib/appWebHandoff'
 import { verifyMobileToken, verifyStaffToken } from '@/lib/mobileSession'
 import { volunteerAccessAllows } from '@/lib/volunteerSignins'
 
@@ -28,6 +28,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     if (volunteer) {
+      if (!volunteerMayOpen(path)) {
+        return res.status(403).json({ success: false, error: 'Sign in as oversight to open that page' })
+      }
       const allowed = await volunteerAccessAllows(volunteer.sub, volunteer.sid, volunteer.iat)
       if (!allowed) {
         return res.status(401).json({ success: false, error: 'Sign in again to open that page' })

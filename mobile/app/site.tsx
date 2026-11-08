@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState, type ComponentType, type RefObject } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
-import { useLocalSearchParams, useNavigation } from 'expo-router'
+import { router, useLocalSearchParams, useNavigation } from 'expo-router'
 import * as Linking from 'expo-linking'
 import { WebView } from 'react-native-webview'
 import type { WebViewNavigation } from 'react-native-webview'
+import { theme } from '@/constants/theme'
+import { apiRequest } from '@/lib/api'
+import { useAuth } from '@/lib/auth'
 
 type BrowserHandle = { goBack: () => void }
 
 const Browser = WebView as unknown as ComponentType<Record<string, unknown>>
-import { theme } from '@/constants/theme'
-import { ApiError, apiRequest } from '@/lib/api'
-import { useAuth } from '@/lib/auth'
 
 function one(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] || ''
@@ -35,14 +35,19 @@ export default function SiteScreen() {
 
   useEffect(() => {
     let cancelled = false
-    const fallback = `${apiBase}/auth/signin?callbackUrl=${encodeURIComponent(path)}`
     const bearer = kind === 'staff' ? staffToken : token
 
     async function open() {
       setError('')
       setUri('')
       if (!bearer) {
-        if (!cancelled) setUri(fallback)
+        if (!cancelled) {
+          setError(
+            kind === 'staff'
+              ? 'Sign in as oversight in the app to open that page.'
+              : 'Sign in as a volunteer in the app to open that page.'
+          )
+        }
         return
       }
       try {
@@ -56,10 +61,6 @@ export default function SiteScreen() {
         }
       } catch (err) {
         if (cancelled) return
-        if (err instanceof ApiError && (err.status === 404 || err.status === 0)) {
-          setUri(fallback)
-          return
-        }
         setError(err instanceof Error ? err.message : 'Could not open that page')
       }
     }
@@ -80,9 +81,16 @@ export default function SiteScreen() {
       {error ? (
         <View style={styles.errorBox}>
           <Text style={styles.error}>{error}</Text>
-          <Pressable onPress={() => setUri(`${apiBase}/auth/signin?callbackUrl=${encodeURIComponent(path)}`)}>
-            <Text style={styles.link}>Open the sign-in page</Text>
-          </Pressable>
+          {kind === 'staff' && !staffToken ? (
+            <Pressable onPress={() => router.push('/staff-sign-in')}>
+              <Text style={styles.link}>Oversight sign-in</Text>
+            </Pressable>
+          ) : null}
+          {kind === 'volunteer' && !token && !staffToken ? (
+            <Pressable onPress={() => router.push('/login')}>
+              <Text style={styles.link}>Volunteer sign-in</Text>
+            </Pressable>
+          ) : null}
         </View>
       ) : null}
       {uri ? (
@@ -111,9 +119,22 @@ export default function SiteScreen() {
               apiHost = 'theoshift.com'
             }
             const allowed = host === 'theoshift.com' || host === apiHost || host === 'localhost'
-            if (allowed) return true
-            void Linking.openURL(request.url)
-            return false
+            if (!allowed) {
+              void Linking.openURL(request.url)
+              return false
+            }
+            let pathname = ''
+            try {
+              pathname = new URL(request.url).pathname
+            } catch {
+              pathname = ''
+            }
+            if (pathname === '/auth/signin' || pathname.startsWith('/auth/signin/') || pathname === '/auth/error') {
+              setUri('')
+              setError('Sign in again in the TheoShift app.')
+              return false
+            }
+            return true
           }}
           onError={() => setError('Could not load that page')}
         />

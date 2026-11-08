@@ -10,7 +10,6 @@ const OVERSIGHT_ROLES = new Set([
   'ASSISTANT_OVERSEER',
   'KEYMAN',
   'SUPPORT',
-  'ATTENDANT',
 ])
 
 export function isOversightRole(role: string): boolean {
