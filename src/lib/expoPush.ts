@@ -1,15 +1,41 @@
+export const PHONE_ALERT_CHANNEL_ID = 'chat-alerts'
+
 export function isExpoPushToken(endpoint: string) {
   return endpoint.startsWith('ExponentPushToken[') || endpoint.startsWith('ExpoPushToken[')
 }
 
-type ExpoPushMessage = {
+export type PhoneAlertMessage = {
   to: string
   title: string
   body: string
+  sound: 'default'
+  badge: number
+  priority: 'high'
+  channelId: string
   data?: Record<string, string>
 }
 
-export async function sendExpoPushes(messages: ExpoPushMessage[]) {
+export function buildPhoneAlert(input: {
+  to: string
+  title: string
+  body: string
+  badge: number
+  data?: Record<string, string>
+}): PhoneAlertMessage {
+  const badge = Math.max(1, Math.min(999, Math.floor(input.badge) || 1))
+  return {
+    to: input.to,
+    title: input.title,
+    body: input.body,
+    sound: 'default',
+    badge,
+    priority: 'high',
+    channelId: PHONE_ALERT_CHANNEL_ID,
+    data: input.data ? { ...input.data, badge: String(badge) } : { badge: String(badge) },
+  }
+}
+
+export async function sendExpoPushes(messages: PhoneAlertMessage[]) {
   if (messages.length === 0) return
   const response = await fetch('https://exp.host/--/api/v2/push/send', {
     method: 'POST',

@@ -14,6 +14,7 @@ import { Stack, useLocalSearchParams } from 'expo-router'
 import { apiRequest } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { useVolunteerEvents } from '@/lib/events'
+import { refreshAppBadge } from '@/lib/push'
 
 type ChatMessage = {
   id: string
@@ -33,9 +34,17 @@ function senderName(message: ChatMessage) {
 }
 
 export default function ChannelScreen() {
-  const { channelId } = useLocalSearchParams<{ channelId: string }>()
+  const params = useLocalSearchParams<{ channelId: string; eventId?: string }>()
+  const channelId = params.channelId
   const { token, apiBase } = useAuth()
-  const { eventId } = useVolunteerEvents()
+  const { eventId: selectedEventId, setEventId } = useVolunteerEvents()
+  const eventId = (typeof params.eventId === 'string' && params.eventId) || selectedEventId
+
+  useEffect(() => {
+    if (typeof params.eventId === 'string' && params.eventId && params.eventId !== selectedEventId) {
+      setEventId(params.eventId)
+    }
+  }, [params.eventId, selectedEventId, setEventId])
   const [channel, setChannel] = useState<Channel | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [draft, setDraft] = useState('')
@@ -63,6 +72,7 @@ export default function ChannelScreen() {
       const older = prev.filter((message) => !ids.has(message.id) && oldestIncoming && message.createdAt < oldestIncoming)
       return [...older, ...incoming]
     })
+    void refreshAppBadge(apiBase, token).catch(() => undefined)
   }, [token, apiBase, eventId, channelId])
 
   async function loadEarlier() {

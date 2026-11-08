@@ -6,7 +6,7 @@ import 'react-native-reanimated'
 
 import { theme } from '@/constants/theme'
 import { AuthProvider, useAuth } from '@/lib/auth'
-import { registerChatPush } from '@/lib/push'
+import { clearAppBadge, startPhoneAlerts } from '@/lib/push'
 
 export { ErrorBoundary } from 'expo-router'
 
@@ -41,9 +41,18 @@ function RootNavigator() {
   const signedIn = Boolean(token || staffToken)
 
   useEffect(() => {
-    if (!ready || !token) return
-    void registerChatPush(apiBase, token).catch(() => undefined)
-  }, [ready, token, apiBase])
+    if (!ready) return
+    if (!token) {
+      void clearAppBadge().catch(() => undefined)
+      return
+    }
+    return startPhoneAlerts(apiBase, token, ({ channelId, eventId }) => {
+      router.push({
+        pathname: '/chat/[channelId]',
+        params: eventId ? { channelId, eventId } : { channelId },
+      })
+    })
+  }, [ready, token, apiBase, router])
 
   useEffect(() => {
     if (!ready) return

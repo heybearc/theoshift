@@ -7,7 +7,8 @@ import { getActiveLinkedVolunteerId } from '@/lib/eventVolunteerIdentity'
 import { broadcastToChannel, broadcastToEvent } from '@/lib/chatRealtime'
 import { isReleaseGateChatProbe } from '@/lib/chatReleaseGate'
 import { sendWebPush } from '@/lib/webPush'
-import { isExpoPushToken, sendExpoPushes } from '@/lib/expoPush'
+import { buildPhoneAlert, isExpoPushToken, sendExpoPushes, type PhoneAlertMessage } from '@/lib/expoPush'
+import { countUnreadChat } from '@/lib/chatUnreadCount'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id: eventId, channelId } = req.query
@@ -378,19 +379,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           })
         )
 
-        const phoneMessages = phoneSubs
-          .filter((s) => {
-            const skipSelf =
-              (s.userId != null && senderUserIds.has(s.userId)) ||
-              (s.volunteerId != null && senderVolunteerIds.has(s.volunteerId))
-            return !skipSelf
-          })
-          .map((s) => ({
-            to: s.endpoint,
-            title,
-            body: bodyText,
-            data: { eventId, channelId },
-          }))
+        const recipients = phoneSubs.filter((s) => {
+          const skipSelf =
+            (s.userId != null && senderUserIds.has(s.userId)) ||
+            (s.volunteerId != null && senderVolunteerIds.has(s.volunteerId))
+          return !skipSelf
+        })
+        const badgeByActor = new Map<string, number>()
+        const phoneMessages: PhoneAlertMessage[] = []
+        for (const subscription of recipients) {
+          const actorKey = subscription.userId ? `user:${subscription.userId}` : `volunteer:${subscription.volunteerId}`
+          let badge = badgeByActor.get(actorKey)
+          if (badge == null) {
+            try {
+              badge = subscription.userId
+                ? await countUnreadChat({ kind: 'user', id: subscription.userId })
+                : subscription.volunteerId
+                  ? await countUnreadChat({ kind: 'volunteer', id: subscription.volunteerId })
+                  : 1
+            } catch {
+              badge = 1
+            }
+            badgeByActor.set(actorKey, badge)
+          }
+          phoneMessages.push(
+            buildPhoneAlert({
+              to: subscription.endpoint,
+              title,
+              body: channel.name ? `${channel.name}: ${bodyText}` : bodyText,
+              badge,
+              data: { eventId, channelId },
+            })
+          )
+        }
         const expired = await sendExpoPushes(phoneMessages)
         if (expired && expired.length > 0) {
           await prisma.event_chat_push_subscriptions.deleteMany({ where: { endpoint: { in: expired } } })
