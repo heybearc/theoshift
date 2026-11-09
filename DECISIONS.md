@@ -687,6 +687,11 @@ This document tracks significant technical decisions made during development.
 **Decision:** `npm run release:ios` and `npm run release:android` in `mobile/` build and upload with Fastlane. The Apple team key is shared. The Android keystore is TheoShift’s.  
 **Consequences:** Android 1.0.0 version code 5 is on the Play internal track (`245407d8`). iOS local upload waits on Xcode.
 
+### D-TS-058: Phone UI tests run on this Mac; do not replace Xcode actool
+**Date:** 2026-11-09  
+**Decision:** `npm run test:phone` drives the sign-in screen with Maestro on the iOS Simulator and the local Android emulator. The iOS archive’s thinned `actool` run hangs because it omits `--bundle-identifier`. Do not replace `actool` inside Xcode.app. macOS returns Operation not permitted.  
+**Consequences:** Sign-in flow passed on both simulators (`894224b1`). TestFlight is still build 13. v4.45.1 is on STANDBY BLUE and was not switched.
+
 ---
 
 ## Shared Decisions

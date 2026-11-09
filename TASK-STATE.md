@@ -1,18 +1,18 @@
 # TheoShift Task State
 
-**Last updated:** 2026-11-08  
+**Last updated:** 2026-11-09  
 **Branch:** `main`  
-**Production:** **LIVE** **GREEN** `10.92.3.22` **v4.45.0** (`a2840643`). **STANDBY** **BLUE** `10.92.3.24` synced. Switch #119.
+**Production:** **LIVE** **GREEN** `10.92.3.22` **v4.45.0** (`a2840643`). **STANDBY** **BLUE** `10.92.3.24` **v4.45.1** (`4cf4b85e`). Not switched. Switch #119.
 
 ---
 
 ## Current Task
 
-v4.45.0 is live. Phone store builds are TestFlight 13 and Play internal version code 5. FB-036 still blocked.
+v4.45.1 is on STANDBY and not live. Phone store builds are still TestFlight 13 and Play internal version code 5. The next iOS archive hangs in the thinned `actool` compile. FB-036 still blocked.
 
 ### What I'm doing right now
 
-Nothing in progress. Next store upload is iOS build 14 and Android version code 6, and only from Terminal.
+Store upload is blocked. The thinned asset compile omits `--bundle-identifier` and deadlocks. Replacing `actool` inside Xcode.app is not permitted.
 
 ### Recent completions
 
@@ -54,12 +54,12 @@ Nothing in progress. Next store upload is iOS build 14 and Android version code 
 
 ### Next steps
 
-1. Install TestFlight build 13: https://appstoreconnect.apple.com/apps/6830737568/testflight/ios
+1. Get the iOS archive past the thinned `actool` compile, then upload build 14 and Android version code 6. Do not switch traffic until that upload succeeds.
 2. FB-036 stays blocked until age format, visibility, and photo storage are chosen.
 
 ## Exact next command
 
-Install TestFlight build 13.
+Do not start `npm run release:ios` until the thinned `actool` compile can finish. Build number stays 13.
 
 ---
 
@@ -67,7 +67,8 @@ Install TestFlight build 13.
 
 **Current**
 
-- None blocking.
+- iOS archive hangs in `CompileAssetCatalogVariant thinned`. Adding `--bundle-identifier` makes that `actool` command finish. Installing a wrapper over Xcode’s `actool` failed: Operation not permitted.
+- v4.45.1 (oversight sign-in, phone toggle, Maestro) is on STANDBY BLUE only.
 
 **Infrastructure**
 

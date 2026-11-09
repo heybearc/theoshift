@@ -1,8 +1,8 @@
 # TheoShift Plan
 
-**Last updated:** 2026-11-08  
+**Last updated:** 2026-11-09  
 **Current phase:** Feature Development + Platform Infrastructure  
-**Status:** **v4.45.0 LIVE** (GREEN `10.92.3.22`, `a2840643`). STANDBY BLUE `10.92.3.24` synced. Switch #119.
+**Status:** **v4.45.0 LIVE** (GREEN `10.92.3.22`, `a2840643`). **v4.45.1 STANDBY** BLUE `10.92.3.24` (`4cf4b85e`). Not switched. Switch #119.
 
 ---
 
@@ -23,7 +23,7 @@ This follows the usual small-team pattern: **one system of record in the app**, 
 ## Current Phase
 
 ### Active Work
-- **Volunteer phone app** — Tools and chat alerts shipped in v4.45.0. TestFlight build 13 is uploaded. Android 1.0.0 version code 5 is on the Play internal track. Neither is on the public store.
+- **Volunteer phone app** — v4.45.1 (oversight sign-in and the Oversight/Volunteer switch) is on STANDBY, not live. TestFlight is still build 13. The next iOS archive hangs in the thinned asset compile. Android 1.0.0 version code 5 is on the Play internal track. Maestro sign-in passed on the iOS Simulator and the Android emulator.
 - **Event clone** — The clone window asks for the new dates and moves shifts with the start date. A failed clone stays open.
 - **FB-036 (age and photo) still blocked.** Count locking and the phone count screen shipped in v4.42.0.
 - **Mobile readiness across TheoShift** — Users, Locations, and Feedback phone layouts shipped in v4.33.10. Positions and Volunteers shipped in v4.33.9. Early Check-In volunteer path done through **v4.29.7**.

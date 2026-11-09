@@ -84,3 +84,10 @@ purpose: Scratchpad for today's discoveries (promote on /end-day)
 - Android version code 5 remains on the Play internal track. Not on the public store.
 - Governance synced to `e85b8fa` (`ca86c165`). D-069: the next `/ship` uploads phone builds when `mobile/` changed.
 - Urgent feedback: 0. FB-036 still blocked.
+
+### Mid-day (2026-11-09)
+- v4.45.1 is on STANDBY BLUE (`4cf4b85e`). LIVE is still v4.45.0 on GREEN (`a2840643`). Not switched.
+- Oversight/Volunteer sign-in toggle is in the phone source. Maestro flow passed on the iPhone 18 Pro simulator and the Android emulator (`npm run test:phone`).
+- iOS archive hangs in the thinned `actool` compile because `--bundle-identifier` is omitted. The same command finishes when the flag is added.
+- Admin install of an `actool` wrapper failed: `mv` inside Xcode.app returned Operation not permitted. TestFlight is still build 13.
+- Urgent feedback: 0 new. FB-036 still blocked.
