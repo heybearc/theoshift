@@ -1,8 +1,18 @@
-import { renderHook, act } from '@testing-library/react-hooks'
+import { renderHook, act } from '@testing-library/react'
 import { useShifts } from '../../hooks/useShifts'
 import { createPositionService } from '../../lib/positionService'
+import { notifyAlert } from '../../lib/ui/toast'
+import { appConfirmMessage } from '../../lib/ui/confirm'
 
 jest.mock('../../lib/positionService')
+jest.mock('../../lib/ui/toast', () => ({
+  notifyAlert: jest.fn(),
+  toast: { success: jest.fn(), error: jest.fn(), info: jest.fn() },
+}))
+jest.mock('../../lib/ui/confirm', () => ({
+  appConfirmMessage: jest.fn(),
+  appConfirm: jest.fn(),
+}))
 jest.mock('next/router', () => ({
   useRouter: () => ({
     reload: jest.fn(),
@@ -20,7 +30,7 @@ const mockPositionService = {
 describe('useShifts', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    global.alert = jest.fn()
+    ;(appConfirmMessage as jest.Mock).mockResolvedValue(true)
   })
 
   it('should initialize with default state', () => {
@@ -33,6 +43,7 @@ describe('useShifts', () => {
       endTime: '',
       isAllDay: false,
       volunteersNeeded: 1,
+      shiftDate: null,
     })
   })
 
@@ -85,8 +96,9 @@ describe('useShifts', () => {
       endTime: '12:00',
       isAllDay: false,
       volunteersNeeded: 1,
+      shiftDate: undefined,
     })
-    expect(global.alert).toHaveBeenCalledWith('✅ Shift added successfully')
+    expect(notifyAlert).toHaveBeenCalledWith('✅ Shift added successfully')
   })
 
   it('should prevent all-day shift when partial shifts exist', async () => {
@@ -116,12 +128,11 @@ describe('useShifts', () => {
     })
 
     expect(mockPositionService.createShift).not.toHaveBeenCalled()
-    expect(global.alert).toHaveBeenCalledWith(expect.stringContaining('Cannot add All Day shift'))
+    expect(notifyAlert).toHaveBeenCalledWith(expect.stringContaining('Cannot add All Day shift'))
   })
 
   it('should handle delete shift', async () => {
     mockPositionService.deleteShift.mockResolvedValue(true)
-    global.confirm = jest.fn(() => true)
 
     const { result } = renderHook(() => useShifts({ eventId: 'event-1' }))
 
@@ -133,7 +144,7 @@ describe('useShifts', () => {
   })
 
   it('should not delete shift when user cancels', async () => {
-    global.confirm = jest.fn(() => false)
+    ;(appConfirmMessage as jest.Mock).mockResolvedValue(false)
 
     const { result } = renderHook(() => useShifts({ eventId: 'event-1' }))
 

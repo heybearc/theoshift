@@ -4,6 +4,12 @@
  */
 
 import { ExportService, exportService, createExportService } from '../../lib/exportService'
+import { notifyAlert } from '../../lib/ui/toast'
+
+jest.mock('../../lib/ui/toast', () => ({
+  notifyAlert: jest.fn(),
+  toast: { success: jest.fn(), error: jest.fn(), info: jest.fn() },
+}))
 
 describe('ExportService', () => {
   let service: ExportService
@@ -199,9 +205,6 @@ describe('ExportService', () => {
         return originalCreateElement.call(document, tagName)
       })
 
-      // Mock alert
-      global.alert = jest.fn()
-
       const result = await service.exportAndDownloadPDF({
         eventId: 'event-123',
         eventName: 'Test Event',
@@ -210,14 +213,13 @@ describe('ExportService', () => {
 
       expect(result).toBe(true)
       expect(mockClick).toHaveBeenCalled()
-      expect(global.alert).not.toHaveBeenCalled()
+      expect(notifyAlert).not.toHaveBeenCalled()
 
       document.createElement = originalCreateElement
     })
 
     it('should show alert on failure', async () => {
       global.fetch = jest.fn().mockResolvedValue({ ok: false })
-      global.alert = jest.fn()
 
       const result = await service.exportAndDownloadPDF({
         eventId: 'event-123',
@@ -226,7 +228,7 @@ describe('ExportService', () => {
       })
 
       expect(result).toBe(false)
-      expect(global.alert).toHaveBeenCalledWith('Failed to export PDF')
+      expect(notifyAlert).toHaveBeenCalledWith('Failed to export PDF')
     })
   })
 
@@ -250,8 +252,6 @@ describe('ExportService', () => {
         return originalCreateElement.call(document, tagName)
       })
 
-      global.alert = jest.fn()
-
       const result = await service.exportAndDownloadExcel({
         eventId: 'event-123',
         eventName: 'Test Event',
@@ -260,14 +260,13 @@ describe('ExportService', () => {
 
       expect(result).toBe(true)
       expect(mockClick).toHaveBeenCalled()
-      expect(global.alert).not.toHaveBeenCalled()
+      expect(notifyAlert).not.toHaveBeenCalled()
 
       document.createElement = originalCreateElement
     })
 
     it('should show alert on failure', async () => {
       global.fetch = jest.fn().mockResolvedValue({ ok: false })
-      global.alert = jest.fn()
 
       const result = await service.exportAndDownloadExcel({
         eventId: 'event-123',
@@ -276,7 +275,7 @@ describe('ExportService', () => {
       })
 
       expect(result).toBe(false)
-      expect(global.alert).toHaveBeenCalledWith('Failed to export Excel')
+      expect(notifyAlert).toHaveBeenCalledWith('Failed to export Excel')
     })
   })
 })

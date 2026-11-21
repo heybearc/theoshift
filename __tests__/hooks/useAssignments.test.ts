@@ -1,6 +1,17 @@
-import { renderHook, act } from '@testing-library/react-hooks'
+import { renderHook, act } from '@testing-library/react'
 import { useAssignments } from '../../hooks/useAssignments'
 import { createPositionService } from '../../lib/positionService'
+import { notifyAlert } from '../../lib/ui/toast'
+import { appConfirmMessage } from '../../lib/ui/confirm'
+
+jest.mock('../../lib/ui/toast', () => ({
+  notifyAlert: jest.fn(),
+  toast: { success: jest.fn(), error: jest.fn(), info: jest.fn() },
+}))
+jest.mock('../../lib/ui/confirm', () => ({
+  appConfirmMessage: jest.fn(),
+  appConfirm: jest.fn(),
+}))
 
 jest.mock('../../lib/positionService')
 jest.mock('next/router', () => ({
@@ -21,6 +32,7 @@ const mockPositionService = {
 describe('useAssignments', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    ;(appConfirmMessage as jest.Mock).mockResolvedValue(true)
   })
 
   it('should initialize with default state', () => {
@@ -71,13 +83,12 @@ describe('useAssignments', () => {
       positionId: 'position-1',
       shiftId: 'shift-1',
       attendantId: 'attendant-1',
-      role: 'ATTENDANT',
+      role: 'VOLUNTEER',
     })
   })
 
   it('should handle remove assignment', async () => {
     mockPositionService.deleteAssignment.mockResolvedValue(true)
-    global.confirm = jest.fn(() => true)
 
     const { result } = renderHook(() => useAssignments({ eventId: 'event-1' }))
 
@@ -89,7 +100,7 @@ describe('useAssignments', () => {
   })
 
   it('should not remove assignment when user cancels', async () => {
-    global.confirm = jest.fn(() => false)
+    ;(appConfirmMessage as jest.Mock).mockResolvedValue(false)
 
     const { result } = renderHook(() => useAssignments({ eventId: 'event-1' }))
 
@@ -102,7 +113,6 @@ describe('useAssignments', () => {
 
   it('should handle clear all assignments', async () => {
     mockPositionService.clearAllAssignments.mockResolvedValue(true)
-    global.confirm = jest.fn(() => true)
 
     const { result } = renderHook(() => useAssignments({ eventId: 'event-1' }))
 
@@ -115,7 +125,6 @@ describe('useAssignments', () => {
 
   it('should handle create assignment failure', async () => {
     mockPositionService.createAssignment.mockResolvedValue(false)
-    global.alert = jest.fn()
 
     const { result } = renderHook(() => useAssignments({ eventId: 'event-1' }))
 
@@ -123,6 +132,6 @@ describe('useAssignments', () => {
       await result.current.handleCreateAssignment('position-1', 'shift-1', 'attendant-1')
     })
 
-    expect(global.alert).toHaveBeenCalledWith('Failed to create assignment')
+    expect(notifyAlert).toHaveBeenCalledWith('Failed to create assignment')
   })
 })

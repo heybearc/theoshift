@@ -283,7 +283,10 @@ describe('PositionService', () => {
 
   describe('createAssignment()', () => {
     it('should create assignment successfully', async () => {
-      global.fetch = jest.fn().mockResolvedValue({ ok: true })
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({})
+      })
 
       const result = await service.createAssignment({
         positionId: 'pos-123',
@@ -298,8 +301,8 @@ describe('PositionService', () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            volunteerId: 'att-456',
             positionId: 'pos-123',
-            attendantId: 'att-456',
             shiftId: 'shift-789',
             role: 'ATTENDANT'
           })

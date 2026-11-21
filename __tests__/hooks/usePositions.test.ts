@@ -1,6 +1,16 @@
-import { renderHook, act } from '@testing-library/react-hooks'
+import { renderHook, act } from '@testing-library/react'
 import { usePositions } from '../../hooks/usePositions'
 import { createPositionService } from '../../lib/positionService'
+import { appConfirmMessage } from '../../lib/ui/confirm'
+
+jest.mock('../../lib/ui/toast', () => ({
+  notifyAlert: jest.fn(),
+  toast: { success: jest.fn(), error: jest.fn(), info: jest.fn() },
+}))
+jest.mock('../../lib/ui/confirm', () => ({
+  appConfirmMessage: jest.fn(),
+  appConfirm: jest.fn(),
+}))
 
 // Mock the positionService
 jest.mock('../../lib/positionService')
@@ -47,6 +57,7 @@ describe('usePositions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     localStorage.clear()
+    ;(appConfirmMessage as jest.Mock).mockResolvedValue(true)
   })
 
   it('should initialize with provided positions', () => {
@@ -106,6 +117,9 @@ describe('usePositions', () => {
     )
 
     act(() => {
+      result.current.setShowInactive(true)
+    })
+    act(() => {
       result.current.selectAllPositions()
     })
 
@@ -119,6 +133,9 @@ describe('usePositions', () => {
       usePositions({ eventId: 'event-1', initialPositions: mockPositions })
     )
 
+    act(() => {
+      result.current.setShowInactive(true)
+    })
     act(() => {
       result.current.selectAllPositions()
     })
@@ -134,7 +151,6 @@ describe('usePositions', () => {
 
   it('should handle delete position', async () => {
     mockPositionService.deletePosition.mockResolvedValue(true)
-    global.confirm = jest.fn(() => true)
 
     const { result } = renderHook(() =>
       usePositions({ eventId: 'event-1', initialPositions: mockPositions })
@@ -163,7 +179,6 @@ describe('usePositions', () => {
 
   it('should handle deactivate position', async () => {
     mockPositionService.deactivatePosition.mockResolvedValue(true)
-    global.confirm = jest.fn(() => true)
 
     const { result } = renderHook(() =>
       usePositions({ eventId: 'event-1', initialPositions: mockPositions })
@@ -177,7 +192,7 @@ describe('usePositions', () => {
   })
 
   it('should not delete when user cancels confirmation', async () => {
-    global.confirm = jest.fn(() => false)
+    ;(appConfirmMessage as jest.Mock).mockResolvedValue(false)
 
     const { result } = renderHook(() =>
       usePositions({ eventId: 'event-1', initialPositions: mockPositions })
@@ -192,7 +207,6 @@ describe('usePositions', () => {
 
   it('should handle bulk delete', async () => {
     mockPositionService.deletePosition.mockResolvedValue(true)
-    global.confirm = jest.fn(() => true)
 
     const { result } = renderHook(() =>
       usePositions({ eventId: 'event-1', initialPositions: mockPositions })
@@ -200,6 +214,8 @@ describe('usePositions', () => {
 
     act(() => {
       result.current.togglePositionSelection('1')
+    })
+    act(() => {
       result.current.togglePositionSelection('2')
     })
 
