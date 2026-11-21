@@ -6,7 +6,7 @@
 import { NextApiResponse } from 'next'
 import { logger } from './logger'
 import { ZodError } from 'zod'
-import { Prisma } from '@prisma/client'
+import { Prisma } from '@/generated/prisma/client'
 
 export interface ApiErrorResponse {
   success: false

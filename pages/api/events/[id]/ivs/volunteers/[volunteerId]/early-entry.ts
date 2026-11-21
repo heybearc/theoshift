@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { ConventionDay } from '@prisma/client'
+import { ConventionDay } from '@/generated/prisma/client'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../../../../../auth/[...nextauth]'
 import { prisma } from '@/lib/prisma'

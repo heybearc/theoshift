@@ -7,7 +7,7 @@ import BulkActionModal from '../BulkActionModal'
 import ImportModal from '../ImportModal'
 import ExportModal from '../ExportModal'
 import AddIvsVolunteerModal from '../AddIvsVolunteerModal'
-import { ConventionDay } from '@prisma/client'
+import { ConventionDay } from '@/generated/prisma/browser'
 import { IVS_APPROVAL_STATUSES } from '@/lib/ivs'
 import {
   CONVENTION_DAYS,

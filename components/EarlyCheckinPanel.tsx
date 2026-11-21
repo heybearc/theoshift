@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { ConventionDay } from '@prisma/client'
+import { ConventionDay } from '@/generated/prisma/browser'
 import {
   conventionDayLabel,
   EarlyCheckinVolunteerPayload,

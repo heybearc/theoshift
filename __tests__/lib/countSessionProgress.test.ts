@@ -1,4 +1,4 @@
-import { countSessionProgress } from '../../src/lib/countSessionReporting'
+import { countSessionProgress } from '../../src/lib/countSessionProgress'
 
 describe('countSessionProgress', () => {
   it('counts a submitted zero and leaves an unsubmitted group pending', () => {

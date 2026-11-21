@@ -198,7 +198,7 @@ export default function EventAttendantManagementPageSimple({
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
                   Attendants ({Array.isArray(attendants) ? attendants.length : 0})
                 </h3>
-                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                <div className="overflow-hidden shadow ring-1 ring-black/5 md:rounded-lg">
                   <table className="min-w-full divide-y divide-gray-300">
                     <thead className="bg-gray-50">
                       <tr>

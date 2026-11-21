@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import CountSubmissionSummaries from '../../../../../components/CountSubmissionSummaries'
-import { countSessionProgress } from '@/lib/countSessionReporting'
+import { countSessionProgress } from '@/lib/countSessionProgress'
 import type {
   GroupSubmissionSummary,
   UngroupedPositionSubmission

@@ -77,7 +77,7 @@ export default function FloatingActionButton({
       {/* Backdrop */}
       {isExpanded && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setIsExpanded(false)}
         />
       )}

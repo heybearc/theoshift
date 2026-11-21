@@ -38,7 +38,7 @@ export default function ReleaseBanner({ currentVersion, userLastSeenVersion, rel
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex items-center justify-between flex-wrap">
           <div className="flex items-center flex-1">
-            <span className="flex p-2 rounded-lg bg-white bg-opacity-20">
+            <span className="flex p-2 rounded-lg bg-white/20">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
@@ -59,7 +59,7 @@ export default function ReleaseBanner({ currentVersion, userLastSeenVersion, rel
             </Link>
             <button
               onClick={handleDismiss}
-              className="flex-shrink-0 p-1 rounded-md hover:bg-white hover:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-white"
+              className="flex-shrink-0 p-1 rounded-md hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white"
               aria-label="Dismiss"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

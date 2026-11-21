@@ -1,4 +1,5 @@
-import { ConventionDay, Prisma } from '@prisma/client'
+import { ConventionDay } from '@/generated/prisma/browser'
+import type { Prisma } from '@/generated/prisma/client'
 import { v4 as uuidv4 } from 'uuid'
 
 export const CONVENTION_DAYS: ConventionDay[] = [

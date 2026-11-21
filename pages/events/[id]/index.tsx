@@ -653,7 +653,7 @@ export default function EventDetailsPage({ event, canEdit, canDelete, canManageC
                 </h3>
               </div>
               <div className="space-y-3">
-                <div className="bg-white bg-opacity-60 rounded-lg p-4">
+                <div className="bg-white/60 rounded-lg p-4">
                   <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Department Overseer</div>
                   <div className="text-base font-bold text-gray-900">{event.departmentOverseerName}</div>
                   {event.departmentOverseerPhone && (
@@ -687,7 +687,7 @@ export default function EventDetailsPage({ event, canEdit, canDelete, canManageC
                 </div>
                 
                 {event.keyman && Array.isArray(event.keyman) && event.keyman.length > 0 && (
-                  <div className="bg-white bg-opacity-60 rounded-lg p-4">
+                  <div className="bg-white/60 rounded-lg p-4">
                     <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Keymen</div>
                     <div className="space-y-2">
                       {event.keyman.map((keyman: any, idx: number) => (

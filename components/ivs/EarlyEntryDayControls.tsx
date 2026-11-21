@@ -1,4 +1,4 @@
-import { ConventionDay } from '@prisma/client'
+import { ConventionDay } from '@/generated/prisma/browser'
 import {
   EarlyEntrySchedule,
   formatCheckInSummary,

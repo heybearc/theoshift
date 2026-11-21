@@ -373,7 +373,7 @@ function AssignVolunteerModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div className="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50">
       <div className="relative top-10 mx-auto p-5 border w-[min(100%-1.5rem,28rem)] shadow-lg rounded-md bg-white mb-8">
         <div className="mt-3">
           {/* Header */}
@@ -2856,7 +2856,7 @@ export default function EventPositionsPage({ eventId, event, positions: initialP
 
         {/* Redesigned Bulk Operations Modal */}
         {showBulkEditModal && selectedPositions.size > 0 && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-10 mx-auto p-6 border w-11/12 md:w-4/5 lg:w-3/4 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
               <div className="mt-3">
                 <h3 className="text-xl font-semibold text-gray-900 mb-6">
@@ -3280,7 +3280,7 @@ export default function EventPositionsPage({ eventId, event, positions: initialP
 
         {/* Shift Template Application Modal */}
         {showTemplateModal && selectedPositions.size > 0 && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
               <div className="mt-3">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
@@ -3371,7 +3371,7 @@ export default function EventPositionsPage({ eventId, event, positions: initialP
 
         {/* Progress Modal */}
         {showProgressModal && (
-          <div className="fixed inset-0 bg-gray-900 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+          <div className="fixed inset-0 bg-gray-900/75 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
             <div className="relative mx-auto p-8 border w-11/12 md:w-2/3 lg:w-1/2 shadow-2xl rounded-xl bg-white">
               <div className="text-center">
                 <div className="mb-6">
@@ -3428,7 +3428,7 @@ export default function EventPositionsPage({ eventId, event, positions: initialP
 
         {/* Available Volunteers Modal */}
         {showAvailableAttendants && (
-          <div className="fixed inset-0 bg-gray-900 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-gray-900/75 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
             <div className="relative mx-auto border w-full max-w-2xl shadow-2xl rounded-xl bg-white">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">

@@ -217,7 +217,7 @@ export default function AdminLayout({ children, title, breadcrumbs = [], userLas
         <>
           {/* Backdrop */}
           <div 
-            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"
+            className="md:hidden fixed inset-0 bg-black/50 z-40 transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
           />
           

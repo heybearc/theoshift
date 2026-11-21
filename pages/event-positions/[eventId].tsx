@@ -563,7 +563,7 @@ function CreatePositionModal({ onClose, onSubmit, departments }: {
   }
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div className="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50">
       <div className="relative top-10 mx-auto p-5 border w-2/3 max-w-2xl shadow-lg rounded-md bg-white">
         <form onSubmit={handleSubmit} className="space-y-4">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Create New Position</h3>
@@ -696,7 +696,7 @@ function BulkCreateModal({ onClose, onSubmit }: {
   onSubmit: (positions: any[]) => void
 }) {
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div className="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50">
       <div className="relative top-20 mx-auto p-5 border w-2/3 max-w-4xl shadow-lg rounded-md bg-white">
         <div className="text-center py-8">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Bulk Position Creation</h3>

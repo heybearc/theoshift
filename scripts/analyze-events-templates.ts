@@ -9,7 +9,7 @@
  * 5. Which events need migration
  */
 
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@/generated/prisma/client'
 
 const prisma = new PrismaClient()
 

@@ -632,7 +632,7 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                 <h3 className="text-lg font-bold text-gray-900">Oversight Command</h3>
               </div>
               <div className="space-y-3">
-                <div className="bg-white bg-opacity-60 rounded-lg p-3">
+                <div className="bg-white/60 rounded-lg p-3">
                   <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Circuit Overseer</div>
                   <div className="text-sm font-semibold text-gray-900">
                     {event.circuitoverseername || 'Not Assigned'}
@@ -641,7 +641,7 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                     <div className="text-xs text-gray-600">📞 {event.circuitoverseerphone}</div>
                   )}
                 </div>
-                <div className="bg-white bg-opacity-60 rounded-lg p-3">
+                <div className="bg-white/60 rounded-lg p-3">
                   <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Assembly Overseer</div>
                   <div className="text-sm font-semibold text-gray-900">
                     {event.assemblyoverseername || 'Not Assigned'}
@@ -650,7 +650,7 @@ export default function EventDetailsPage({ event }: EventDetailsPageProps) {
                     <div className="text-xs text-gray-600">📞 {event.assemblyoverseerphone}</div>
                   )}
                 </div>
-                <div className="bg-white bg-opacity-60 rounded-lg p-3">
+                <div className="bg-white/60 rounded-lg p-3">
                   <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Attendant Overseer</div>
                   <div className="text-sm font-semibold text-gray-900">
                     {event.attendantoverseername || 'Not Assigned'}

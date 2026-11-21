@@ -1,4 +1,4 @@
-import { ConventionDay } from '@prisma/client'
+import { ConventionDay } from '@/generated/prisma/client'
 import { prisma } from './prisma'
 import { toDateOnlyStringUTC } from './calendarDate'
 import { toDateKey } from '../../lib/shiftConflict'

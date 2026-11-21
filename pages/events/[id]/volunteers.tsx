@@ -2092,7 +2092,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                               {openDropdowns.has(attendant.id) && (
                                 <div
                                   id={`dropdown-${attendant.id}`}
-                                  className="absolute right-0 mt-1 z-50 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+                                  className="absolute right-0 mt-1 z-50 w-48 rounded-md shadow-lg bg-white ring-1 ring-black/5"
                                   style={{
                                     maxHeight: '300px',
                                     overflowY: 'auto'
@@ -2321,7 +2321,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
                             {openDropdowns.has(attendant.id) && (
                               <div 
                                 id={`dropdown-${attendant.id}`}
-                                className="absolute right-0 mt-1 z-50 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+                                className="absolute right-0 mt-1 z-50 w-48 rounded-md shadow-lg bg-white ring-1 ring-black/5"
                                 style={{ 
                                   maxHeight: '300px',
                                   overflowY: 'auto'
@@ -2653,7 +2653,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
 
         {/* Import Volunteers Modal */}
         {showImportModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
               <div className="mt-3">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Import Volunteers</h3>
@@ -2714,7 +2714,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
 
         {/* Bulk Edit Modal */}
         {showBulkEditModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 p-4">
+          <div className="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50 p-4">
             <div className="relative top-4 sm:top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
               <div className="mt-3">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
@@ -2851,7 +2851,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
 
         {/* Bulk Availability Request Modal */}
         {showBulkRequestModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
             <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full">
               <div className="p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
@@ -2940,7 +2940,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
         {/* Email volunteers (broadcast) */}
         {showBroadcastEmailModal && (
           <div
-            className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4"
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full">
@@ -3046,7 +3046,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
 
         {/* Availability Status Modal */}
         {availabilityModalAttendant && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
             <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full">
               <div className="p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
@@ -3154,7 +3154,7 @@ Bob,Johnson,bob.johnson@example.com,,South Congregation,"Regular Pioneer",,true`
 
         {/* View Details Modal (FB-007) */}
         {viewingAttendant && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="fixed inset-0 bg-gray-600/50 overflow-y-auto h-full w-full z-50">
             <div className="relative top-10 mx-auto p-6 border max-w-3xl w-full mx-4 shadow-lg rounded-md bg-white">
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-xl font-semibold text-gray-900">

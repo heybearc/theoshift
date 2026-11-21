@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { ConventionDay } from '@prisma/client'
+import { ConventionDay } from '@/generated/prisma/browser'
 import { useScrollRestoration } from '../../hooks/useScrollRestoration'
 import {
   conventionDayLabel,

@@ -383,7 +383,7 @@ export default function UsersPage({ users: initialUsers, pagination: initialPagi
                             </button>
 
                             {openDropdown === user.id && (
-                              <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5" style={{ zIndex: 9999 }}>
+                              <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black/5" style={{ zIndex: 9999 }}>
                                 <div className="py-1" role="menu">
                                   <Link
                                     href={`/admin/users/${user.id}/edit`}

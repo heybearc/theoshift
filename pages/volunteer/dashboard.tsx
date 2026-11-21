@@ -1013,7 +1013,7 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
   }
 
   const profileVerificationModal = showProfileVerification ? (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <div className="text-center mb-6">
           <div className="text-4xl mb-3">✅</div>
@@ -1064,7 +1064,7 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
   ) : null
 
   const chatOnboardingModal = showChatOnboarding ? (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <div className="text-center mb-6">
           <div className="text-4xl mb-3">💬</div>
@@ -1485,7 +1485,7 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
               {/* Availability Requests */}
               {availabilityRequests.length > 0 && (
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 shadow-lg rounded-lg">
-                  <div className="px-6 py-4 border-b border-blue-200 bg-white bg-opacity-60">
+                  <div className="px-6 py-4 border-b border-blue-200 bg-white/60">
                     <h2 className="text-lg font-medium text-gray-900 flex items-center">
                       <span className="text-xl mr-2">📅</span>
                       Availability Requests
@@ -1635,7 +1635,7 @@ export default function VolunteerDashboard({ initialEventId }: VolunteerDashboar
               {((dashboardData.activeCountGroups?.length ?? 0) > 0 ||
                 (dashboardData.activeCountSessions?.length ?? 0) > 0) && (
                 <div className="bg-gradient-to-br from-green-50 to-blue-50 border-2 border-green-200 shadow-lg rounded-lg">
-                  <div className="px-6 py-4 border-b border-green-200 bg-white bg-opacity-60">
+                  <div className="px-6 py-4 border-b border-green-200 bg-white/60">
                     <h2 className="text-lg font-medium text-gray-900 flex items-center">
                       <span className="text-xl mr-2">📊</span>
                       Submit attendance count

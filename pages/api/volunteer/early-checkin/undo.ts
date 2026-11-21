@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { ConventionDay } from '@prisma/client'
+import { ConventionDay } from '@/generated/prisma/client'
 import { getApiSession } from '@/lib/apiSession'
 import { prisma } from '@/lib/prisma'
 import { deleteDayCheckIn, getCurrentConventionDay } from '@/lib/ivsEarlyCheckin'

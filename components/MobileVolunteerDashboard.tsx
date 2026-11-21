@@ -247,13 +247,13 @@ export default function MobileVolunteerDashboard({
             <div className="flex items-center space-x-2">
               <Link
                 href="/volunteer/devices"
-                className="px-3 py-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-all text-sm font-semibold"
+                className="px-3 py-2 bg-white/20 rounded-full hover:bg-white/30 transition-all text-sm font-semibold"
               >
                 Phones
               </Link>
               <Link
                 href="/profile"
-                className="p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-all"
+                className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-all"
                 aria-label="My Profile"
                 title="My Profile"
               >
@@ -264,7 +264,7 @@ export default function MobileVolunteerDashboard({
               <button
                 onClick={handlePullToRefresh}
                 disabled={refreshing}
-                className="p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-all disabled:opacity-50"
+                className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-all disabled:opacity-50"
                 aria-label="Refresh"
               >
                 <svg 
@@ -279,7 +279,7 @@ export default function MobileVolunteerDashboard({
               {onSignOut && (
                 <button
                   onClick={onSignOut}
-                  className="p-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-all"
+                  className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-all"
                   aria-label="Sign Out"
                   title="Sign Out"
                 >
@@ -292,7 +292,7 @@ export default function MobileVolunteerDashboard({
           </div>
           
           {/* Event Info Card */}
-          <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-3 border border-white border-opacity-20">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
             <p className="font-medium text-sm">{event.name}</p>
             <p className="text-xs text-blue-100 mt-1">
               📅 {formatDate(event.startDate)} - {formatDate(event.endDate)}
@@ -301,18 +301,18 @@ export default function MobileVolunteerDashboard({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-t border-white border-opacity-20">
+        <div className="flex border-t border-white/20">
           <button
             onClick={() => setActiveTab('assignments')}
             className={`flex-1 py-3 text-sm font-medium transition-all ${
               activeTab === 'assignments'
-                ? 'bg-white bg-opacity-20 border-b-2 border-white'
-                : 'text-blue-100 hover:bg-white hover:bg-opacity-10'
+                ? 'bg-white/20 border-b-2 border-white'
+                : 'text-blue-100 hover:bg-white/10'
             }`}
           >
             📋 Assignments
             {assignments.length > 0 && (
-              <span className="ml-1 px-2 py-0.5 bg-white bg-opacity-30 rounded-full text-xs">
+              <span className="ml-1 px-2 py-0.5 bg-white/30 rounded-full text-xs">
                 {assignments.length}
               </span>
             )}
@@ -321,8 +321,8 @@ export default function MobileVolunteerDashboard({
             onClick={() => setActiveTab('availability')}
             className={`flex-1 py-3 text-sm font-medium transition-all relative ${
               activeTab === 'availability'
-                ? 'bg-white bg-opacity-20 border-b-2 border-white'
-                : 'text-blue-100 hover:bg-white hover:bg-opacity-10'
+                ? 'bg-white/20 border-b-2 border-white'
+                : 'text-blue-100 hover:bg-white/10'
             }`}
           >
             📅 Availability
@@ -336,8 +336,8 @@ export default function MobileVolunteerDashboard({
             onClick={() => setActiveTab('contacts')}
             className={`flex-1 py-3 text-sm font-medium transition-all ${
               activeTab === 'contacts'
-                ? 'bg-white bg-opacity-20 border-b-2 border-white'
-                : 'text-blue-100 hover:bg-white hover:bg-opacity-10'
+                ? 'bg-white/20 border-b-2 border-white'
+                : 'text-blue-100 hover:bg-white/10'
             }`}
           >
             👥 Contacts
@@ -346,13 +346,13 @@ export default function MobileVolunteerDashboard({
             onClick={() => setActiveTab('documents')}
             className={`flex-1 py-3 text-sm font-medium transition-all ${
               activeTab === 'documents'
-                ? 'bg-white bg-opacity-20 border-b-2 border-white'
-                : 'text-blue-100 hover:bg-white hover:bg-opacity-10'
+                ? 'bg-white/20 border-b-2 border-white'
+                : 'text-blue-100 hover:bg-white/10'
             }`}
           >
             📄 Documents
             {documents.length > 0 && (
-              <span className="ml-1 px-2 py-0.5 bg-white bg-opacity-30 rounded-full text-xs">
+              <span className="ml-1 px-2 py-0.5 bg-white/30 rounded-full text-xs">
                 {documents.length}
               </span>
             )}
@@ -362,8 +362,8 @@ export default function MobileVolunteerDashboard({
               onClick={() => setActiveTab('request')}
               className={`flex-1 py-3 text-sm font-medium transition-all ${
                 activeTab === 'request'
-                  ? 'bg-white bg-opacity-20 border-b-2 border-white'
-                  : 'text-blue-100 hover:bg-white hover:bg-opacity-10'
+                  ? 'bg-white/20 border-b-2 border-white'
+                  : 'text-blue-100 hover:bg-white/10'
               }`}
             >
               ➕ Request
@@ -697,7 +697,7 @@ export default function MobileVolunteerDashboard({
                         </p>
                       </div>
                       
-                      <div className="p-3 bg-white bg-opacity-60 space-y-2">
+                      <div className="p-3 bg-white/60 space-y-2">
                         <textarea
                           value={availabilityComments[request.id] || ''}
                           onChange={(e) =>
